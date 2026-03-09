@@ -19,6 +19,7 @@ interface NoctEvent {
 
 interface RightPanelProps {
   events: NoctEvent[];
+  onVenueClick?: (venueName: string) => void;
 }
 
 // Map known venues to their brand colors for avatar circles
@@ -42,7 +43,7 @@ function getVenueColor(venue: string): string {
   return VENUE_COLORS[venue] || 'from-noctvm-violet to-purple-400';
 }
 
-export default function RightPanel({ events }: RightPanelProps) {
+export default function RightPanel({ events, onVenueClick }: RightPanelProps) {
   // Get tonight's events
   const tonightEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -104,7 +105,7 @@ export default function RightPanel({ events }: RightPanelProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-medium text-white truncate group-hover:text-noctvm-violet transition-colors">{event.title}</p>
-                  <p className="text-[10px] text-noctvm-silver">{event.venue}{event.time ? ` · ${event.time}` : ''}</p>
+                  <p className="text-[10px] text-noctvm-silver">{event.venue}{event.time ? ` \u00B7 ${event.time}` : ''}</p>
                 </div>
               </a>
             ))}
@@ -122,9 +123,10 @@ export default function RightPanel({ events }: RightPanelProps) {
         <h3 className="font-heading text-sm font-semibold text-white mb-3">Trending Venues</h3>
         <div className="space-y-2">
           {trendingVenues.map(({ name, count }) => (
-            <div
+            <button
               key={name}
-              className="flex items-center gap-3 p-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border hover:border-noctvm-violet/30 transition-colors cursor-pointer group"
+              onClick={() => onVenueClick?.(name)}
+              className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border hover:border-noctvm-violet/30 transition-colors cursor-pointer group"
             >
               <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getVenueColor(name)} flex items-center justify-center flex-shrink-0`}>
                 <span className="text-xs font-heading font-bold text-white">{name[0]}</span>
@@ -133,7 +135,7 @@ export default function RightPanel({ events }: RightPanelProps) {
                 <p className="text-xs font-medium text-white group-hover:text-noctvm-violet transition-colors">{name}</p>
                 <p className="text-[10px] text-noctvm-silver">{count} upcoming event{count !== 1 ? 's' : ''}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
