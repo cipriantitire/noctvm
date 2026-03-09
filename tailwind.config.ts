@@ -10,20 +10,20 @@ const config: Config = {
     extend: {
       colors: {
         noctvm: {
-          black: '#0D0D0D',
+          black: '#050505',
           midnight: '#1A0A2E',
           violet: '#7C3AED',
           gold: '#D4A843',
-          silver: '#9CA3AF',
+          silver: '#8A8A8A',
           emerald: '#10B981',
-          surface: '#141414',
-          'surface-light': '#1E1E1E',
-          border: '#2A2A2A',
+          surface: '#0A0A0A',
+          'surface-light': '#111111',
+          border: '#1A1A1A',
         }
       },
       fontFamily: {
-        heading: ['Space Grotesk', 'sans-serif'],
-        body: ['Inter', 'sans-serif'],
+        heading: ['Syne', 'sans-serif'],
+        body: ['DM Sans', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       backgroundImage: {
