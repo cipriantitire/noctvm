@@ -70,11 +70,11 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter"
             onClick={handleCloseVenue}
           />
-          {/* Modal window - almost maximized */}
-          <div className="relative w-full h-full sm:w-[95%] sm:h-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-2xl bg-noctvm-black border border-noctvm-border/50 overflow-hidden shadow-2xl shadow-black/50 flex flex-col">
+          {/* Modal window - liquid glass + scale entrance */}
+          <div className="relative w-full h-full sm:w-[95%] sm:h-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-2xl liquid-glass overflow-hidden shadow-2xl shadow-black/50 flex flex-col animate-scale-in">
             {/* Close button */}
             <button
               onClick={handleCloseVenue}
@@ -116,7 +116,7 @@ export default function Home() {
           <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6">
             {/* ===== EVENTS TAB ===== */}
             {activeTab === 'events' && !profileSubContent && (
-              <>
+              <div className="tab-content">
                 {/* Mobile top section: map + live tonight + trending venues */}
                 <MobileTopSection onVenueClick={handleVenueClick} />
 
@@ -158,7 +158,9 @@ export default function Home() {
                   : "grid grid-cols-1 lg:grid-cols-2 gap-4"
                 }>
                   {filteredEvents.map((event, index) => (
-                    <EventCard key={`${event.source}-${index}`} event={event} variant={viewMode} />
+                    <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)}`}>
+                      <EventCard event={event} variant={viewMode} />
+                    </div>
                   ))}
                 </div>
 
@@ -171,24 +173,26 @@ export default function Home() {
                     <p className="text-noctvm-silver/50 text-sm mt-1">Try a different filter or search</p>
                   </div>
                 )}
-              </>
+              </div>
             )}
 
             {/* ===== FEED TAB ===== */}
             {activeTab === 'feed' && !profileSubContent && (
-              <FeedPage onVenueClick={handleVenueClick} />
+              <div className="tab-content">
+                <FeedPage onVenueClick={handleVenueClick} />
+              </div>
             )}
 
             {/* ===== WALLET TAB ===== */}
             {activeTab === 'wallet' && !profileSubContent && (
-              <div className="space-y-6 max-w-2xl mx-auto">
-                <div className="text-center py-4">
+              <div className="space-y-6 max-w-2xl mx-auto tab-content">
+                <div className="text-center py-4 animate-fade-in-up">
                   <h2 className="font-heading text-xl font-bold text-white">Wallet</h2>
                   <p className="text-sm text-noctvm-silver mt-1">Your digital nightlife wallet</p>
                 </div>
 
                 {/* Moonrays card */}
-                <div className="bg-gradient-to-br from-noctvm-midnight to-noctvm-surface rounded-2xl p-5 border border-noctvm-violet/20">
+                <div className="liquid-glass rounded-2xl p-5 animate-fade-in-up stagger-2">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-noctvm-violet/20 flex items-center justify-center">
                       <MoonIcon className="w-5 h-5 text-noctvm-violet" />
@@ -206,7 +210,7 @@ export default function Home() {
                 </div>
 
                 {/* Coming Soon sections */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in-up stagger-4">
                   <div className="bg-noctvm-surface rounded-xl p-5 border border-noctvm-border relative overflow-hidden">
                     <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20">
                       <span className="text-[8px] uppercase tracking-wider font-mono font-medium text-noctvm-violet">Coming Soon</span>
@@ -256,32 +260,32 @@ export default function Home() {
 
             {/* ===== PROFILE TAB ===== */}
             {activeTab === 'profile' && !profileSubContent && (
-              <div className="space-y-6 max-w-lg mx-auto">
-                <div className="text-center py-6">
-                  <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center mx-auto mb-4">
+              <div className="space-y-6 max-w-lg mx-auto tab-content">
+                <div className="text-center py-6 animate-fade-in-up">
+                  <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center mx-auto mb-4 animate-scale-in">
                     <span className="text-2xl font-heading font-bold text-noctvm-violet">N</span>
                   </div>
                   <h2 className="font-heading text-xl font-bold text-white">Noctvm User</h2>
                   <p className="text-sm text-noctvm-silver mt-1">Bucharest, Romania</p>
                   <div className="flex items-center justify-center gap-6 mt-4">
-                    <div className="text-center">
+                    <div className="text-center hover-lift cursor-pointer">
                       <p className="font-heading text-lg font-bold text-white">0</p>
                       <p className="text-[10px] text-noctvm-silver">Events</p>
                     </div>
                     <div className="w-px h-8 bg-noctvm-border"></div>
-                    <div className="text-center">
+                    <div className="text-center hover-lift cursor-pointer">
                       <p className="font-heading text-lg font-bold text-white">0</p>
                       <p className="text-[10px] text-noctvm-silver">Following</p>
                     </div>
                     <div className="w-px h-8 bg-noctvm-border"></div>
-                    <div className="text-center">
+                    <div className="text-center hover-lift cursor-pointer">
                       <p className="font-heading text-lg font-bold text-white">0</p>
                       <p className="text-[10px] text-noctvm-silver">Followers</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 animate-fade-in-up stagger-3">
                   {[
                     { label: 'Manage Account', desc: 'Edit profile, privacy settings', key: 'manage-account' as ProfileSubPage, icon: <UserIcon className="w-5 h-5" /> },
                     { label: 'Add Location', desc: 'Add a venue or event space', key: 'add-location' as ProfileSubPage, icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4.5v15m7.5-7.5h-15" /></svg> },
@@ -291,7 +295,7 @@ export default function Home() {
                     <button
                       key={item.label}
                       onClick={() => setProfileSubPage(item.key)}
-                      className="w-full flex items-center gap-3 p-4 bg-noctvm-surface rounded-xl border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-left group"
+                      className="w-full flex items-center gap-3 p-4 bg-noctvm-surface rounded-xl border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-left group hover-lift"
                     >
                       <div className="w-9 h-9 rounded-lg bg-noctvm-midnight flex items-center justify-center text-noctvm-silver group-hover:text-noctvm-violet transition-colors">
                         {item.icon}
