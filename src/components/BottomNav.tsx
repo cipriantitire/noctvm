@@ -1,13 +1,13 @@
 'use client';
 
-import { EventsIcon, FeedIcon, ReservationsIcon, HubIcon } from './icons';
+import { EventsIcon, FeedIcon, WalletIcon, HubIcon } from './icons';
 
-type TabType = 'events' | 'feed' | 'reservations' | 'hub';
+type TabType = 'events' | 'feed' | 'wallet' | 'hub';
 
 const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
   { icon: EventsIcon, label: 'Events', tab: 'events' },
   { icon: FeedIcon, label: 'Feed', tab: 'feed' },
-  { icon: ReservationsIcon, label: 'Reservations', tab: 'reservations' },
+  { icon: WalletIcon, label: 'Wallet', tab: 'wallet' },
   { icon: HubIcon, label: 'Hub', tab: 'hub' },
 ];
 
@@ -25,11 +25,11 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             key={tab}
             onClick={() => onTabChange(tab)}
             className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-lg transition-colors ${
-              activeTab === tab ? 'text-noctvm-violet' : 'text-noctvm-silver hover:text-white'
+              activeTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
             }`}
           >
-            <Icon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">{label}</span>
+            <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
+            <span className={`text-[10px] font-medium ${activeTab === tab ? 'text-white' : ''}`}>{label}</span>
           </button>
         ))}
       </div>
