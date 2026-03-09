@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
+import { VENUE_LOGOS } from '@/lib/venue-logos';
 import EventCard from './EventCard';
 
 interface VenuePageProps {
@@ -54,8 +55,29 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
 
         {/* Venue header - compact */}
         <div className="flex items-start gap-4 mb-5 animate-fade-in-up">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0">
-            <span className="text-xl font-heading font-bold text-white">{venueName[0]}</span>
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {VENUE_LOGOS[venueName] ? (
+              <img
+                src={VENUE_LOGOS[venueName]}
+                alt={venueName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  const parent = el.parentElement;
+                  if (parent) {
+                    parent.classList.add('bg-gradient-to-br', 'from-noctvm-violet', 'to-purple-400');
+                    el.replaceWith(Object.assign(document.createElement('span'), {
+                      className: 'text-xl font-heading font-bold text-white',
+                      textContent: venueName[0]
+                    }));
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center">
+                <span className="text-xl font-heading font-bold text-white">{venueName[0]}</span>
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
