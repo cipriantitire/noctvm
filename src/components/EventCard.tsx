@@ -10,7 +10,6 @@ function formatDate(dateStr: string): string {
 
 function getSourceBadge(source: string) {
   switch (source) {
-    case 'beethere': return { label: 'BeeThere', color: 'bg-noctvm-violet/20 text-noctvm-violet' };
     case 'fever': return { label: 'Fever', color: 'bg-orange-500/20 text-orange-400' };
     case 'ra': return { label: 'RA', color: 'bg-blue-500/20 text-blue-400' };
     case 'livetickets': return { label: 'LiveTickets', color: 'bg-pink-500/20 text-pink-400' };
