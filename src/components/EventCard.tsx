@@ -13,6 +13,9 @@ function getSourceBadge(source: string) {
     case 'beethere': return { label: 'BeeThere', color: 'bg-noctvm-violet/20 text-noctvm-violet' };
     case 'fever': return { label: 'Fever', color: 'bg-orange-500/20 text-orange-400' };
     case 'ra': return { label: 'RA', color: 'bg-blue-500/20 text-blue-400' };
+    case 'livetickets': return { label: 'LiveTickets', color: 'bg-pink-500/20 text-pink-400' };
+    case 'iabilet': return { label: 'iaBilet', color: 'bg-cyan-500/20 text-cyan-400' };
+    case 'zilesinopti': return { label: 'Zile si Nopti', color: 'bg-amber-500/20 text-amber-400' };
     default: return { label: source, color: 'bg-noctvm-silver/20 text-noctvm-silver' };
   }
 }
@@ -27,7 +30,6 @@ export default function EventCard({ event }: { event: NoctEvent }) {
       rel="noopener noreferrer"
       className="group block bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow"
     >
-      {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-noctvm-midnight">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -35,12 +37,14 @@ export default function EventCard({ event }: { event: NoctEvent }) {
           alt={event.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
         />
-        {/* Source badge */}
         <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-medium ${sourceBadge.color} backdrop-blur-sm`}>
           {sourceBadge.label}
         </div>
-        {/* Rating badge for Fever */}
         {event.rating && (
           <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
             <StarIcon className="w-3 h-3 text-noctvm-gold" />
@@ -48,10 +52,7 @@ export default function EventCard({ event }: { event: NoctEvent }) {
           </div>
         )}
       </div>
-
-      {/* Content */}
       <div className="p-4">
-        {/* Genre tags */}
         <div className="flex flex-wrap gap-1.5 mb-2">
           {event.genres.slice(0, 3).map((genre) => (
             <span
@@ -62,16 +63,10 @@ export default function EventCard({ event }: { event: NoctEvent }) {
             </span>
           ))}
         </div>
-
-        {/* Title */}
         <h3 className="font-heading font-semibold text-white text-sm leading-tight mb-1.5 line-clamp-2 group-hover:text-noctvm-violet transition-colors">
           {event.title}
         </h3>
-
-        {/* Venue */}
         <p className="text-noctvm-silver text-xs mb-3">{event.venue}</p>
-
-        {/* Footer: date + price */}
         <div className="flex items-center justify-between pt-3 border-t border-noctvm-border">
           <div className="flex items-center gap-1.5 text-noctvm-silver">
             <CalendarIcon className="w-3.5 h-3.5" />
