@@ -161,7 +161,7 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
 
       {/* Stories row - CENTERED */}
       <div className="flex justify-center mb-4">
-        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 liquid-glass-subtle rounded-2xl py-3">
+        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 py-3">
           {/* Add story */}
           <div className="flex flex-col items-center gap-1 flex-shrink-0">
             <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center">
