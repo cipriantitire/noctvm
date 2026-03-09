@@ -11,11 +11,11 @@ const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: T
 ];
 
 interface SidebarProps {
-  activeTab: TabType;
-  onTabChange: (tab: TabType) => void;
+  activeTab?: TabType;
+  onTabChange?: (tab: TabType) => void;
 }
 
-export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export default function Sidebar({ activeTab = 'events', onTabChange = () => {} }: SidebarProps) {
   return (
     <aside className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-all duration-300 ease-in-out py-6 overflow-hidden">
       {/* Moon Logo - top left */}
