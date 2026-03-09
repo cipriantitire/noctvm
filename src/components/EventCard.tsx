@@ -36,7 +36,6 @@ export default function EventCard({ event, variant = 'portrait' }: EventCardProp
         rel="noopener noreferrer"
         className="group flex bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow h-[180px]"
       >
-        {/* Image - left side */}
         <div className="relative w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -56,7 +55,6 @@ export default function EventCard({ event, variant = 'portrait' }: EventCardProp
             </div>
           )}
         </div>
-        {/* Content - right side */}
         <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
           <div>
             <div className="flex flex-wrap gap-1.5 mb-2">
@@ -92,7 +90,6 @@ export default function EventCard({ event, variant = 'portrait' }: EventCardProp
     );
   }
 
-  // Portrait (default) - vertical card
   return (
     <a
       href={event.event_url}
