@@ -161,7 +161,7 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
 
       {/* Stories row - CENTERED */}
       <div className="flex justify-center mb-4">
-        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2">
+        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 liquid-glass-subtle rounded-2xl py-3">
           {/* Add story */}
           <div className="flex flex-col items-center gap-1 flex-shrink-0">
             <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center">
@@ -185,7 +185,7 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
       {/* Posts */}
       <div className="space-y-6 max-w-2xl mx-auto">
         {posts.map((post, idx) => (
-          <article key={post.id} className="bg-noctvm-surface rounded-xl border border-noctvm-border overflow-hidden">
+          <article key={post.id} className="bg-noctvm-surface rounded-xl border border-noctvm-border overflow-hidden animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms` }}>
             {/* Post header */}
             <div className="flex items-center gap-3 p-3">
               <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${AVATAR_COLORS[idx % AVATAR_COLORS.length]} flex items-center justify-center flex-shrink-0`}>
@@ -240,9 +240,9 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
             <div className="px-3 pt-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => toggleLike(post.id)} className="hover:scale-110 transition-transform">
+                  <button onClick={() => toggleLike(post.id)} className="hover:scale-110 active:animate-micro-pop transition-transform">
                     {post.liked ? (
-                      <svg className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                      <svg className="w-6 h-6 text-red-500 animate-micro-pop" viewBox="0 0 24 24" fill="currentColor"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
                     ) : (
                       <HeartIcon className="w-6 h-6 text-noctvm-silver hover:text-red-400 transition-colors" />
                     )}
@@ -254,9 +254,9 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
                     <ShareIcon className="w-6 h-6 text-noctvm-silver hover:text-white transition-colors" />
                   </button>
                 </div>
-                <button onClick={() => toggleSave(post.id)} className="hover:scale-110 transition-transform">
+                <button onClick={() => toggleSave(post.id)} className="hover:scale-110 active:animate-micro-pop transition-transform">
                   {post.saved ? (
-                    <svg className="w-6 h-6 text-noctvm-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" /></svg>
+                    <svg className="w-6 h-6 text-noctvm-gold animate-micro-pop" viewBox="0 0 24 24" fill="currentColor"><path d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" /></svg>
                   ) : (
                     <BookmarkIcon className="w-6 h-6 text-noctvm-silver hover:text-noctvm-gold transition-colors" />
                   )}
