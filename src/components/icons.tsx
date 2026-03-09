@@ -1,7 +1,8 @@
 export function MoonIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+    <svg className={className} viewBox="0 0 120 120" fill="currentColor">
+      <path d="M70 14C49.5 14 32 28 27 47C31.5 45.5 36.3 44.7 41.3 44.7C62.5 44.7 79.7 61.9 79.7 83.1C79.7 86.3 79.3 89.4 78.5 92.3C93.8 86.5 105 71.7 105 54.3C105 32 89.5 14 70 14Z" opacity="0.95" />
+      <line x1="12" y1="86" x2="108" y2="86" stroke="currentColor" strokeWidth="2" opacity="0.5" />
     </svg>
   );
 }
