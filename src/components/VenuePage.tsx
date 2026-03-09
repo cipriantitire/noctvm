@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react';
 import { NoctEvent } from '@/lib/types';
+import { SAMPLE_EVENTS } from '@/lib/events-data';
 import EventCard from './EventCard';
 
 interface VenuePageProps {
   venueName: string;
-  events: NoctEvent[];
   onBack: () => void;
 }
 
@@ -21,10 +21,10 @@ function getVenueInfo(name: string) {
   return VENUE_INFO[name] || { description: 'A popular nightlife venue in Bucharest.', address: 'Bucharest, Romania', capacity: 'N/A', genres: ['Various'] };
 }
 
-export default function VenuePage({ venueName, events, onBack }: VenuePageProps) {
+export default function VenuePage({ venueName, onBack }: VenuePageProps) {
   const info = getVenueInfo(venueName);
   
-  const venueEvents = useMemo(() => events.filter(e => e.venue === venueName), [events, venueName]);
+  const venueEvents = useMemo(() => SAMPLE_EVENTS.filter(e => e.venue === venueName), [venueName]);
   
   const today = new Date().toISOString().split('T')[0];
   const liveEvents = venueEvents.filter(e => e.date === today);
@@ -32,7 +32,7 @@ export default function VenuePage({ venueName, events, onBack }: VenuePageProps)
   const pastEvents = venueEvents.filter(e => e.date < today);
 
   return (
-    <div>
+    <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6">
       {/* Back button */}
       <button onClick={onBack} className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors mb-6 group">
         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
