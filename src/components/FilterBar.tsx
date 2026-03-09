@@ -3,19 +3,28 @@
 import { useState } from 'react';
 import { SearchIcon } from './icons';
 
-const GENRE_FILTERS = ['All', 'Techno', 'House', 'Hip-Hop', 'Live', 'Party', 'DnB', 'Reggaeton'];
+const GENRE_FILTERS = ['All', 'Techno', 'House', 'Hip-Hop', 'Manele', 'Live', 'Party', 'DnB', 'Reggaeton'];
 
 interface FilterBarProps {
-  onFilterChange?: (genre: string) => void;
+  activeGenres: string[];
+  onFilterChange: (genres: string[]) => void;
   onSearchChange?: (query: string) => void;
 }
 
-export default function FilterBar({ onFilterChange, onSearchChange }: FilterBarProps) {
-  const [activeGenre, setActiveGenre] = useState('All');
-
+export default function FilterBar({ activeGenres, onFilterChange, onSearchChange }: FilterBarProps) {
   const handleGenreClick = (genre: string) => {
-    setActiveGenre(genre);
-    onFilterChange?.(genre);
+    if (genre === 'All') {
+      onFilterChange(['All']);
+      return;
+    }
+    let next = activeGenres.filter(g => g !== 'All');
+    if (next.includes(genre)) {
+      next = next.filter(g => g !== genre);
+    } else {
+      next = [...next, genre];
+    }
+    if (next.length === 0) next = ['All'];
+    onFilterChange(next);
   };
 
   return (
@@ -32,19 +41,22 @@ export default function FilterBar({ onFilterChange, onSearchChange }: FilterBarP
         />
       </div>
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        {GENRE_FILTERS.map((genre) => (
-          <button
-            key={genre}
-            onClick={() => handleGenreClick(genre)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              activeGenre === genre
-                ? 'bg-noctvm-violet text-white shadow-glow'
-                : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
-            }`}
-          >
-            {genre}
-          </button>
-        ))}
+        {GENRE_FILTERS.map((genre) => {
+          const isActive = activeGenres.includes(genre);
+          return (
+            <button
+              key={genre}
+              onClick={() => handleGenreClick(genre)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                isActive
+                  ? 'bg-noctvm-violet text-white shadow-glow'
+                  : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
+              }`}
+            >
+              {genre}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
