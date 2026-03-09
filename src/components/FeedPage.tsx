@@ -6,7 +6,6 @@ import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 interface FeedPost {
   id: string;
   user: { name: string; handle: string; avatar: string; verified: boolean };
-  image: string;
   caption: string;
   venue: { name: string; tagged: boolean };
   tags: string[];
@@ -15,94 +14,106 @@ interface FeedPost {
   timeAgo: string;
   liked: boolean;
   saved: boolean;
+  // Visual theming for mock photo placeholder
+  imageTheme: { gradient: string; scene: string; emoji: string };
 }
 
 const MOCK_POSTS: FeedPost[] = [
   {
     id: '1',
     user: { name: 'Alexandra M.', handle: '@alexm_buc', avatar: 'A', verified: true },
-    image: '',
-    caption: 'Best techno night in months. The sound system at Control is unmatched.',
+    caption: 'Best techno night in months. The sound system at Control is unmatched. Three hours of pure underground bliss.',
     venue: { name: 'Control Club', tagged: true },
-    tags: ['#techno', '#nightlife', '#bucharest'],
+    tags: ['#techno', '#nightlife', '#bucharest', '#underground'],
     likes: 234,
     comments: [
-      { user: 'dj_raven', text: 'That set was insane!' },
-      { user: 'maria.dance', text: 'wish I was there' },
-      { user: 'night.owl', text: 'Control never disappoints' },
+      { user: 'dj_raven', text: 'That set was insane! The last hour was pure fire' },
+      { user: 'maria.dance', text: 'wish I was there omg' },
+      { user: 'night.owl', text: 'Control never disappoints, best sound in the city' },
     ],
     timeAgo: '2h',
     liked: false,
     saved: false,
+    imageTheme: { gradient: 'from-red-900 via-purple-950 to-black', scene: 'Strobe lights cutting through fog over a packed dancefloor', emoji: '' },
   },
   {
     id: '2',
     user: { name: 'Mihai D.', handle: '@mihai.deep', avatar: 'M', verified: false },
-    image: '',
-    caption: 'Friday vibes at Nook. House music and good people. What more do you need?',
+    caption: 'Friday vibes at Nook. House music and good people. What more do you need? DJ kept the energy perfect all night.',
     venue: { name: 'Nook Club', tagged: true },
-    tags: ['#house', '#fridaynight', '#nookclub'],
+    tags: ['#house', '#fridaynight', '#nookclub', '#deephouse'],
     likes: 128,
     comments: [
-      { user: 'elena.groove', text: 'The DJ was amazing!' },
-      { user: 'andrei_buc', text: 'Next Friday again?' },
+      { user: 'elena.groove', text: 'The DJ was amazing! Do you know who played?' },
+      { user: 'andrei_buc', text: 'Next Friday again? Im in' },
     ],
     timeAgo: '5h',
     liked: true,
     saved: false,
+    imageTheme: { gradient: 'from-blue-900 via-indigo-950 to-black', scene: 'Warm amber lights over an intimate bar scene', emoji: '' },
   },
   {
     id: '3',
     user: { name: 'Ioana R.', handle: '@ioana.rave', avatar: 'I', verified: true },
-    image: '',
-    caption: 'Expirat never fails. That industrial vibe with the underground sound... pure magic.',
+    caption: 'Expirat never fails. That industrial vibe with the underground sound... pure magic. The concrete walls were literally shaking.',
     venue: { name: 'Expirat Halele Carol', tagged: true },
-    tags: ['#underground', '#rave', '#expirat'],
+    tags: ['#underground', '#rave', '#expirat', '#halelecarol'],
     likes: 456,
     comments: [
-      { user: 'techno.kid', text: 'Best venue in the city' },
-      { user: 'dark_bass', text: 'Those visuals were next level' },
-      { user: 'radu.night', text: 'See you next week!' },
-      { user: 'ana.dance', text: 'Legendary night' },
+      { user: 'techno.kid', text: 'Best venue in the city hands down' },
+      { user: 'dark_bass', text: 'Those visuals were next level, who did the VJ set?' },
+      { user: 'radu.night', text: 'See you next week! Cant miss the Recondite show' },
+      { user: 'ana.dance', text: 'Legendary night, my ears are still ringing' },
     ],
     timeAgo: '8h',
     liked: false,
     saved: true,
+    imageTheme: { gradient: 'from-emerald-950 via-gray-950 to-black', scene: 'Raw concrete hall with green lasers slicing through haze', emoji: '' },
   },
   {
     id: '4',
     user: { name: 'Stefan V.', handle: '@stef.vinyl', avatar: 'S', verified: false },
-    image: '',
-    caption: 'Guesthouse with the crew. Multi-room setup means you always find your vibe.',
+    caption: 'Guesthouse with the crew. Multi-room setup means you always find your vibe. Started in the disco room, ended up at the techno floor at 5am.',
     venue: { name: 'Club Guesthouse', tagged: true },
-    tags: ['#clubbing', '#crew', '#guesthouse'],
+    tags: ['#clubbing', '#crew', '#guesthouse', '#vinyl'],
     likes: 89,
     comments: [
-      { user: 'liviu.bass', text: 'Room 2 was fire' },
+      { user: 'liviu.bass', text: 'Room 2 was fire, that vinyl-only set was chef kiss' },
     ],
     timeAgo: '12h',
     liked: false,
     saved: false,
+    imageTheme: { gradient: 'from-amber-900 via-orange-950 to-black', scene: 'Cozy multi-room club with warm lights spilling between doorways', emoji: '' },
   },
   {
     id: '5',
     user: { name: 'Catalina P.', handle: '@cat.party', avatar: 'C', verified: true },
-    image: '',
-    caption: 'Opening night was everything. New sound system, new lighting, same incredible energy.',
+    caption: 'Opening night was everything. New sound system, new lighting rig, same incredible energy. OXYA is about to become everyones favorite.',
     venue: { name: 'OXYA Club', tagged: true },
-    tags: ['#opening', '#newclub', '#bucharest'],
+    tags: ['#opening', '#newclub', '#bucharest', '#oxya'],
     likes: 312,
     comments: [
-      { user: 'night.rider', text: 'Can\'t wait to go back' },
-      { user: 'diana.groove', text: 'The lights were insane' },
+      { user: 'night.rider', text: 'Cant wait to go back, when is the next event?' },
+      { user: 'diana.groove', text: 'The LED walls were insane, felt like being inside a music video' },
     ],
     timeAgo: '1d',
     liked: true,
     saved: false,
+    imageTheme: { gradient: 'from-fuchsia-900 via-violet-950 to-black', scene: 'Futuristic LED panels pulsing with color over a euphoric crowd', emoji: '' },
   },
 ];
 
 const AVATAR_COLORS = ['from-red-500 to-orange-500', 'from-blue-500 to-cyan-500', 'from-emerald-500 to-teal-500', 'from-noctvm-violet to-purple-500', 'from-pink-500 to-rose-500'];
+
+const STORY_USERS = [
+  { name: 'Alexandra', avatar: 'A', hasNew: true },
+  { name: 'Mihai', avatar: 'M', hasNew: true },
+  { name: 'Ioana', avatar: 'I', hasNew: true },
+  { name: 'Stefan', avatar: 'S', hasNew: false },
+  { name: 'Catalina', avatar: 'C', hasNew: true },
+  { name: 'Andrei', avatar: 'R', hasNew: false },
+  { name: 'Diana', avatar: 'D', hasNew: true },
+];
 
 interface FeedPageProps {
   onVenueClick: (venueName: string) => void;
@@ -131,13 +142,13 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
 
   return (
     <div className="space-y-0">
-      {/* Sub-tabs */}
-      <div className="flex gap-4 border-b border-noctvm-border mb-4">
+      {/* Sub-tabs - CENTERED */}
+      <div className="flex justify-center gap-6 border-b border-noctvm-border mb-4">
         {(['following', 'explore', 'friends'] as const).map((sub) => (
           <button
             key={sub}
             onClick={() => setSubTab(sub)}
-            className={`pb-3 text-sm font-medium capitalize transition-colors ${
+            className={`pb-3 text-xs font-semibold uppercase tracking-wider transition-colors ${
               subTab === sub
                 ? 'text-noctvm-violet border-b-2 border-noctvm-violet'
                 : 'text-noctvm-silver hover:text-white'
@@ -148,25 +159,27 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
         ))}
       </div>
 
-      {/* Stories row */}
-      <div className="flex gap-3 overflow-x-auto pb-4 mb-2 scrollbar-hide">
-        {/* Add story */}
-        <div className="flex flex-col items-center gap-1 flex-shrink-0">
-          <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center">
-            <svg className="w-6 h-6 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          </div>
-          <span className="text-[9px] text-noctvm-silver">Your story</span>
-        </div>
-        {MOCK_POSTS.slice(0, 5).map((post, i) => (
-          <div key={post.id} className="flex flex-col items-center gap-1 flex-shrink-0">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br p-[2px]" style={{ backgroundImage: `linear-gradient(135deg, var(--tw-gradient-stops))` }}>
-              <div className={`w-full h-full rounded-full bg-gradient-to-br ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center ring-2 ring-noctvm-black`}>
-                <span className="text-sm font-bold text-white">{post.user.avatar}</span>
-              </div>
+      {/* Stories row - CENTERED */}
+      <div className="flex justify-center mb-4">
+        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2">
+          {/* Add story */}
+          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center">
+              <svg className="w-6 h-6 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             </div>
-            <span className="text-[9px] text-noctvm-silver truncate max-w-[64px]">{post.user.name.split(' ')[0]}</span>
+            <span className="text-[9px] text-noctvm-silver">Your story</span>
           </div>
-        ))}
+          {STORY_USERS.map((user, i) => (
+            <div key={user.name} className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer">
+              <div className={`w-16 h-16 rounded-full p-[2px] ${user.hasNew ? 'bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500' : 'bg-noctvm-border'}`}>
+                <div className={`w-full h-full rounded-full bg-gradient-to-br ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center ring-2 ring-noctvm-black`}>
+                  <span className="text-sm font-bold text-white">{user.avatar}</span>
+                </div>
+              </div>
+              <span className="text-[9px] text-noctvm-silver truncate max-w-[64px]">{user.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Posts */}
@@ -193,19 +206,29 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
               </button>
             </div>
 
-            {/* Post image placeholder */}
-            <div className="aspect-square bg-noctvm-midnight flex items-center justify-center relative">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-noctvm-surface/50 flex items-center justify-center mx-auto mb-2">
-                  <svg className="w-8 h-8 text-noctvm-silver/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 21h18a1.5 1.5 0 001.5-1.5V4.5A1.5 1.5 0 0021 3H3a1.5 1.5 0 00-1.5 1.5v15A1.5 1.5 0 003 21z" /></svg>
-                </div>
-                <p className="text-[10px] text-noctvm-silver/30 font-mono">Photo placeholder</p>
+            {/* Post image - themed gradient with scene description */}
+            <div className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden`}>
+              {/* Atmospheric overlay elements */}
+              <div className="absolute inset-0">
+                {/* Fake light beams */}
+                <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-white/5 via-white/10 to-transparent rotate-12"></div>
+                <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-white/5 via-white/8 to-transparent -rotate-6"></div>
+                {/* Corner glow */}
+                <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-white/5 blur-3xl"></div>
+                <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-white/3 blur-3xl"></div>
+                {/* Horizontal haze band */}
+                <div className="absolute top-1/3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                <div className="absolute top-2/3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+              </div>
+              {/* Scene description */}
+              <div className="relative text-center px-8">
+                <p className="text-sm text-white/25 font-medium leading-relaxed italic">{post.imageTheme.scene}</p>
               </div>
               {/* Venue tag overlay */}
               {post.venue.tagged && (
                 <button
                   onClick={() => onVenueClick(post.venue.name)}
-                  className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-colors group"
+                  className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all group hover:bg-black/80"
                 >
                   <svg className="w-3 h-3 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
                   <span className="text-[10px] font-medium text-white group-hover:text-noctvm-violet transition-colors">{post.venue.name}</span>
@@ -250,7 +273,7 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
               </p>
 
               {/* Venue + tags */}
-              <div className="flex flex-wrap gap-1 mb-2">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {post.venue.tagged && (
                   <button
                     onClick={() => onVenueClick(post.venue.name)}
@@ -285,7 +308,7 @@ export default function FeedPage({ onVenueClick }: FeedPageProps) {
                   </div>
                   {/* Comment input */}
                   <div className="flex items-center gap-2 mt-2 pt-2 border-t border-noctvm-border">
-                    <div className={`w-6 h-6 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0`}>
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0">
                       <span className="text-[8px] font-bold text-white">N</span>
                     </div>
                     <input
