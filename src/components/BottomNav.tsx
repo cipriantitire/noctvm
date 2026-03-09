@@ -1,14 +1,14 @@
 'use client';
 
-import { EventsIcon, FeedIcon, WalletIcon, HubIcon } from './icons';
+import { EventsIcon, FeedIcon, WalletIcon, UserIcon } from './icons';
 
-type TabType = 'events' | 'feed' | 'wallet' | 'hub';
+type TabType = 'events' | 'feed' | 'wallet' | 'profile';
 
 const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
   { icon: EventsIcon, label: 'Events', tab: 'events' },
   { icon: FeedIcon, label: 'Feed', tab: 'feed' },
   { icon: WalletIcon, label: 'Wallet', tab: 'wallet' },
-  { icon: HubIcon, label: 'Hub', tab: 'hub' },
+  { icon: UserIcon, label: 'Profile', tab: 'profile' },
 ];
 
 interface BottomNavProps {
