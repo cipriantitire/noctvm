@@ -302,3 +302,40 @@ body {
 .backdrop-enter {
   animation: fadeIn 0.3s ease-out both;
 }
+
+/* ========================= */
+/* VIEW TOGGLE TRANSITION    */
+/* ========================= */
+.view-transition {
+  animation: viewSwitch 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes viewSwitch {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* ========================= */
+/* LIQUID GLASS MOUSE TRACK  */
+/* ========================= */
+/* Desktop: mouse-reactive shimmer driven by --mouse-x / --mouse-y CSS vars */
+@media (hover: hover) and (pointer: fine) {
+  .liquid-glass.lg-mouse::before {
+    animation: none !important;
+    background: radial-gradient(
+      600px circle at calc(var(--mouse-x, 50%) * 1%) calc(var(--mouse-y, 50%) * 1%),
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(124, 58, 237, 0.04) 35%,
+      transparent 70%
+    );
+    background-size: 100% 100%;
+    transition: background 0.15s ease-out;
+  }
+}
