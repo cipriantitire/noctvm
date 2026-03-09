@@ -181,11 +181,11 @@ export default function Home() {
               {/* Wallet sections */}
               <div className="space-y-4">
                 {[
-                  { title: 'Tickets', desc: 'Upcoming event tickets', count: 0, icon: '🎫', color: 'from-noctvm-violet/20 to-purple-900/20' },
-                  { title: 'Passes', desc: 'Season & venue passes', count: 0, icon: '🪪', color: 'from-blue-500/20 to-cyan-900/20' },
-                  { title: 'VIP Access', desc: 'Table reservations & VIP entries', count: 0, icon: '⭐', color: 'from-noctvm-gold/20 to-amber-900/20' },
-                  { title: 'Fidelity Cards', desc: 'Venue loyalty programs', count: 0, icon: '💳', color: 'from-noctvm-emerald/20 to-emerald-900/20' },
-                  { title: 'Bonus Points', desc: 'Earn rewards for every night out', count: 0, icon: '🌙', color: 'from-violet-500/20 to-indigo-900/20' },
+                  { title: 'Tickets', desc: 'Upcoming event tickets', count: 0, icon: 'TK', color: 'from-noctvm-violet/20 to-purple-900/20' },
+                  { title: 'Passes', desc: 'Season & venue passes', count: 0, icon: 'ID', color: 'from-blue-500/20 to-cyan-900/20' },
+                  { title: 'VIP Access', desc: 'Table reservations & VIP entries', count: 0, icon: '★', color: 'from-noctvm-gold/20 to-amber-900/20' },
+                  { title: 'Fidelity Cards', desc: 'Venue loyalty programs', count: 0, icon: 'CD', color: 'from-noctvm-emerald/20 to-emerald-900/20' },
+                  { title: 'Bonus Points', desc: 'Earn rewards for every night out', count: 0, icon: '☽', color: 'from-violet-500/20 to-indigo-900/20' },
                 ].map(({ title, desc, count, icon, color }) => (
                   <button key={title} className={`w-full flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r ${color} border border-noctvm-border hover:border-noctvm-violet/30 transition-all text-left group`}>
                     <div className="w-12 h-12 rounded-xl bg-noctvm-midnight/50 flex items-center justify-center text-2xl flex-shrink-0">
@@ -205,7 +205,7 @@ export default function Home() {
 
               {/* Moonrays teaser */}
               <div className="mt-8 p-5 rounded-xl bg-gradient-to-br from-noctvm-midnight to-noctvm-black border border-noctvm-violet/20 text-center">
-                <div className="text-3xl mb-2">🌙</div>
+                <div className="text-3xl mb-2">☽</div>
                 <h3 className="font-heading text-lg font-bold text-white mb-1">Moonrays</h3>
                 <p className="text-xs text-noctvm-silver max-w-xs mx-auto">Earn points every night out. Redeem for exclusive perks, skip-the-line access, and more.</p>
                 <p className="text-[10px] text-noctvm-violet font-mono mt-3 uppercase tracking-widest">Coming Soon</p>
