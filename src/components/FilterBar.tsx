@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { SearchIcon } from './icons';
 
-const GENRE_FILTERS = ['All', 'Electronic', 'Techno', 'Stand-up', 'Concert', 'Classical', 'Indie', 'Party'];
+const GENRE_FILTERS = ['All', 'Techno', 'House', 'Hip-Hop', 'Live', 'Party', 'DnB', 'Reggaeton'];
 
 interface FilterBarProps {
   onFilterChange?: (genre: string) => void;
@@ -20,9 +20,10 @@ export default function FilterBar({ onFilterChange, onSearchChange }: FilterBarP
 
   return (
     <div className="space-y-4">
-      {/* Search */}
       <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-noctvm-silver" />
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
+        </div>
         <input
           type="text"
           placeholder="Search events, venues..."
@@ -30,8 +31,6 @@ export default function FilterBar({ onFilterChange, onSearchChange }: FilterBarP
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
       </div>
-
-      {/* Genre pills */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {GENRE_FILTERS.map((genre) => (
           <button
