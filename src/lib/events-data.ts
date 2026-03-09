@@ -12,7 +12,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://zilesinopti.ro/evenimente/admina-chlorys-von-bulove/",
     genres: ["Electronic", "Techno", "House", "Experimental", "Minimal"],
     price: "Free",
-  },,
+  },
   {
     source: "iabilet",
     title: "Ladies Night x BDLP",
@@ -24,7 +24,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-ladies-night-x-bdlp-121883/",
     genres: ["Club", "Party"],
     price: null,
-  },,
+  },
   {
     source: "livetickets",
     title: "Vlad Flueraru - Lansare Album 'Pedralba' - 12.03",
@@ -36,7 +36,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/vlad-flueraru-lansare-album-pedralba-1203",
     genres: ["Live Music", "Alternative"],
     price: "50 - 100 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "CARAMELO | baila reggaeton",
@@ -48,7 +48,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/caramelo-baila-reggaeton-39",
     genres: ["Reggaeton", "Latin", "Hip-Hop"],
     price: "de la 0 RON",
-  },,
+  },
   {
     source: "zilesinopti",
     title: "PW - Misbits 13 Years Anniversary - Raresh, Miss I, oddist @ Platforma Wolff",
@@ -60,7 +60,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://zilesinopti.ro/evenimente/raresh-miss-i-oddist-platforma-wolff/",
     genres: ["Minimal", "Techno", "House", "Underground Electronic"],
     price: "70 - 90 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "BLOOM - Maison64 Only300",
@@ -72,7 +72,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/bloom-maison64-only300",
     genres: ["Club", "Nightlife"],
     price: "de la 80 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "CAROUSEL PARTY / 13 Martie @ NOAR HALL, Bucuresti",
@@ -84,7 +84,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/carousel-party-noar-hall-bucuresti",
     genres: ["Club", "Party"],
     price: "30 - 100 RON",
-  },,
+  },
   {
     source: "zilesinopti",
     title: "Hector Oaks [ES] @ Control Club",
@@ -96,7 +96,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://zilesinopti.ro/evenimente/hector-oaks-es-control-club/",
     genres: ["Techno", "Ghetto Tech", "Acid", "EBM", "Raw Techno"],
     price: "40 - 50 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "NOOKin w/ Traumer, Maher Daniel, Sepp & Nu Zau, ASHPOT",
@@ -108,7 +108,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/nookin-w-traumer-maher-daniel-sepp-nu-zau-ashpot",
     genres: ["Techno", "Minimal", "Underground"],
     price: "de la 50 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "GRAYZONE x VIPER",
@@ -120,7 +120,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/grayzone-x-viper",
     genres: ["Underground", "Club"],
     price: "35 - 45 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Musiclover Party #1 @ Concert Gheboasa",
@@ -132,7 +132,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-musiclover-party-1-concert-gheboasa-123431/",
     genres: ["Hip-Hop", "Party"],
     price: "de la 71 RON",
-  },,
+  },
   {
     source: "zilesinopti",
     title: "Black Rhino Residency #25: Iration Steppas @ Control Club",
@@ -144,7 +144,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://zilesinopti.ro/evenimente/black-rhino-residency-25-iration-steppas-control-club/",
     genres: ["Dub", "Reggae", "Sound System", "Bass Music", "Underground Bass"],
     price: null,
-  },,
+  },
   {
     source: "livetickets",
     title: "PW x Refuge Worldwide 5 Years - bblove, Chlorys, No Plastic, Obelix at Platforma Wolff",
@@ -156,7 +156,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/pw-x-refuge-worldwide-5-years-bblove-chlorys-no-plastic-obelix-at-platforma-wolff",
     genres: ["Underground", "Electronic"],
     price: "de la 30 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Amani: TULUM x Housetopia",
@@ -168,7 +168,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/tulum-tibute-to-keinemusik",
     genres: ["House", "Deep House"],
     price: "35 - 40 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "BUCHAREST V.I.P | GRAND OPENING",
@@ -180,7 +180,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/bucharest-vip-grand-opening",
     genres: ["Club", "Nightlife"],
     price: "60 - 80 RON",
-  },,
+  },
   {
     source: "zilesinopti",
     title: "Cap, Christian AB & Francesco del Garda @ Club Guesthouse",
@@ -192,7 +192,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://zilesinopti.ro/evenimente/cap-christian-ab-francesco-del-garda/",
     genres: ["Minimal", "Techno", "House", "Deep House"],
     price: "55 - 70 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Girls Wanna Have Fun - Story The Club",
@@ -204,7 +204,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/girls-wanna-have-fun-story-the-club",
     genres: ["Club", "Party"],
     price: "20 - 50 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "EMPYREAN EP 3",
@@ -216,7 +216,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/empyrean-ep-3",
     genres: ["Live Music", "Underground"],
     price: "70 - 110 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Amnesia pres. Pyramid Ibiza World Tour: BUCHAREST 20.03.2026",
@@ -228,7 +228,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/amnesia-pres-pyramid-world-tour-bucharest",
     genres: ["Techno", "House", "Ibiza"],
     price: "90 - 300 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Wolf City Bucharest",
@@ -240,7 +240,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/wolf-city-bucharest",
     genres: ["Hard Dance", "Hardcore", "Hardstyle"],
     price: "50 - 195 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "PW x Flipside - Vass, Lowkodi, Twodoor at Platforma Wolff",
@@ -252,7 +252,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/pw-x-flipside-vass-lowkodi-twodoor",
     genres: ["Underground", "Electronic"],
     price: "de la 40 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Adrian Norocel - Bucuresti Centrul Vechi - Story The Club",
@@ -264,7 +264,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/adrian-norocel-bucuresti-centrul-vechi-story-the-club",
     genres: ["Club", "Party"],
     price: "de la 50 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Bailando - SIN PIJAMA",
@@ -276,7 +276,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/bailando-sin-pijama",
     genres: ["Latin", "Reggaeton", "Club"],
     price: "40 - 70 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Musiclover Party #2 @ Concert SHIFT",
@@ -288,7 +288,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-musiclover-party-2-concert-shift-123572/",
     genres: ["Hip-Hop", "Party"],
     price: "de la 71 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "PW - Dragos Ilici (all night long) at Platforma Wolff",
@@ -300,7 +300,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/pw-dragos-ilici-all-night-long-at-platforma-wolff",
     genres: ["Minimal", "Techno", "Underground"],
     price: "de la 40 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Alex Botea x 21 Martie x Princess Club Bucuresti",
@@ -312,7 +312,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/alex-botea-x-21-martie-x-princess-club-bucuresti",
     genres: ["Club", "Party"],
     price: "60 - 70 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "ARCANDO @ Noisebreak 360",
@@ -324,7 +324,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-arcando-noisebreak-360-121611/",
     genres: ["Drum & Bass"],
     price: "de la 95 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Sqweez! invites Gegen",
@@ -336,7 +336,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/sqweez-invites-gegen",
     genres: ["Techno", "Underground", "Queer"],
     price: "50 - 210 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "GH 21.03 | LIMOUSINE DREAM w. Gene on Earth, Gojnea76, Jorg Kunning live, Shanti Celeste",
@@ -348,7 +348,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/gh-2103-limousine-dream-w-gene-on-earth-gojnea76-jorg-kunning-live-shanti-celeste",
     genres: ["Minimal", "House", "Underground"],
     price: "de la 60 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Athletes vs Cheerleaders x Rava & Petre Stefan",
@@ -360,7 +360,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-athletes-vs-cheerleaders-x-rava-petre-stefan-122705/",
     genres: ["Club", "Party"],
     price: "de la 138 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Concert PARAZITII la Quantic",
@@ -372,7 +372,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-concert-parazitii-la-quantic-123296/",
     genres: ["Hip-Hop", "Rap"],
     price: "de la 162 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Bitza - PERSONALE - Avanpremiera Album",
@@ -384,7 +384,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-bitza-o-personale-o-avanpremiera-album-122989/",
     genres: ["Hip-Hop", "Rap"],
     price: "de la 70 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "B:pressure pres. Dillinja",
@@ -396,7 +396,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-b-pressure-pres-dillinja-122656/",
     genres: ["Drum & Bass", "Underground"],
     price: "de la 60 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "GH 27.03 | Bagabont pres Bocaseca: un party 100% HIP HOP",
@@ -408,7 +408,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/gh-2703-bagabont-pres-bocaseca-un-party-100-hip-hop",
     genres: ["Hip-Hop"],
     price: "de la 60 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "PW - DMC b2b Morgan Boyle, Koler, Mianda at Platforma Wolff",
@@ -420,7 +420,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/pw-dmc-b2b-morgan-boyle-koler-mianda-at-platforma-wolff",
     genres: ["Underground", "Electronic"],
     price: "de la 40 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "MIDNIGHTS presents FAUL & WAD // Fratelli Studio1 // 27.03",
@@ -432,7 +432,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/midnights-presents-faul-wad-fratellistudio1",
     genres: ["House", "Electronic", "Club"],
     price: "30 - 300 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "ANI DE LICEU - Le Dome Bucuresti",
@@ -444,7 +444,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/ani-de-liceu-4",
     genres: ["Club", "Party"],
     price: "de la 60 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "ODPL: 1 Tera de Instrumentale",
@@ -456,7 +456,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-odpl-1-tera-de-instrumentale-124314/",
     genres: ["Hip-Hop", "Party"],
     price: "de la 42 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "PW x DeDans - Gernot (Modeselektor, Moderat), Cosmin TRG at Platforma Wolff",
@@ -468,7 +468,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/pw-x-dedans-gernot-modeselektor-moderat-cosmin-trg-at-platforma-wolff",
     genres: ["Techno", "Electronic", "Underground"],
     price: "de la 50 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "Bairam in Bucuresti by Wayback",
@@ -480,7 +480,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/bairam-in-bucuresti-by-wayback-4",
     genres: ["Balkan", "Club", "Party"],
     price: "30 - 100 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "GH 28.03 | Clovis, Suciu",
@@ -492,7 +492,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/gh-2803-clovis-suciu",
     genres: ["Minimal", "Techno", "Underground"],
     price: "de la 40 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "BBB 2026 - Rick Ross",
@@ -504,7 +504,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-bbb-2026-rick-ross-122327/",
     genres: ["Hip-Hop", "Rap"],
     price: "de la 179 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "DELTA HEAVY @ NOISEBREAK: CHAPTER XVI",
@@ -516,7 +516,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-delta-heavy-noisebreak-chapter-xvi-123361/",
     genres: ["DnB", "Dubstep"],
     price: "de la 85 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "LATINO GANG | Bad Bunny Party - La CASITA | BUCHAREST",
@@ -528,7 +528,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/latino-gang-bad-bunny-party-la-casita-bucharest",
     genres: ["Reggaeton", "Latin", "Hip-Hop"],
     price: "40 - 70 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "GH 04.04 | GiGi FM, Rhadoo, oddist",
@@ -540,7 +540,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/gh-0404-gigi-fm-rhadoo-oddist",
     genres: ["Minimal", "Techno", "Underground"],
     price: "de la 55 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Escape Party - Hyperjump",
@@ -552,7 +552,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-escape-party-hyperjump-123348/",
     genres: ["Club", "Party", "Concept"],
     price: "de la 64 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Underground for the Masses III",
@@ -564,7 +564,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-underground-for-the-masses-iii-110438/",
     genres: ["Underground", "Metal", "Bass"],
     price: "de la 650 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "DELIRIC x SILENT STRIKE x HIP HOP TAKEOVERS | BUCURESTI | Noul Normal: Turneu National 2026",
@@ -576,7 +576,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/deliric-x-silent-strike-x-hip-hop-takeovers-bucuresti-noul-normal-turneu-national",
     genres: ["Hip-Hop", "Rap"],
     price: "de la 139 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "THE AWAKENING.",
@@ -588,7 +588,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/the-awakening",
     genres: ["Club", "Electronic"],
     price: "80 - 250 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "BLACK COFFEE X GAIA",
@@ -600,7 +600,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/black-coffee-x-gaia",
     genres: ["Deep House", "Afro House", "Underground"],
     price: "250 - 900 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "TRICKY Live @ Club Guesthouse, Bucuresti",
@@ -612,7 +612,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/tricky-live-club-guesthouse-bucuresti",
     genres: ["Trip-Hop", "Electronic", "Underground"],
     price: "de la 148 RON",
-  },,
+  },
   {
     source: "livetickets",
     title: "NOSTALGIA 2026",
@@ -624,7 +624,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/nostalgia-2026",
     genres: ["Electronic", "Festival"],
     price: "de la 269 RON",
-  },,
+  },
   {
     source: "iabilet",
     title: "Kapital Festival",
@@ -636,7 +636,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.iabilet.ro/bilete-kapital-festival-124238/",
     genres: ["Festival", "Electronic", "Hip-Hop"],
     price: null,
-  },,
+  },
   {
     source: "livetickets",
     title: "Black Rhino Radio presents: Autechre",
@@ -648,5 +648,5 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://www.livetickets.ro/bilete/black-rhino-radio-presents-autechre",
     genres: ["IDM", "Experimental Electronic", "Underground"],
     price: "de la 150 RON",
-  },,
+  },
 ];
