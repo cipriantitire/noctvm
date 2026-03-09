@@ -105,7 +105,7 @@ export default function RightPanel({ events, onVenueClick }: RightPanelProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-medium text-white truncate group-hover:text-noctvm-violet transition-colors">{event.title}</p>
-                  <p className="text-[10px] text-noctvm-silver">{event.venue}{event.time ? ` \u00B7 ${event.time}` : ''}</p>
+                  <p className="text-[10px] text-noctvm-silver">{event.venue}{event.time ? ` \u00b7 ${event.time}` : ''}</p>
                 </div>
               </a>
             ))}
