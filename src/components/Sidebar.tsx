@@ -1,14 +1,13 @@
 'use client';
 
-import { MoonIcon, EventsIcon, FeedIcon, WalletIcon, HubIcon, UserIcon } from './icons';
+import { MoonIcon, EventsIcon, FeedIcon, WalletIcon, UserIcon } from './icons';
 
-type TabType = 'events' | 'feed' | 'wallet' | 'hub';
+type TabType = 'events' | 'feed' | 'wallet' | 'profile';
 
 const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
   { icon: EventsIcon, label: 'Events', tab: 'events' },
   { icon: FeedIcon, label: 'Feed', tab: 'feed' },
   { icon: WalletIcon, label: 'Wallet', tab: 'wallet' },
-  { icon: HubIcon, label: 'Hub', tab: 'hub' },
 ];
 
 interface SidebarProps {
@@ -45,7 +44,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
       {/* Profile avatar at bottom */}
       <div className="px-3 w-full">
-        <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-noctvm-silver hover:text-white hover:bg-noctvm-surface transition-all duration-200">
+        <button onClick={() => onTabChange('profile')} className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === 'profile' ? 'bg-noctvm-violet/10 text-white' : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'}`}>
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 ring-2 ring-noctvm-border">
             <UserIcon className="w-4 h-4 text-white" />
           </div>
