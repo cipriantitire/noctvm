@@ -46,9 +46,9 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
   }, []);
 
   return (
-    <div className="lg:hidden space-y-3 mb-4">
+    <div className="lg:hidden space-y-3 mb-4 animate-fade-in">
       {/* Map - wide landscape */}
-      <div className="rounded-xl overflow-hidden border border-noctvm-border">
+      <div className="rounded-xl overflow-hidden border border-noctvm-border animate-fade-in-up">
         <div className="aspect-[21/9] bg-noctvm-midnight flex items-center justify-center">
           <div className="text-center">
             <div className="w-10 h-10 rounded-full bg-noctvm-violet/10 flex items-center justify-center mx-auto mb-1.5">
@@ -64,7 +64,7 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
 
       {/* LIVE TONIGHT */}
       {tonightEvents.length > 0 && (
-        <div className="p-3 rounded-xl bg-gradient-to-r from-noctvm-midnight to-noctvm-black border border-noctvm-violet/20">
+        <div className="p-3 rounded-xl liquid-glass-subtle border-noctvm-violet/20 animate-fade-in-up stagger-2">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse"></span>
             <span className="text-[9px] uppercase tracking-widest text-noctvm-emerald font-mono font-medium">Live Tonight</span>
@@ -77,7 +77,7 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
                 href={event.event_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-noctvm-surface/50 border border-noctvm-border flex-shrink-0 hover:border-noctvm-violet/30 transition-colors"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-noctvm-surface/50 border border-noctvm-border flex-shrink-0 hover:border-noctvm-violet/30 transition-all duration-200"
               >
                 <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${getVenueColor(event.venue)} flex items-center justify-center flex-shrink-0`}>
                   <span className="text-[8px] font-bold text-white">{event.venue[0]}</span>
@@ -93,24 +93,24 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
       )}
 
       {/* Trending Venues - horizontal scroll */}
-      <div>
-        <h3 className="text-[9px] uppercase tracking-widest text-noctvm-silver font-mono font-medium mb-2 px-1">Trending Venues</h3>
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-          {trendingVenues.map(({ name, count }) => (
+      <div className="animate-fade-in-up stagger-4">
+        <h3 className="text-[10px] uppercase tracking-widest text-noctvm-silver font-mono font-medium mb-2 px-1">Trending Venues</h3>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {trendingVenues.map(({ name, count }, i) => (
             <button
               key={name}
               onClick={() => onVenueClick(name)}
-              className="flex flex-col items-center gap-1 flex-shrink-0 group"
+              className={`flex flex-col items-center gap-1.5 flex-shrink-0 w-[76px] group animate-fade-in-up stagger-${i + 1}`}
             >
               <div className="relative">
-                <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${getVenueColor(name)} flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all`}>
-                  <span className="text-sm font-heading font-bold text-white">{name[0]}</span>
+                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getVenueColor(name)} flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all duration-300 group-hover:scale-105`}>
+                  <span className="text-base font-heading font-bold text-white">{name[0]}</span>
                 </div>
                 {count > 1 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-noctvm-violet text-[8px] font-bold text-white flex items-center justify-center">{count}</span>
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-violet text-[10px] font-bold text-white flex items-center justify-center">{count}</span>
                 )}
               </div>
-              <span className="text-[9px] text-noctvm-silver group-hover:text-white transition-colors truncate max-w-[60px] text-center">{name.split(' ')[0]}</span>
+              <span className="text-[12px] text-noctvm-silver group-hover:text-white transition-colors text-center leading-tight line-clamp-2">{name}</span>
             </button>
           ))}
         </div>
