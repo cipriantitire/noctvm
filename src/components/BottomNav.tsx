@@ -1,23 +1,31 @@
 'use client';
 
-import { ExploreIcon, MapIcon, BookmarkIcon, UserIcon } from './icons';
+import { EventsIcon, FeedIcon, ReservationsIcon, HubIcon } from './icons';
 
-const NAV_ITEMS = [
-  { icon: ExploreIcon, label: 'Explore', active: true },
-  { icon: MapIcon, label: 'Map', active: false },
-  { icon: BookmarkIcon, label: 'Saved', active: false },
-  { icon: UserIcon, label: 'Profile', active: false },
+type TabType = 'events' | 'feed' | 'reservations' | 'hub';
+
+const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
+  { icon: EventsIcon, label: 'Events', tab: 'events' },
+  { icon: FeedIcon, label: 'Feed', tab: 'feed' },
+  { icon: ReservationsIcon, label: 'Reservations', tab: 'reservations' },
+  { icon: HubIcon, label: 'Hub', tab: 'hub' },
 ];
 
-export default function BottomNav() {
+interface BottomNavProps {
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
+}
+
+export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-noctvm-border">
       <div className="flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom)]">
-        {NAV_ITEMS.map(({ icon: Icon, label, active }) => (
+        {NAV_ITEMS.map(({ icon: Icon, label, tab }) => (
           <button
-            key={label}
+            key={tab}
+            onClick={() => onTabChange(tab)}
             className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-lg transition-colors ${
-              active ? 'text-noctvm-violet' : 'text-noctvm-silver hover:text-white'
+              activeTab === tab ? 'text-noctvm-violet' : 'text-noctvm-silver hover:text-white'
             }`}
           >
             <Icon className="w-5 h-5" />
