@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
+import { VENUE_LOGOS } from '@/lib/venue-logos';
 
 const VENUE_COLORS: Record<string, string> = {
   'Control Club': 'from-red-500 to-orange-500',
@@ -79,7 +80,19 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-noctvm-surface/50 border border-noctvm-border flex-shrink-0 hover:border-noctvm-violet/30 transition-all duration-200"
               >
-                <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${getVenueColor(event.venue)} flex items-center justify-center flex-shrink-0`}>
+                {VENUE_LOGOS[event.venue] ? (
+                  <img
+                    src={VENUE_LOGOS[event.venue]}
+                    alt={event.venue}
+                    className="w-6 h-6 rounded-full object-cover flex-shrink-0 ring-1 ring-noctvm-border"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.style.display = 'none';
+                      el.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${getVenueColor(event.venue)} flex items-center justify-center flex-shrink-0 ${VENUE_LOGOS[event.venue] ? 'hidden' : ''}`}>
                   <span className="text-[8px] font-bold text-white">{event.venue[0]}</span>
                 </div>
                 <div className="min-w-0">
@@ -103,7 +116,19 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
               className={`flex flex-col items-center gap-1.5 flex-shrink-0 w-[76px] group animate-fade-in-up stagger-${i + 1}`}
             >
               <div className="relative">
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getVenueColor(name)} flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all duration-300 group-hover:scale-105`}>
+                {VENUE_LOGOS[name] ? (
+                  <img
+                    src={VENUE_LOGOS[name]}
+                    alt={name}
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.style.display = 'none';
+                      el.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getVenueColor(name)} flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all duration-300 group-hover:scale-105 ${VENUE_LOGOS[name] ? 'hidden' : ''}`}>
                   <span className="text-base font-heading font-bold text-white">{name[0]}</span>
                 </div>
                 {count > 1 && (
