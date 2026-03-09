@@ -23,9 +23,8 @@ function getVenueInfo(name: string) {
 
 export default function VenuePage({ venueName, onBack }: VenuePageProps) {
   const info = getVenueInfo(venueName);
-  
   const venueEvents = useMemo(() => SAMPLE_EVENTS.filter(e => e.venue === venueName), [venueName]);
-  
+
   const today = new Date().toISOString().split('T')[0];
   const liveEvents = venueEvents.filter(e => e.date === today);
   const upcomingEvents = venueEvents.filter(e => e.date >= today);
@@ -34,48 +33,44 @@ export default function VenuePage({ venueName, onBack }: VenuePageProps) {
   return (
     <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6">
       {/* Back button */}
-      <button onClick={onBack} className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors mb-6 group">
-        <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        <span className="text-sm font-medium">Back to Events</span>
+      <button onClick={onBack} className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors mb-4 group">
+        <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span className="text-xs font-medium">Back to Events</span>
       </button>
 
-      {/* Venue header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-heading font-bold text-white">{venueName[0]}</span>
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="font-heading text-2xl font-bold text-white">{venueName}</h1>
-              {liveEvents.length > 0 && (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-emerald/20 border border-noctvm-emerald/30">
-                  <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
-                  <span className="text-[10px] font-mono font-medium text-noctvm-emerald uppercase tracking-wider">LIVE NOW</span>
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-noctvm-silver mt-1">{info.address}</p>
-          </div>
+      {/* Venue header - compact */}
+      <div className="flex items-start gap-4 mb-5">
+        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0">
+          <span className="text-xl font-heading font-bold text-white">{venueName[0]}</span>
         </div>
-        <p className="text-sm text-noctvm-silver/80 leading-relaxed">{info.description}</p>
-        
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          {info.genres.map(g => (
-            <span key={g} className="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-medium bg-noctvm-midnight text-noctvm-violet border border-noctvm-violet/20">{g}</span>
-          ))}
-          <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-medium bg-noctvm-surface text-noctvm-silver border border-noctvm-border">Cap. {info.capacity}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="font-heading text-xl font-bold text-white">{venueName}</h1>
+            {liveEvents.length > 0 && (
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-noctvm-emerald/20 border border-noctvm-emerald/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse"></span>
+                <span className="text-[9px] font-mono font-medium text-noctvm-emerald uppercase tracking-wider">LIVE</span>
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-noctvm-silver mt-0.5">{info.address}</p>
+          <p className="text-xs text-noctvm-silver/70 mt-1 line-clamp-2">{info.description}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {info.genres.map(g => (
+              <span key={g} className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-medium bg-noctvm-midnight text-noctvm-violet border border-noctvm-violet/20">{g}</span>
+            ))}
+            <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider font-medium bg-noctvm-surface text-noctvm-silver border border-noctvm-border">Cap. {info.capacity}</span>
+          </div>
         </div>
       </div>
 
-      {/* Gallery placeholder */}
-      <div className="mb-8">
-        <h3 className="font-heading text-sm font-semibold text-white mb-3">Gallery</h3>
-        <div className="grid grid-cols-3 gap-1.5 rounded-xl overflow-hidden">
-          {[1,2,3].map(i => (
-            <div key={i} className="aspect-square bg-noctvm-surface border border-noctvm-border flex items-center justify-center">
-              <span className="text-[10px] text-noctvm-silver/30 font-mono">Photo {i}</span>
+      {/* Gallery - small thumbnails in a row */}
+      <div className="mb-6">
+        <h3 className="font-heading text-xs font-semibold text-noctvm-silver uppercase tracking-wider mb-2">Gallery</h3>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className="w-20 h-20 flex-shrink-0 rounded-lg bg-noctvm-surface border border-noctvm-border flex items-center justify-center">
+              <span className="text-[9px] text-noctvm-silver/30 font-mono">Photo {i}</span>
             </div>
           ))}
         </div>
@@ -83,22 +78,25 @@ export default function VenuePage({ venueName, onBack }: VenuePageProps) {
 
       {/* Live Events */}
       {liveEvents.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
-            <h3 className="font-heading text-sm font-semibold text-noctvm-emerald">Happening Now</h3>
+            <h3 className="font-heading text-xs font-semibold text-noctvm-emerald uppercase tracking-wider">Happening Now</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {liveEvents.map((event, i) => <EventCard key={i} event={event} />)}
           </div>
         </div>
       )}
 
-      {/* Upcoming Events */}
-      <div className="mb-8">
-        <h3 className="font-heading text-sm font-semibold text-white mb-3">Upcoming Events ({upcomingEvents.length})</h3>
+      {/* Upcoming Events - same grid as events page */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-heading text-xs font-semibold text-white uppercase tracking-wider">Upcoming Events</h3>
+          <span className="text-[10px] text-noctvm-silver font-mono">{upcomingEvents.length} events</span>
+        </div>
         {upcomingEvents.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {upcomingEvents.map((event, i) => <EventCard key={i} event={event} />)}
           </div>
         ) : (
@@ -107,16 +105,17 @@ export default function VenuePage({ venueName, onBack }: VenuePageProps) {
       </div>
 
       {/* Past Events */}
-      <div>
-        <h3 className="font-heading text-sm font-semibold text-noctvm-silver mb-3">Past Events ({pastEvents.length})</h3>
-        {pastEvents.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-60">
+      {pastEvents.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-heading text-xs font-semibold text-noctvm-silver uppercase tracking-wider">Past Events</h3>
+            <span className="text-[10px] text-noctvm-silver/50 font-mono">{pastEvents.length} events</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 opacity-50">
             {pastEvents.slice(0, 4).map((event, i) => <EventCard key={i} event={event} />)}
           </div>
-        ) : (
-          <p className="text-xs text-noctvm-silver/60 py-4">No past events recorded yet</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
