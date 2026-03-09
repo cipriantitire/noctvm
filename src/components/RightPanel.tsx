@@ -1,26 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-
-interface NoctEvent {
-  source: string;
-  title: string;
-  venue: string;
-  date: string;
-  time: string | null;
-  description: string | null;
-  image_url: string;
-  event_url: string;
-  genres: string[];
-  price: string | null;
-  rating?: string;
-  reviews?: number;
-}
-
-interface RightPanelProps {
-  events: NoctEvent[];
-  onVenueClick?: (venueName: string) => void;
-}
+import { SAMPLE_EVENTS } from '@/lib/events-data';
 
 // Map known venues to their brand colors for avatar circles
 const VENUE_COLORS: Record<string, string> = {
@@ -43,17 +24,21 @@ function getVenueColor(venue: string): string {
   return VENUE_COLORS[venue] || 'from-noctvm-violet to-purple-400';
 }
 
-export default function RightPanel({ events, onVenueClick }: RightPanelProps) {
+interface RightPanelProps {
+  onVenueClick?: (venueName: string) => void;
+}
+
+export default function RightPanel({ onVenueClick }: RightPanelProps) {
   // Get tonight's events
   const tonightEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    return events.filter(e => e.date === today);
-  }, [events]);
+    return SAMPLE_EVENTS.filter(e => e.date === today);
+  }, []);
 
   // Get trending venues (most events)
   const trendingVenues = useMemo(() => {
     const counts: Record<string, { count: number; image: string }> = {};
-    events.forEach(e => {
+    SAMPLE_EVENTS.forEach(e => {
       if (!counts[e.venue]) {
         counts[e.venue] = { count: 0, image: e.image_url };
       }
@@ -63,7 +48,7 @@ export default function RightPanel({ events, onVenueClick }: RightPanelProps) {
       .sort(([, a], [, b]) => b.count - a.count)
       .slice(0, 6)
       .map(([name, data]) => ({ name, ...data }));
-  }, [events]);
+  }, []);
 
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-noctvm-border p-6 overflow-y-auto">
@@ -83,7 +68,7 @@ export default function RightPanel({ events, onVenueClick }: RightPanelProps) {
         </div>
       </div>
 
-      {/* Live Tonight - functional */}
+      {/* Live Tonight */}
       <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-noctvm-midnight to-noctvm-black border border-noctvm-violet/20">
         <div className="flex items-center gap-2 mb-3">
           <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
@@ -118,7 +103,7 @@ export default function RightPanel({ events, onVenueClick }: RightPanelProps) {
         )}
       </div>
 
-      {/* Trending venues with logos */}
+      {/* Trending venues */}
       <div>
         <h3 className="font-heading text-sm font-semibold text-white mb-3">Trending Venues</h3>
         <div className="space-y-2">
