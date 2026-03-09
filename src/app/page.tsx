@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar from '@/components/FilterBar';
@@ -21,8 +21,13 @@ export default function Home() {
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('portrait');
+  const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [profileSubPage, setProfileSubPage] = useState<ProfileSubPage>(null);
+
+  // Default to landscape (rows) on mobile, portrait (grid) on desktop
+  useEffect(() => {
+    if (window.innerWidth >= 1024) setViewMode('portrait');
+  }, []);
 
   const filteredEvents = useMemo(() => {
     let events = SAMPLE_EVENTS;
