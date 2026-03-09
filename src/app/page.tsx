@@ -6,20 +6,26 @@ import BottomNav from '@/components/BottomNav';
 import FilterBar from '@/components/FilterBar';
 import EventCard from '@/components/EventCard';
 import RightPanel from '@/components/RightPanel';
-import { MoonIcon } from '@/components/icons';
+import { MoonIcon, HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 
-type TabType = 'events' | 'feed' | 'reservations' | 'hub';
+type TabType = 'events' | 'feed' | 'wallet' | 'hub';
+type FeedSubTab = 'following' | 'explore' | 'friends';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('events');
-  const [activeGenre, setActiveGenre] = useState('All');
+  const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
+  const [feedSubTab, setFeedSubTab] = useState<FeedSubTab>('explore');
 
   const filteredEvents = useMemo(() => {
     let events = SAMPLE_EVENTS;
-    if (activeGenre !== 'All') {
-      events = events.filter(e => e.genres.some(g => g.toLowerCase().includes(activeGenre.toLowerCase())));
+    if (!activeGenres.includes('All')) {
+      events = events.filter(e =>
+        activeGenres.some(genre =>
+          e.genres.some(g => g.toLowerCase().includes(genre.toLowerCase()))
+        )
+      );
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -30,13 +36,19 @@ export default function Home() {
       );
     }
     return events;
-  }, [activeGenre, searchQuery]);
+  }, [activeGenres, searchQuery]);
+
+  const todaysEvents = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return SAMPLE_EVENTS.filter(e => e.date === today);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-noctvm-black">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="flex-1 min-h-screen">
+        {/* Mobile header */}
         <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -51,6 +63,7 @@ export default function Home() {
         </header>
 
         <div className="max-w-2xl mx-auto px-4 py-6 pb-24 lg:pb-6">
+          {/* EVENTS TAB */}
           {activeTab === 'events' && (
             <>
               <div className="hidden lg:block mb-6">
@@ -58,7 +71,7 @@ export default function Home() {
                 <p className="text-sm text-noctvm-silver mt-1">Discover what&apos;s happening in Bucharest</p>
               </div>
               <div className="mb-6">
-                <FilterBar onFilterChange={setActiveGenre} onSearchChange={setSearchQuery} />
+                <FilterBar activeGenres={activeGenres} onFilterChange={setActiveGenres} onSearchChange={setSearchQuery} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filteredEvents.map((event, index) => (
@@ -77,70 +90,155 @@ export default function Home() {
             </>
           )}
 
+          {/* FEED TAB - Instagram-inspired */}
           {activeTab === 'feed' && (
-            <div className="py-16 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-noctvm-midnight flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10 text-noctvm-violet/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 21h18a1.5 1.5 0 001.5-1.5V4.5A1.5 1.5 0 0021 3H3a1.5 1.5 0 00-1.5 1.5v15A1.5 1.5 0 003 21z" />
-                </svg>
-              </div>
-              <h2 className="font-heading text-xl font-bold text-white mb-2">Feed</h2>
-              <p className="text-noctvm-silver text-sm mb-6">Past events, photo albums, venue posts</p>
-              <div className="flex justify-center gap-3 mb-8">
-                {['Following', 'Explore', 'Friends'].map((tab) => (
-                  <span key={tab} className="px-4 py-1.5 rounded-full text-xs font-medium bg-noctvm-surface text-noctvm-silver border border-noctvm-border">
-                    {tab}
-                  </span>
-                ))}
-              </div>
-              <p className="text-noctvm-silver/40 text-xs font-mono">Coming soon</p>
-            </div>
-          )}
-
-          {activeTab === 'reservations' && (
-            <div className="py-16 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-noctvm-midnight flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10 text-noctvm-violet/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                </svg>
-              </div>
-              <h2 className="font-heading text-xl font-bold text-white mb-2">Reservations</h2>
-              <p className="text-noctvm-silver text-sm mb-6">Table bookings, VIP access & more</p>
-              <div className="flex justify-center gap-3 mb-8">
-                {['Fidelity Card', 'Bonus'].map((tab) => (
-                  <span key={tab} className="px-4 py-1.5 rounded-full text-xs font-medium bg-noctvm-surface text-noctvm-silver border border-noctvm-border">
-                    {tab}
-                  </span>
-                ))}
-              </div>
-              <p className="text-noctvm-silver/40 text-xs font-mono">Coming soon</p>
-            </div>
-          )}
-
-          {activeTab === 'hub' && (
-            <div className="py-16 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-noctvm-midnight flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10 text-noctvm-violet/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h2 className="font-heading text-xl font-bold text-white mb-2">Hub</h2>
-              <p className="text-noctvm-silver text-sm mb-6">Manage your nightlife presence</p>
-              <div className="grid gap-3 max-w-xs mx-auto">
-                {['Manage Account', 'Add Location', 'Claim Location'].map((item) => (
-                  <div key={item} className="px-4 py-3 rounded-xl bg-noctvm-surface text-noctvm-silver text-sm border border-noctvm-border hover:border-noctvm-violet/30 transition-colors cursor-pointer text-left">
-                    {item}
+            <div>
+              {/* Stories-style bar */}
+              <div className="flex gap-4 overflow-x-auto pb-4 mb-2 border-b border-noctvm-border scrollbar-hide">
+                {['Your Story', 'Control', 'Nook', 'Expirat', 'Guesthouse', 'OXYA'].map((name, i) => (
+                  <div key={name} className="flex flex-col items-center gap-1 flex-shrink-0">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${i === 0 ? 'border-2 border-dashed border-noctvm-silver/30' : 'bg-gradient-to-br from-noctvm-violet to-purple-500 p-[2px]'}`}>
+                      <div className="w-full h-full rounded-full bg-noctvm-black flex items-center justify-center">
+                        <span className="text-xs font-heading font-bold text-noctvm-silver">{name[0]}</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-noctvm-silver truncate w-16 text-center">{name}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-noctvm-silver/40 text-xs font-mono mt-8">Coming soon</p>
+
+              {/* Sub-tabs: Following / Explore / Friends */}
+              <div className="flex border-b border-noctvm-border mb-6">
+                {(['following', 'explore', 'friends'] as FeedSubTab[]).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setFeedSubTab(tab)}
+                    className={`flex-1 py-3 text-sm font-medium capitalize transition-colors relative ${
+                      feedSubTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
+                    }`}
+                  >
+                    {tab}
+                    {feedSubTab === tab && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Feed posts - Instagram card style */}
+              <div className="space-y-6">
+                {SAMPLE_EVENTS.slice(0, 6).map((event, i) => (
+                  <div key={i} className="border border-noctvm-border rounded-lg overflow-hidden bg-noctvm-surface">
+                    {/* Post header */}
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-white">{event.venue[0]}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">{event.venue}</p>
+                        <p className="text-[10px] text-noctvm-silver">{event.date}</p>
+                      </div>
+                      <button className="text-noctvm-silver hover:text-white">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg>
+                      </button>
+                    </div>
+                    {/* Post image */}
+                    <div className="aspect-square bg-noctvm-midnight overflow-hidden">
+                      <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    </div>
+                    {/* Action row */}
+                    <div className="px-4 py-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-4">
+                          <button className="text-white hover:text-noctvm-violet transition-colors"><HeartIcon className="w-6 h-6" /></button>
+                          <button className="text-white hover:text-noctvm-violet transition-colors"><ChatIcon className="w-6 h-6" /></button>
+                          <button className="text-white hover:text-noctvm-violet transition-colors"><ShareIcon className="w-6 h-6" /></button>
+                        </div>
+                        <button className="text-white hover:text-noctvm-violet transition-colors"><BookmarkIcon className="w-6 h-6" /></button>
+                      </div>
+                      <p className="text-sm text-white font-semibold mb-1">{event.title}</p>
+                      {event.description && <p className="text-xs text-noctvm-silver line-clamp-2">{event.description}</p>}
+                      <div className="flex gap-1.5 mt-2">
+                        {event.genres.slice(0, 3).map(g => (
+                          <span key={g} className="text-[10px] text-noctvm-violet">#{g.replace(/\s+/g, '')}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* WALLET TAB (formerly Reservations) */}
+          {activeTab === 'wallet' && (
+            <div>
+              <div className="mb-8">
+                <h2 className="font-heading text-2xl font-bold text-white mb-1">Wallet</h2>
+                <p className="text-sm text-noctvm-silver">Your nightlife essentials in one place</p>
+              </div>
+
+              {/* Wallet sections */}
+              <div className="space-y-4">
+                {[
+                  { title: 'Tickets', desc: 'Upcoming event tickets', count: 0, icon: '🎫', color: 'from-noctvm-violet/20 to-purple-900/20' },
+                  { title: 'Passes', desc: 'Season & venue passes', count: 0, icon: '🪪', color: 'from-blue-500/20 to-cyan-900/20' },
+                  { title: 'VIP Access', desc: 'Table reservations & VIP entries', count: 0, icon: '⭐', color: 'from-noctvm-gold/20 to-amber-900/20' },
+                  { title: 'Fidelity Cards', desc: 'Venue loyalty programs', count: 0, icon: '💳', color: 'from-noctvm-emerald/20 to-emerald-900/20' },
+                  { title: 'Bonus Points', desc: 'Earn rewards for every night out', count: 0, icon: '🌙', color: 'from-violet-500/20 to-indigo-900/20' },
+                ].map(({ title, desc, count, icon, color }) => (
+                  <button key={title} className={`w-full flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r ${color} border border-noctvm-border hover:border-noctvm-violet/30 transition-all text-left group`}>
+                    <div className="w-12 h-12 rounded-xl bg-noctvm-midnight/50 flex items-center justify-center text-2xl flex-shrink-0">
+                      {icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-white group-hover:text-noctvm-violet transition-colors">{title}</h3>
+                        <span className="text-xs text-noctvm-silver font-mono">{count}</span>
+                      </div>
+                      <p className="text-xs text-noctvm-silver mt-0.5">{desc}</p>
+                    </div>
+                    <svg className="w-4 h-4 text-noctvm-silver/50 group-hover:text-noctvm-violet transition-colors flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                ))}
+              </div>
+
+              {/* Moonrays teaser */}
+              <div className="mt-8 p-5 rounded-xl bg-gradient-to-br from-noctvm-midnight to-noctvm-black border border-noctvm-violet/20 text-center">
+                <div className="text-3xl mb-2">🌙</div>
+                <h3 className="font-heading text-lg font-bold text-white mb-1">Moonrays</h3>
+                <p className="text-xs text-noctvm-silver max-w-xs mx-auto">Earn points every night out. Redeem for exclusive perks, skip-the-line access, and more.</p>
+                <p className="text-[10px] text-noctvm-violet font-mono mt-3 uppercase tracking-widest">Coming Soon</p>
+              </div>
+            </div>
+          )}
+
+          {/* HUB TAB */}
+          {activeTab === 'hub' && (
+            <div>
+              <div className="mb-8">
+                <h2 className="font-heading text-2xl font-bold text-white mb-1">Hub</h2>
+                <p className="text-sm text-noctvm-silver">Manage your nightlife presence</p>
+              </div>
+              <div className="grid gap-3">
+                {[
+                  { label: 'Manage Account', desc: 'Edit profile, preferences, privacy' },
+                  { label: 'Add Location', desc: 'Register a new venue or event space' },
+                  { label: 'Claim Location', desc: 'Claim ownership of an existing venue' },
+                ].map(({ label, desc }) => (
+                  <div key={label} className="px-4 py-4 rounded-xl bg-noctvm-surface text-left border border-noctvm-border hover:border-noctvm-violet/30 transition-colors cursor-pointer group">
+                    <p className="text-sm font-medium text-white group-hover:text-noctvm-violet transition-colors">{label}</p>
+                    <p className="text-xs text-noctvm-silver mt-0.5">{desc}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-noctvm-silver/40 text-xs font-mono mt-8 text-center">Coming soon</p>
             </div>
           )}
         </div>
       </main>
 
-      <RightPanel />
+      <RightPanel events={SAMPLE_EVENTS} />
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
