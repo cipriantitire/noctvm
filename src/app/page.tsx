@@ -9,11 +9,14 @@ import RightPanel from '@/components/RightPanel';
 import { MoonIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 
+type TabType = 'events' | 'feed' | 'wallet' | 'profile';
+
 export default function Home() {
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('portrait');
+  const [activeTab, setActiveTab] = useState<TabType>('events');
 
   const filteredEvents = useMemo(() => {
     let events = SAMPLE_EVENTS;
@@ -134,7 +137,7 @@ export default function Home() {
       <RightPanel onVenueClick={setSelectedVenue} />
 
       {/* Mobile bottom nav */}
-      <BottomNav />
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 }
