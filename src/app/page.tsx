@@ -75,53 +75,63 @@ export default function Home() {
 
           {/* Event grid */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events found</p>
+            <p className="text-sm text-noctvm-silver">
+              <span className="text-white font-medium">{filteredEvents.length}</span> events found
+            </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('portrait')}
-                className={`px-2 py-1 rounded-lg text-xs transition-all ${
-                  viewMode === 'portrait'
-                    ? 'bg-noctvm-violet/20 text-noctvm-violet'
-                    : 'text-noctvm-silver hover:text-white'
+                className={`p-1.5 rounded-lg transition-colors ${
+                  viewMode === 'portrait' ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'text-noctvm-silver hover:text-white'
                 }`}
               >
-                Portrait
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <rect x="3" y="3" width="7" height="18" rx="1" strokeWidth="1.5" />
+                  <rect x="14" y="3" width="7" height="18" rx="1" strokeWidth="1.5" />
+                </svg>
               </button>
               <button
                 onClick={() => setViewMode('landscape')}
-                className={`px-2 py-1 rounded-lg text-xs transition-all ${
-                  viewMode === 'landscape'
-                    ? 'bg-noctvm-violet/20 text-noctvm-violet'
-                    : 'text-noctvm-silver hover:text-white'
+                className={`p-1.5 rounded-lg transition-colors ${
+                  viewMode === 'landscape' ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'text-noctvm-silver hover:text-white'
                 }`}
               >
-                Landscape
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <rect x="3" y="3" width="18" height="7" rx="1" strokeWidth="1.5" />
+                  <rect x="3" y="14" width="18" height="7" rx="1" strokeWidth="1.5" />
+                </svg>
               </button>
             </div>
           </div>
 
-          <div className={`grid gap-4 ${
-            viewMode === 'portrait'
-              ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-          }`}>
-            {filteredEvents.map((event) => (
+          <div className={
+            viewMode === 'landscape'
+              ? 'flex flex-col gap-3'
+              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4'
+          }>
+            {filteredEvents.map((event, index) => (
               <EventCard
-                key={event.id}
+                key={`${event.title}-${index}`}
                 event={event}
-                viewMode={viewMode}
-                onVenueClick={(venue) => setSelectedVenue(venue)}
+                variant={viewMode}
               />
             ))}
           </div>
+
+          {filteredEvents.length === 0 && (
+            <div className="text-center py-20">
+              <div className="w-16 h-16 rounded-full bg-noctvm-violet/10 flex items-center justify-center mx-auto mb-4">
+                <MoonIcon className="w-8 h-8 text-noctvm-violet" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">No events found</h3>
+              <p className="text-sm text-noctvm-silver">Try adjusting your filters or search query</p>
+            </div>
+          )}
         </div>
       </main>
 
       {/* Right panel (desktop only) */}
-      <RightPanel
-        selectedVenue={selectedVenue}
-        onClose={() => setSelectedVenue(null)}
-      />
+      <RightPanel onVenueClick={setSelectedVenue} />
 
       {/* Mobile bottom nav */}
       <BottomNav />
