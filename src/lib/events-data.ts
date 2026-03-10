@@ -2,6 +2,7 @@ import { NoctEvent } from "./types";
 
 export const SAMPLE_EVENTS: NoctEvent[] = [
   {
+    id: "evt-1",
     source: "zilesinopti",
     title: "corp.: Admina, Chlorys & von Bulove @ Control Club",
     venue: "Control Club",
@@ -14,6 +15,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "Free",
   },
   {
+    id: "evt-2",
     source: "iabilet",
     title: "Ladies Night x BDLP",
     venue: "OXYA Club",
@@ -26,6 +28,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: null,
   },
   {
+    id: "evt-3",
     source: "livetickets",
     title: "Vlad Flueraru - Lansare Album 'Pedralba' - 12.03",
     venue: "Control Club",
@@ -38,6 +41,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "50 - 100 RON",
   },
   {
+    id: "evt-4",
     source: "livetickets",
     title: "CARAMELO | baila reggaeton",
     venue: "Interbelic",
@@ -50,6 +54,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 0 RON",
   },
   {
+    id: "evt-5",
     source: "zilesinopti",
     title: "PW - Misbits 13 Years Anniversary - Raresh, Miss I, oddist @ Platforma Wolff",
     venue: "Platforma Wolff",
@@ -62,6 +67,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "70 - 90 RON",
   },
   {
+    id: "evt-6",
     source: "livetickets",
     title: "BLOOM - Maison64 Only300",
     venue: "Maison 64",
@@ -74,6 +80,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 80 RON",
   },
   {
+    id: "evt-7",
     source: "livetickets",
     title: "CAROUSEL PARTY / 13 Martie @ NOAR HALL, Bucuresti",
     venue: "Noar Hall",
@@ -86,6 +93,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "30 - 100 RON",
   },
   {
+    id: "evt-8",
     source: "zilesinopti",
     title: "Hector Oaks [ES] @ Control Club",
     venue: "Control Club",
@@ -98,6 +106,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "40 - 50 RON",
   },
   {
+    id: "evt-9",
     source: "livetickets",
     title: "NOOKin w/ Traumer, Maher Daniel, Sepp & Nu Zau, ASHPOT",
     venue: "Nook Club",
@@ -110,6 +119,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 50 RON",
   },
   {
+    id: "evt-10",
     source: "livetickets",
     title: "GRAYZONE x VIPER",
     venue: "Club Guesthouse",
@@ -122,6 +132,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "35 - 45 RON",
   },
   {
+    id: "evt-11",
     source: "iabilet",
     title: "Musiclover Party #1 @ Concert Gheboasa",
     venue: "KAYO Club",
@@ -134,6 +145,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 71 RON",
   },
   {
+    id: "evt-12",
     source: "zilesinopti",
     title: "Black Rhino Residency #25: Iration Steppas @ Control Club",
     venue: "Control Club",
@@ -146,6 +158,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: null,
   },
   {
+    id: "evt-13",
     source: "livetickets",
     title: "PW x Refuge Worldwide 5 Years - bblove, Chlorys, No Plastic, Obelix at Platforma Wolff",
     venue: "Platforma Wolff",
@@ -158,6 +171,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 30 RON",
   },
   {
+    id: "evt-14",
     source: "livetickets",
     title: "Amani: TULUM x Housetopia",
     venue: "Club Mono",
@@ -170,6 +184,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "35 - 40 RON",
   },
   {
+    id: "evt-15",
     source: "livetickets",
     title: "BUCHAREST V.I.P | GRAND OPENING",
     venue: "Princess Club",
@@ -182,6 +197,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "60 - 80 RON",
   },
   {
+    id: "evt-16",
     source: "zilesinopti",
     title: "Cap, Christian AB & Francesco del Garda @ Club Guesthouse",
     venue: "Club Guesthouse",
@@ -194,6 +210,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "55 - 70 RON",
   },
   {
+    id: "evt-17",
     source: "livetickets",
     title: "Girls Wanna Have Fun - Story The Club",
     venue: "FOMO Club",
@@ -206,6 +223,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "20 - 50 RON",
   },
   {
+    id: "evt-18",
     source: "livetickets",
     title: "EMPYREAN EP 3",
     venue: "Oclu Pub",
@@ -218,6 +236,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "70 - 110 RON",
   },
   {
+    id: "evt-19",
     source: "livetickets",
     title: "Amnesia pres. Pyramid Ibiza World Tour: BUCHAREST 20.03.2026",
     venue: "Museum of Immersive New Art (MINA)",
@@ -230,6 +249,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "90 - 300 RON",
   },
   {
+    id: "evt-20",
     source: "livetickets",
     title: "Wolf City Bucharest",
     venue: "Forge Bucharest",
@@ -242,6 +262,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "50 - 195 RON",
   },
   {
+    id: "evt-21",
     source: "livetickets",
     title: "PW x Flipside - Vass, Lowkodi, Twodoor at Platforma Wolff",
     venue: "Platforma Wolff",
@@ -254,6 +275,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 40 RON",
   },
   {
+    id: "evt-22",
     source: "livetickets",
     title: "Adrian Norocel - Bucuresti Centrul Vechi - Story The Club",
     venue: "FOMO Club",
@@ -266,6 +288,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 50 RON",
   },
   {
+    id: "evt-23",
     source: "livetickets",
     title: "Bailando - SIN PIJAMA",
     venue: "Princess Club",
@@ -278,6 +301,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "40 - 70 RON",
   },
   {
+    id: "evt-24",
     source: "iabilet",
     title: "Musiclover Party #2 @ Concert SHIFT",
     venue: "KAYO Club",
@@ -290,6 +314,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 71 RON",
   },
   {
+    id: "evt-25",
     source: "livetickets",
     title: "PW - Dragos Ilici (all night long) at Platforma Wolff",
     venue: "Platforma Wolff",
@@ -302,6 +327,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 40 RON",
   },
   {
+    id: "evt-26",
     source: "livetickets",
     title: "Alex Botea x 21 Martie x Princess Club Bucuresti",
     venue: "Princess Club",
@@ -314,6 +340,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "60 - 70 RON",
   },
   {
+    id: "evt-27",
     source: "iabilet",
     title: "ARCANDO @ Noisebreak 360",
     venue: "Noar Hall - Sala Palatului",
@@ -326,6 +353,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 95 RON",
   },
   {
+    id: "evt-28",
     source: "livetickets",
     title: "Sqweez! invites Gegen",
     venue: "Forge Bucharest",
@@ -338,6 +366,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "50 - 210 RON",
   },
   {
+    id: "evt-29",
     source: "livetickets",
     title: "GH 21.03 | LIMOUSINE DREAM w. Gene on Earth, Gojnea76, Jorg Kunning live, Shanti Celeste",
     venue: "Club Guesthouse",
@@ -350,6 +379,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 60 RON",
   },
   {
+    id: "evt-30",
     source: "iabilet",
     title: "Athletes vs Cheerleaders x Rava & Petre Stefan",
     venue: "OXYA Club",
@@ -362,6 +392,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 138 RON",
   },
   {
+    id: "evt-31",
     source: "iabilet",
     title: "Concert PARAZITII la Quantic",
     venue: "Quantic",
@@ -374,6 +405,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 162 RON",
   },
   {
+    id: "evt-32",
     source: "iabilet",
     title: "Bitza - PERSONALE - Avanpremiera Album",
     venue: "Expirat Halele Carol",
@@ -386,6 +418,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 70 RON",
   },
   {
+    id: "evt-33",
     source: "iabilet",
     title: "B:pressure pres. Dillinja",
     venue: "Expirat Halele Carol",
@@ -398,6 +431,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 60 RON",
   },
   {
+    id: "evt-34",
     source: "livetickets",
     title: "GH 27.03 | Bagabont pres Bocaseca: un party 100% HIP HOP",
     venue: "Club Guesthouse",
@@ -410,6 +444,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 60 RON",
   },
   {
+    id: "evt-35",
     source: "livetickets",
     title: "PW - DMC b2b Morgan Boyle, Koler, Mianda at Platforma Wolff",
     venue: "Platforma Wolff",
@@ -422,6 +457,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 40 RON",
   },
   {
+    id: "evt-36",
     source: "livetickets",
     title: "MIDNIGHTS presents FAUL & WAD // Fratelli Studio1 // 27.03",
     venue: "Fratelli Studios",
@@ -434,6 +470,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "30 - 300 RON",
   },
   {
+    id: "evt-37",
     source: "livetickets",
     title: "ANI DE LICEU - Le Dome Bucuresti",
     venue: "Le Dome",
@@ -446,6 +483,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 60 RON",
   },
   {
+    id: "evt-38",
     source: "iabilet",
     title: "ODPL: 1 Tera de Instrumentale",
     venue: "NJoy Club & Garden",
@@ -458,6 +496,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 42 RON",
   },
   {
+    id: "evt-39",
     source: "livetickets",
     title: "PW x DeDans - Gernot (Modeselektor, Moderat), Cosmin TRG at Platforma Wolff",
     venue: "Platforma Wolff",
@@ -470,6 +509,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 50 RON",
   },
   {
+    id: "evt-40",
     source: "livetickets",
     title: "Bairam in Bucuresti by Wayback",
     venue: "Noar Hall",
@@ -482,6 +522,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "30 - 100 RON",
   },
   {
+    id: "evt-41",
     source: "livetickets",
     title: "GH 28.03 | Clovis, Suciu",
     venue: "Club Guesthouse",
@@ -494,6 +535,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 40 RON",
   },
   {
+    id: "evt-42",
     source: "iabilet",
     title: "BBB 2026 - Rick Ross",
     venue: "Laminor Arena",
@@ -506,6 +548,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 179 RON",
   },
   {
+    id: "evt-43",
     source: "iabilet",
     title: "DELTA HEAVY @ NOISEBREAK: CHAPTER XVI",
     venue: "Quantic",
@@ -518,6 +561,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 85 RON",
   },
   {
+    id: "evt-44",
     source: "livetickets",
     title: "LATINO GANG | Bad Bunny Party - La CASITA | BUCHAREST",
     venue: "Noar Hall",
@@ -530,6 +574,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "40 - 70 RON",
   },
   {
+    id: "evt-45",
     source: "livetickets",
     title: "GH 04.04 | GiGi FM, Rhadoo, oddist",
     venue: "Club Guesthouse",
@@ -542,6 +587,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 55 RON",
   },
   {
+    id: "evt-46",
     source: "iabilet",
     title: "Escape Party - Hyperjump",
     venue: "Club Mono",
@@ -554,6 +600,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 64 RON",
   },
   {
+    id: "evt-47",
     source: "iabilet",
     title: "Underground for the Masses III",
     venue: "Quantic",
@@ -566,6 +613,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 650 RON",
   },
   {
+    id: "evt-48",
     source: "livetickets",
     title: "DELIRIC x SILENT STRIKE x HIP HOP TAKEOVERS | BUCURESTI | Noul Normal: Turneu National 2026",
     venue: "Halo Events Center",
@@ -578,6 +626,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 139 RON",
   },
   {
+    id: "evt-49",
     source: "livetickets",
     title: "THE AWAKENING.",
     venue: "Noar Hall",
@@ -590,6 +639,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "80 - 250 RON",
   },
   {
+    id: "evt-50",
     source: "livetickets",
     title: "BLACK COFFEE X GAIA",
     venue: "TBA - BUCHAREST",
@@ -602,6 +652,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "250 - 900 RON",
   },
   {
+    id: "evt-51",
     source: "livetickets",
     title: "TRICKY Live @ Club Guesthouse, Bucuresti",
     venue: "Club Guesthouse",
@@ -614,6 +665,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 148 RON",
   },
   {
+    id: "evt-52",
     source: "livetickets",
     title: "NOSTALGIA 2026",
     venue: "Federatia Romana de Tir Sportiv",
@@ -626,6 +678,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: "de la 269 RON",
   },
   {
+    id: "evt-53",
     source: "iabilet",
     title: "Kapital Festival",
     venue: "Arena Nationala",
@@ -638,6 +691,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     price: null,
   },
   {
+    id: "evt-54",
     source: "livetickets",
     title: "Black Rhino Radio presents: Autechre",
     venue: "Club Guesthouse",
