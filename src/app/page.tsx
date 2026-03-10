@@ -84,12 +84,7 @@ export default function Home() {
   );
 
   // Profile menu items
-  const profileMenuItems = [
-    { label: 'Manage Account', desc: 'Edit profile, privacy settings', key: 'manage-account' as ProfileSubPage, icon: <UserIcon className="w-5 h-5" /> },
-    { label: 'Add Location', desc: 'Add a venue or event space', key: 'add-location' as ProfileSubPage, icon: addLocationIcon },
-    { label: 'Claim Location', desc: 'Claim ownership of a venue', key: 'claim-location' as ProfileSubPage, icon: claimLocationIcon },
-    { label: 'Settings', desc: 'App preferences and notifications', key: 'settings' as ProfileSubPage, icon: settingsIcon },
-  ];
+  const profileMenuItems = [{ label: 'Manage Account', desc: 'Edit profile, privacy settings', key: 'manage-account' as ProfileSubPage, icon: <UserIcon className="w-5 h-5" /> }, { label: 'Add Location', desc: 'Add a venue or event space', key: 'add-location' as ProfileSubPage, icon: addLocationIcon }, { label: 'Claim Location', desc: 'Claim ownership of a venue', key: 'claim-location' as ProfileSubPage, icon: claimLocationIcon }, { label: 'Settings', desc: 'App preferences and notifications', key: 'settings' as ProfileSubPage, icon: settingsIcon }];
 
   // Profile sub-page content
   const profileSubContent = profileSubPage ? {
