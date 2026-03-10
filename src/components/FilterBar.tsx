@@ -1,20 +1,29 @@
 'use client';
 
-import { useState } from 'react';
 import { SearchIcon } from './icons';
 
 const GENRE_FILTERS = ['All', 'Techno', 'House', 'Hip-Hop', 'Manele', 'Live', 'Party', 'DnB', 'Reggaeton'];
 
 interface FilterBarProps {
   activeGenres: string[];
-  onFilterChange: (genres: string[]) => void;
-  onSearchChange?: (query: string) => void;
+  onGenreChange: (genres: string[]) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  viewMode: 'portrait' | 'landscape';
+  onViewModeChange: (mode: 'portrait' | 'landscape') => void;
 }
 
-export default function FilterBar({ activeGenres, onFilterChange, onSearchChange }: FilterBarProps) {
+export default function FilterBar({
+  activeGenres,
+  onGenreChange,
+  searchQuery,
+  onSearchChange,
+  viewMode,
+  onViewModeChange,
+}: FilterBarProps) {
   const handleGenreClick = (genre: string) => {
     if (genre === 'All') {
-      onFilterChange(['All']);
+      onGenreChange(['All']);
       return;
     }
     let next = activeGenres.filter(g => g !== 'All');
@@ -24,22 +33,63 @@ export default function FilterBar({ activeGenres, onFilterChange, onSearchChange
       next = [...next, genre];
     }
     if (next.length === 0) next = ['All'];
-    onFilterChange(next);
+    onGenreChange(next);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-          <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
+    <div className="space-y-3 mb-4">
+      {/* Search + view toggle row */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search events, venues..."
+            value={searchQuery}
+            className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
         </div>
-        <input
-          type="text"
-          placeholder="Search events, venues..."
-          className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
-          onChange={(e) => onSearchChange?.(e.target.value)}
-        />
+
+        {/* View mode toggle */}
+        <div className="flex items-center bg-noctvm-surface border border-noctvm-border rounded-xl overflow-hidden flex-shrink-0">
+          <button
+            onClick={() => onViewModeChange('portrait')}
+            className={`p-2.5 transition-all duration-200 ${
+              viewMode === 'portrait'
+                ? 'bg-noctvm-violet/20 text-noctvm-violet'
+                : 'text-noctvm-silver/50 hover:text-noctvm-silver'
+            }`}
+            title="Grid view"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          </button>
+          <button
+            onClick={() => onViewModeChange('landscape')}
+            className={`p-2.5 transition-all duration-200 ${
+              viewMode === 'landscape'
+                ? 'bg-noctvm-violet/20 text-noctvm-violet'
+                : 'text-noctvm-silver/50 hover:text-noctvm-silver'
+            }`}
+            title="List view"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="4" rx="1" />
+              <rect x="3" y="10" width="18" height="4" rx="1" />
+              <rect x="3" y="16" width="18" height="4" rx="1" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* Genre pills */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {GENRE_FILTERS.map((genre) => {
           const isActive = activeGenres.includes(genre);
