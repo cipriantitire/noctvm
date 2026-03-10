@@ -97,7 +97,6 @@ export default function Home() {
       )}
 
       {/* ===== MAIN LAYOUT ===== */}
-      {/* h-screen + overflow-hidden on outer = body never scrolls, only main scrolls */}
       <div className="flex h-screen bg-noctvm-black overflow-hidden">
         <Sidebar activeTab={activeTab} onTabChange={(t) => { setActiveTab(t); setProfileSubPage(null); }} />
 
@@ -131,34 +130,19 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Filters */}
-                <div className="mb-6">
-                  <FilterBar
-                    activeGenres={activeGenres}
-                    onFilterChange={setActiveGenres}
-                    onSearchChange={setSearchQuery}
-                  />
-                </div>
+                {/* Filters + Search + View Toggle */}
+                <FilterBar
+                  activeGenres={activeGenres}
+                  onGenreChange={setActiveGenres}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                />
 
-                {/* View mode toggle */}
+                {/* Event count */}
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</span>
-                  <div className="flex items-center gap-1 bg-noctvm-surface border border-noctvm-border rounded-lg p-0.5">
-                    <button
-                      onClick={() => setViewMode('portrait')}
-                      className={`p-1.5 rounded-md transition-colors ${viewMode === 'portrait' ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
-                      title="Grid view"
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                    </button>
-                    <button
-                      onClick={() => setViewMode('landscape')}
-                      className={`p-1.5 rounded-md transition-colors ${viewMode === 'landscape' ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
-                      title="List view"
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>
-                    </button>
-                  </div>
                 </div>
 
                 <div
