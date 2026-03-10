@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
-import { VENUE_LOGOS } from '@/lib/venue-logos';
+import { getVenueLogo } from '@/lib/venue-logos';
 
 const VENUE_COLORS: Record<string, string> = {
   'Control Club': 'from-red-500 to-orange-500',
@@ -67,37 +67,29 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
       {tonightEvents.length > 0 && (
         <div className="p-3 rounded-xl liquid-glass-subtle border-noctvm-violet/20 animate-fade-in-up stagger-2">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-noctvm-violet animate-pulse" />
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-noctvm-silver">Live Tonight</h2>
-            <span className="ml-auto bg-noctvm-violet/10 text-noctvm-violet text-[10px] font-medium px-1.5 py-0.5 rounded-full">
-              {tonightEvents.length} event{tonightEvents.length !== 1 ? 's' : ''}
-            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-noctvm-violet animate-pulse-slow" />
+            <span className="text-[11px] font-semibold text-noctvm-violet uppercase tracking-wider">Live Tonight</span>
+            <span className="text-[10px] text-noctvm-silver/50 ml-auto">{tonightEvents.length} events</span>
           </div>
-
-          <div className="space-y-1.5">
-            {tonightEvents.map((event, i) => (
-              <button
-                key={i}
-                onClick={() => onVenueClick(event.venue)}
-                className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer text-left"
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+            {tonightEvents.slice(0, 4).map(event => (
+              <a
+                key={event.id}
+                href={event.event_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 w-[140px] rounded-lg overflow-hidden border border-noctvm-border hover:border-noctvm-violet/30 transition-colors"
               >
-                {VENUE_LOGOS[event.venue] ? (
-                  <img
-                    src={VENUE_LOGOS[event.venue]}
-                    alt={event.venue}
-                    className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getVenueColor(event.venue)} flex items-center justify-center flex-shrink-0`}>
-                    <span className="text-white text-[10px] font-bold">{event.venue[0]}</span>
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-white truncate">{event.title}</p>
-                  <p className="text-[10px] text-noctvm-silver truncate">{event.venue}</p>
+                <div className="aspect-[3/2] bg-noctvm-midnight relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" loading="lazy"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 </div>
-                <span className="ml-auto text-[10px] text-noctvm-silver whitespace-nowrap">{event.time}</span>
-              </button>
+                <div className="p-1.5">
+                  <p className="text-[10px] font-medium text-white line-clamp-1">{event.title}</p>
+                  <p className="text-[9px] text-noctvm-silver/60">{event.venue}</p>
+                </div>
+              </a>
             ))}
           </div>
         </div>
@@ -105,28 +97,38 @@ export default function MobileTopSection({ onVenueClick }: MobileTopSectionProps
 
       {/* TRENDING VENUES */}
       <div className="p-3 rounded-xl liquid-glass-subtle animate-fade-in-up stagger-3">
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-noctvm-silver mb-2">Trending Venues</h2>
-        <div className="grid grid-cols-4 gap-2">
-          {trendingVenues.map((venue) => (
-            <button
-              key={venue.name}
-              onClick={() => onVenueClick(venue.name)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-            >
-              {VENUE_LOGOS[venue.name] ? (
-                <img
-                  src={VENUE_LOGOS[venue.name]}
-                  alt={venue.name}
-                  className="w-10 h-10 rounded-lg object-cover"
-                />
-              ) : (
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getVenueColor(venue.name)} flex items-center justify-center`}>
-                  <span className="text-white text-xs font-bold">{venue.name[0]}</span>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[11px] font-semibold text-noctvm-silver uppercase tracking-wider">Trending Venues</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+          {trendingVenues.map(venue => {
+            const logoSrc = getVenueLogo(venue.name);
+            return (
+              <button
+                key={venue.name}
+                onClick={() => onVenueClick(venue.name)}
+                className="flex-shrink-0 flex flex-col items-center gap-1 w-[60px] group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-noctvm-border group-hover:border-noctvm-violet/50 transition-colors flex items-center justify-center bg-noctvm-midnight">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logoSrc}
+                    alt={venue.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const el = e.target as HTMLImageElement;
+                      el.style.display = 'none';
+                      el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+                    }}
+                  />
+                  <span className={`fallback text-xs font-bold bg-gradient-to-br ${getVenueColor(venue.name)} bg-clip-text text-transparent hidden`}>
+                    {venue.name.charAt(0)}
+                  </span>
                 </div>
-              )}
-              <span className="text-[10px] text-noctvm-silver text-center leading-tight truncate w-full">{venue.name}</span>
-            </button>
-          ))}
+                <span className="text-[9px] text-noctvm-silver/70 text-center line-clamp-1 w-full">{venue.name}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
