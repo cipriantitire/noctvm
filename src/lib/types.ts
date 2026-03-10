@@ -1,5 +1,6 @@
 export interface NoctEvent {
-  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere';
+  id: string;
+  source: 'fever' | 'ra' | 'zilesinoopti' | 'livetickets' | 'iabilet' | 'beethere';
   title: string;
   venue: string;
   date: string;
