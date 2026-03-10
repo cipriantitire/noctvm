@@ -10,15 +10,19 @@ import { MoonIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 
 export default function Home() {
-  const [activeGenre, setActiveGenre] = useState('All');
+  const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('portrait');
 
   const filteredEvents = useMemo(() => {
     let events = SAMPLE_EVENTS;
-    if (activeGenre !== 'All') {
-      events = events.filter(e => e.genres.some(g => g.toLowerCase().includes(activeGenre.toLowerCase())));
+    if (!activeGenres.includes('All')) {
+      events = events.filter(e =>
+        e.genres.some(g =>
+          activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase()))
+        )
+      );
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -29,7 +33,7 @@ export default function Home() {
       );
     }
     return events;
-  }, [activeGenre, searchQuery]);
+  }, [activeGenres, searchQuery]);
 
   return (
     <div className="flex min-h-screen bg-noctvm-black">
@@ -63,55 +67,61 @@ export default function Home() {
           {/* Filters */}
           <div className="mb-6">
             <FilterBar
-              onFilterChange={setActiveGenre}
+              activeGenres={activeGenres}
+              onFilterChange={setActiveGenres}
               onSearchChange={setSearchQuery}
             />
           </div>
 
           {/* Event grid */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</p>
-            <div className="flex items-center gap-1 bg-noctvm-surface border border-noctvm-border rounded-lg p-0.5">
+            <p className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events found</p>
+            <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('portrait')}
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'portrait' ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
-                title="Grid view"
+                className={`px-2 py-1 rounded-lg text-xs transition-all ${
+                  viewMode === 'portrait'
+                    ? 'bg-noctvm-violet/20 text-noctvm-violet'
+                    : 'text-noctvm-silver hover:text-white'
+                }`}
               >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+                Portrait
               </button>
               <button
                 onClick={() => setViewMode('landscape')}
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'landscape' ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
-                title="List view"
+                className={`px-2 py-1 rounded-lg text-xs transition-all ${
+                  viewMode === 'landscape'
+                    ? 'bg-noctvm-violet/20 text-noctvm-violet'
+                    : 'text-noctvm-silver hover:text-white'
+                }`}
               >
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="14" height="6" rx="1"/><rect x="1" y="9" width="14" height="6" rx="1"/></svg>
+                Landscape
               </button>
             </div>
           </div>
-          <div className={viewMode === 'portrait'
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-            : "grid grid-cols-1 lg:grid-cols-2 gap-4"
-          }>
-            {filteredEvents.map((event, index) => (
-              <EventCard key={`${event.source}-${index}`} event={event} variant={viewMode} />
+
+          <div className={`grid gap-4 ${
+            viewMode === 'portrait'
+              ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+          }`}>
+            {filteredEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                viewMode={viewMode}
+                onVenueClick={(venue) => setSelectedVenue(venue)}
+              />
             ))}
           </div>
-
-          {/* Empty state */}
-          {filteredEvents.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-full bg-noctvm-midnight flex items-center justify-center mx-auto mb-4">
-                <MoonIcon className="w-8 h-8 text-noctvm-violet/50" />
-              </div>
-              <p className="text-noctvm-silver font-heading">No events found</p>
-              <p className="text-noctvm-silver/50 text-sm mt-1">Try a different filter or search</p>
-            </div>
-          )}
         </div>
       </main>
 
-      {/* Desktop right panel */}
-      <RightPanel />
+      {/* Right panel (desktop only) */}
+      <RightPanel
+        selectedVenue={selectedVenue}
+        onClose={() => setSelectedVenue(null)}
+      />
 
       {/* Mobile bottom nav */}
       <BottomNav />
