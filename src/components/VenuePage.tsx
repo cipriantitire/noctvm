@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo } from '@/lib/venue-logos';
@@ -46,6 +46,15 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
   const pastEvents = venueEvents.filter(e => e.date < today);
 
   const logoSrc = getVenueLogo(venueName);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0">
@@ -53,8 +62,8 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
       <div className="h-6" /> {/* Spacer instead of header */}
 
       {/* Venue Identity */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0">
+      <div className="flex items-start gap-4 mb-8">
+        <div className="w-20 h-20 lg:w-28 lg:h-28 rounded-3xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={logoSrc}
@@ -66,52 +75,72 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
               el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
             }}
           />
-          <span className="fallback hidden text-2xl font-bold text-noctvm-violet">{venueName.charAt(0)}</span>
+          <span className="fallback hidden text-3xl font-bold text-noctvm-violet">{venueName.charAt(0)}</span>
         </div>
-        <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-white">{venueName}</h1>
-          <p className="text-noctvm-silver/70 text-sm">{info.address}</p>
-          <div className="flex flex-wrap gap-1.5 mt-2">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl lg:text-4xl font-bold text-white leading-tight">{venueName}</h1>
+          <p className="text-noctvm-silver font-medium text-xs lg:text-sm mt-0.5">{info.address}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
             {info.genres.map(g => (
-              <span key={g} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
+              <span key={g} className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
                 {g}
               </span>
             ))}
           </div>
+          <p className="text-noctvm-silver/90 text-sm lg:text-base leading-relaxed max-w-3xl line-clamp-3">{info.description}</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="text-center p-3 rounded-xl liquid-glass-subtle">
-          <p className="text-lg font-bold text-white">{venueEvents.length}</p>
-          <p className="text-[10px] text-noctvm-silver/60">Events</p>
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
+          <p className="text-xl font-bold text-white">{venueEvents.length}</p>
+          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest">Events</p>
         </div>
-        <div className="text-center p-3 rounded-xl liquid-glass-subtle">
-          <p className="text-lg font-bold text-white">{info.capacity}</p>
-          <p className="text-[10px] text-noctvm-silver/60">Capacity</p>
+        <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
+          <p className="text-xl font-bold text-white">{info.capacity}</p>
+          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest">Capacity</p>
         </div>
-        <div className="text-center p-3 rounded-xl liquid-glass-subtle">
-          <p className="text-lg font-bold text-noctvm-gold">4.5</p>
-          <p className="text-[10px] text-noctvm-silver/60">Rating</p>
+        <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
+          <p className="text-xl font-bold text-noctvm-gold font-mono">4.5</p>
+          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest">Rating</p>
         </div>
       </div>
 
-      {/* About */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-white mb-2">About</h3>
-        <p className="text-noctvm-silver/80 text-sm leading-relaxed">{info.description}</p>
-      </div>
+      <div className="h-4" /> {/* Spacer */}
 
       {/* Gallery */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-white mb-3">Gallery</h3>
-        <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide -mx-2 px-2">
+      <div className="mb-10 relative group/gallery">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => scroll('left')}
+              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all shadow-lg backdrop-blur-sm"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button 
+              onClick={() => scroll('right')}
+              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all shadow-lg backdrop-blur-sm"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+          </div>
+        </div>
+        
+        <div 
+          ref={scrollRef}
+          className="flex gap-5 overflow-x-auto pb-6 scrollbar-hide -mx-2 px-2 snap-x snap-mandatory"
+        >
           {GALLERY_THEMES.map((theme) => (
-            <div key={theme.label} className={`flex-shrink-0 w-[500px] sm:w-[700px] aspect-[21/10] rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer shadow-2xl`}>
-              <div className="text-center group-hover:transform group-hover:scale-110 transition-transform">
-                <span className="text-6xl font-bold text-white/10 group-hover:text-white/20 transition-colors uppercase tracking-tighter">{theme.icon}</span>
-                <p className="text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-4 ml-[0.3em]">{theme.label}</p>
+            <div key={theme.label} className="snap-start flex-shrink-0 w-full sm:w-[48%] lg:w-[23.5%]">
+              <div className={`aspect-video rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xl relative overflow-hidden`}>
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="text-center group-hover:transform group-hover:scale-110 transition-transform relative z-10">
+                  <span className="text-5xl font-bold text-white/10 group-hover:text-white/30 transition-colors uppercase tracking-tighter">{theme.icon}</span>
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-3">{theme.label}</p>
+                </div>
               </div>
             </div>
           ))}
@@ -120,12 +149,12 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
 
       {/* Live Now */}
       {liveEvents.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-2 h-2 rounded-full bg-noctvm-emerald animate-pulse-slow" />
-            <h3 className="text-sm font-semibold text-noctvm-emerald">Live Now</h3>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-2.5 h-2.5 rounded-full bg-noctvm-emerald animate-pulse-slow shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            <h3 className="text-sm font-bold text-noctvm-emerald uppercase tracking-widest">Live Now</h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {liveEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" />)}
           </div>
         </div>
@@ -133,25 +162,25 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
 
       {/* Upcoming */}
       {upcomingEvents.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white">Upcoming Events</h3>
-            <div className="flex p-0.5 rounded-lg bg-noctvm-surface border border-noctvm-border">
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-bold text-white uppercase tracking-widest">Upcoming Events</h3>
+            <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
               <button
                 onClick={() => setViewMode('portrait')}
-                className={`p-1.5 rounded-md transition-all ${viewMode === 'portrait' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'portrait' ? 'bg-noctvm-violet text-white shadow-xl scale-110' : 'text-noctvm-silver hover:text-white'}`}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
               </button>
               <button
                 onClick={() => setViewMode('landscape')}
-                className={`p-1.5 rounded-md transition-all ${viewMode === 'landscape' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'landscape' ? 'bg-noctvm-violet text-white shadow-xl scale-110' : 'text-noctvm-silver hover:text-white'}`}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
               </button>
             </div>
           </div>
-          <div className={`${viewMode === 'portrait' ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 gap-4" : "space-y-3"}`}>
+          <div className={`${viewMode === 'portrait' ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 gap-5" : "space-y-4"}`}>
             {upcomingEvents.map(event => <EventCard key={event.id} event={event} variant={viewMode} />)}
           </div>
         </div>
@@ -159,9 +188,9 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
 
       {/* Past */}
       {pastEvents.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-noctvm-silver/60 mb-3">Past Events</h3>
-          <div className="space-y-3 opacity-60">
+        <div className="pb-10">
+          <h3 className="text-xs font-bold text-noctvm-silver/40 mb-4 uppercase tracking-[0.2em]">Past Events</h3>
+          <div className="space-y-4 opacity-50 grayscale hover:grayscale-0 transition-all">
             {pastEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" />)}
           </div>
         </div>
