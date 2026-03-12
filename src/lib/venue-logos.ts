@@ -76,8 +76,8 @@ export function getVenueLogo(venueName: string): string {
     if (lower.includes(key) || key.includes(lower)) return url;
   }
 
-  // 3. Fallback -- generate an SVG with the first 2 characters
-  const fallbackLabel = venueName.slice(0, 2).toUpperCase();
+  // 3. Fallback -- generate an SVG with the first character
+  const fallbackLabel = venueName.slice(0, 1).toUpperCase();
   return makeSvgLogo(fallbackLabel);
 }
 
