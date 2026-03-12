@@ -47,7 +47,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
   const logoSrc = getVenueLogo(venueName);
 
   return (
-    <div className="p-4 lg:p-6">
+    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <button onClick={onBack} className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors cursor-pointer">

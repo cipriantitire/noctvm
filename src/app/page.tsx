@@ -20,7 +20,7 @@ type TabType = 'events' | 'feed' | 'wallet' | 'profile';
 type ProfileSubPage = null | 'manage-account' | 'add-location' | 'claim-location' | 'settings';
 
 export default function Home() {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
@@ -328,6 +328,13 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
+
+                  <button
+                    onClick={() => signOut()}
+                    className="w-full mt-6 py-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors text-red-400 text-sm font-medium animate-fade-in-up stagger-4"
+                  >
+                    Log Out
+                  </button>
                 </div>
               ) : (
                 <div className="max-w-md mx-auto text-center py-16 tab-content animate-fade-in">
