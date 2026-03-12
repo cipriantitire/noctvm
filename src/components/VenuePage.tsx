@@ -106,12 +106,12 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
       {/* Gallery */}
       <div className="mb-6">
         <h3 className="text-sm font-semibold text-white mb-3">Gallery</h3>
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
+        <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide -mx-2 px-2">
           {GALLERY_THEMES.map((theme) => (
-            <div key={theme.label} className={`flex-shrink-0 w-48 aspect-[16/10] rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-colors`}>
-              <div className="text-center">
-                <span className="text-3xl font-bold text-white/20 group-hover:text-white/40 transition-colors">{theme.icon}</span>
-                <p className="text-[10px] text-white/30 mt-1">{theme.label}</p>
+            <div key={theme.label} className={`flex-shrink-0 w-80 sm:w-96 aspect-[21/9] rounded-2xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xl`}>
+              <div className="text-center group-hover:transform group-hover:scale-110 transition-transform">
+                <span className="text-4xl font-bold text-white/20 group-hover:text-white/40 transition-colors">{theme.icon}</span>
+                <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest mt-2">{theme.label}</p>
               </div>
             </div>
           ))}
@@ -151,7 +151,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
               </button>
             </div>
           </div>
-          <div className={`${viewMode === 'portrait' ? "grid grid-cols-2 gap-3" : "space-y-3"}`}>
+          <div className={`${viewMode === 'portrait' ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-3"}`}>
             {upcomingEvents.map(event => <EventCard key={event.id} event={event} variant={viewMode} />)}
           </div>
         </div>

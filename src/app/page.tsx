@@ -38,7 +38,8 @@ export default function Home() {
   }, []);
 
   const filteredEvents = useMemo(() => {
-    let events = SAMPLE_EVENTS;
+    const today = new Date().toISOString().split('T')[0];
+    let events = SAMPLE_EVENTS.filter(e => e.date >= today);
     if (!activeGenres.includes('All')) {
       events = events.filter(e =>
         e.genres.some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
