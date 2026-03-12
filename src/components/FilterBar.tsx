@@ -54,36 +54,35 @@ export default function FilterBar({
         </div>
 
         {/* View mode toggle */}
-        <div className="flex items-center bg-noctvm-surface border border-noctvm-border rounded-xl overflow-hidden flex-shrink-0">
+        <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px]">
           <button
             onClick={() => onViewModeChange('portrait')}
-            className={`p-2.5 transition-all duration-200 ${
+            className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
               viewMode === 'portrait'
-                ? 'bg-noctvm-violet/20 text-noctvm-violet'
-                : 'text-noctvm-silver/50 hover:text-noctvm-silver'
+                ? 'bg-noctvm-violet text-white shadow-lg scale-105'
+                : 'text-noctvm-silver hover:text-white'
             }`}
             title="Grid view"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
             </svg>
           </button>
+          <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
           <button
             onClick={() => onViewModeChange('landscape')}
-            className={`p-2.5 transition-all duration-200 ${
+            className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
               viewMode === 'landscape'
-                ? 'bg-noctvm-violet/20 text-noctvm-violet'
-                : 'text-noctvm-silver/50 hover:text-noctvm-silver'
+                ? 'bg-noctvm-violet text-white shadow-lg scale-105'
+                : 'text-noctvm-silver hover:text-white'
             }`}
             title="List view"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="4" rx="1" />
-              <rect x="3" y="10" width="18" height="4" rx="1" />
-              <rect x="3" y="16" width="18" height="4" rx="1" />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
         </div>
