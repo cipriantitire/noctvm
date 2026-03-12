@@ -18,39 +18,14 @@ const LOCAL_LOGOS: Record<string, string> = {
 };
 
 // -- SVG data URI fallbacks for venues without local logos --
-function makeSvgLogo(label: string): string {
-  // Split long names into two lines if needed
-  const maxLineLen = 14;
-  let line1 = label;
-  let line2 = '';
+function makeSvgLogo(name: string): string {
+  const initial = name.charAt(0).toUpperCase();
+  const fontSize = 80;
 
-  if (label.length > maxLineLen) {
-    const words = label.split(' ');
-    line1 = '';
-    line2 = '';
-    let onLine1 = true;
-    for (const word of words) {
-      if (onLine1 && (line1 + ' ' + word).trim().length <= maxLineLen) {
-        line1 = (line1 + ' ' + word).trim();
-      } else {
-        onLine1 = false;
-        line2 = (line2 + ' ' + word).trim();
-      }
-    }
-  }
-
-  const fontSize = label.length > 12 ? 18 : label.length > 8 ? 20 : 24;
-
-  const svg = line2
-    ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">`
-      + `<rect width="200" height="200" rx="16" fill="#1a1a2e"/>`
-      + `<text x="100" y="92" text-anchor="middle" fill="#a78bfa" font-family="system-ui,sans-serif" font-weight="700" font-size="${fontSize}">${line1}</text>`
-      + `<text x="100" y="${92 + fontSize + 4}" text-anchor="middle" fill="#a78bfa" font-family="system-ui,sans-serif" font-weight="700" font-size="${fontSize}">${line2}</text>`
-      + `</svg>`
-    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">`
-      + `<rect width="200" height="200" rx="16" fill="#1a1a2e"/>`
-      + `<text x="100" y="108" text-anchor="middle" fill="#a78bfa" font-family="system-ui,sans-serif" font-weight="700" font-size="${fontSize}">${line1}</text>`
-      + `</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <rect width="200" height="200" rx="40" fill="#1a1a2e"/>
+    <text x="100" y="130" text-anchor="middle" fill="#a78bfa" font-family="system-ui,sans-serif" font-weight="800" font-size="${fontSize}">${initial}</text>
+  </svg>`;
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

@@ -116,15 +116,15 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
         <p className="text-noctvm-silver/80 text-sm leading-relaxed">{info.description}</p>
       </div>
 
-      {/* Gallery Placeholder */}
+      {/* Gallery */}
       <div className="mb-6">
         <h3 className="text-sm font-semibold text-white mb-3">Gallery</h3>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
           {GALLERY_THEMES.map((theme) => (
-            <div key={theme.label} className={`aspect-square rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5`}>
+            <div key={theme.label} className={`flex-shrink-0 w-32 aspect-[4/5] rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-colors`}>
               <div className="text-center">
-                <span className="text-lg font-bold text-white/30">{theme.icon}</span>
-                <p className="text-[8px] text-white/30 mt-0.5">{theme.label}</p>
+                <span className="text-3xl font-bold text-white/20 group-hover:text-white/40 transition-colors">{theme.icon}</span>
+                <p className="text-[10px] text-white/30 mt-1">{theme.label}</p>
               </div>
             </div>
           ))}
