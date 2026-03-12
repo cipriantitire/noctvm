@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 
 interface RightPanelProps {
