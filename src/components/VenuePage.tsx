@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo } from '@/lib/venue-logos';
@@ -36,6 +36,7 @@ const GALLERY_THEMES = [
 ];
 
 export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps) {
+  const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const info = getVenueInfo(venueName);
   const venueEvents = useMemo(() => SAMPLE_EVENTS.filter(e => e.venue === venueName), [venueName]);
 
@@ -49,21 +50,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
   return (
     <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors cursor-pointer">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-          <span className="text-sm">Back</span>
-        </button>
-        {onClose && (
-          <button onClick={onClose} className="text-noctvm-silver hover:text-white transition-colors cursor-pointer">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
+      <div className="h-6" /> {/* Spacer instead of header */}
 
       {/* Venue Identity */}
       <div className="flex items-center gap-4 mb-6">
@@ -121,7 +108,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
         <h3 className="text-sm font-semibold text-white mb-3">Gallery</h3>
         <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-1 px-1">
           {GALLERY_THEMES.map((theme) => (
-            <div key={theme.label} className={`flex-shrink-0 w-32 aspect-[4/5] rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-colors`}>
+            <div key={theme.label} className={`flex-shrink-0 w-48 aspect-[16/10] rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-colors`}>
               <div className="text-center">
                 <span className="text-3xl font-bold text-white/20 group-hover:text-white/40 transition-colors">{theme.icon}</span>
                 <p className="text-[10px] text-white/30 mt-1">{theme.label}</p>
@@ -147,9 +134,25 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
       {/* Upcoming */}
       {upcomingEvents.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm font-semibold text-white mb-3">Upcoming Events</h3>
-          <div className="space-y-3">
-            {upcomingEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" />)}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white">Upcoming Events</h3>
+            <div className="flex p-0.5 rounded-lg bg-noctvm-surface border border-noctvm-border">
+              <button
+                onClick={() => setViewMode('portrait')}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'portrait' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </button>
+              <button
+                onClick={() => setViewMode('landscape')}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'landscape' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+              </button>
+            </div>
+          </div>
+          <div className={`${viewMode === 'portrait' ? "grid grid-cols-2 gap-3" : "space-y-3"}`}>
+            {upcomingEvents.map(event => <EventCard key={event.id} event={event} variant={viewMode} />)}
           </div>
         </div>
       )}
