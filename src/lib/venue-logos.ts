@@ -106,6 +106,27 @@ export function getVenueLogo(venueName: string): string {
   return makeSvgLogo(fallbackLabel);
 }
 
+// -- UI Theming for fallbacks --
+const VENUE_COLORS: Record<string, string> = {
+  'Control Club': 'from-red-500 to-orange-500',
+  'Nook Club': 'from-blue-500 to-cyan-500',
+  'Club Guesthouse': 'from-emerald-500 to-teal-500',
+  'Platforma Wolff': 'from-amber-500 to-yellow-500',
+  'Beraria H': 'from-noctvm-violet to-purple-500',
+  'Expirat Halele Carol': 'from-pink-500 to-rose-500',
+  'Interbelic': 'from-indigo-500 to-blue-500',
+  'OXYA Club': 'from-fuchsia-500 to-pink-500',
+  'Maison 64': 'from-violet-500 to-purple-500',
+  'Noar Hall': 'from-sky-500 to-blue-500',
+  'KAYO Club': 'from-lime-500 to-green-500',
+  'Princess Club': 'from-rose-500 to-red-500',
+  'Forge Bucharest': 'from-orange-500 to-amber-500',
+};
+
+export function getVenueColor(venue: string): string {
+  return VENUE_COLORS[venue] || 'from-noctvm-violet to-purple-400';
+}
+
 /**
  * Legacy export for backwards compatibility.
  * Prefer getVenueLogo() for new code.

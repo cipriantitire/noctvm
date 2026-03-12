@@ -1,28 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
-import { SAMPLE_EVENTS } from '@/lib/events-data';
-
-// Map known venues to their brand colors for avatar circles
-const VENUE_COLORS: Record<string, string> = {
-  'Control Club': 'from-red-500 to-orange-500',
-  'Nook Club': 'from-blue-500 to-cyan-500',
-  'Club Guesthouse': 'from-emerald-500 to-teal-500',
-  'Platforma Wolff': 'from-amber-500 to-yellow-500',
-  'Beraria H': 'from-noctvm-violet to-purple-500',
-  'Expirat Halele Carol': 'from-pink-500 to-rose-500',
-  'Interbelic': 'from-indigo-500 to-blue-500',
-  'OXYA Club': 'from-fuchsia-500 to-pink-500',
-  'Maison 64': 'from-violet-500 to-purple-500',
-  'Noar Hall': 'from-sky-500 to-blue-500',
-  'KAYO Club': 'from-lime-500 to-green-500',
-  'Princess Club': 'from-rose-500 to-red-500',
-  'Forge Bucharest': 'from-orange-500 to-amber-500',
-};
-
-function getVenueColor(venue: string): string {
-  return VENUE_COLORS[venue] || 'from-noctvm-violet to-purple-400';
-}
+import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 
 interface RightPanelProps {
   onVenueClick?: (venueName: string) => void;
@@ -85,8 +63,18 @@ export default function RightPanel({ onVenueClick }: RightPanelProps) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 transition-colors group"
               >
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${getVenueColor(event.venue)} flex items-center justify-center flex-shrink-0`}>
-                  <span className="text-[10px] font-bold text-white">{event.venue[0]}</span>
+                <div className="w-8 h-8 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={getVenueLogo(event.venue)} alt={event.venue} className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      const el = e.target as HTMLImageElement;
+                      el.style.display = 'none';
+                      el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+                    }}
+                  />
+                  <span className={`fallback hidden text-[10px] font-bold bg-gradient-to-br ${getVenueColor(event.venue)} bg-clip-text text-transparent`}>
+                    {event.venue[0]}
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-medium text-white truncate group-hover:text-noctvm-violet transition-colors">{event.title}</p>
@@ -113,8 +101,18 @@ export default function RightPanel({ onVenueClick }: RightPanelProps) {
               onClick={() => onVenueClick?.(name)}
               className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border hover:border-noctvm-violet/30 transition-colors cursor-pointer group"
             >
-              <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getVenueColor(name)} flex items-center justify-center flex-shrink-0`}>
-                <span className="text-xs font-heading font-bold text-white">{name[0]}</span>
+              <div className="w-9 h-9 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={getVenueLogo(name)} alt={name} className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.style.display = 'none';
+                    el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+                  }}
+                />
+                <span className={`fallback hidden text-xs font-heading font-bold bg-gradient-to-br ${getVenueColor(name)} bg-clip-text text-transparent`}>
+                  {name[0]}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-white group-hover:text-noctvm-violet transition-colors">{name}</p>
