@@ -10,20 +10,24 @@ import VenuePage from '@/components/VenuePage';
 import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
 import { ManageAccountPage, AddLocationPage, ClaimLocationPage, SettingsPage } from '@/components/ProfilePages';
+import AuthModal from '@/components/AuthModal';
 import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { useLiquidGlass } from '@/hooks/useLiquidGlass';
+import { useAuth } from '@/contexts/AuthContext';
 
 type TabType = 'events' | 'feed' | 'wallet' | 'profile';
 type ProfileSubPage = null | 'manage-account' | 'add-location' | 'claim-location' | 'settings';
 
 export default function Home() {
+  const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [profileSubPage, setProfileSubPage] = useState<ProfileSubPage>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Activate mouse-reactive liquid glass shimmer on desktop
   useLiquidGlass();
@@ -96,6 +100,9 @@ export default function Home() {
 
   return (
     <>
+      {/* ===== AUTH MODAL ===== */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
       {/* ===== VENUE OVERLAY MODAL ===== */}
       {selectedVenue && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8">
@@ -273,50 +280,70 @@ export default function Home() {
 
             {/* ===== PROFILE TAB ===== */}
             {activeTab === 'profile' && !profileSubContent && (
-              <div className="space-y-6 max-w-lg mx-auto tab-content">
-                <div className="text-center py-6 animate-fade-in-up">
-                  <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center mx-auto mb-4 animate-scale-in">
+              user ? (
+                <div className="space-y-6 max-w-lg mx-auto tab-content">
+                  <div className="text-center py-6 animate-fade-in-up">
+                    <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center mx-auto mb-4 animate-scale-in overflow-hidden">
+                      {profile?.avatar_url ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <UserIcon className="w-10 h-10 text-noctvm-silver" />
+                      )}
+                    </div>
+                    <h2 className="font-heading text-xl font-bold text-white">{profile?.display_name || 'Night Owl'}</h2>
+                    <p className="text-sm text-noctvm-silver mt-1">@{profile?.username || 'nightowl'}</p>
+                    <div className="flex items-center justify-center gap-4 mt-3">
+                      <div className="text-center">
+                        <span className="block font-heading font-bold text-white">0</span>
+                        <span className="text-[10px] text-noctvm-silver">Events</span>
+                      </div>
+                      <div className="w-px h-8 bg-noctvm-border"></div>
+                      <div className="text-center">
+                        <span className="block font-heading font-bold text-white">0</span>
+                        <span className="text-[10px] text-noctvm-silver">Following</span>
+                      </div>
+                      <div className="w-px h-8 bg-noctvm-border"></div>
+                      <div className="text-center">
+                        <span className="block font-heading font-bold text-white">0</span>
+                        <span className="text-[10px] text-noctvm-silver">Reviews</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 animate-fade-in-up stagger-3">
+                    {profileMenuItems.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => setProfileSubPage(item.key)}
+                        className="w-full flex items-center gap-3 p-4 bg-noctvm-surface rounded-xl border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-left group hover-lift"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-noctvm-midnight flex items-center justify-center text-noctvm-silver group-hover:text-noctvm-violet transition-colors">
+                          {item.icon}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">{item.label}</p>
+                          <p className="text-[11px] text-noctvm-silver">{item.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="max-w-md mx-auto text-center py-16 tab-content animate-fade-in">
+                  <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center mx-auto mb-6">
                     <UserIcon className="w-10 h-10 text-noctvm-silver" />
                   </div>
-                  <h2 className="font-heading text-xl font-bold text-white">Night Owl</h2>
-                  <p className="text-sm text-noctvm-silver mt-1">@nightowl</p>
-                  <div className="flex items-center justify-center gap-4 mt-3">
-                    <div className="text-center">
-                      <span className="block font-heading font-bold text-white">0</span>
-                      <span className="text-[10px] text-noctvm-silver">Events</span>
-                    </div>
-                    <div className="w-px h-8 bg-noctvm-border"></div>
-                    <div className="text-center">
-                      <span className="block font-heading font-bold text-white">0</span>
-                      <span className="text-[10px] text-noctvm-silver">Following</span>
-                    </div>
-                    <div className="w-px h-8 bg-noctvm-border"></div>
-                    <div className="text-center">
-                      <span className="block font-heading font-bold text-white">0</span>
-                      <span className="text-[10px] text-noctvm-silver">Reviews</span>
-                    </div>
-                  </div>
+                  <h2 className="font-heading text-xl font-bold text-white mb-2">Join NOCTVM</h2>
+                  <p className="text-sm text-noctvm-silver mb-6">Sign in to save events, follow venues, and connect with the nightlife community.</p>
+                  <button
+                    onClick={() => setShowAuthModal(true)}
+                    className="px-8 py-3 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors"
+                  >
+                    Sign In / Create Account
+                  </button>
                 </div>
-
-                <div className="space-y-2 animate-fade-in-up stagger-3">
-                  {profileMenuItems.map((item) => (
-
-                    <button
-                      key={item.label}
-                      onClick={() => setProfileSubPage(item.key)}
-                      className="w-full flex items-center gap-3 p-4 bg-noctvm-surface rounded-xl border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-left group hover-lift"
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-noctvm-midnight flex items-center justify-center text-noctvm-silver group-hover:text-noctvm-violet transition-colors">
-                        {item.icon}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{item.label}</p>
-                        <p className="text-[11px] text-noctvm-silver">{item.desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )
             )}
 
             {/* ===== PROFILE SUB-PAGES ===== */}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 // Shared back button
 function BackButton({ onBack, label }: { onBack: () => void; label: string }) {
@@ -83,18 +85,40 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: {
 
 // ==================== MANAGE ACCOUNT ====================
 export function ManageAccountPage({ onBack }: { onBack: () => void }) {
-  const [displayName, setDisplayName] = useState('Noctvm User');
-  const [username, setUsername] = useState('noctvm_user');
-  const [email, setEmail] = useState('user@example.com');
-  const [bio, setBio] = useState('');
-  const [city, setCity] = useState('Bucharest');
+  const { profile, refreshProfile } = useAuth();
+  const [displayName, setDisplayName] = useState(profile?.display_name || '');
+  const [username, setUsername] = useState(profile?.username || '');
+  const [bio, setBio] = useState(profile?.bio || '');
+  const [city, setCity] = useState(profile?.city || 'Bucharest');
   const [isPrivate, setIsPrivate] = useState(false);
   const [showSaved, setShowSaved] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    if (!profile) return;
+    setSaving(true);
+    setError('');
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        display_name: displayName,
+        username,
+        bio,
+        city,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', profile.id);
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      await refreshProfile();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+    setSaving(false);
   };
 
   return (
@@ -104,8 +128,15 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
 
       {/* Avatar */}
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center">
-          <span className="text-2xl font-heading font-bold text-noctvm-violet">N</span>
+        <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center overflow-hidden">
+          {profile?.avatar_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-2xl font-heading font-bold text-noctvm-violet">
+              {(profile?.display_name || 'N')[0].toUpperCase()}
+            </span>
+          )}
         </div>
         <div>
           <button className="text-xs text-noctvm-violet font-medium hover:text-noctvm-violet/80 transition-colors">Change Avatar</button>
@@ -116,7 +147,8 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
       <div className="space-y-4">
         <FormInput label="Display Name" value={displayName} onChange={setDisplayName} placeholder="Your display name" />
         <FormInput label="Username" value={username} onChange={setUsername} placeholder="@username" />
-        <FormInput label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
+        <FormInput label="Email" type="email" value={profile?.email || ''} onChange={() => {}} placeholder="your@email.com" disabled />
+        <p className="text-[10px] text-noctvm-silver/50 -mt-2">Email cannot be changed here</p>
         <FormTextarea label="Bio" value={bio} onChange={setBio} placeholder="Tell people about yourself..." rows={2} />
         <FormInput label="City" value={city} onChange={setCity} placeholder="Your city" />
 
@@ -128,9 +160,15 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
+        {error && (
+          <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
+            <p className="text-xs text-red-400">{error}</p>
+          </div>
+        )}
+
         <div className="pt-4 flex gap-3">
-          <button onClick={handleSave} className="flex-1 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors">
-            {saved ? 'Saved!' : 'Save Changes'}
+          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors disabled:opacity-50">
+            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
           </button>
           <button onClick={onBack} className="px-6 py-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border text-sm text-noctvm-silver hover:text-white transition-colors">
             Cancel
@@ -341,6 +379,7 @@ export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
 
 // ==================== SETTINGS ====================
 export function SettingsPage({ onBack }: { onBack: () => void }) {
+  const { signOut } = useAuth();
   const [pushNotifs, setPushNotifs] = useState(true);
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [eventReminders, setEventReminders] = useState(true);
@@ -419,7 +458,7 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
         <div className="pt-2 border-t border-red-500/20">
           <h3 className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-3">Danger Zone</h3>
           <div className="space-y-2">
-            <button className="w-full p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-red-500/30 transition-colors text-left">
+            <button onClick={() => { signOut(); onBack(); }} className="w-full p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-red-500/30 transition-colors text-left">
               <p className="text-sm font-medium text-white">Log Out</p>
               <p className="text-[10px] text-noctvm-silver mt-0.5">Sign out of your account</p>
             </button>

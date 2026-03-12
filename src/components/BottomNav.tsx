@@ -1,6 +1,7 @@
 'use client';
 
 import { EventsIcon, FeedIcon, WalletIcon, UserIcon } from './icons';
+import { useAuth } from '@/contexts/AuthContext';
 
 type TabType = 'events' | 'feed' | 'wallet' | 'profile';
 
@@ -17,6 +18,7 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const { profile } = useAuth();
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-noctvm-border">
       <div className="flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom)]">
@@ -28,7 +30,14 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               activeTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
             }`}
           >
-            <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
+            {tab === 'profile' && profile?.avatar_url ? (
+              <div className={`w-6 h-6 rounded-full overflow-hidden ${activeTab === tab ? 'ring-2 ring-noctvm-violet' : ''}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
+            )}
             <span className={`text-[10px] font-medium ${activeTab === tab ? 'text-white' : ''}`}>{label}</span>
           </button>
         ))}
