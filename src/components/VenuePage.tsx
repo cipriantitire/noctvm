@@ -62,8 +62,8 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
       <div className="h-6" /> {/* Spacer instead of header */}
 
       {/* Venue Identity */}
-      <div className="flex items-start gap-4 mb-8">
-        <div className="w-20 h-20 lg:w-28 lg:h-28 rounded-3xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0">
+      <div className="flex items-start gap-6 mb-8">
+        <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-3xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 shadow-2xl">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={logoSrc}
@@ -75,35 +75,35 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
               el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
             }}
           />
-          <span className="fallback hidden text-3xl font-bold text-noctvm-violet">{venueName.charAt(0)}</span>
+          <span className="fallback hidden text-4xl font-bold text-noctvm-violet">{venueName.charAt(0)}</span>
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 pt-1">
           <h1 className="text-2xl lg:text-4xl font-bold text-white leading-tight">{venueName}</h1>
           <p className="text-noctvm-silver font-medium text-xs lg:text-sm mt-0.5">{info.address}</p>
-          <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
+          <div className="flex flex-wrap gap-1.5 mt-2 mb-4">
             {info.genres.map(g => (
               <span key={g} className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
                 {g}
               </span>
             ))}
           </div>
-          <p className="text-noctvm-silver/90 text-sm lg:text-base leading-relaxed max-w-3xl line-clamp-3">{info.description}</p>
+          <p className="text-noctvm-silver/90 text-sm leading-relaxed max-w-4xl">{info.description}</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-3 gap-3 mb-10">
         <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
           <p className="text-xl font-bold text-white">{venueEvents.length}</p>
-          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest">Events</p>
+          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Events</p>
         </div>
         <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
           <p className="text-xl font-bold text-white">{info.capacity}</p>
-          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest">Capacity</p>
+          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Capacity</p>
         </div>
         <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
           <p className="text-xl font-bold text-noctvm-gold font-mono">4.5</p>
-          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest">Rating</p>
+          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Rating</p>
         </div>
       </div>
 
@@ -112,19 +112,19 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
       {/* Gallery */}
       <div className="mb-10 relative group/gallery">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
-          <div className="flex gap-2">
+          <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
+          <div className="flex p-0.5 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
             <button 
               onClick={() => scroll('left')}
-              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all shadow-lg backdrop-blur-sm"
+              className="p-1.5 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all shadow-lg backdrop-blur-sm"
+              className="p-1.5 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </button>
           </div>
         </div>
