@@ -61,6 +61,22 @@ export default function UserProfilePage({
   // ── Stats state ───────────────────────────────────────────────────────────
   const [statsData, setStatsData] = useState({ posts: 0, followers: 0, following: 0 });
 
+  // ── Share toast state ──────────────────────────────────────────────────────
+  const [shareToast, setShareToast] = useState(false);
+
+  const handleShareProfile = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'NOCTVM', url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2000);
+    }
+  };
+
   // ── Fetch highlights ──────────────────────────────────────────────────────
 
   const fetchHighlights = useCallback(async () => {
@@ -314,8 +330,11 @@ export default function UserProfilePage({
           >
             Edit Profile
           </button>
-          <button className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors">
-            Share Profile
+          <button
+            onClick={handleShareProfile}
+            className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors"
+          >
+            {shareToast ? 'Copied!' : 'Share Profile'}
           </button>
         </div>
       </div>
