@@ -95,14 +95,14 @@ export default function FilterBar({
       </div>
 
       {/* Genre pills */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex flex-wrap gap-2 pb-1">
         {GENRE_FILTERS.map((genre) => {
           const isActive = activeGenres.includes(genre);
           return (
             <button
               key={genre}
               onClick={() => handleGenreClick(genre)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 isActive
                   ? 'bg-noctvm-violet text-white shadow-glow'
                   : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
