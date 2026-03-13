@@ -107,7 +107,13 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
       onStoryCreated?.();
       handleClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to share story.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as any).message)
+            : 'Failed to share story.'
+      );
     } finally {
       setSubmitting(false);
     }
