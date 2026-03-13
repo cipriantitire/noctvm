@@ -48,7 +48,7 @@ export default function EventDetailModal({ event, onClose }: EventDetailModalPro
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
+      className={`fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
       onClick={handleClose}
     >
       {/* Backdrop */}

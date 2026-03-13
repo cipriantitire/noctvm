@@ -111,7 +111,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
         err instanceof Error
           ? err.message
           : typeof err === 'object' && err !== null && 'message' in err
-            ? String((err as any).message)
+            ? String((err as { message: unknown }).message)
             : 'Failed to share story.'
       );
     } finally {
@@ -123,7 +123,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
 
   if (!user) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={handleClose}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
         <div className="bg-noctvm-midnight border border-noctvm-border rounded-2xl p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
           <p className="text-white font-semibold mb-2">Sign in to share a story</p>
           <p className="text-sm text-noctvm-silver mb-4">Create an account to share your nightlife moments.</p>
@@ -146,7 +146,6 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}
-      onClick={handleClose}
     >
       <div
         className={`w-full max-w-lg bg-noctvm-midnight border border-noctvm-border rounded-2xl overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
@@ -167,12 +166,12 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
         </div>
 
         <div className="overflow-y-auto max-h-[75vh]">
-          {/* Photo upload — square 1:1 ratio */}
+          {/* Photo upload — portrait 9:16 ratio */}
           <div
             className={`relative mx-4 mt-4 rounded-xl border-2 border-dashed transition-colors cursor-pointer ${
               isDragging ? 'border-noctvm-violet bg-noctvm-violet/5' : 'border-noctvm-border hover:border-noctvm-violet/40'
             } ${imagePreview ? 'border-solid border-noctvm-border' : ''}`}
-            style={{ aspectRatio: imagePreview ? 'auto' : '1' }}
+            style={{ aspectRatio: '9/16' }}
             onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -181,20 +180,20 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
             {imagePreview ? (
               <>
                 {mediaType === 'video' ? (
-                  <video src={imagePreview} className="w-full rounded-xl object-contain max-h-64" controls muted playsInline />
+                  <video src={imagePreview} className="absolute inset-0 w-full h-full object-cover rounded-xl" autoPlay muted playsInline loop />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imagePreview} alt="" className="w-full rounded-xl object-contain max-h-64" />
+                  <img src={imagePreview} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl" />
                 )}
                 <button
                   onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); setMediaType('image'); }}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
+                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                 <div className="w-14 h-14 rounded-2xl bg-noctvm-surface flex items-center justify-center">
                   {/* Story/phone icon */}
                   <svg className="w-7 h-7 text-noctvm-silver" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -203,7 +202,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white">Drop your story photo or video</p>
+                  <p className="text-sm font-medium text-white">Portrait photo or video · 9:16</p>
                   <p className="text-xs text-noctvm-silver mt-0.5">or <span className="text-noctvm-violet">browse files</span></p>
                   <p className="text-[10px] text-noctvm-silver/40 mt-1">Disappears after 24 hours</p>
                 </div>

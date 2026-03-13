@@ -10,6 +10,7 @@ interface VenuePageProps {
   venueName: string;
   onBack: () => void;
   onClose?: () => void;
+  onEventClick?: (event: NoctEvent) => void;
 }
 
 const VENUE_INFO: Record<string, { description: string; address: string; capacity: string; genres: string[] }> = {
@@ -35,7 +36,7 @@ const GALLERY_THEMES = [
   { gradient: 'from-sky-900/60 via-noctvm-midnight to-blue-900/40', label: 'VIP', icon: 'V' },
 ];
 
-export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps) {
+export default function VenuePage({ venueName, onBack, onClose, onEventClick }: VenuePageProps) {
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const info = getVenueInfo(venueName);
   const venueEvents = useMemo(() => SAMPLE_EVENTS.filter(e => e.venue === venueName), [venueName]);
@@ -132,7 +133,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
         
         <div 
           ref={scrollRef}
-          className="flex gap-5 overflow-x-auto pb-6 scrollbar-hide -mx-2 px-2 snap-x snap-mandatory"
+          className="flex gap-5 overflow-x-auto py-4 pb-6 scrollbar-hide px-4 snap-x snap-mandatory"
         >
           {GALLERY_THEMES.map((theme) => (
             <div key={theme.label} className="snap-start flex-shrink-0 w-full sm:w-[48%] lg:w-[23.5%]">
@@ -153,10 +154,10 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2.5 h-2.5 rounded-full bg-noctvm-emerald animate-pulse-slow shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-            <h3 className="text-sm font-bold text-noctvm-emerald uppercase tracking-widest">Live Now</h3>
+            <h3 className="text-sm font-bold text-noctvm-emerald uppercase tracking-widest">Live Tonight</h3>
           </div>
           <div className="space-y-4">
-            {liveEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" />)}
+            {liveEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />)}
           </div>
         </div>
       )}
@@ -182,7 +183,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
             </div>
           </div>
           <div className={`${viewMode === 'portrait' ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-4 gap-5" : "space-y-4"}`}>
-            {upcomingEvents.map(event => <EventCard key={event.id} event={event} variant={viewMode} />)}
+            {upcomingEvents.map(event => <EventCard key={event.id} event={event} variant={viewMode} onClick={onEventClick} />)}
           </div>
         </div>
       )}
@@ -192,7 +193,7 @@ export default function VenuePage({ venueName, onBack, onClose }: VenuePageProps
         <div className="pb-10">
           <h3 className="text-xs font-bold text-noctvm-silver/40 mb-4 uppercase tracking-[0.2em]">Past Events</h3>
           <div className="space-y-4 opacity-50 grayscale hover:grayscale-0 transition-all">
-            {pastEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" />)}
+            {pastEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />)}
           </div>
         </div>
       )}

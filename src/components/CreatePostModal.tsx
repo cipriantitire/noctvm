@@ -129,7 +129,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
       onPostCreated?.();
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create post.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Failed to create post.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -154,7 +160,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
 
   if (!user) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={handleClose}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
         <div className="bg-noctvm-midnight border border-noctvm-border rounded-2xl p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
           <p className="text-white font-semibold mb-2">Sign in to post</p>
           <p className="text-sm text-noctvm-silver mb-4">Create an account to share your nightlife moments.</p>
@@ -175,7 +181,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   }
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`} onClick={handleClose}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}>
       <div
         className={`w-full max-w-lg bg-noctvm-midnight border border-noctvm-border rounded-2xl overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
         onClick={e => e.stopPropagation()}
