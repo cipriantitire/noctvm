@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
-import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
+import { HeartIcon, ChatIcon, ShareIcon } from './icons';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -627,12 +627,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                       <ShareIcon className="w-6 h-6 text-noctvm-silver hover:text-white transition-colors" />
                     </button>
                   </div>
-                  <button onClick={() => toggleSave(post)} className="hover:scale-110 active:animate-micro-pop transition-transform">
-                    {post.saved
-                      ? <svg className="w-6 h-6 text-noctvm-gold animate-micro-pop" viewBox="0 0 24 24" fill="currentColor"><path d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" /></svg>
-                      : <BookmarkIcon className="w-6 h-6 text-noctvm-silver hover:text-noctvm-gold transition-colors" />
-                    }
-                  </button>
                 </div>
 
                 <p className="text-xs font-semibold text-white mb-1">{post.likes.toLocaleString()} likes</p>
