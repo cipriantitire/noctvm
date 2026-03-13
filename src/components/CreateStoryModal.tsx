@@ -28,6 +28,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
   const [showVenueSuggestions, setShowVenueSuggestions] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isClosing, setIsClosing] = useState(false);
@@ -37,8 +38,9 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
   );
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) return;
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) return;
     setImageFile(file);
+    setMediaType(file.type.startsWith('video/') ? 'video' : 'image');
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -63,6 +65,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
   const reset = () => {
     setImagePreview(null);
     setImageFile(null);
+    setMediaType('image');
     setCaption('');
     setSelectedVenue('');
     setVenueSearch('');
@@ -171,10 +174,14 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
           >
             {imagePreview ? (
               <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="" className="w-full rounded-xl object-contain max-h-64" />
+                {mediaType === 'video' ? (
+                  <video src={imagePreview} className="w-full rounded-xl object-contain max-h-64" controls muted playsInline />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={imagePreview} alt="" className="w-full rounded-xl object-contain max-h-64" />
+                )}
                 <button
-                  onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); }}
+                  onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); setMediaType('image'); }}
                   className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -190,13 +197,13 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white">Drop your story photo</p>
+                  <p className="text-sm font-medium text-white">Drop your story photo or video</p>
                   <p className="text-xs text-noctvm-silver mt-0.5">or <span className="text-noctvm-violet">browse files</span></p>
                   <p className="text-[10px] text-noctvm-silver/40 mt-1">Disappears after 24 hours</p>
                 </div>
               </div>
             )}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+            <input ref={fileInputRef} type="file" accept="image/*,video/*" className="hidden" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
           </div>
 
           {/* User row + caption */}

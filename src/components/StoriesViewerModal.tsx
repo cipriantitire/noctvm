@@ -29,6 +29,11 @@ interface StoriesViewerModalProps {
   startIndex: number;
 }
 
+function isVideo(url: string | null): boolean {
+  if (!url) return false;
+  return /\.(mp4|webm|mov|avi|m4v)(\?|$)/i.test(url);
+}
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -122,10 +127,22 @@ export default function StoriesViewerModal({
       className={`fixed inset-0 z-[100] overflow-hidden ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
       onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
     >
-      {/* Background: real image or gradient fallback */}
+      {/* Background: real image/video or gradient fallback */}
       {story.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={story.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        isVideo(story.image_url) ? (
+          <video
+            key={story.image_url}
+            src={story.image_url}
+            className="absolute inset-0 w-full h-full object-cover"
+            autoPlay
+            muted
+            playsInline
+            loop
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={story.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        )
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color}`} />
       )}
