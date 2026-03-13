@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
 export interface RealStory {
   id: string;
+  user_id: string;
   image_url: string | null;
   caption: string | null;
   venue_name: string | null;
@@ -27,6 +29,7 @@ interface StoriesViewerModalProps {
   onClose: () => void;
   users: StoryUser[];
   startIndex: number;
+  myUserId?: string;
 }
 
 function isVideo(url: string | null): boolean {
@@ -46,7 +49,7 @@ function timeAgo(dateStr: string): string {
 const STORY_DURATION_MS = 5000;
 
 export default function StoriesViewerModal({
-  isOpen, onClose, users, startIndex,
+  isOpen, onClose, users, startIndex, myUserId,
 }: StoriesViewerModalProps) {
   const [isClosing, setIsClosing]     = useState(false);
   const [userIndex, setUserIndex]     = useState(startIndex);
@@ -141,7 +144,7 @@ export default function StoriesViewerModal({
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={story.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={story.image_url} alt="" className="absolute inset-0 w-full h-full object-contain bg-black" />
         )
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color}`} />
@@ -156,6 +159,32 @@ export default function StoriesViewerModal({
           </div>
         ))}
       </div>
+
+      {/* Delete own story button */}
+      {myUserId && story.user_id === myUserId && (
+        <button
+          onClick={async (e) => {
+            e.stopPropagation();
+            await supabase.from('stories').delete().eq('id', story.id);
+            if (storyIndex < totalStories - 1) {
+              setStoryIndex(s => s + 1);
+              resetProgress();
+            } else if (userIndex < users.length - 1) {
+              setUserIndex(u => u + 1);
+              setStoryIndex(0);
+              resetProgress();
+            } else {
+              handleClose();
+            }
+          }}
+          className="absolute top-4 left-14 z-30 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-black/80 transition-all"
+          title="Delete story"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+          </svg>
+        </button>
+      )}
 
       {/* Header */}
       <div className="absolute top-7 left-0 right-0 flex items-center justify-between px-4 z-20">

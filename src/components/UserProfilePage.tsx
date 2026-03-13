@@ -156,6 +156,7 @@ export default function UserProfilePage({
       color: 'from-noctvm-violet to-purple-500',
       stories: data.map((s: any) => ({
         id: s.id,
+        user_id: s.user_id,
         image_url: s.image_url,
         caption: s.caption,
         venue_name: s.venue_name,

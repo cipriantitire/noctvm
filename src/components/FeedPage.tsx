@@ -117,6 +117,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
       const prof = row.profiles as unknown as { display_name: string; username: string; avatar_url: string | null } | null;
       const story: RealStory = {
         id: row.id,
+        user_id: row.user_id,
         image_url: row.image_url,
         caption: row.caption,
         venue_name: row.venue_name,

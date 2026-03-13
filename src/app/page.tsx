@@ -180,6 +180,7 @@ export default function Home() {
         onClose={() => setShowStories(false)}
         users={storyUsers}
         startIndex={storyStartIndex}
+        myUserId={user?.id}
       />
 
       {/* ── Feed Create Post FAB ──────────────────────────────────── */}
