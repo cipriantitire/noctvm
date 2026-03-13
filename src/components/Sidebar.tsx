@@ -7,8 +7,8 @@ type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
 
 const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
   { icon: EventsIcon, label: 'Events', tab: 'events' },
-  { icon: FeedIcon,   label: 'Feed',   tab: 'feed' },
   { icon: VenuesIcon, label: 'Venues', tab: 'venues' },
+  { icon: FeedIcon,   label: 'Feed',   tab: 'feed' },
   { icon: WalletIcon, label: 'Wallet', tab: 'wallet' },
 ];
 
@@ -46,7 +46,7 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
             }`}
           >
             <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
-            <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">{label}</span>
+            <span className="max-w-0 overflow-hidden opacity-0 group-hover/sidebar:max-w-[160px] group-hover/sidebar:opacity-100 transition-all duration-300 whitespace-nowrap">{label}</span>
           </button>
         ))}
       </nav>
@@ -60,7 +60,7 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
           title="Account Settings"
         >
           <CogIcon className="w-6 h-6 flex-shrink-0 transition-transform" />
-          <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">Settings</span>
+          <span className="max-w-0 overflow-hidden opacity-0 group-hover/sidebar:max-w-[160px] group-hover/sidebar:opacity-100 transition-all duration-300 whitespace-nowrap">Settings</span>
         </button>
 
         {/* Profile */}
@@ -80,7 +80,7 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
               <UserIcon className="w-4 h-4 text-white" />
             )}
           </div>
-          <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap truncate max-w-[100px]">
+          <span className="max-w-0 overflow-hidden opacity-0 group-hover/sidebar:max-w-[120px] group-hover/sidebar:opacity-100 transition-all duration-300 whitespace-nowrap truncate">
             {profileLabel}
           </span>
         </button>
