@@ -166,12 +166,11 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
         </div>
 
         <div className="overflow-y-auto max-h-[75vh]">
-          {/* Photo upload — portrait 9:16 ratio */}
+          {/* Photo upload — flexible aspect ratio, portrait recommended */}
           <div
-            className={`relative mx-4 mt-4 rounded-xl border-2 border-dashed transition-colors cursor-pointer ${
+            className={`relative mx-4 mt-4 rounded-xl border-2 border-dashed transition-colors cursor-pointer min-h-[300px] ${
               isDragging ? 'border-noctvm-violet bg-noctvm-violet/5' : 'border-noctvm-border hover:border-noctvm-violet/40'
             } ${imagePreview ? 'border-solid border-noctvm-border' : ''}`}
-            style={{ aspectRatio: '9/16' }}
             onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -180,10 +179,10 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
             {imagePreview ? (
               <>
                 {mediaType === 'video' ? (
-                  <video src={imagePreview} className="absolute inset-0 w-full h-full object-cover rounded-xl" autoPlay muted playsInline loop />
+                  <video src={imagePreview} className="w-full max-h-[60vh] object-contain rounded-xl" autoPlay muted playsInline loop />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imagePreview} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl" />
+                  <img src={imagePreview} alt="" className="w-full max-h-[60vh] object-contain rounded-xl" />
                 )}
                 <button
                   onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); setMediaType('image'); }}
@@ -202,7 +201,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white">Portrait photo or video · 9:16</p>
+                  <p className="text-sm font-medium text-white">Portrait recommended · Any photo or video</p>
                   <p className="text-xs text-noctvm-silver mt-0.5">or <span className="text-noctvm-violet">browse files</span></p>
                   <p className="text-[10px] text-noctvm-silver/40 mt-1">Disappears after 24 hours</p>
                 </div>

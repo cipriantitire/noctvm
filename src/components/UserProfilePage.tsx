@@ -7,6 +7,16 @@ import { GridIcon, BookmarkIcon, TagIcon, UserIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 
+// ── Post types ────────────────────────────────────────────────────────────────
+
+interface ProfilePost {
+  id: string;
+  image_url: string | null;
+  caption: string;
+  created_at: string;
+  likes_count: number;
+}
+
 // ── Highlight types ───────────────────────────────────────────────────────────
 
 interface DbHighlight {
@@ -43,6 +53,14 @@ export default function UserProfilePage({
   // ── Active stories state ──────────────────────────────────────────────────
   const [hasActiveStories, setHasActiveStories] = useState(false);
 
+  // ── Posts state ───────────────────────────────────────────────────────────
+  const [posts, setPosts] = useState<ProfilePost[]>([]);
+  const [savedPosts, setSavedPosts] = useState<ProfilePost[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+
+  // ── Stats state ───────────────────────────────────────────────────────────
+  const [statsData, setStatsData] = useState({ posts: 0, followers: 0, following: 0 });
+
   // ── Fetch highlights ──────────────────────────────────────────────────────
 
   const fetchHighlights = useCallback(async () => {
@@ -55,9 +73,38 @@ export default function UserProfilePage({
     if (data) setHighlights(data as DbHighlight[]);
   }, [user]);
 
+  const fetchPosts = useCallback(async () => {
+    if (!user) return;
+    setLoadingPosts(true);
+    try {
+      const { data } = await supabase
+        .from('posts')
+        .select('id, image_url, caption, created_at, likes_count')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      setPosts((data || []) as ProfilePost[]);
+    } finally {
+      setLoadingPosts(false);
+    }
+  }, [user]);
+
+  const fetchSavedPosts = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('post_saves')
+      .select('posts(id, image_url, caption, created_at, likes_count)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    if (data) {
+      setSavedPosts(data.map((row: any) => row.posts).filter(Boolean) as ProfilePost[]);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchHighlights();
-  }, [fetchHighlights]);
+    fetchPosts();
+    fetchSavedPosts();
+  }, [fetchHighlights, fetchPosts, fetchSavedPosts]);
 
   // ── Check for active stories ──────────────────────────────────────────────
 
@@ -69,6 +116,23 @@ export default function UserProfilePage({
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString())
       .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
+  }, [user]);
+
+  // ── Fetch real counters ───────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('target_id', user.id).eq('target_type', 'user'),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', user.id).eq('target_type', 'user'),
+    ]).then(([postsRes, followersRes, followingRes]) => {
+      setStatsData({
+        posts: postsRes.count ?? 0,
+        followers: followersRes.count ?? 0,
+        following: followingRes.count ?? 0,
+      });
+    });
   }, [user]);
 
   // ── Fetch and open my stories ─────────────────────────────────────────────
@@ -162,9 +226,9 @@ export default function UserProfilePage({
   const initials = (profile?.display_name || profile?.username || 'N')[0].toUpperCase();
 
   const stats = [
-    { label: 'Posts',     value: 0 },
-    { label: 'Followers', value: 0 },
-    { label: 'Following', value: 0 },
+    { label: 'Posts',     value: statsData.posts },
+    { label: 'Followers', value: statsData.followers },
+    { label: 'Following', value: statsData.following },
   ];
 
   const tabs = [
@@ -172,12 +236,6 @@ export default function UserProfilePage({
     { key: 'saved'  as const, icon: <BookmarkIcon className="w-5 h-5" /> },
     { key: 'tagged' as const, icon: <TagIcon      className="w-5 h-5" /> },
   ];
-
-  const emptyMessages = {
-    posts:  { title: 'No Posts Yet',    sub: 'Share your first nightlife moment', cta: true  },
-    saved:  { title: 'Nothing Saved',   sub: 'Save posts to find them here',      cta: false },
-    tagged: { title: 'No Tags Yet',     sub: 'Posts where you are tagged appear here', cta: false },
-  };
 
   return (
     <div className="max-w-xl mx-auto tab-content animate-fade-in">
@@ -337,28 +395,73 @@ export default function UserProfilePage({
 
       {/* ── Posts grid / empty state ──────────────────────────── */}
       <div className="pb-24 lg:pb-6">
-        <div className="text-center py-16 animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-noctvm-border flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-noctvm-silver/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-              <path d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-            </svg>
+        {activeTab === 'posts' && (
+          <>
+            {loadingPosts ? (
+              <div className="grid grid-cols-3 gap-0.5">{Array.from({length:6}).map((_,i)=><div key={i} className="aspect-square bg-noctvm-surface animate-pulse"/>)}</div>
+            ) : posts.length > 0 ? (
+              <div className="grid grid-cols-3 gap-0.5">
+                {posts.map(post => (
+                  <div key={post.id} className="aspect-square bg-noctvm-surface overflow-hidden relative group cursor-pointer">
+                    {post.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/20 flex items-center justify-center">
+                        <span className="text-noctvm-silver/30 text-xs text-center px-2 line-clamp-3">{post.caption}</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">❤️ {post.likes_count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 animate-fade-in">
+                <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-noctvm-border flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-noctvm-silver/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                </div>
+                <h3 className="font-heading text-sm font-bold text-white mb-1">No Posts Yet</h3>
+                <p className="text-xs text-noctvm-silver/60">Share your first nightlife moment</p>
+                <button onClick={onOpenCreatePost} className="mt-4 px-6 py-2 rounded-lg bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet text-xs font-medium hover:bg-noctvm-violet/30 transition-colors">Create Post</button>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'saved' && (
+          <>
+            {savedPosts.length > 0 ? (
+              <div className="grid grid-cols-3 gap-0.5">
+                {savedPosts.map(post => (
+                  <div key={post.id} className="aspect-square bg-noctvm-surface overflow-hidden relative group cursor-pointer">
+                    {post.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/20 flex items-center justify-center">
+                        <span className="text-noctvm-silver/30 text-xs text-center px-2 line-clamp-3">{post.caption}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 animate-fade-in">
+                <h3 className="font-heading text-sm font-bold text-white mb-1">Nothing Saved</h3>
+                <p className="text-xs text-noctvm-silver/60">Save posts to find them here</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'tagged' && (
+          <div className="text-center py-16 animate-fade-in">
+            <h3 className="font-heading text-sm font-bold text-white mb-1">No Tags Yet</h3>
+            <p className="text-xs text-noctvm-silver/60">Posts where you are tagged appear here</p>
           </div>
-          <h3 className="font-heading text-sm font-bold text-white mb-1">
-            {emptyMessages[activeTab].title}
-          </h3>
-          <p className="text-xs text-noctvm-silver/60">
-            {emptyMessages[activeTab].sub}
-          </p>
-          {emptyMessages[activeTab].cta && (
-            <button
-              onClick={onOpenCreatePost}
-              className="mt-4 px-6 py-2 rounded-lg bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet text-xs font-medium hover:bg-noctvm-violet/30 transition-colors"
-            >
-              Create Post
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
       {/* ── Create Highlight Modal ────────────────────────────── */}

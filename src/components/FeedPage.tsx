@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
@@ -79,6 +79,8 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   // Stories
   const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
   const [showMyStoryDropdown, setShowMyStoryDropdown] = useState(false);
+  const myStoryBtnRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
 
   // Per-tab post lists
   const [explorePosts, setExplorePosts] = useState<FeedPost[]>([]);
@@ -266,6 +268,16 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     }
   };
 
+  // ── My story dropdown toggle ─────────────────────────────────────────────
+
+  const toggleMyStoryDropdown = () => {
+    if (!showMyStoryDropdown && myStoryBtnRef.current) {
+      const rect = myStoryBtnRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
+    }
+    setShowMyStoryDropdown(v => !v);
+  };
+
   // ── Active post list ─────────────────────────────────────────────────────
 
   const activePosts = subTab === 'following' ? followingPosts : subTab === 'friends' ? friendsPosts : explorePosts;
@@ -412,10 +424,11 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             {myEntry ? (
               <div className="relative flex-shrink-0">
                 {showMyStoryDropdown && (
-                  <div className="fixed inset-0 z-10" onClick={() => setShowMyStoryDropdown(false)} />
+                  <div className="fixed inset-0 z-[99]" onClick={() => setShowMyStoryDropdown(false)} />
                 )}
                 <button
-                  onClick={() => setShowMyStoryDropdown(v => !v)}
+                  ref={myStoryBtnRef}
+                  onClick={toggleMyStoryDropdown}
                   className="flex flex-col items-center gap-1 relative z-20"
                 >
                   <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500">
@@ -436,8 +449,11 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                   </div>
                   <span className="text-[10px] text-noctvm-silver max-w-[60px] truncate">My Story</span>
                 </button>
-                {showMyStoryDropdown && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-30 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-xl overflow-hidden min-w-[140px]">
+                {showMyStoryDropdown && dropdownPos && (
+                  <div
+                    className="fixed z-[100] bg-noctvm-surface border border-noctvm-border rounded-xl shadow-xl overflow-hidden min-w-[140px]"
+                    style={{ top: dropdownPos.top, left: dropdownPos.left, transform: 'translateX(-50%)' }}
+                  >
                     <button
                       onClick={() => { setShowMyStoryDropdown(false); onOpenCreateStory(); }}
                       className="w-full px-4 py-2.5 text-xs text-white hover:bg-noctvm-midnight text-left flex items-center gap-2"
