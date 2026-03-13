@@ -20,11 +20,14 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
   const { user, profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [caption, setCaption] = useState('');
   const [venueSearch, setVenueSearch] = useState('');
   const [selectedVenue, setSelectedVenue] = useState('');
   const [showVenueSuggestions, setShowVenueSuggestions] = useState(false);
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isClosing, setIsClosing] = useState(false);
@@ -35,6 +38,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
+    setImageFile(file);
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -47,11 +51,23 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
     if (file) handleFile(file);
   }, []);
 
+  const addTag = () => {
+    const raw = tagInput.trim().replace(/^#/, '');
+    if (raw && !tags.includes(`#${raw}`) && tags.length < 10) {
+      setTags(prev => [...prev, `#${raw}`]);
+    }
+    setTagInput('');
+  };
+  const removeTag = (tag: string) => setTags(prev => prev.filter(t => t !== tag));
+
   const reset = () => {
     setImagePreview(null);
+    setImageFile(null);
     setCaption('');
     setSelectedVenue('');
     setVenueSearch('');
+    setTags([]);
+    setTagInput('');
     setError('');
   };
 
@@ -62,17 +78,27 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
 
   const handleSubmit = async () => {
     if (!user) return;
-    if (!imagePreview) { setError('Add a photo for your story.'); return; }
+    if (!imageFile) { setError('Add a photo for your story.'); return; }
     setSubmitting(true);
     setError('');
     try {
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      const ext = imageFile.name.split('.').pop() ?? 'jpg';
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('story-media')
+        .upload(path, imageFile, { cacheControl: '3600', upsert: false });
+      if (uploadErr) throw uploadErr;
+      const { data: { publicUrl } } = supabase.storage.from('story-media').getPublicUrl(path);
+
       const { error: insertError } = await supabase.from('stories').insert({
         user_id: user.id,
-        image_url: imagePreview,
+        image_url: publicUrl,
         caption: caption.trim() || null,
         venue_name: selectedVenue || null,
         expires_at: expiresAt,
+        tags: tags.length > 0 ? tags : null,
       });
       if (insertError) throw insertError;
       onStoryCreated?.();
@@ -114,7 +140,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
       onClick={handleClose}
     >
       <div
-        className={`w-full max-w-sm bg-noctvm-midnight border border-noctvm-border rounded-2xl overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+        className={`w-full max-w-lg bg-noctvm-midnight border border-noctvm-border rounded-2xl overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
       >
@@ -132,12 +158,12 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
         </div>
 
         <div className="overflow-y-auto max-h-[75vh]">
-          {/* Photo upload — portrait 9:16 ratio */}
+          {/* Photo upload — square 1:1 ratio */}
           <div
             className={`relative mx-4 mt-4 rounded-xl border-2 border-dashed transition-colors cursor-pointer ${
               isDragging ? 'border-noctvm-violet bg-noctvm-violet/5' : 'border-noctvm-border hover:border-noctvm-violet/40'
             } ${imagePreview ? 'border-solid border-noctvm-border' : ''}`}
-            style={{ aspectRatio: imagePreview ? 'auto' : '9/16', maxHeight: '280px' }}
+            style={{ aspectRatio: imagePreview ? 'auto' : '1' }}
             onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -148,7 +174,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imagePreview} alt="" className="w-full rounded-xl object-contain max-h-64" />
                 <button
-                  onClick={e => { e.stopPropagation(); setImagePreview(null); }}
+                  onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); }}
                   className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -228,6 +254,31 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Hashtags */}
+          <div className="px-4 py-3 border-b border-noctvm-border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-white flex-shrink-0">Tags</span>
+              <div className="flex-1 flex flex-wrap items-center gap-1.5">
+                {tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-xs">
+                    {tag}
+                    <button onClick={() => removeTag(tag)}>
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  placeholder="#tag"
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addTag(); } }}
+                  className="flex-1 min-w-[80px] bg-transparent text-xs text-white placeholder:text-noctvm-silver/30 outline-none"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Story duration info */}

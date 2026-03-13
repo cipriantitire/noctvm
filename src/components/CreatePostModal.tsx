@@ -17,20 +17,11 @@ const BUCHAREST_VENUES = [
   'Club Eclipse', 'Baraka', 'Midi Club',
 ];
 
-const MOCK_USERS = [
-  { handle: '@alexm_buc',    name: 'Alexandra M.' },
-  { handle: '@mihai.deep',   name: 'Mihai D.' },
-  { handle: '@ioana.rave',   name: 'Ioana R.' },
-  { handle: '@stef.vinyl',   name: 'Stefan V.' },
-  { handle: '@cat.party',    name: 'Catalina P.' },
-  { handle: '@radu.night',   name: 'Radu N.' },
-  { handle: '@diana.groove', name: 'Diana G.' },
-];
-
 export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpenAuth }: CreatePostModalProps) {
   const { user, profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [caption, setCaption] = useState('');
   const [venueSearch, setVenueSearch] = useState('');
@@ -44,20 +35,29 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   const [peopleSearch, setPeopleSearch] = useState('');
   const [taggedUsers, setTaggedUsers] = useState<string[]>([]);
   const [showPeopleSuggestions, setShowPeopleSuggestions] = useState(false);
+  const [profileResults, setProfileResults] = useState<{ id: string; handle: string; name: string }[]>([]);
 
   const filteredVenues = BUCHAREST_VENUES.filter(v =>
     v.toLowerCase().includes(venueSearch.toLowerCase()) && venueSearch.length > 0
   );
 
-  const filteredUsers = MOCK_USERS.filter(u =>
-    (u.handle.toLowerCase().includes(peopleSearch.toLowerCase()) ||
-     u.name.toLowerCase().includes(peopleSearch.toLowerCase())) &&
-    peopleSearch.length > 0 &&
-    !taggedUsers.includes(u.handle)
-  );
+  const searchProfiles = async (q: string) => {
+    if (!q || q.length < 2) { setProfileResults([]); return; }
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username, display_name')
+      .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+      .limit(8);
+    setProfileResults((data || []).map((p: { id: string; username: string; display_name: string }) => ({
+      id: p.id,
+      handle: `@${p.username}`,
+      name: p.display_name,
+    })));
+  };
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
+    setImageFile(file);
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
     reader.readAsDataURL(file);
@@ -90,14 +90,24 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
     setError('');
 
     try {
-      // For now, store imagePreview as image_url (data URL)
-      // In production this would upload to Supabase Storage
+      let uploadedUrl: string | null = null;
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop() ?? 'jpg';
+        const path = `${user.id}/${Date.now()}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('post-media')
+          .upload(path, imageFile, { cacheControl: '3600', upsert: false });
+        if (uploadErr) throw uploadErr;
+        const { data: { publicUrl } } = supabase.storage.from('post-media').getPublicUrl(path);
+        uploadedUrl = publicUrl;
+      }
+
       const { error: insertError } = await supabase
         .from('posts')
         .insert({
           user_id: user.id,
           caption: caption.trim(),
-          image_url: imagePreview,
+          image_url: uploadedUrl,
           venue_name: selectedVenue || null,
           tags,
           tagged_users: taggedUsers.length > 0 ? taggedUsers : null,
@@ -107,6 +117,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
 
       // Reset form
       setImagePreview(null);
+      setImageFile(null);
       setCaption('');
       setSelectedVenue('');
       setVenueSearch('');
@@ -114,6 +125,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
       setTagInput('');
       setTaggedUsers([]);
       setPeopleSearch('');
+      setProfileResults([]);
       onPostCreated?.();
       onClose();
     } catch (err: unknown) {
@@ -125,6 +137,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
 
   const handleClose = () => {
     setImagePreview(null);
+    setImageFile(null);
     setCaption('');
     setSelectedVenue('');
     setVenueSearch('');
@@ -132,6 +145,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
     setTagInput('');
     setTaggedUsers([]);
     setPeopleSearch('');
+    setProfileResults([]);
     setError('');
     setIsClosing(true);
   };
@@ -198,7 +212,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imagePreview} alt="" className="w-full rounded-xl object-contain max-h-80" />
                 <button
-                  onClick={(e) => { e.stopPropagation(); setImagePreview(null); }}
+                  onClick={(e) => { e.stopPropagation(); setImagePreview(null); setImageFile(null); }}
                   className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -294,20 +308,21 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
                 type="text"
                 placeholder="@username"
                 value={peopleSearch}
-                onChange={e => { setPeopleSearch(e.target.value); setShowPeopleSuggestions(true); }}
+                onChange={e => { setPeopleSearch(e.target.value); searchProfiles(e.target.value); setShowPeopleSuggestions(true); }}
                 onFocus={() => setShowPeopleSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowPeopleSuggestions(false), 150)}
                 className="flex-1 min-w-[100px] bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none"
               />
             </div>
-            {showPeopleSuggestions && filteredUsers.length > 0 && (
+            {showPeopleSuggestions && profileResults.length > 0 && (
               <div className="absolute left-4 right-4 top-full mt-1 bg-noctvm-midnight border border-noctvm-border rounded-xl overflow-hidden z-10 shadow-xl">
-                {filteredUsers.map(u => (
+                {profileResults.map(u => (
                   <button
-                    key={u.handle}
+                    key={u.id}
                     onMouseDown={() => {
                       setTaggedUsers(prev => [...prev, u.handle]);
                       setPeopleSearch('');
+                      setProfileResults([]);
                       setShowPeopleSuggestions(false);
                     }}
                     className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
