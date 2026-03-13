@@ -69,6 +69,7 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
+  const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
 
   // Load current user's venue follows
   useEffect(() => {
@@ -132,7 +133,7 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
   const venueReviews = (name: string) => MOCK_REVIEWS[name] || [];
 
   return (
-    <div className="max-w-2xl mx-auto tab-content">
+    <div className="tab-content">
       {/* Header */}
       <div className="mb-6 animate-fade-in">
         <h1 className="font-heading text-2xl font-bold text-white">Venues</h1>
@@ -173,15 +174,86 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
         ))}
       </div>
 
-      {/* Venues list */}
-      <div className="space-y-3 pb-24 lg:pb-6">
+      {/* View toggle row */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs text-noctvm-silver font-mono">{sortedVenues.length} venues</span>
+        <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner h-[36px]">
+          <button
+            onClick={() => setVenueView('grid')}
+            className={`p-1.5 rounded-lg transition-all flex items-center justify-center ${venueView === 'grid' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+            title="Grid view"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+          </button>
+          <div className="w-px h-4 bg-noctvm-border self-center mx-0.5 opacity-50" />
+          <button
+            onClick={() => setVenueView('list')}
+            className={`p-1.5 rounded-lg transition-all flex items-center justify-center ${venueView === 'list' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+            title="List view"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Venues list/grid */}
+      <div className={`pb-24 lg:pb-6 ${venueView === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3'}`}>
         {sortedVenues.map((venue, idx) => {
           const isFollowed = followedVenues.has(venue.name);
           const isLoading = loadingFollows.has(venue.name);
           const isExpanded = expandedVenue === venue.name;
           const reviews = venueReviews(venue.name);
 
-          return (
+          return venueView === 'grid' ? (
+            <div
+              key={venue.name}
+              onClick={() => onVenueClick(venue.name)}
+              className={`group bg-noctvm-surface rounded-xl border cursor-pointer hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow overflow-hidden h-full flex flex-col ${isFollowed ? 'border-noctvm-violet/30' : 'border-noctvm-border'}`}
+              style={{ animationDelay: `${idx * 50}ms` }}
+            >
+              {/* Venue color header */}
+              <div className={`h-[100px] bg-gradient-to-br ${getVenueColor(venue.name)} relative flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-black/20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getVenueLogo(venue.name)}
+                    alt={venue.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const el = e.target as HTMLImageElement;
+                      el.style.display = 'none';
+                      el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+                    }}
+                  />
+                  <span className={`fallback hidden text-2xl font-bold text-white`}>{venue.name[0]}</span>
+                </div>
+                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/80 text-white text-[9px] font-semibold">Following</span>}
+              </div>
+              {/* Info */}
+              <div className="p-3 flex flex-col flex-1">
+                <h3 className="font-heading font-semibold text-white text-sm leading-tight mb-1 group-hover:text-noctvm-violet transition-colors line-clamp-1">{venue.name}</h3>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <StarRating rating={venue.rating} />
+                  <span className="text-[9px] text-noctvm-silver/60">{venue.rating}</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mb-auto">
+                  {venue.genres.slice(0, 2).map(g => (
+                    <span key={g} className="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{g}</span>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between pt-2 mt-2 border-t border-noctvm-border">
+                  <span className="text-[9px] text-noctvm-silver/40 font-mono">Cap. {venue.capacity}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleFollow(venue.name); }}
+                    disabled={isLoading || !user}
+                    className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${isFollowed ? 'bg-noctvm-violet/10 text-noctvm-violet' : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-white'} disabled:opacity-40`}
+                  >
+                    {isLoading ? '...' : isFollowed ? 'Following' : 'Follow'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div
               key={venue.name}
               className={`bg-noctvm-surface rounded-2xl border transition-all duration-300 overflow-hidden animate-fade-in-up cursor-pointer ${

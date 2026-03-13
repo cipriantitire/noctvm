@@ -2,7 +2,13 @@
 
 import { SearchIcon } from './icons';
 
-const GENRE_FILTERS = ['All', 'Techno', 'House', 'Hip-Hop', 'Manele', 'Live', 'Party', 'DnB', 'Reggaeton'];
+const GENRE_FILTERS = [
+  'All', 'Techno', 'House', 'Electronic', 'Minimal', 'Underground',
+  'Club', 'Party', 'Hip-Hop', 'Reggaeton', 'Latin', 'Live Music',
+  'Alternative', 'Drum & Bass', 'Hard Dance', 'Hardcore', 'Dub',
+  'Reggae', 'Bass Music', 'Experimental', 'Deep House', 'Acid',
+  'EBM', 'Nightlife', 'Queer'
+];
 
 interface FilterBarProps {
   activeGenres: string[];

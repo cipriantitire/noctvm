@@ -256,39 +256,52 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <FilterBar
-                  activeGenres={activeGenres}
-                  onGenreChange={setActiveGenres}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
-                />
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</span>
-                </div>
-                <div
-                  key={viewMode}
-                  className={`view-transition ${
-                    viewMode === 'portrait'
-                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-stretch'
-                      : 'grid grid-cols-1 lg:grid-cols-2 gap-4'
-                  }`}
-                >
-                  {filteredEvents.map((event, index) => (
-                    <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
-                      <EventCard event={event} variant={viewMode} onClick={(e) => setSelectedEvent(e)} />
+                {activeCity === 'constanta' ? (
+                  <div className="text-center py-20 animate-fade-in">
+                    <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/20 flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-noctvm-violet/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
                     </div>
-                  ))}
-                </div>
-                {filteredEvents.length === 0 && (
-                  <div className="text-center py-16 animate-fade-in">
-                    <div className="w-16 h-16 rounded-full bg-noctvm-surface flex items-center justify-center mx-auto mb-4">
-                      <MoonIcon className="w-8 h-8 text-noctvm-violet/50" />
-                    </div>
-                    <p className="text-noctvm-silver text-sm">No events found</p>
-                    <p className="text-noctvm-silver/50 text-xs mt-1">Try adjusting your filters</p>
+                    <h3 className="font-heading text-lg font-bold text-white mb-2">Constanța — Coming Soon</h3>
+                    <p className="text-sm text-noctvm-silver/60">We&apos;re working on bringing the best of Constanța&apos;s nightlife to NOCTVM.</p>
+                    <p className="text-xs text-noctvm-silver/30 mt-2">Summer 2026</p>
                   </div>
+                ) : (
+                  <>
+                    <FilterBar
+                      activeGenres={activeGenres}
+                      onGenreChange={setActiveGenres}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      viewMode={viewMode}
+                      onViewModeChange={setViewMode}
+                    />
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</span>
+                    </div>
+                    <div
+                      key={viewMode}
+                      className={`view-transition ${
+                        viewMode === 'portrait'
+                          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-stretch'
+                          : 'grid grid-cols-1 lg:grid-cols-2 gap-4'
+                      }`}
+                    >
+                      {filteredEvents.map((event, index) => (
+                        <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
+                          <EventCard event={event} variant={viewMode} onClick={(e) => setSelectedEvent(e)} />
+                        </div>
+                      ))}
+                    </div>
+                    {filteredEvents.length === 0 && (
+                      <div className="text-center py-16 animate-fade-in">
+                        <div className="w-16 h-16 rounded-full bg-noctvm-surface flex items-center justify-center mx-auto mb-4">
+                          <MoonIcon className="w-8 h-8 text-noctvm-violet/50" />
+                        </div>
+                        <p className="text-noctvm-silver text-sm">No events found</p>
+                        <p className="text-noctvm-silver/50 text-xs mt-1">Try adjusting your filters</p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
