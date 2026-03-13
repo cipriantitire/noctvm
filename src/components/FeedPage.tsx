@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { StoryUser, RealStory } from './StoriesViewerModal';
 import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,68 +26,6 @@ interface FeedPost {
   imageTheme: { gradient: string; scene: string };
   imageUrl: string | null;
 }
-
-// ── Mock data (Explore tab) ──────────────────────────────────────────────────
-
-const MOCK_POSTS: FeedPost[] = [
-  {
-    id: 'mock-1', userId: null,
-    user: { name: 'Alexandra M.', handle: '@alexm_buc', avatar: 'A', verified: true },
-    caption: 'Best techno night in months. The sound system at Control is unmatched. Three hours of pure underground bliss.',
-    venue: { name: 'Control Club', tagged: true }, tags: ['#techno', '#nightlife', '#bucharest', '#underground'],
-    likes: 234, comments: [{ user: 'dj_raven', text: 'That set was insane!' }, { user: 'maria.dance', text: 'wish I was there omg' }, { user: 'night.owl', text: 'Control never disappoints' }],
-    timeAgo: '2h', liked: false, saved: false, imageUrl: null,
-    imageTheme: { gradient: 'from-red-900 via-purple-950 to-black', scene: 'Strobe lights cutting through fog over a packed dancefloor' },
-  },
-  {
-    id: 'mock-2', userId: null,
-    user: { name: 'Mihai D.', handle: '@mihai.deep', avatar: 'M', verified: false },
-    caption: 'Friday vibes at Nook. House music and good people. What more do you need?',
-    venue: { name: 'Nook Club', tagged: true }, tags: ['#house', '#fridaynight', '#nookclub'],
-    likes: 128, comments: [{ user: 'elena.groove', text: 'The DJ was amazing!' }, { user: 'andrei_buc', text: 'Next Friday again? Im in' }],
-    timeAgo: '5h', liked: true, saved: false, imageUrl: null,
-    imageTheme: { gradient: 'from-blue-900 via-indigo-950 to-black', scene: 'Warm amber lights over an intimate bar scene' },
-  },
-  {
-    id: 'mock-3', userId: null,
-    user: { name: 'Ioana R.', handle: '@ioana.rave', avatar: 'I', verified: true },
-    caption: 'Expirat never fails. That industrial vibe with the underground sound... pure magic.',
-    venue: { name: 'Expirat Halele Carol', tagged: true }, tags: ['#underground', '#rave', '#expirat'],
-    likes: 456, comments: [{ user: 'techno.kid', text: 'Best venue in the city hands down' }, { user: 'dark_bass', text: 'Those visuals were next level' }, { user: 'radu.night', text: 'See you next week!' }, { user: 'ana.dance', text: 'Legendary night' }],
-    timeAgo: '8h', liked: false, saved: true, imageUrl: null,
-    imageTheme: { gradient: 'from-emerald-950 via-gray-950 to-black', scene: 'Raw concrete hall with green lasers slicing through haze' },
-  },
-  {
-    id: 'mock-4', userId: null,
-    user: { name: 'Stefan V.', handle: '@stef.vinyl', avatar: 'S', verified: false },
-    caption: 'Guesthouse with the crew. Multi-room setup means you always find your vibe.',
-    venue: { name: 'Club Guesthouse', tagged: true }, tags: ['#clubbing', '#crew', '#guesthouse'],
-    likes: 89, comments: [{ user: 'liviu.bass', text: 'Room 2 was fire, chef kiss' }],
-    timeAgo: '12h', liked: false, saved: false, imageUrl: null,
-    imageTheme: { gradient: 'from-amber-900 via-orange-950 to-black', scene: 'Cozy multi-room club with warm lights spilling between doorways' },
-  },
-  {
-    id: 'mock-5', userId: null,
-    user: { name: 'Catalina P.', handle: '@cat.party', avatar: 'C', verified: true },
-    caption: 'Opening night was everything. New sound system, new lighting rig, same incredible energy.',
-    venue: { name: 'OXYA Club', tagged: true }, tags: ['#opening', '#newclub', '#bucharest'],
-    likes: 312, comments: [{ user: 'night.rider', text: 'Cant wait to go back!' }, { user: 'diana.groove', text: 'The LED walls were insane' }],
-    timeAgo: '1d', liked: true, saved: false, imageUrl: null,
-    imageTheme: { gradient: 'from-fuchsia-900 via-violet-950 to-black', scene: 'Futuristic LED panels pulsing with color over a euphoric crowd' },
-  },
-];
-
-const AVATAR_COLORS = ['from-red-500 to-orange-500', 'from-blue-500 to-cyan-500', 'from-emerald-500 to-teal-500', 'from-noctvm-violet to-purple-500', 'from-pink-500 to-rose-500'];
-
-const STORY_USERS = [
-  { name: 'Alexandra', avatar: 'A', hasNew: true, color: 'from-red-500 to-orange-500' },
-  { name: 'Mihai', avatar: 'M', hasNew: true, color: 'from-blue-500 to-cyan-500' },
-  { name: 'Ioana', avatar: 'I', hasNew: true, color: 'from-emerald-500 to-teal-500' },
-  { name: 'Stefan', avatar: 'S', hasNew: false, color: 'from-noctvm-violet to-purple-500' },
-  { name: 'Catalina', avatar: 'C', hasNew: true, color: 'from-pink-500 to-rose-500' },
-  { name: 'Andrei', avatar: 'R', hasNew: false, color: 'from-amber-500 to-orange-500' },
-  { name: 'Diana', avatar: 'D', hasNew: true, color: 'from-indigo-500 to-blue-500' },
-];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -130,15 +69,18 @@ interface FeedPageProps {
   onVenueClick: (venueName: string) => void;
   onOpenCreatePost: () => void;
   onOpenCreateStory: () => void;
-  onOpenStories: (index: number) => void;
+  onOpenStories: (users: StoryUser[], index: number) => void;
 }
 
 export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories }: FeedPageProps) {
   const { user, profile } = useAuth();
   const [subTab, setSubTab] = useState<'following' | 'explore' | 'friends'>('explore');
 
+  // Stories
+  const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
+
   // Per-tab post lists
-  const [explorePosts, setExplorePosts] = useState<FeedPost[]>(MOCK_POSTS);
+  const [explorePosts, setExplorePosts] = useState<FeedPost[]>([]);
   const [followingPosts, setFollowingPosts] = useState<FeedPost[]>([]);
   const [friendsPosts, setFriendsPosts] = useState<FeedPost[]>([]);
   const [loadingTab, setLoadingTab] = useState(false);
@@ -148,6 +90,69 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [activeDotsId, setActiveDotsId] = useState<string | null>(null);
   const [sharePostId, setSharePostId] = useState<string | null>(null);
+
+  // ── Load active stories ──────────────────────────────────────────────────
+
+  useEffect(() => { fetchActiveStories(); }, []);
+
+  const fetchActiveStories = async () => {
+    const { data } = await supabase
+      .from('stories')
+      .select('id, image_url, caption, venue_name, created_at, expires_at, user_id, profiles(display_name, username, avatar_url)')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false });
+
+    if (!data) return;
+
+    const userMap = new Map<string, StoryUser>();
+    const colors = ['from-red-500 to-orange-500', 'from-blue-500 to-cyan-500', 'from-emerald-500 to-teal-500',
+      'from-noctvm-violet to-purple-500', 'from-pink-500 to-rose-500', 'from-amber-500 to-orange-500'];
+    let colorIdx = 0;
+
+    for (const row of data) {
+      const prof = row.profiles as unknown as { display_name: string; username: string; avatar_url: string | null } | null;
+      const story: RealStory = {
+        id: row.id,
+        image_url: row.image_url,
+        caption: row.caption,
+        venue_name: row.venue_name,
+        created_at: row.created_at,
+      };
+      if (!userMap.has(row.user_id)) {
+        const name = prof?.display_name || prof?.username || 'User';
+        userMap.set(row.user_id, {
+          id: row.user_id,
+          name,
+          avatar: name[0].toUpperCase(),
+          avatarUrl: prof?.avatar_url,
+          hasNew: true,
+          color: colors[colorIdx++ % colors.length],
+          stories: [],
+        });
+      }
+      userMap.get(row.user_id)!.stories.push(story);
+    }
+
+    setLiveStoryUsers(Array.from(userMap.values()));
+  };
+
+  // ── Load explore posts ────────────────────────────────────────────────────
+
+  useEffect(() => { fetchExplorePosts(); }, []);
+
+  const fetchExplorePosts = async () => {
+    setLoadingTab(true);
+    try {
+      const { data } = await supabase
+        .from('posts')
+        .select('*, profiles(display_name, username, avatar_url)')
+        .order('created_at', { ascending: false })
+        .limit(40);
+      setExplorePosts((data || []).map(mapSupabasePost));
+    } finally {
+      setLoadingTab(false);
+    }
+  };
 
   // ── Load real posts for Following / Friends tabs ─────────────────────────
 
@@ -360,15 +365,18 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
               <span className="text-[9px] text-noctvm-silver">Add Story</span>
             </div>
 
-            {STORY_USERS.map((su, i) => (
+            {liveStoryUsers.map((su, i) => (
               <div
-                key={su.name}
-                onClick={() => onOpenStories(i)}
+                key={su.id}
+                onClick={() => onOpenStories(liveStoryUsers, i)}
                 className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer"
               >
                 <div className={`w-16 h-16 rounded-full p-[2px] ${su.hasNew ? 'bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500' : 'bg-noctvm-border'}`}>
-                  <div className={`w-full h-full rounded-full bg-gradient-to-br ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center ring-2 ring-noctvm-black`}>
-                    <span className="text-sm font-bold text-white">{su.avatar}</span>
+                  <div className={`w-full h-full rounded-full bg-gradient-to-br ${su.color} flex items-center justify-center ring-2 ring-noctvm-black overflow-hidden`}>
+                    {su.avatarUrl
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={su.avatarUrl} alt="" className="w-full h-full object-cover" />
+                      : <span className="text-sm font-bold text-white">{su.avatar}</span>}
                   </div>
                 </div>
                 <span className="text-[9px] text-noctvm-silver truncate max-w-[64px]">{su.name}</span>
@@ -396,7 +404,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
               {/* ── Post header ────────────────────────────────── */}
               <div className="flex items-center gap-3 p-3">
-                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${AVATAR_COLORS[idx % AVATAR_COLORS.length]} flex items-center justify-center flex-shrink-0`}>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0">
                   <span className="text-xs font-bold text-white">{post.user.avatar}</span>
                 </div>
                 <div className="flex-1 min-w-0">

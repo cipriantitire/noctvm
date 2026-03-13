@@ -4,19 +4,22 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
-export interface StoryUser {
-  name: string;
-  avatar: string;
-  hasNew: boolean;
-  color: string; // Tailwind gradient string e.g. 'from-red-500 to-orange-500'
+export interface RealStory {
+  id: string;
+  image_url: string | null;
+  caption: string | null;
+  venue_name: string | null;
+  created_at: string;
 }
 
-// ── Internal types ───────────────────────────────────────────────────────────
-
-interface Story {
-  id: number;
-  caption: string;
-  timeAgo: string;
+export interface StoryUser {
+  id: string;
+  name: string;
+  avatar: string;          // single letter fallback
+  avatarUrl?: string | null;
+  hasNew: boolean;
+  color: string;           // Tailwind gradient, used as bg fallback
+  stories: RealStory[];
 }
 
 interface StoriesViewerModalProps {
@@ -26,253 +29,161 @@ interface StoriesViewerModalProps {
   startIndex: number;
 }
 
-// ── Mock story data per user ──────────────────────────────────────────────────
-
-const STORY_CAPTIONS = [
-  'Best night ever 🔥',
-  'Vibes immaculate 🎧',
-  "Can't stop, won't stop",
-  'Living for this moment ✨',
-  'Underground all night long',
-];
-
-function buildUserStories(userIndex: number): Story[] {
-  const count = 2 + (userIndex % 2); // 2 or 3 stories per user
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    caption: STORY_CAPTIONS[(userIndex + i) % STORY_CAPTIONS.length],
-    timeAgo: `${i + 1}h`,
-  }));
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
 }
 
 const STORY_DURATION_MS = 5000;
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export default function StoriesViewerModal({
-  isOpen,
-  onClose,
-  users,
-  startIndex,
+  isOpen, onClose, users, startIndex,
 }: StoriesViewerModalProps) {
-  const [isClosing, setIsClosing] = useState(false);
-  const [userIndex, setUserIndex] = useState(startIndex);
-  const [storyIndex, setStoryIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [isClosing, setIsClosing]     = useState(false);
+  const [userIndex, setUserIndex]     = useState(startIndex);
+  const [storyIndex, setStoryIndex]   = useState(0);
+  const [progress, setProgress]       = useState(0);
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startTimeRef = useRef<number>(0);
-  const elapsedRef = useRef<number>(0);
+  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef  = useRef<number>(0);
 
-  const currentUser = users[userIndex] ?? null;
-  const stories = currentUser ? buildUserStories(userIndex) : [];
+  const currentUser  = users[userIndex] ?? null;
+  const stories      = currentUser?.stories ?? [];
   const totalStories = stories.length;
-
-  // ── Close ──────────────────────────────────────────────────────────────────
 
   const handleClose = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsClosing(true);
   }, []);
 
-  // ── Navigation ────────────────────────────────────────────────────────────
-
-  const resetProgress = () => {
-    setProgress(0);
-    elapsedRef.current = 0;
-  };
+  const resetProgress = () => { setProgress(0); };
 
   const advanceStory = useCallback(() => {
     if (storyIndex < totalStories - 1) {
-      setStoryIndex((s) => s + 1);
-      resetProgress();
+      setStoryIndex(s => s + 1); resetProgress();
     } else if (userIndex < users.length - 1) {
-      setUserIndex((u) => u + 1);
-      setStoryIndex(0);
-      resetProgress();
+      setUserIndex(u => u + 1); setStoryIndex(0); resetProgress();
     } else {
       handleClose();
     }
   }, [storyIndex, totalStories, userIndex, users.length, handleClose]);
 
   const goBack = useCallback(() => {
-    if (storyIndex > 0) {
-      setStoryIndex((s) => s - 1);
-      resetProgress();
-    } else if (userIndex > 0) {
-      setUserIndex((u) => u - 1);
-      setStoryIndex(0);
-      resetProgress();
-    }
+    if (storyIndex > 0) { setStoryIndex(s => s - 1); resetProgress(); }
+    else if (userIndex > 0) { setUserIndex(u => u - 1); setStoryIndex(0); resetProgress(); }
   }, [storyIndex, userIndex]);
-
-  // ── Reset on open ─────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (isOpen) {
-      setUserIndex(startIndex);
-      setStoryIndex(0);
-      setProgress(0);
-      elapsedRef.current = 0;
-      setIsClosing(false);
+      setUserIndex(startIndex); setStoryIndex(0);
+      setProgress(0); setIsClosing(false);
     }
   }, [isOpen, startIndex]);
 
-  // ── Progress timer ────────────────────────────────────────────────────────
-
   useEffect(() => {
-    if (!isOpen || isClosing) {
+    if (!isOpen || isClosing || !totalStories) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
-
-    // Reset progress for new story
     setProgress(0);
-    elapsedRef.current = 0;
     startTimeRef.current = Date.now();
-
     timerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTimeRef.current;
-      elapsedRef.current = elapsed;
       const pct = Math.min((elapsed / STORY_DURATION_MS) * 100, 100);
       setProgress(pct);
-      if (elapsed >= STORY_DURATION_MS) {
-        clearInterval(timerRef.current!);
-        advanceStory();
-      }
+      if (elapsed >= STORY_DURATION_MS) { clearInterval(timerRef.current!); advanceStory(); }
     }, 40);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isClosing, storyIndex, userIndex]);
-
-  // ── Keyboard navigation ───────────────────────────────────────────────────
 
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
+      if (e.key === 'Escape')      handleClose();
       else if (e.key === 'ArrowRight') advanceStory();
-      else if (e.key === 'ArrowLeft') goBack();
+      else if (e.key === 'ArrowLeft')  goBack();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, handleClose, advanceStory, goBack]);
 
-  // ── Render guard ──────────────────────────────────────────────────────────
-
   if (!isOpen && !isClosing) return null;
-  if (!currentUser) return null;
+  if (!currentUser || !totalStories) return null;
 
   const story = stories[storyIndex] ?? stories[0];
 
   return (
     <div
       className={`fixed inset-0 z-[100] overflow-hidden ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
-      onAnimationEnd={() => {
-        if (isClosing) {
-          setIsClosing(false);
-          onClose();
-        }
-      }}
+      onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
     >
-      {/* ── Gradient background ─────────────────────────────────────────── */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color} opacity-80`} />
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Background: real image or gradient fallback */}
+      {story.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={story.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color}`} />
+      )}
+      <div className="absolute inset-0 bg-black/40" />
 
-      {/* ── Progress bars ───────────────────────────────────────────────── */}
+      {/* Progress bars */}
       <div className="absolute top-2 left-3 right-3 flex gap-1 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {stories.map((_, i) => (
           <div key={i} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full"
-              style={{
-                width:
-                  i < storyIndex ? '100%' :
-                  i === storyIndex ? `${progress}%` :
-                  '0%',
-                transition: i === storyIndex ? 'none' : undefined,
-              }}
-            />
+            <div className="h-full bg-white rounded-full" style={{ width: i < storyIndex ? '100%' : i === storyIndex ? `${progress}%` : '0%' }} />
           </div>
         ))}
       </div>
 
-      {/* ── Header: avatar + name + close ───────────────────────────────── */}
+      {/* Header */}
       <div className="absolute top-7 left-0 right-0 flex items-center justify-between px-4 z-20">
         <div className="flex items-center gap-2.5">
-          <div
-            className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-white text-sm font-bold border-2 border-white/40 shadow-lg`}
-          >
-            {currentUser.avatar}
+          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-white text-sm font-bold border-2 border-white/40 shadow-lg overflow-hidden`}>
+            {currentUser.avatarUrl
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+              : currentUser.avatar}
           </div>
           <div>
             <div className="text-white text-sm font-semibold leading-tight drop-shadow">{currentUser.name}</div>
-            {story && <div className="text-white/60 text-[10px]">{story.timeAgo}</div>}
+            <div className="text-white/60 text-[10px]">{timeAgo(story.created_at)}</div>
           </div>
         </div>
-        <button
-          onClick={handleClose}
-          className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors"
-          aria-label="Close stories"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+        <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors" aria-label="Close">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </div>
 
-      {/* ── Story content (centre) ───────────────────────────────────────── */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <p className="text-white text-2xl font-bold text-center px-10 drop-shadow-2xl leading-snug">
-          {story?.caption}
-        </p>
-      </div>
+      {/* Story caption */}
+      {story.caption && (
+        <div className="absolute bottom-0 left-0 right-0 px-6 z-20 pointer-events-none" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom))' }}>
+          <p className="text-white text-sm text-center drop-shadow-lg">{story.caption}</p>
+          {story.venue_name && <p className="text-white/60 text-xs text-center mt-1">📍 {story.venue_name}</p>}
+        </div>
+      )}
 
-      {/* ── Tap zones (below header, above content) ─────────────────────── */}
+      {/* Tap zones */}
       <div className="absolute inset-0 flex z-10" style={{ top: '80px' }}>
-        {/* Left: go back */}
-        <div
-          className="flex-1 h-full cursor-pointer select-none"
-          onClick={goBack}
-          aria-label="Previous story"
-        />
-        {/* Right: advance */}
-        <div
-          className="flex-1 h-full cursor-pointer select-none"
-          onClick={advanceStory}
-          aria-label="Next story"
-        />
+        <div className="flex-1 h-full cursor-pointer select-none" onClick={goBack} />
+        <div className="flex-1 h-full cursor-pointer select-none" onClick={advanceStory} />
       </div>
 
-      {/* ── Caption bottom ───────────────────────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 px-6 pb-12 z-20 pointer-events-none" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom))' }}>
-        <p className="text-white/80 text-sm text-center">{story?.caption}</p>
-      </div>
-
-      {/* ── User navigation hints ────────────────────────────────────────── */}
+      {/* User nav arrows */}
       {userIndex > 0 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setUserIndex((u) => u - 1); setStoryIndex(0); resetProgress(); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all"
-          aria-label="Previous user"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+        <button onClick={e => { e.stopPropagation(); setUserIndex(u => u - 1); setStoryIndex(0); resetProgress(); }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
       )}
       {userIndex < users.length - 1 && (
-        <button
-          onClick={(e) => { e.stopPropagation(); setUserIndex((u) => u + 1); setStoryIndex(0); resetProgress(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all"
-          aria-label="Next user"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+        <button onClick={e => { e.stopPropagation(); setUserIndex(u => u + 1); setStoryIndex(0); resetProgress(); }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
         </button>
       )}
     </div>

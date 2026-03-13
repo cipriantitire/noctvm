@@ -24,16 +24,6 @@ import { NoctEvent } from '@/lib/types';
 import { useLiquidGlass } from '@/hooks/useLiquidGlass';
 import { useAuth } from '@/contexts/AuthContext';
 
-const FEED_STORY_USERS: StoryUser[] = [
-  { name: 'Alexandra', avatar: 'A', hasNew: true,  color: 'from-red-500 to-orange-500' },
-  { name: 'Mihai',     avatar: 'M', hasNew: true,  color: 'from-blue-500 to-cyan-500' },
-  { name: 'Ioana',     avatar: 'I', hasNew: true,  color: 'from-emerald-500 to-teal-500' },
-  { name: 'Stefan',    avatar: 'S', hasNew: false, color: 'from-noctvm-violet to-purple-500' },
-  { name: 'Catalina',  avatar: 'C', hasNew: true,  color: 'from-pink-500 to-rose-500' },
-  { name: 'Andrei',    avatar: 'R', hasNew: false, color: 'from-amber-500 to-orange-500' },
-  { name: 'Diana',     avatar: 'D', hasNew: true,  color: 'from-indigo-500 to-blue-500' },
-];
-
 type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
 
 // Profile views:
@@ -67,6 +57,13 @@ export default function Home() {
   const [venueClosing, setVenueClosing] = useState(false);
   const [showStories, setShowStories] = useState(false);
   const [storyStartIndex, setStoryStartIndex] = useState(0);
+  const [storyUsers, setStoryUsers] = useState<StoryUser[]>([]);
+
+  const handleOpenStories = (users: StoryUser[], index: number) => {
+    setStoryUsers(users);
+    setStoryStartIndex(index);
+    setShowStories(true);
+  };
 
   useLiquidGlass();
 
@@ -158,7 +155,7 @@ export default function Home() {
       <StoriesViewerModal
         isOpen={showStories}
         onClose={() => setShowStories(false)}
-        users={FEED_STORY_USERS}
+        users={storyUsers}
         startIndex={storyStartIndex}
       />
 
@@ -280,7 +277,7 @@ export default function Home() {
                   onVenueClick={handleVenueClick}
                   onOpenCreatePost={() => setShowCreatePost(true)}
                   onOpenCreateStory={() => setShowCreateStory(true)}
-                  onOpenStories={(index) => { setStoryStartIndex(index); setShowStories(true); }}
+                  onOpenStories={(users, index) => handleOpenStories(users, index)}
                 />
               </div>
             )}
@@ -384,7 +381,7 @@ export default function Home() {
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
                     onOpenCreatePost={() => setShowCreatePost(true)}
-                    onOpenStories={(index: number) => { setStoryStartIndex(index); setShowStories(true); }}
+                    onOpenStories={(users, index) => handleOpenStories(users, index)}
                   />
                 )}
 
