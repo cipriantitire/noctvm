@@ -173,6 +173,16 @@ body {
   }
 }
 
+@keyframes scaleOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.95) translateY(4px); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 /* Slide in from right - venue overlay */
 @keyframes slideInRight {
   from {
@@ -223,6 +233,16 @@ body {
 
 .animate-scale-in {
   animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.18s ease-in both;
+  pointer-events: none;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.18s ease-in both;
+  pointer-events: none;
 }
 
 .animate-slide-in-right {
@@ -295,7 +315,11 @@ body {
 
 /* Smooth tab content transition */
 .tab-content {
-  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: tabFadeIn 0.3s ease-out both;
+}
+@keyframes tabFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* Backdrop fade */
@@ -320,6 +344,40 @@ body {
     transform: scale(1);
     filter: blur(0px);
   }
+}
+
+/* ========================= */
+/* ANIMATE SLIDE UP          */
+/* (bottom sheet)            */
+/* ========================= */
+@keyframes slideUpFromBottom {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1;   }
+}
+.animate-slide-up {
+  animation: slideUpFromBottom 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ========================= */
+/* LIQUID GLASS PRICE BADGE  */
+/* ========================= */
+.liquid-glass-price {
+  background: linear-gradient(145deg, rgba(16,185,129,0.32) 0%, rgba(16,185,129,0.14) 55%, rgba(16,185,129,0.26) 100%);
+  backdrop-filter: blur(24px) saturate(2.2);
+  -webkit-backdrop-filter: blur(24px) saturate(2.2);
+  border: 1px solid rgba(52,211,153,0.32);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.14) inset, 0 4px 20px rgba(0,0,0,0.55), 0 0 28px rgba(16,185,129,0.22);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass-price::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 52%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 /* ========================= */
