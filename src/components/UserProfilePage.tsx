@@ -1,25 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { GridIcon, BookmarkIcon, TagIcon, UserIcon } from './icons';
+import type { StoryUser, RealStory } from './StoriesViewerModal';
+import CreateHighlightModal from './CreateHighlightModal';
 
 // ── Highlight types ───────────────────────────────────────────────────────────
 
-interface Highlight {
+interface DbHighlight {
   id: string;
   name: string;
-  color: string; // Tailwind gradient
+  color: string;
+  cover_url: string | null;
 }
-
-const HIGHLIGHT_COLORS = [
-  { label: 'Violet', value: 'from-noctvm-violet to-purple-500' },
-  { label: 'Pink',   value: 'from-pink-500 to-rose-500' },
-  { label: 'Cyan',   value: 'from-cyan-500 to-blue-500' },
-  { label: 'Amber',  value: 'from-amber-500 to-orange-500' },
-  { label: 'Emerald',value: 'from-emerald-500 to-teal-500' },
-  { label: 'Red',    value: 'from-red-500 to-rose-600' },
-];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -27,7 +22,7 @@ interface UserProfilePageProps {
   onOpenAuth: () => void;
   onSettingsClick: () => void;
   onOpenCreatePost?: () => void;
-  onOpenStories?: (index: number) => void;
+  onOpenStories?: (users: StoryUser[], index: number) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -42,27 +37,59 @@ export default function UserProfilePage({
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
-  const [showNewHighlight, setShowNewHighlight] = useState(false);
-  const [newHighlightName, setNewHighlightName] = useState('');
-  const [newHighlightColor, setNewHighlightColor] = useState(HIGHLIGHT_COLORS[0].value);
+  const [highlights, setHighlights] = useState<DbHighlight[]>([]);
+  const [showCreateHighlight, setShowCreateHighlight] = useState(false);
 
-  const createHighlight = () => {
-    const name = newHighlightName.trim();
-    if (!name) return;
-    setHighlights((prev) => [
-      ...prev,
-      { id: Date.now().toString(), name, color: newHighlightColor },
-    ]);
-    setNewHighlightName('');
-    setNewHighlightColor(HIGHLIGHT_COLORS[0].value);
-    setShowNewHighlight(false);
+  // ── Fetch highlights ──────────────────────────────────────────────────────
+
+  const fetchHighlights = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('highlights')
+      .select('id, name, color, cover_url')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
+    if (data) setHighlights(data as DbHighlight[]);
+  }, [user]);
+
+  useEffect(() => {
+    fetchHighlights();
+  }, [fetchHighlights]);
+
+  // ── Open highlight in stories viewer ─────────────────────────────────────
+
+  const openHighlight = async (hl: DbHighlight) => {
+    const { data } = await supabase
+      .from('highlight_stories')
+      .select('stories(id, image_url, caption, venue_name, created_at)')
+      .eq('highlight_id', hl.id)
+      .order('added_at', { ascending: true });
+
+    const realStories: RealStory[] = (data ?? [])
+      .map((row: any) => row.stories)
+      .filter(Boolean);
+
+    if (!realStories.length) return;
+
+    const storyUser: StoryUser = {
+      id: hl.id,
+      name: hl.name,
+      avatar: hl.name[0].toUpperCase(),
+      avatarUrl: hl.cover_url,
+      hasNew: false,
+      color: hl.color,
+      stories: realStories,
+    };
+
+    onOpenStories?.([storyUser], 0);
   };
 
-  const cancelNewHighlight = () => {
-    setNewHighlightName('');
-    setNewHighlightColor(HIGHLIGHT_COLORS[0].value);
-    setShowNewHighlight(false);
+  // ── Delete highlight ──────────────────────────────────────────────────────
+
+  const deleteHighlight = async (hlId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await supabase.from('highlights').delete().eq('id', hlId);
+    setHighlights((prev) => prev.filter((h) => h.id !== hlId));
   };
 
   // ── Not logged in ─────────────────────────────────────────────────────────
@@ -177,7 +204,7 @@ export default function UserProfilePage({
 
           {/* "New" button */}
           <button
-            onClick={() => setShowNewHighlight(true)}
+            onClick={() => setShowCreateHighlight(true)}
             className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group"
             aria-label="Create new highlight"
           >
@@ -190,63 +217,40 @@ export default function UserProfilePage({
           </button>
 
           {/* Existing highlights */}
-          {highlights.map((hl, i) => (
-            <button
+          {highlights.map((hl) => (
+            <div
               key={hl.id}
-              onClick={() => onOpenStories?.(i % 7)}
-              className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group"
+              className="flex flex-col items-center gap-1 flex-shrink-0 relative group"
             >
-              <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all`}>
-                <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
-              </div>
+              <button
+                onClick={() => openHighlight(hl)}
+                className="focus:outline-none"
+              >
+                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} overflow-hidden flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all`}>
+                  {hl.cover_url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={hl.cover_url} alt={hl.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
+                  )}
+                </div>
+              </button>
+
+              {/* Delete button — visible on hover */}
+              <button
+                onClick={(e) => deleteHighlight(hl.id, e)}
+                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver hover:text-white hover:bg-red-500/80 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                aria-label={`Delete ${hl.name}`}
+              >
+                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
               <span className="text-[9px] text-noctvm-silver truncate max-w-[4rem] text-center">{hl.name}</span>
-            </button>
+            </div>
           ))}
         </div>
-
-        {/* Inline create form */}
-        {showNewHighlight && (
-          <div className="mt-3 p-3 rounded-xl bg-noctvm-surface border border-noctvm-border animate-scale-in">
-            <p className="text-xs font-semibold text-white mb-2">New Highlight</p>
-            <input
-              type="text"
-              value={newHighlightName}
-              onChange={(e) => setNewHighlightName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') createHighlight(); if (e.key === 'Escape') cancelNewHighlight(); }}
-              placeholder="Collection name…"
-              maxLength={24}
-              autoFocus
-              className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2 text-sm text-white placeholder-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 mb-3"
-            />
-            {/* Color swatches */}
-            <div className="flex gap-2 mb-3">
-              {HIGHLIGHT_COLORS.map((c) => (
-                <button
-                  key={c.value}
-                  onClick={() => setNewHighlightColor(c.value)}
-                  title={c.label}
-                  className={`w-7 h-7 rounded-full bg-gradient-to-br ${c.value} border-2 transition-all ${newHighlightColor === c.value ? 'border-white scale-110' : 'border-transparent hover:scale-105'}`}
-                />
-              ))}
-            </div>
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={cancelNewHighlight}
-                className="flex-1 py-1.5 rounded-lg border border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createHighlight}
-                disabled={!newHighlightName.trim()}
-                className="flex-1 py-1.5 rounded-lg bg-noctvm-violet text-white text-xs font-semibold hover:bg-noctvm-violet/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── Tab bar ───────────────────────────────────────────── */}
@@ -293,6 +297,16 @@ export default function UserProfilePage({
           )}
         </div>
       </div>
+
+      {/* ── Create Highlight Modal ────────────────────────────── */}
+      <CreateHighlightModal
+        isOpen={showCreateHighlight}
+        onClose={() => setShowCreateHighlight(false)}
+        onCreated={() => {
+          setShowCreateHighlight(false);
+          fetchHighlights();
+        }}
+      />
     </div>
   );
 }
