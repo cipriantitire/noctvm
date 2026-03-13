@@ -78,6 +78,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
   // Stories
   const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
+  const [showMyStoryDropdown, setShowMyStoryDropdown] = useState(false);
 
   // Per-tab post lists
   const [explorePosts, setExplorePosts] = useState<FeedPost[]>([]);
@@ -87,6 +88,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
   // UI state
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const [loadedComments, setLoadedComments] = useState<Record<string, {user: string; text: string}[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [activeDotsId, setActiveDotsId] = useState<string | null>(null);
   const [sharePostId, setSharePostId] = useState<string | null>(null);
@@ -148,7 +150,20 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         .select('*, profiles(display_name, username, avatar_url)')
         .order('created_at', { ascending: false })
         .limit(40);
-      setExplorePosts((data || []).map(mapSupabasePost));
+
+      let likedSet = new Set<string>();
+      let savedSet = new Set<string>();
+      if (user && data && data.length > 0) {
+        const postIds = data.map((p: any) => p.id);
+        const [likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+          supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+        ]);
+        likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
+        savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
+      }
+
+      setExplorePosts((data || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
     } finally {
       setLoadingTab(false);
     }
@@ -184,7 +199,19 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         .order('created_at', { ascending: false })
         .limit(30);
 
-      setFollowingPosts((posts || []).map(mapSupabasePost));
+      let likedSet = new Set<string>();
+      let savedSet = new Set<string>();
+      if (posts && posts.length > 0) {
+        const postIds = posts.map((p: any) => p.id);
+        const [likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+          supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+        ]);
+        likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
+        savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
+      }
+
+      setFollowingPosts((posts || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
     } finally {
       setLoadingTab(false);
     }
@@ -221,7 +248,19 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         .order('created_at', { ascending: false })
         .limit(30);
 
-      setFriendsPosts((posts || []).map(mapSupabasePost));
+      let likedSet = new Set<string>();
+      let savedSet = new Set<string>();
+      if (posts && posts.length > 0) {
+        const postIds = posts.map((p: any) => p.id);
+        const [likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+          supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+        ]);
+        likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
+        savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
+      }
+
+      setFriendsPosts((posts || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
     } finally {
       setLoadingTab(false);
     }
@@ -264,24 +303,42 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     }
   };
 
-  const toggleComments = (id: string) => {
+  const toggleComments = async (id: string) => {
+    const isExpanding = !expandedComments.has(id);
     setExpandedComments(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      isExpanding ? next.add(id) : next.delete(id);
       return next;
     });
+    if (isExpanding && !loadedComments[id]) {
+      const { data } = await supabase
+        .from('post_comments')
+        .select('text, profiles(username)')
+        .eq('post_id', id)
+        .order('created_at', { ascending: true })
+        .limit(50);
+      if (data) {
+        const comments = data.map((c: any) => ({ user: c.profiles?.username || 'user', text: c.text }));
+        setLoadedComments(prev => ({ ...prev, [id]: comments }));
+        updatePost(id, { comments });
+      }
+    }
   };
 
   const submitComment = async (post: FeedPost) => {
     const text = (commentInputs[post.id] || '').trim();
-    if (!text) return;
+    if (!user || !text) return;
     setCommentInputs(prev => ({ ...prev, [post.id]: '' }));
 
-    const newComment = { user: profile?.username || 'you', text };
-    updatePost(post.id, { comments: [...post.comments, newComment] });
-
-    if (!user || post.userId === null) return;
-    await supabase.from('post_comments').insert({ post_id: post.id, user_id: user.id, text });
+    const { error } = await supabase.from('post_comments').insert({
+      post_id: post.id,
+      user_id: user.id,
+      text: text,
+    });
+    if (!error) {
+      const newComment = { user: profile?.username || 'you', text };
+      updatePost(post.id, { comments: [...(activePosts.find(p => p.id === post.id)?.comments || []), newComment] });
+    }
   };
 
   const copyLink = (postId: string) => {
@@ -317,6 +374,10 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
   // ── Main render ──────────────────────────────────────────────────────────
 
+  // Compute my entry and others for the stories row
+  const myEntry = user ? liveStoryUsers.find(su => su.id === user.id) : null;
+  const othersStoryUsers = liveStoryUsers.filter(su => su.id !== user?.id);
+
   return (
     <>
       <ShareSheet
@@ -346,29 +407,79 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         {/* ── Stories row ──────────────────────────────────────── */}
         <div className="flex justify-center mb-4">
           <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 py-3">
-            {/* Add story / create post */}
-            <div
-              onClick={() => onOpenCreateStory()}
-              className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group"
-            >
-              <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors relative">
-                {profile?.avatar_url
-                  ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full opacity-60" />
-                  : null}
-                <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-noctvm-violet flex items-center justify-center border-2 border-noctvm-black">
-                  <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                {!profile?.avatar_url && <svg className="w-6 h-6 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>}
-              </div>
-              <span className="text-[9px] text-noctvm-silver">Add Story</span>
-            </div>
 
-            {liveStoryUsers.map((su, i) => (
+            {/* My story bubble or Add Story button */}
+            {myEntry ? (
+              <div className="relative flex-shrink-0">
+                {showMyStoryDropdown && (
+                  <div className="fixed inset-0 z-10" onClick={() => setShowMyStoryDropdown(false)} />
+                )}
+                <button
+                  onClick={() => setShowMyStoryDropdown(v => !v)}
+                  className="flex flex-col items-center gap-1 relative z-20"
+                >
+                  <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500">
+                    <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
+                        {myEntry.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={myEntry.avatarUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-white font-bold text-lg">{myEntry.avatar}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* small "+" badge */}
+                  <div className="absolute bottom-5 right-0 w-5 h-5 rounded-full bg-noctvm-violet border-2 border-noctvm-black flex items-center justify-center z-20">
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                  </div>
+                  <span className="text-[10px] text-noctvm-silver max-w-[60px] truncate">My Story</span>
+                </button>
+                {showMyStoryDropdown && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-30 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-xl overflow-hidden min-w-[140px]">
+                    <button
+                      onClick={() => { setShowMyStoryDropdown(false); onOpenCreateStory(); }}
+                      className="w-full px-4 py-2.5 text-xs text-white hover:bg-noctvm-midnight text-left flex items-center gap-2"
+                    >
+                      <svg className="w-3.5 h-3.5 text-noctvm-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                      Add to Story
+                    </button>
+                    <div className="h-px bg-noctvm-border" />
+                    <button
+                      onClick={() => { setShowMyStoryDropdown(false); onOpenStories(liveStoryUsers, liveStoryUsers.indexOf(myEntry)); }}
+                      className="w-full px-4 py-2.5 text-xs text-white hover:bg-noctvm-midnight text-left flex items-center gap-2"
+                    >
+                      <svg className="w-3.5 h-3.5 text-noctvm-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                      View My Story
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                onClick={() => onOpenCreateStory()}
+                className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group"
+              >
+                <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors relative">
+                  {profile?.avatar_url
+                    ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full opacity-60" />
+                    : null}
+                  <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-noctvm-violet flex items-center justify-center border-2 border-noctvm-black">
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  {!profile?.avatar_url && <svg className="w-6 h-6 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>}
+                </div>
+                <span className="text-[9px] text-noctvm-silver">Add Story</span>
+              </div>
+            )}
+
+            {othersStoryUsers.map((su, i) => (
               <div
                 key={su.id}
-                onClick={() => onOpenStories(liveStoryUsers, i)}
+                onClick={() => onOpenStories(liveStoryUsers, liveStoryUsers.indexOf(su))}
                 className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer"
               >
                 <div className={`w-16 h-16 rounded-full p-[2px] ${su.hasNew ? 'bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500' : 'bg-noctvm-border'}`}>

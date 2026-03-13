@@ -40,6 +40,9 @@ export default function UserProfilePage({
   const [highlights, setHighlights] = useState<DbHighlight[]>([]);
   const [showCreateHighlight, setShowCreateHighlight] = useState(false);
 
+  // ── Active stories state ──────────────────────────────────────────────────
+  const [hasActiveStories, setHasActiveStories] = useState(false);
+
   // ── Fetch highlights ──────────────────────────────────────────────────────
 
   const fetchHighlights = useCallback(async () => {
@@ -55,6 +58,48 @@ export default function UserProfilePage({
   useEffect(() => {
     fetchHighlights();
   }, [fetchHighlights]);
+
+  // ── Check for active stories ──────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('stories')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gt('expires_at', new Date().toISOString())
+      .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
+  }, [user]);
+
+  // ── Fetch and open my stories ─────────────────────────────────────────────
+
+  const fetchAndOpenMyStories = async () => {
+    if (!user || !onOpenStories) return;
+    const { data } = await supabase
+      .from('stories')
+      .select('id, image_url, caption, venue_name, created_at')
+      .eq('user_id', user.id)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: true });
+    if (!data || data.length === 0) return;
+    const name = profile?.display_name || profile?.username || 'Me';
+    const storyUser: import('./StoriesViewerModal').StoryUser = {
+      id: user.id,
+      name,
+      avatar: name[0].toUpperCase(),
+      avatarUrl: profile?.avatar_url ?? null,
+      hasNew: true,
+      color: 'from-noctvm-violet to-purple-500',
+      stories: data.map((s: any) => ({
+        id: s.id,
+        image_url: s.image_url,
+        caption: s.caption,
+        venue_name: s.venue_name,
+        created_at: s.created_at,
+      })),
+    };
+    onOpenStories([storyUser], 0);
+  };
 
   // ── Open highlight in stories viewer ─────────────────────────────────────
 
@@ -143,16 +188,34 @@ export default function UserProfilePage({
         {/* Avatar + stats */}
         <div className="flex items-center gap-6 mb-4">
           <div className="relative flex-shrink-0">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 overflow-hidden ring-2 ring-noctvm-border">
-              {profile?.avatar_url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-white">{initials}</span>
+            {hasActiveStories ? (
+              <div className="p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500 rounded-full">
+                <div
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 overflow-hidden ring-2 ring-noctvm-black cursor-pointer"
+                  onClick={fetchAndOpenMyStories}
+                >
+                  {profile?.avatar_url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-2xl font-bold text-white">{initials}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 overflow-hidden ring-2 ring-noctvm-border">
+                {profile?.avatar_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">{initials}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 flex justify-around">
