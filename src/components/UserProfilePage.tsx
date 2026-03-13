@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { GridIcon, BookmarkIcon, TagIcon, UserIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
+import EventCard from './EventCard';
+import type { NoctEvent } from '@/lib/types';
 
 // ── Post types ────────────────────────────────────────────────────────────────
 
@@ -33,6 +35,7 @@ interface UserProfilePageProps {
   onSettingsClick: () => void;
   onOpenCreatePost?: () => void;
   onOpenStories?: (users: StoryUser[], index: number) => void;
+  onEventClick: (event: NoctEvent) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -42,6 +45,7 @@ export default function UserProfilePage({
   onSettingsClick,
   onOpenCreatePost,
   onOpenStories,
+  onEventClick,
 }: UserProfilePageProps) {
   const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'tagged'>('posts');
@@ -55,7 +59,7 @@ export default function UserProfilePage({
 
   // ── Posts state ───────────────────────────────────────────────────────────
   const [posts, setPosts] = useState<ProfilePost[]>([]);
-  const [savedPosts, setSavedPosts] = useState<ProfilePost[]>([]);
+  const [savedEvents, setSavedEvents] = useState<NoctEvent[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
 
   // ── Stats state ───────────────────────────────────────────────────────────
@@ -104,23 +108,21 @@ export default function UserProfilePage({
     }
   }, [user]);
 
-  const fetchSavedPosts = useCallback(async () => {
+  const fetchSavedEvents = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
-      .from('post_saves')
-      .select('posts(id, image_url, caption, created_at, likes_count)')
+      .from('event_saves')
+      .select('events(*)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    if (data) {
-      setSavedPosts(data.map((row: any) => row.posts).filter(Boolean) as ProfilePost[]);
-    }
+    setSavedEvents((data ?? []).map((r: any) => r.events).filter(Boolean) as NoctEvent[]);
   }, [user]);
 
   useEffect(() => {
     fetchHighlights();
     fetchPosts();
-    fetchSavedPosts();
-  }, [fetchHighlights, fetchPosts, fetchSavedPosts]);
+    fetchSavedEvents();
+  }, [fetchHighlights, fetchPosts, fetchSavedEvents]);
 
   // ── Check for active stories ──────────────────────────────────────────────
 
@@ -451,29 +453,21 @@ export default function UserProfilePage({
         )}
 
         {activeTab === 'saved' && (
-          <>
-            {savedPosts.length > 0 ? (
-              <div className="grid grid-cols-3 gap-0.5">
-                {savedPosts.map(post => (
-                  <div key={post.id} className="aspect-square bg-noctvm-surface overflow-hidden relative group cursor-pointer">
-                    {post.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/20 flex items-center justify-center">
-                        <span className="text-noctvm-silver/30 text-xs text-center px-2 line-clamp-3">{post.caption}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+          <div className="space-y-3 px-1">
+            {savedEvents.length > 0 ? (
+              savedEvents.map(event => (
+                <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />
+              ))
             ) : (
-              <div className="text-center py-16 animate-fade-in">
-                <h3 className="font-heading text-sm font-bold text-white mb-1">Nothing Saved</h3>
-                <p className="text-xs text-noctvm-silver/60">Save posts to find them here</p>
+              <div className="text-center py-12">
+                <div className="w-12 h-12 rounded-full bg-noctvm-surface flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-noctvm-violet/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" /></svg>
+                </div>
+                <p className="text-sm text-noctvm-silver">No saved events</p>
+                <p className="text-xs text-noctvm-silver/50 mt-1">Bookmark events to find them here</p>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {activeTab === 'tagged' && (

@@ -444,6 +444,7 @@ export default function Home() {
                     onSettingsClick={handleSettingsClick}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
+                    onEventClick={(e) => setSelectedEvent(e)}
                   />
                 )}
 
