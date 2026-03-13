@@ -17,6 +17,8 @@ interface FilterBarProps {
   onSearchChange: (query: string) => void;
   viewMode: 'portrait' | 'landscape';
   onViewModeChange: (mode: 'portrait' | 'landscape') => void;
+  selectedDate: string | null;
+  onDateChange: (d: string | null) => void;
 }
 
 export default function FilterBar({
@@ -26,6 +28,8 @@ export default function FilterBar({
   onSearchChange,
   viewMode,
   onViewModeChange,
+  selectedDate,
+  onDateChange,
 }: FilterBarProps) {
   const handleGenreClick = (genre: string) => {
     if (genre === 'All') {
@@ -92,10 +96,50 @@ export default function FilterBar({
             </svg>
           </button>
         </div>
+
+        {/* Calendar filter */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              const input = document.getElementById('event-date-filter') as HTMLInputElement;
+              input?.showPicker?.();
+            }}
+            className={`p-2 rounded-lg border transition-colors ${
+              selectedDate
+                ? 'bg-noctvm-violet/20 border-noctvm-violet/50 text-noctvm-violet'
+                : 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:text-white hover:border-noctvm-violet/30'
+            }`}
+            title="Filter by date"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </button>
+          <input
+            id="event-date-filter"
+            type="date"
+            min={new Date().toISOString().split('T')[0]}
+            value={selectedDate ?? ''}
+            onChange={e => onDateChange(e.target.value || null)}
+            className="absolute opacity-0 pointer-events-none w-0 h-0"
+          />
+        </div>
       </div>
 
       {/* Genre pills */}
       <div className="flex flex-wrap gap-2 pb-1">
+        {selectedDate && (
+          <button
+            onClick={() => onDateChange(null)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/50 text-noctvm-violet text-xs font-medium flex-shrink-0"
+          >
+            {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </button>
+        )}
         {GENRE_FILTERS.map((genre) => {
           const isActive = activeGenres.includes(genre);
           return (

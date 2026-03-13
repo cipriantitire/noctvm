@@ -48,6 +48,7 @@ export default function Home() {
   const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [profileView, setProfileView] = useState<ProfileView>('profile');
@@ -119,8 +120,11 @@ export default function Home() {
         e.genres.some(g => g.toLowerCase().includes(q))
       );
     }
+    if (selectedDate) {
+      events = events.filter(e => e.date === selectedDate);
+    }
     return events;
-  }, [dbEvents, activeGenres, searchQuery]);
+  }, [dbEvents, activeGenres, searchQuery, selectedDate]);
 
   const handleVenueClick = (name: string) => setSelectedVenue(name);
   const handleCloseVenue = () => setVenueClosing(true);
@@ -293,6 +297,8 @@ export default function Home() {
                       onSearchChange={setSearchQuery}
                       viewMode={viewMode}
                       onViewModeChange={setViewMode}
+                      selectedDate={selectedDate}
+                      onDateChange={setSelectedDate}
                     />
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</span>
