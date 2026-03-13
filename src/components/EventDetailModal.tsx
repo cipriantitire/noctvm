@@ -3,11 +3,14 @@
 import { useEffect, useState } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { CalendarIcon, StarIcon, TicketIcon } from './icons';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface EventDetailModalProps {
   event: NoctEvent | null;
   onClose: () => void;
   onVenueClick?: (venueName: string) => void;
+  onOpenAuth: () => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -25,13 +28,19 @@ function getSourceBadge(source: string) {
     case 'iabilet':     return { label: 'iaBilet',      color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
     case 'beethere':    return { label: 'BeeThere',     color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
     case 'zilesinopti': return { label: 'Zile și Nopți',color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
+    case 'onevent':     return { label: 'OnEvent',       color: 'bg-violet-500/20 text-violet-400 border-violet-500/30' };
+    case 'ambilet':     return { label: 'Ambilet',       color: 'bg-teal-500/20 text-teal-400 border-teal-500/30' };
     default:            return { label: source,          color: 'bg-noctvm-silver/20 text-noctvm-silver border-noctvm-border' };
   }
 }
 
-export default function EventDetailModal({ event, onClose, onVenueClick }: EventDetailModalProps) {
+export default function EventDetailModal({ event, onClose, onVenueClick, onOpenAuth }: EventDetailModalProps) {
+  const { user } = useAuth();
   const [descExpanded, setDescExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [saveCount, setSaveCount]     = useState(0);
+  const [isSaved,   setIsSaved]       = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const handleClose = () => setIsClosing(true);
 
   useEffect(() => {
@@ -40,6 +49,50 @@ export default function EventDetailModal({ event, onClose, onVenueClick }: Event
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [event]);
+
+  useEffect(() => {
+    if (!event?.id) { setSaveCount(0); setIsSaved(false); return; }
+
+    // Initial fetch
+    supabase
+      .from('event_saves')
+      .select('id, user_id', { count: 'exact' })
+      .eq('event_id', event.id)
+      .then(({ data, count }) => {
+        setSaveCount(count ?? 0);
+        if (user) setIsSaved((data ?? []).some((r: any) => r.user_id === user.id));
+      });
+
+    // Real-time subscription
+    const channel = supabase
+      .channel(`event_saves_${event.id}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'event_saves',
+        filter: `event_id=eq.${event.id}`,
+      }, async () => {
+        const { data, count } = await supabase
+          .from('event_saves')
+          .select('id, user_id', { count: 'exact' })
+          .eq('event_id', event.id);
+        setSaveCount(count ?? 0);
+        if (user) setIsSaved((data ?? []).some((r: any) => r.user_id === user.id));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [event?.id, user]);
+
+  const handleSave = async () => {
+    if (!user) { onOpenAuth(); return; }
+    if (!event?.id || saveLoading) return;
+    setSaveLoading(true);
+    if (isSaved) {
+      await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
+    } else {
+      await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
+    }
+    setSaveLoading(false);
+  };
 
   if (!event) return null;
 
@@ -148,10 +201,24 @@ export default function EventDetailModal({ event, onClose, onVenueClick }: Event
             <div className="w-9 h-9 rounded-xl bg-noctvm-surface border border-noctvm-border flex items-center justify-center flex-shrink-0">
               <CalendarIcon className="w-4 h-4 text-noctvm-violet" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-medium text-white">{formatDate(event.date)}</p>
               {event.time && <p className="text-xs text-noctvm-violet font-mono">{event.time}</p>}
             </div>
+            <button
+              onClick={handleSave}
+              disabled={saveLoading || !event?.id}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                isSaved
+                  ? 'bg-noctvm-violet/20 text-noctvm-violet border-noctvm-violet/40'
+                  : 'bg-black/40 text-noctvm-silver border-white/10 hover:border-noctvm-violet/30 hover:text-noctvm-violet'
+              } ${!event?.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+              </svg>
+              <span>{saveCount}</span>
+            </button>
           </div>
 
           {/* Description */}

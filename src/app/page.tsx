@@ -170,6 +170,7 @@ export default function Home() {
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
         onVenueClick={(venueName) => { setSelectedEvent(null); handleVenueClick(venueName); }}
+        onOpenAuth={() => setShowAuthModal(true)}
       />
 
       {/* ── Create Post Modal ───────────────────────────────────── */}
