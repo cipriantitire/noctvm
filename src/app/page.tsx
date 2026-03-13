@@ -21,6 +21,7 @@ import StoriesViewerModal from '@/components/StoriesViewerModal';
 import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon, CogIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 import { useLiquidGlass } from '@/hooks/useLiquidGlass';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -59,6 +60,7 @@ export default function Home() {
   const [showStories, setShowStories] = useState(false);
   const [storyStartIndex, setStoryStartIndex] = useState(0);
   const [storyUsers, setStoryUsers] = useState<StoryUser[]>([]);
+  const [dbEvents, setDbEvents] = useState<NoctEvent[] | null>(null);
 
   const handleOpenStories = (users: StoryUser[], index: number) => {
     setStoryUsers(users);
@@ -71,6 +73,21 @@ export default function Home() {
   useEffect(() => {
     if (window.innerWidth >= 1024) setViewMode('portrait');
   }, []);
+
+  useEffect(() => {
+    const city = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
+    const today = new Date().toISOString().split('T')[0];
+    supabase
+      .from('events')
+      .select('*')
+      .eq('city', city)
+      .gte('date', today)
+      .order('date')
+      .then(({ data }) => {
+        if (data && data.length > 0) setDbEvents(data as NoctEvent[]);
+        else setDbEvents([]);
+      });
+  }, [activeCity]);
 
   // Switch to profile tab and show the account menu
   const handleSettingsClick = () => {
@@ -87,7 +104,8 @@ export default function Home() {
 
   const filteredEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    let events = SAMPLE_EVENTS.filter(e => e.date >= today);
+    // Use DB events when loaded; fall back to sample data if DB is empty or still loading
+    let events = dbEvents && dbEvents.length > 0 ? dbEvents : SAMPLE_EVENTS.filter(e => e.date >= today);
     if (!activeGenres.includes('All')) {
       events = events.filter(e =>
         e.genres.some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
@@ -102,7 +120,7 @@ export default function Home() {
       );
     }
     return events;
-  }, [activeGenres, searchQuery]);
+  }, [dbEvents, activeGenres, searchQuery]);
 
   const handleVenueClick = (name: string) => setSelectedVenue(name);
   const handleCloseVenue = () => setVenueClosing(true);
@@ -435,10 +453,11 @@ export default function Home() {
                             setProfileView('profile');
                           }
                         }}
-                        className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors group"
+                        className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all"
                       >
-                        <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                        <span className="text-xs font-medium">Back</span>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6" />
+                        </svg>
                       </button>
                       <h2 className="font-heading text-lg font-bold text-white">Settings</h2>
                     </div>

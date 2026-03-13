@@ -5,11 +5,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 // Shared back button
-function BackButton({ onBack, label }: { onBack: () => void; label: string }) {
+function BackButton({ onBack }: { onBack: () => void; label?: string }) {
   return (
-    <button onClick={onBack} className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors mb-6 group">
-      <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      <span className="text-xs font-medium">{label}</span>
+    <button
+      onClick={onBack}
+      className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all mb-6"
+    >
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
     </button>
   );
 }
