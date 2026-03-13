@@ -41,10 +41,11 @@ export default function EventCard({ event, variant = 'portrait' }: EventCardProp
       return null;
     }
     
-    // Extract first number and currency (last word)
+    // Extract first number and currency (last alphabetic word)
     const matches = event.price.match(/(\d+)/);
     const value = matches ? matches[0] : '';
-    const currency = event.price.trim().split(' ').pop() || 'RON';
+    const currencyMatches = event.price.match(/[a-zA-Z]+$/);
+    const currency = currencyMatches ? currencyMatches[0] : 'RON';
     
     return (
       <div className="absolute bottom-2.5 right-2.5 bg-noctvm-emerald/90 backdrop-blur-md rounded-xl p-2 flex flex-col items-center justify-center min-w-[48px] h-[48px] border border-white/20 shadow-xl z-20">
