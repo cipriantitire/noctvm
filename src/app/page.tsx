@@ -44,6 +44,7 @@ type ProfileView =
 export default function Home() {
   const { user, profile, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
+  const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
@@ -143,7 +144,11 @@ export default function Home() {
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
       {/* ── Event Detail Modal ──────────────────────────────────── */}
-      <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+      <EventDetailModal
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        onVenueClick={(venueName) => { setSelectedEvent(null); handleVenueClick(venueName); }}
+      />
 
       {/* ── Create Post Modal ───────────────────────────────────── */}
       <CreatePostModal isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} onPostCreated={() => {}} onOpenAuth={() => setShowAuthModal(true)} />
@@ -234,8 +239,21 @@ export default function Home() {
                 <MobileTopSection onVenueClick={handleVenueClick} />
                 <div className="hidden lg:flex items-center justify-between mb-6 animate-fade-in">
                   <div>
-                    <h1 className="font-heading text-2xl font-bold text-white">Explore</h1>
-                    <p className="text-sm text-noctvm-silver mt-1">Discover what&apos;s happening in Bucharest tonight</p>
+                    <h1 className="font-heading text-2xl font-bold text-white">Events</h1>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-noctvm-silver">Nightlife in</span>
+                      <div className="relative">
+                        <select
+                          value={activeCity}
+                          onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
+                          className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
+                        >
+                          <option value="bucuresti">București</option>
+                          <option value="constanta">Constanța</option>
+                        </select>
+                        <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <FilterBar
@@ -253,12 +271,12 @@ export default function Home() {
                   key={viewMode}
                   className={`view-transition ${
                     viewMode === 'portrait'
-                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4'
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-stretch'
                       : 'grid grid-cols-1 lg:grid-cols-2 gap-4'
                   }`}
                 >
                   {filteredEvents.map((event, index) => (
-                    <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)}`}>
+                    <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
                       <EventCard event={event} variant={viewMode} onClick={(e) => setSelectedEvent(e)} />
                     </div>
                   ))}

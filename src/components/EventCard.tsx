@@ -125,7 +125,7 @@ export default function EventCard({ event, variant = 'portrait', onClick }: Even
   }
 
   return (
-    <Wrapper className="group flex flex-col bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow cursor-pointer">
+    <Wrapper className="group flex flex-col bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow cursor-pointer h-full">
       {/* Fixed-height image — no aspect-ratio so content area stays consistent */}
       <div className="relative h-[160px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}

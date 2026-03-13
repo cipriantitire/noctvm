@@ -7,6 +7,7 @@ import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 interface EventDetailModalProps {
   event: NoctEvent | null;
   onClose: () => void;
+  onVenueClick?: (venueName: string) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -28,7 +29,7 @@ function getSourceBadge(source: string) {
   }
 }
 
-export default function EventDetailModal({ event, onClose }: EventDetailModalProps) {
+export default function EventDetailModal({ event, onClose, onVenueClick }: EventDetailModalProps) {
   const [descExpanded, setDescExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => setIsClosing(true);
@@ -49,7 +50,6 @@ export default function EventDetailModal({ event, onClose }: EventDetailModalPro
   return (
     <div
       className={`fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
-      onClick={handleClose}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
@@ -132,7 +132,16 @@ export default function EventDetailModal({ event, onClose }: EventDetailModalPro
           </h2>
 
           {/* Venue */}
-          <p className="text-noctvm-violet font-medium text-sm">@ {event.venue}</p>
+          {onVenueClick ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onVenueClick(event.venue); }}
+              className="text-noctvm-violet font-medium text-sm hover:underline text-left"
+            >
+              @ {event.venue}
+            </button>
+          ) : (
+            <p className="text-noctvm-violet font-medium text-sm">@ {event.venue}</p>
+          )}
 
           {/* Date + Time */}
           <div className="flex items-center gap-3 text-noctvm-silver/80">
