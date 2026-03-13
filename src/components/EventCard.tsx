@@ -1,6 +1,6 @@
 import React from 'react';
 import { NoctEvent } from '@/lib/types';
-import { CalendarIcon, StarIcon } from './icons';
+import { CalendarIcon, StarIcon, BookmarkIcon } from './icons';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
@@ -17,6 +17,8 @@ function getSourceBadge(source: string) {
     case 'iabilet':     return { label: 'iaBilet',      color: 'bg-cyan-500/20 text-cyan-400' };
     case 'beethere':    return { label: 'BeeThere',     color: 'bg-yellow-500/20 text-yellow-400' };
     case 'zilesinopti': return { label: 'Zile si Nopti',color: 'bg-amber-500/20 text-amber-400' };
+    case 'onevent':     return { label: 'OnEvent',       color: 'bg-violet-500/20 text-violet-400' };
+    case 'ambilet':     return { label: 'Ambilet',       color: 'bg-teal-500/20 text-teal-400' };
     default:            return { label: source,          color: 'bg-noctvm-silver/20 text-noctvm-silver' };
   }
 }
@@ -118,6 +120,9 @@ export default function EventCard({ event, variant = 'portrait', onClick }: Even
                 </>
               )}
             </div>
+            {event.id && (
+              <BookmarkIcon className="w-3.5 h-3.5 text-noctvm-silver/40 flex-shrink-0" />
+            )}
           </div>
         </div>
       </Wrapper>
@@ -169,6 +174,11 @@ export default function EventCard({ event, variant = 'portrait', onClick }: Even
               <span className="w-1 h-1 rounded-full bg-white/10 flex-shrink-0" />
               <span className="text-[10px] font-mono text-noctvm-violet leading-none flex-shrink-0">{event.time}</span>
             </>
+          )}
+          {event.id && (
+            <div className="ml-auto">
+              <BookmarkIcon className="w-3.5 h-3.5 text-noctvm-silver/40 flex-shrink-0" />
+            </div>
           )}
         </div>
       </div>
