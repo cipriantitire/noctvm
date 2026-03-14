@@ -103,6 +103,7 @@ export default function FilterBar({
             onClick={() => {
               const input = document.getElementById('event-date-filter') as HTMLInputElement;
               input?.showPicker?.();
+              input?.click();
             }}
             className={`p-2 rounded-lg border transition-colors ${
               selectedDate

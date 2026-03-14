@@ -86,12 +86,15 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
     if (!user) { onOpenAuth(); return; }
     if (!event?.id || saveLoading) return;
     setSaveLoading(true);
-    if (isSaved) {
-      await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
-    } else {
-      await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
+    try {
+      if (isSaved) {
+        await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
+      } else {
+        await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
+      }
+    } finally {
+      setSaveLoading(false);
     }
-    setSaveLoading(false);
   };
 
   if (!event) return null;
