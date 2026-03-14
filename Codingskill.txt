@@ -1,1 +1,0 @@
-I have a bit differnt rule: Prefer components under 150lines. If a component exceeds this, evaluate whether it contains distinct concers (Data fetching, sub-UI sections, reusable logic) and split at those natural boundaries. Always extract stateful logic into custom hooks. Never split purely to meet a line count.

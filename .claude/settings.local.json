@@ -3,7 +3,28 @@
     "allow": [
       "Bash(find /c/Users/cipri/NOCTVM -type f -name .env*)",
       "Bash(npm install:*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(where node:*)",
+      "Bash(ls C:/Users/cipri/NOCTVM/node_modules/.bin/next*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(dir \"C:\\\\Users\\\\cipri\\\\NOCTVM\\\\src\\\\lib\")",
+      "Bash(dir \"C:\\\\Users\\\\cipri\\\\NOCTVM\\\\src\\\\app\")",
+      "Bash(dir \"C:\\\\Users\\\\cipri\\\\NOCTVM\\\\src\\\\contexts\")",
+      "Bash(node -e \"const d=require\\(''''fs''''\\).readFileSync\\(''''/dev/stdin'''',''''utf8''''\\); const p=JSON.parse\\(d\\); console.log\\(''''next:'''',p.dependencies?.next,''''supabase:'''',p.dependencies?.[''''@supabase/supabase-js'''']\\)\")",
+      "Bash(git stash:*)",
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel --prod)",
+      "Read(//mnt/c/Users/cipri/**)",
+      "Read(//mnt/c/Users/cipri/NOCTVM/**)",
+      "Skill(hookify:list)",
+      "Skill(hookify:list:*)"
     ]
   }
 }

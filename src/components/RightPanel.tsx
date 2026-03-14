@@ -3,12 +3,14 @@
 import { useMemo } from 'react';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
+import { NoctEvent } from '@/lib/types';
 
 interface RightPanelProps {
   onVenueClick?: (venueName: string) => void;
+  onEventClick?: (event: NoctEvent) => void;
 }
 
-export default function RightPanel({ onVenueClick }: RightPanelProps) {
+export default function RightPanel({ onVenueClick, onEventClick }: RightPanelProps) {
   // Get tonight's events
   const tonightEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -58,16 +60,14 @@ export default function RightPanel({ onVenueClick }: RightPanelProps) {
         {tonightEvents.length > 0 ? (
           <div className="space-y-2.5 max-h-48 overflow-y-auto">
             {tonightEvents.slice(0, 5).map((event, i) => (
-              <a
+              <button
                 key={i}
-                href={event.event_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 transition-colors group"
+                onClick={() => onEventClick ? onEventClick(event) : window.open(event.event_url, '_blank')}
+                className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 transition-colors group text-left"
               >
                 <div className="w-8 h-8 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={getVenueLogo(event.venue)} alt={event.venue} className="w-full h-full object-cover" 
+                  <img src={getVenueLogo(event.venue)} alt={event.venue} className="w-full h-full object-cover"
                     onError={(e) => {
                       const el = e.target as HTMLImageElement;
                       el.style.display = 'none';
@@ -80,9 +80,9 @@ export default function RightPanel({ onVenueClick }: RightPanelProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-medium text-white truncate group-hover:text-noctvm-violet transition-colors">{event.title}</p>
-                  <p className="text-[10px] text-noctvm-silver">{event.venue}{event.time ? ` \u00b7 ${event.time}` : ''}</p>
+                  <p className="text-[10px] text-noctvm-silver">{event.venue}{event.time ? ` · ${event.time}` : ''}</p>
                 </div>
-              </a>
+              </button>
             ))}
             {tonightEvents.length > 5 && (
               <p className="text-[10px] text-noctvm-violet text-center pt-1 font-medium">+{tonightEvents.length - 5} more tonight</p>
@@ -105,7 +105,7 @@ export default function RightPanel({ onVenueClick }: RightPanelProps) {
             >
               <div className="w-9 h-9 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={getVenueLogo(name)} alt={name} className="w-full h-full object-cover" 
+                <img src={getVenueLogo(name)} alt={name} className="w-full h-full object-cover"
                   onError={(e) => {
                     const el = e.target as HTMLImageElement;
                     el.style.display = 'none';

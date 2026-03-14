@@ -56,13 +56,14 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   }, [event]);
 
   useEffect(() => {
-    if (!isRealEvent(event?.id)) { setSaveCount(0); setIsSaved(false); return; }
+    if (!event || !isRealEvent(event.id)) { setSaveCount(0); setIsSaved(false); return; }
+    const eventId = event.id;
 
     // Initial fetch
     supabase
       .from('event_saves')
       .select('id, user_id', { count: 'exact' })
-      .eq('event_id', event.id)
+      .eq('event_id', eventId)
       .then(({ data, count }) => {
         setSaveCount(count ?? 0);
         if (user) setIsSaved((data ?? []).some((r: any) => r.user_id === user.id));
@@ -70,15 +71,15 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
 
     // Real-time subscription
     const channel = supabase
-      .channel(`event_saves_${event.id}`)
+      .channel(`event_saves_${eventId}`)
       .on('postgres_changes', {
         event: '*', schema: 'public', table: 'event_saves',
-        filter: `event_id=eq.${event.id}`,
+        filter: `event_id=eq.${eventId}`,
       }, async () => {
         const { data, count } = await supabase
           .from('event_saves')
           .select('id, user_id', { count: 'exact' })
-          .eq('event_id', event.id);
+          .eq('event_id', eventId);
         setSaveCount(count ?? 0);
         if (user) setIsSaved((data ?? []).some((r: any) => r.user_id === user.id));
       })
@@ -89,13 +90,14 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
 
   const handleSave = async () => {
     if (!user) { onOpenAuth(); return; }
-    if (!isRealEvent(event?.id) || saveLoading) return;
+    if (!event || !isRealEvent(event.id) || saveLoading) return;
+    const eventId = event.id;
     setSaveLoading(true);
     try {
       if (isSaved) {
-        await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
+        await supabase.from('event_saves').delete().eq('event_id', eventId).eq('user_id', user.id);
       } else {
-        await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
+        await supabase.from('event_saves').insert({ event_id: eventId, user_id: user.id });
       }
     } finally {
       setSaveLoading(false);
@@ -215,12 +217,12 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
             </div>
             <button
               onClick={handleSave}
-              disabled={saveLoading || !isRealEvent(event?.id)}
+              disabled={saveLoading || !isRealEvent(event?.id ?? '')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 isSaved
                   ? 'bg-noctvm-violet/20 text-noctvm-violet border-noctvm-violet/40'
                   : 'bg-black/40 text-noctvm-silver border-white/10 hover:border-noctvm-violet/30 hover:text-noctvm-violet'
-              } ${!isRealEvent(event?.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${!isRealEvent(event?.id ?? '') ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
