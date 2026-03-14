@@ -8,10 +8,13 @@ import { ScrapedEvent } from './types';
 import { extractJsonLd, parseDate, extractTime, clean, guessGenres, fetchHtml } from './utils';
 
 const BASE_URL = 'https://zilesinopti.ro';
-const LIST_URL = `${BASE_URL}/evenimente/`;
+const LIST_URLS = [
+  { url: 'https://zilesinopti.ro/evenimente-bucuresti/', city: 'Bucharest' },
+  { url: 'https://zilesinopti.ro/evenimente-constanta/', city: 'Constanta' },
+];
 
 /** Try to extract events from JSON-LD blocks embedded in the page. */
-function fromJsonLd(html: string): ScrapedEvent[] {
+function fromJsonLd(html: string, city: string): ScrapedEvent[] {
   const blocks = extractJsonLd(html);
   const events: ScrapedEvent[] = [];
 
@@ -24,13 +27,10 @@ function fromJsonLd(html: string): ScrapedEvent[] {
     const date = parseDate(startDate);
     if (!date) continue;
 
-    // Skip past events
-    if (date < new Date().toISOString().split('T')[0]) continue;
-
     const location = (b.location as Record<string, unknown>) ?? {};
     const venue = clean(
       (location.name as string) ??
-      (location.address as string) ??
+      ((location.address as any)?.streetAddress as string) ??
       'Venue TBC'
     );
 
@@ -42,16 +42,8 @@ function fromJsonLd(html: string): ScrapedEvent[] {
       const img = b.image;
       if (typeof img === 'string') return img;
       if (Array.isArray(img)) return (img[0] as Record<string, unknown>)?.url as string ?? '';
-      if (typeof img === 'object' && img) return (img as Record<string, unknown>).url as string ?? '';
-      return '';
+      return (img as any)?.url as string ?? '';
     })();
-
-    const eventUrl = String(b.url ?? b['@id'] ?? '');
-    const offers = (b.offers as Record<string, unknown>) ?? {};
-    const priceSpec = offers.price;
-    const price = priceSpec != null
-      ? (String(priceSpec) === '0' ? 'Free' : `${priceSpec} RON`)
-      : null;
 
     events.push({
       title,
@@ -60,49 +52,48 @@ function fromJsonLd(html: string): ScrapedEvent[] {
       time: extractTime(startDate),
       description: description || null,
       image_url: image,
-      event_url: eventUrl || LIST_URL,
+      event_url: String(b.url ?? ''),
       genres: guessGenres(title, description),
-      price,
+      price: null,
+      city,
     });
   }
 
   return events;
 }
 
-/** Fallback: parse event article cards from The Events Calendar HTML. */
-function fromHtml(html: string): ScrapedEvent[] {
+/** Fallback: parse event cards from HTML. */
+function fromHtml(html: string, city: string): ScrapedEvent[] {
   const events: ScrapedEvent[] = [];
+  const today = new Date().toISOString().split('T')[0];
 
-  // Each event is wrapped in <article class="type-tribe_events ...">
-  const articleRegex = /<article[^>]*class="[^"]*tribe_events[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
-  let art: RegExpExecArray | null;
+  // Specific container for Zile și Nopți "superwidgets"
+  const cardRegex = /<div[^>]*class="[^"]*kzn-sw-item[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
+  let match: RegExpExecArray | null;
 
-  while ((art = articleRegex.exec(html)) !== null) {
-    const block = art[1];
-
-    // Title + URL
-    const titleMatch = block.match(/<a[^>]*href="([^"]+)"[^>]*class="[^"]*url[^"]*"[^>]*>([\s\S]*?)<\/a>/i)
-      ?? block.match(/<h[23][^>]*class="[^"]*tribe-event[^"]*"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
+  while ((match = cardRegex.exec(html)) !== null) {
+    const block = match[1];
+    const titleMatch = block.match(/<h3[^>]*class="[^"]*kzn-sw-item-titlu[^"]*"[^>]*>([\s\S]*?)<\/h3>/i) || 
+                       block.match(/<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
     if (!titleMatch) continue;
 
-    const eventUrl = titleMatch[1];
-    const title = clean(titleMatch[2].replace(/<[^>]+>/g, ''));
-    if (!title) continue;
+    // Use link from h3 if available
+    const linkMatch = titleMatch[0].match(/href="([^"]+)"/i);
+    const eventUrl = linkMatch?.[1] ?? '';
+    if (!eventUrl) continue;
 
-    // Date
-    const dateMatch = block.match(/datetime="([^"]+)"/);
-    const rawDate = dateMatch?.[1] ?? '';
+    const title = clean(titleMatch[0].replace(/<[^>]+>/g, ''));
+    if (!title || title.length < 3) continue;
+
+    const dateMatch = block.match(/class="[^"]*kzn-one-event-date[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    const rawDate = clean(dateMatch?.[1]?.replace(/<[^>]+>/g, '') ?? '');
     const date = parseDate(rawDate);
-    if (!date || date < new Date().toISOString().split('T')[0]) continue;
+    if (!date || date < today) continue;
 
-    // Venue
-    const venueMatch = block.match(/<address[^>]*>([\s\S]*?)<\/address>/i)
-      ?? block.match(/class="[^"]*venue[^"]*"[^>]*>([\s\S]*?)<\//i);
+    const venueMatch = block.match(/class="[^"]*kzn-one-event-locatie[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
     const venue = clean(venueMatch?.[1]?.replace(/<[^>]+>/g, '') ?? 'Venue TBC');
 
-    // Image
     const imgMatch = block.match(/<img[^>]+src="([^"]+)"/i);
-    const image_url = imgMatch?.[1] ?? '';
 
     events.push({
       title,
@@ -110,10 +101,11 @@ function fromHtml(html: string): ScrapedEvent[] {
       date,
       time: extractTime(rawDate),
       description: null,
-      image_url,
-      event_url: eventUrl,
+      image_url: imgMatch?.[1] ?? '',
+      event_url: eventUrl.startsWith('http') ? eventUrl : `${BASE_URL}${eventUrl}`,
       genres: guessGenres(title, ''),
       price: null,
+      city,
     });
   }
 
@@ -121,13 +113,16 @@ function fromHtml(html: string): ScrapedEvent[] {
 }
 
 export async function scrapeZilesinopti(): Promise<ScrapedEvent[]> {
-  try {
-    const html = await fetchHtml(LIST_URL);
-    const jsonLdEvents = fromJsonLd(html);
-    if (jsonLdEvents.length > 0) return jsonLdEvents;
-    return fromHtml(html);
-  } catch (err) {
-    console.warn('[zilesinopti] scrape failed:', err);
-    return [];
+  const allEvents: ScrapedEvent[] = [];
+  for (const { url, city } of LIST_URLS) {
+    try {
+      const html = await fetchHtml(url);
+      const fromLd = fromJsonLd(html, city);
+      const fromH = fromHtml(html, city);
+      allEvents.push(...(fromLd.length > 0 ? fromLd : fromH));
+    } catch (err) {
+      console.warn(`[zilesinopti] failed for ${url}:`, err);
+    }
   }
+  return allEvents;
 }

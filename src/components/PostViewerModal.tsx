@@ -9,6 +9,7 @@ import LikesModal from './LikesModal';
 
 interface ProfilePost {
   id: string;
+  user_id?: string; // Add user_id
   image_url: string | null;
   caption: string | null;
   created_at: string;
@@ -126,7 +127,6 @@ export default function PostViewerModal({
   useEffect(() => {
     if (!isOpen || !post?.id) return;
     const postId = post.id;
-
     const channel = supabase
       .channel(`post_viewer_${postId}`)
       .on('postgres_changes', { 
@@ -275,10 +275,12 @@ export default function PostViewerModal({
                    </div>
                 </div>
              </div>
-             <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white leading-tight truncate">{profileName || 'User'}</p>
-                <p className="text-[10px] text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
-             </div>
+              <div className="flex-1 min-w-0">
+                 <button className="text-sm font-semibold text-white leading-tight truncate hover:text-noctvm-violet transition-colors">
+                   {profileName || 'User'}
+                 </button>
+                 <p className="text-[10px] text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
+              </div>
              <div className="relative">
                 <button 
                   onClick={() => setShowOptions(!showOptions)}
@@ -289,7 +291,7 @@ export default function PostViewerModal({
                 {showOptions && (
                   <PostOptionsMenu
                     postId={post.id}
-                    postUserId={post.id} // This is likely wrong but we'll assume it's current user's profile
+                    postUserId={post.user_id || null}
                     currentUserId={user?.id || null}
                     authorHandle={profileName || 'user'}
                     onClose={() => setShowOptions(false)}
@@ -309,26 +311,31 @@ export default function PostViewerModal({
                   </div>
                   <div>
                      <p className="text-xs text-white leading-relaxed">
-                        <span className="font-bold mr-2">{profileName}</span>
+                        <button className="font-bold mr-2 text-noctvm-violet hover:underline focus:outline-none">
+                          {profileName}
+                        </button>
                         {post.caption}
                      </p>
                   </div>
                </div>
              )}
 
-             {comments.map((c, i) => (
-               <div key={i} className="flex gap-3 animate-fade-in-up" style={{ animationDelay: `${i * 30}ms` }}>
-                  <div className="w-8 h-8 rounded-full bg-noctvm-violet/10 flex-shrink-0 flex items-center justify-center ring-1 ring-noctvm-border overflow-hidden">
-                    <span className="text-[10px] text-noctvm-violet font-bold">{c.user[0].toUpperCase()}</span>
+              {comments.map((c, i) => (
+                <div key={i} className="flex gap-3 animate-fade-in-up" style={{ animationDelay: `${i * 30}ms` }}>
+                  <div className="flex-1">
+                    <p className="text-xs text-noctvm-silver leading-relaxed">
+                      <button className="font-bold text-white hover:text-noctvm-violet transition-colors mr-1 focus:outline-none">
+                        {c.user}
+                      </button>
+                      {c.text}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1 op-60">
+                      <span className="text-[10px] text-noctvm-silver/50">12h</span>
+                      <button className="text-[10px] items-center font-semibold text-noctvm-silver/50 hover:text-white transition-colors">Reply</button>
+                    </div>
                   </div>
-                  <div>
-                     <p className="text-xs text-white leading-relaxed">
-                        <span className="font-bold mr-2">{c.user}</span>
-                        {c.text}
-                     </p>
-                  </div>
-               </div>
-             ))}
+                </div>
+              ))}
              {comments.length === 0 && !post.caption && (
                <div className="flex flex-col items-center justify-center h-full py-20 opacity-30">
                   <ChatIcon className="w-8 h-8 mb-2" />

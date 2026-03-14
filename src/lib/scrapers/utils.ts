@@ -9,9 +9,19 @@ export function extractJsonLd(html: string): unknown[] {
   let match;
   while ((match = regex.exec(html)) !== null) {
     try {
-      const parsed = JSON.parse(match[1].trim());
-      if (Array.isArray(parsed)) results.push(...parsed);
-      else results.push(parsed);
+      let content = match[1].trim();
+      // Remove CDATA tags if present
+      content = content.replace(/\/\*<!\[CDATA\[\*\//g, '').replace(/\/\*\]\]>\*\//g, '');
+      content = content.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
+      
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        results.push(...parsed);
+      } else if (parsed && typeof parsed === 'object' && '@graph' in parsed && Array.isArray(parsed['@graph'])) {
+        results.push(...(parsed['@graph'] as unknown[]));
+      } else {
+        results.push(parsed);
+      }
     } catch {
       // malformed JSON-LD — skip
     }
@@ -37,33 +47,45 @@ const RO_MONTHS: Record<string, string> = {
 /** Normalise various date strings to YYYY-MM-DD. Returns null if unparseable. */
 export function parseDate(raw: string): string | null {
   if (!raw) return null;
+  const currentYear = '2026';
 
-  // ISO-ish: 2026-03-15 or 2026-03-15T20:00:00
-  const isoMatch = raw.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (isoMatch) return isoMatch[1];
+  // ISO-like: 2026-03-15 or 2026-3-15 or 2026-3-1
+  const isoMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const [, y, m, d] = isoMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
 
   // European numeric: 15.03.2026 or 15/03/2026
-  const euNumeric = raw.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);
+  const euNumeric = raw.match(/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);
   if (euNumeric) {
     const [, d, m, y] = euNumeric;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
 
-  // Romanian text: "15 Martie 2026" or "15 mar 2026"
-  const roText = raw.toLowerCase().match(/(\d{1,2})\s+([a-zăîâșț]+)\.?\s+(\d{4})/);
-  if (roText) {
-    const [, day, monthStr, year] = roText;
-    const monthNum = RO_MONTHS[monthStr] ?? RO_MONTHS[monthStr.slice(0, 3)];
-    if (monthNum) return `${year}-${monthNum}-${day.padStart(2, '0')}`;
+  // Short numeric: 14/03 or 14.03 -> 2026-03-14
+  const shortNumeric = raw.match(/(\d{1,2})[.\/](\d{1,2})(?!\d)/);
+  if (shortNumeric) {
+    const [, d, m] = shortNumeric;
+    return `${currentYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
 
-  // Fallback: native Date (handles many formats)
+  // Romanian text: "15 Martie 2026" or "15 mar 2026"
+  const roText = raw.toLowerCase().match(/(\d{1,2})\s+([a-zăîâșț]{3,})\.?(\s+(\d{4}))?/);
+  if (roText) {
+    const [, day, monthStr, , year] = roText;
+    const monthNum = RO_MONTHS[monthStr] ?? RO_MONTHS[monthStr.slice(0, 3)];
+    if (monthNum) {
+      const targetYear = year || currentYear;
+      return `${targetYear}-${monthNum}-${day.padStart(2, '0')}`;
+    }
+  }
+
+  // Fallback: native Date
   try {
     const d = new Date(raw);
     if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
-  } catch {
-    // unparseable
-  }
+  } catch { /* skip */ }
 
   return null;
 }
@@ -114,9 +136,18 @@ export async function fetchHtml(url: string, timeoutMs = 8_000): Promise<string>
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; NOCTVM-scraper/1.0)',
-        Accept: 'text/html,application/xhtml+xml',
-        'Accept-Language': 'ro,en;q=0.9',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'ro,en;q=0.9,en-US;q=0.8',
+        'Cache-Control': 'max-age=0',
+        'Sec-Ch-Ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
       },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);

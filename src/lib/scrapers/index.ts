@@ -59,7 +59,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     }
     const { source, events } = outcome.value;
     results.push({ source, count: events.length });
-    allRows.push(...events.map(e => ({ ...e, source, city: 'Bucharest' })));
+    allRows.push(...events.map(e => ({ ...e, source, city: e.city || 'Bucharest' })));
   }
 
   // Deduplicate within the batch by (title, venue, date, source)

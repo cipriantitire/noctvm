@@ -148,7 +148,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}
     >
       <div
-        className={`w-full max-w-lg bg-noctvm-midnight border border-noctvm-border rounded-2xl overflow-hidden ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+        className={`w-full max-w-lg liquid-glass rounded-2xl overflow-hidden shadow-2xl shadow-black/80 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
       >

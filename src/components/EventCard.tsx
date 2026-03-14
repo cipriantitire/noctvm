@@ -156,7 +156,7 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
         onClick={e => e.stopPropagation()}
         className="absolute bottom-3 right-3 z-30 group/price"
       >
-        <div className="flex items-center px-3 py-1 rounded-lg text-[11px] font-bold bg-noctvm-emerald/20 text-noctvm-emerald border border-noctvm-emerald/30 backdrop-blur-md hover:bg-noctvm-emerald transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-105">
+        <div className="flex items-center px-3 py-1 rounded-lg text-[11px] font-bold bg-noctvm-emerald/10 text-noctvm-emerald border border-noctvm-emerald/20 backdrop-blur-md hover:bg-noctvm-emerald hover:text-white transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-105">
           {display}
         </div>
       </a>

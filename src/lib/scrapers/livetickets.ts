@@ -1,108 +1,74 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // livetickets.ro scraper
 // Site: Romanian ticketing platform (already in NOCTVM as a source)
+// ─────────────────────────────────────────────────────────────────────────────
+// livetickets.ro scraper
+// Site: Romanian ticketing platform (already in NOCTVM as a source)
 // Strategy: JSON-LD extraction + HTML card parsing
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
 import { extractJsonLd, parseDate, extractTime, clean, guessGenres, fetchHtml } from './utils';
 
-const LIST_URL = 'https://www.livetickets.ro/cauta?city=Bucuresti&category=Club%2FNightlife';
-const BASE_URL  = 'https://www.livetickets.ro';
-
-function fromJsonLd(html: string): ScrapedEvent[] {
-  const today = new Date().toISOString().split('T')[0];
-  const events: ScrapedEvent[] = [];
-
-  for (const block of extractJsonLd(html)) {
-    const b = block as Record<string, unknown>;
-    if (String(b['@type'] ?? '') !== 'Event') continue;
-
-    const startDate = String(b.startDate ?? '');
-    const date = parseDate(startDate);
-    if (!date || date < today) continue;
-
-    const location = (b.location as Record<string, unknown>) ?? {};
-    const venue = clean(String(location.name ?? 'Venue TBC'));
-    const title = clean(b.name as string);
-    if (!title) continue;
-
-    const description = clean(b.description as string);
-    const img = b.image;
-    const image_url = typeof img === 'string' ? img
-      : Array.isArray(img) ? (img[0] as Record<string, unknown>)?.url as string ?? ''
-      : (img as Record<string, unknown>)?.url as string ?? '';
-
-    const offers = b.offers as Record<string, unknown> | undefined;
-    const price = offers?.price != null
-      ? (Number(offers.price) === 0 ? 'Free' : `${offers.price} RON`)
-      : null;
-
-    events.push({
-      title,
-      venue,
-      date,
-      time: extractTime(startDate),
-      description: description || null,
-      image_url,
-      event_url: String(b.url ?? LIST_URL),
-      genres: guessGenres(title, description),
-      price,
-    });
-  }
-
-  return events;
-}
-
-function fromHtml(html: string): ScrapedEvent[] {
-  const today = new Date().toISOString().split('T')[0];
-  const events: ScrapedEvent[] = [];
-  const seen = new Set<string>();
-
-  // livetickets event card links
-  const linkRegex = /<a[^>]+href="((?:https?:\/\/(?:www\.)?livetickets\.ro)?\/[^"]*(?:event|eveniment|concert|show|ticket)[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
-  let match: RegExpExecArray | null;
-
-  while ((match = linkRegex.exec(html)) !== null) {
-    let url = match[1];
-    if (!url.startsWith('http')) url = `${BASE_URL}${url}`;
-    if (seen.has(url)) continue;
-    seen.add(url);
-
-    const inner = match[2];
-    const title = clean(inner.replace(/<[^>]+>/g, '').trim().split('\n').filter(Boolean)[0] ?? '');
-    if (!title || title.length < 3) continue;
-
-    const dateMatch = inner.match(/(\d{1,2}[.\-]\d{1,2}[.\-]\d{4})|(\d{4}-\d{2}-\d{2})/);
-    const date = dateMatch ? parseDate(dateMatch[0]) : null;
-    if (!date || date < today) continue;
-
-    const imgMatch = match[0].match(/<img[^>]+src="([^"]+)"/i);
-
-    events.push({
-      title,
-      venue: 'Venue TBC',
-      date,
-      time: null,
-      description: null,
-      image_url: imgMatch?.[1] ?? '',
-      event_url: url,
-      genres: guessGenres(title, ''),
-      price: null,
-    });
-  }
-
-  return events;
-}
+const LIST_URLS = [
+  { search: 'Bucuresti', city: 'Bucharest' },
+  { search: 'Constanta', city: 'Constanta' },
+];
+const API_BASE = 'https://api.livetickets.ro/public/event-search?spc.numberOfRecords=1000&spc.pageNumber=1&src.search=';
+const IMG_BASE = 'https://static.livetickets.ro/event/';
+const WEB_BASE = 'https://www.livetickets.ro';
 
 export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
-  try {
-    const html = await fetchHtml(LIST_URL);
-    const fromLd = fromJsonLd(html);
-    if (fromLd.length > 0) return fromLd;
-    return fromHtml(html);
-  } catch (err) {
-    console.warn('[livetickets] scrape failed:', err);
-    return [];
+  const allEvents: ScrapedEvent[] = [];
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const { search, city } of LIST_URLS) {
+    try {
+      const url = `${API_BASE}${search}`;
+      const res = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+          'Flow-Language-Code': 'RO'
+        }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      const data = await res.json() as any;
+      const items = data.events?.items ?? [];
+
+      for (const item of items) {
+        const startDate = String(item.start_date ?? '');
+        const date = parseDate(startDate);
+        if (!date || date < today) continue;
+
+        const title = clean(item.name);
+        if (!title) continue;
+
+        const description = clean(item.description?.replace(/<[^>]+>/g, ''));
+        const image_url = item.image ? `${IMG_BASE}${item.image}` : '';
+        const event_url = item.url ? (item.url.startsWith('http') ? item.url : `${WEB_BASE}/bilete/${item.url}`) : '';
+
+        const price = item.price_min != null 
+          ? (Number(item.price_min) === 0 ? 'Free' : `${item.price_min} ${item.currency?.symbol ?? 'RON'}`)
+          : null;
+
+        allEvents.push({
+          title,
+          venue: clean(item.location ?? 'Venue TBC'),
+          date,
+          time: extractTime(startDate),
+          description: description || null,
+          image_url,
+          event_url,
+          genres: guessGenres(title, description || ''),
+          price,
+          city,
+        });
+      }
+    } catch (err) {
+      console.warn(`[livetickets] failed for ${search}:`, err);
+    }
   }
+  return allEvents;
 }

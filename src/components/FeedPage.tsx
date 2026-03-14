@@ -147,7 +147,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
   const fetchExplorePosts = useCallback(async () => {
     setLoadingTab(true);
-    const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
+    const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta';
     try {
       const { data } = await supabase
         .from('posts')
@@ -263,12 +263,15 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         .eq('target_type', 'user');
 
       const followedIds = (follows || []).map((f: { target_id: string }) => f.target_id);
-      if (followedIds.length === 0) { setFollowingPosts([]); return; }
+      
+      let query = supabase.from('posts').select('*, profiles(display_name, username, avatar_url)');
+      if (followedIds.length > 0) {
+        query = query.or(`user_id.in.(${followedIds.join(',')}),user_id.eq.${user.id}`);
+      } else {
+        query = query.eq('user_id', user.id);
+      }
 
-      const { data: posts } = await supabase
-        .from('posts')
-        .select('*, profiles(display_name, username, avatar_url)')
-        .or(`user_id.in.(${followedIds.join(',')}),user_id.eq.${user.id}`)
+      const { data: posts } = await query
         .order('created_at', { ascending: false })
         .limit(30);
 
@@ -522,7 +525,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                 </button>
                 {showMyStoryDropdown && dropdownPos && (
                   <div
-                    className="fixed z-[100] bg-noctvm-surface border border-noctvm-border rounded-xl shadow-xl overflow-hidden min-w-[140px]"
+                    className="fixed z-[100] liquid-glass rounded-xl shadow-xl overflow-hidden min-w-[140px]"
                     style={{ top: dropdownPos.top, left: dropdownPos.left, transform: 'translateX(-50%)' }}
                   >
                     <button
