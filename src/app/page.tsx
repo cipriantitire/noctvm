@@ -262,7 +262,7 @@ export default function Home() {
             {/* ── Events Tab ──────────────────────────────────── */}
             {activeTab === 'events' && (
               <div className="tab-content">
-                <MobileTopSection onVenueClick={handleVenueClick} />
+                <MobileTopSection onVenueClick={handleVenueClick} activeCity={activeCity} />
                 <div className="hidden lg:flex items-center justify-between mb-6 animate-fade-in">
                   <div>
                     <h1 className="font-heading text-2xl font-bold text-white">Events</h1>
@@ -339,7 +339,7 @@ export default function Home() {
             {/* ── Venues Tab ──────────────────────────────────── */}
             {activeTab === 'venues' && (
               <div className="tab-content">
-                <VenuesPage onVenueClick={handleVenueClick} />
+                <VenuesPage onVenueClick={handleVenueClick} activeCity={activeCity} />
               </div>
             )}
 

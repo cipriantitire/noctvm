@@ -45,9 +45,10 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md
 
 interface VenuesPageProps {
   onVenueClick: (venueName: string) => void;
+  activeCity?: 'bucuresti' | 'constanta';
 }
 
-export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
+export default function VenuesPage({ onVenueClick, activeCity: activeCityProp }: VenuesPageProps) {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [followedVenues, setFollowedVenues] = useState<Set<string>>(new Set());
@@ -58,6 +59,13 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
   const [activeCity, setActiveCity] = useState<'Bucharest' | 'Constanța'>('Bucharest');
+
+  // Sync prop to state
+  useEffect(() => {
+    if (activeCityProp) {
+      setActiveCity(activeCityProp === 'bucuresti' ? 'Bucharest' : 'Constanța');
+    }
+  }, [activeCityProp]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loadingVenues, setLoadingVenues] = useState(true);
 
