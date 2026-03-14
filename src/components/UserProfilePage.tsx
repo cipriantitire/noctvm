@@ -8,6 +8,7 @@ import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
 import type { NoctEvent } from '@/lib/types';
+import PostViewerModal from './PostViewerModal';
 
 // ── Post types ────────────────────────────────────────────────────────────────
 
@@ -61,6 +62,8 @@ export default function UserProfilePage({
   const [posts, setPosts] = useState<ProfilePost[]>([]);
   const [savedEvents, setSavedEvents] = useState<NoctEvent[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   // ── Stats state ───────────────────────────────────────────────────────────
   const [statsData, setStatsData] = useState({ posts: 0, followers: 0, following: 0 });
@@ -423,8 +426,12 @@ export default function UserProfilePage({
               <div className="grid grid-cols-3 gap-0.5">{Array.from({length:6}).map((_,i)=><div key={i} className="aspect-square bg-noctvm-surface animate-pulse"/>)}</div>
             ) : posts.length > 0 ? (
               <div className="grid grid-cols-3 gap-0.5">
-                {posts.map(post => (
-                  <div key={post.id} className="aspect-square bg-noctvm-surface overflow-hidden relative group cursor-pointer">
+                {posts.map((post, i) => (
+                  <button
+                    key={post.id}
+                    onClick={() => { setViewerIndex(i); setViewerOpen(true); }}
+                    className="aspect-square bg-noctvm-surface overflow-hidden relative group cursor-pointer"
+                  >
                     {post.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -436,7 +443,7 @@ export default function UserProfilePage({
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="text-white text-xs font-bold">❤️ {post.likes_count}</span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : (
@@ -486,6 +493,13 @@ export default function UserProfilePage({
           setShowCreateHighlight(false);
           fetchHighlights();
         }}
+      />
+
+      <PostViewerModal
+        posts={posts}
+        initialIndex={viewerIndex}
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
       />
     </div>
   );
