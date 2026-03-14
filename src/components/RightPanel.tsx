@@ -53,7 +53,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
   }, [dbEvents, activeCity]);
 
   return (
-    <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-noctvm-border p-6 overflow-y-auto">
+    <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-y-auto custom-scrollbar">
       {/* Map placeholder */}
       <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border">
         <div className="aspect-[4/3] bg-noctvm-midnight flex items-center justify-center">
@@ -71,7 +71,8 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
       </div>
 
       {/* Live Tonight */}
-      <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-noctvm-midnight to-noctvm-black border border-noctvm-violet/20">
+      <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-md border border-white/5 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-noctvm-violet/10 transition-colors" />
         <div className="flex items-center gap-2 mb-3">
           <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
           <span className="text-[10px] uppercase tracking-widest text-noctvm-emerald font-mono font-medium">Live Tonight</span>
@@ -121,7 +122,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
             <button
               key={name}
               onClick={() => onVenueClick?.(name)}
-              className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border hover:border-noctvm-violet/30 transition-colors cursor-pointer group"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-noctvm-violet/30 hover:bg-white/[0.08] transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
             >
               <div className="w-9 h-9 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
