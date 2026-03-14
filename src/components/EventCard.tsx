@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NoctEvent } from '@/lib/types';
-import { CalendarIcon, StarIcon, BookmarkIcon } from './icons';
+import { CalendarIcon, StarIcon } from './icons';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
@@ -23,14 +25,79 @@ function getSourceBadge(source: string) {
   }
 }
 
+function isRealEvent(id: string | undefined): boolean {
+  if (!id) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
 interface EventCardProps {
   event: NoctEvent;
   variant?: 'portrait' | 'landscape';
   onClick?: (event: NoctEvent) => void;
+  onSaveRequireAuth?: () => void;
 }
 
-export default function EventCard({ event, variant = 'portrait', onClick }: EventCardProps) {
+export default function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: EventCardProps) {
+  const { user } = useAuth();
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
   const sourceBadge = getSourceBadge(event.source);
+
+  // Fetch initial saved state
+  useEffect(() => {
+    if (!user || !isRealEvent(event.id)) return;
+    supabase
+      .from('event_saves')
+      .select('id')
+      .eq('event_id', event.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => setIsSaved(!!data));
+  }, [event.id, user]);
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) { onSaveRequireAuth?.(); return; }
+    if (!isRealEvent(event.id) || saveLoading) return;
+    setSaveLoading(true);
+    try {
+      if (isSaved) {
+        await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
+        setIsSaved(false);
+      } else {
+        await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
+        setIsSaved(true);
+      }
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const bookmarkButton = isRealEvent(event.id) ? (
+    <button
+      onClick={handleSave}
+      disabled={saveLoading}
+      className={`p-1 rounded transition-colors ${
+        isSaved
+          ? 'text-noctvm-violet'
+          : 'text-noctvm-silver/40 hover:text-noctvm-violet/70'
+      }`}
+      title={isSaved ? 'Remove from saved' : 'Save event'}
+    >
+      <svg
+        className="w-3.5 h-3.5"
+        viewBox="0 0 24 24"
+        fill={isSaved ? 'currentColor' : 'none'}
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+      </svg>
+    </button>
+  ) : null;
 
   const getPriceBadge = () => {
     if (!event.price) return null;
@@ -120,9 +187,7 @@ export default function EventCard({ event, variant = 'portrait', onClick }: Even
                 </>
               )}
             </div>
-            {event.id && (
-              <BookmarkIcon className="w-3.5 h-3.5 text-noctvm-silver/40 flex-shrink-0" />
-            )}
+            {bookmarkButton}
           </div>
         </div>
       </Wrapper>
@@ -175,9 +240,9 @@ export default function EventCard({ event, variant = 'portrait', onClick }: Even
               <span className="text-[10px] font-mono text-noctvm-violet leading-none flex-shrink-0">{event.time}</span>
             </>
           )}
-          {event.id && (
+          {isRealEvent(event.id) && (
             <div className="ml-auto">
-              <BookmarkIcon className="w-3.5 h-3.5 text-noctvm-silver/40 flex-shrink-0" />
+              {bookmarkButton}
             </div>
           )}
         </div>
@@ -185,4 +250,3 @@ export default function EventCard({ event, variant = 'portrait', onClick }: Even
     </Wrapper>
   );
 }
-

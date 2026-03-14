@@ -314,7 +314,7 @@ export default function Home() {
                     >
                       {filteredEvents.map((event, index) => (
                         <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
-                          <EventCard event={event} variant={viewMode} onClick={(e) => setSelectedEvent(e)} />
+                          <EventCard event={event} variant={viewMode} onClick={(e) => setSelectedEvent(e)} onSaveRequireAuth={() => setShowAuthModal(true)} />
                         </div>
                       ))}
                     </div>
