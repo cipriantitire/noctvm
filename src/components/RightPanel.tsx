@@ -29,15 +29,23 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
         if (data) setDbEvents(data as NoctEvent[]);
       });
 
+    // Trending venues now means "Venues with the most upcoming events"
     supabase
-      .from('venues')
-      .select('name, followers')
+      .from('events')
+      .select('venue')
       .eq('city', cityLabel)
-      .order('followers', { ascending: false })
-      .limit(10)
+      .gte('date', today)
       .then(({ data }) => {
         if (data) {
-          setTrendingVenues(data.map(v => ({ name: v.name, count: v.followers || 0 })));
+          const counts: Record<string, number> = {};
+          data.forEach(ev => {
+            counts[ev.venue] = (counts[ev.venue] || 0) + 1;
+          });
+          const sorted = Object.entries(counts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 8);
+          setTrendingVenues(sorted);
         }
       });
   }, [activeCity]);
@@ -134,7 +142,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-xs font-medium text-white group-hover:text-noctvm-violet transition-colors truncate">{name}</p>
-                <p className="text-[10px] text-noctvm-silver">Trending · {count.toLocaleString()} followers</p>
+                <p className="text-[10px] text-noctvm-silver">{count} Upcoming Events</p>
               </div>
             </button>
           ))}

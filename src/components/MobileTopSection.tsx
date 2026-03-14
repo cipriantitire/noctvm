@@ -30,16 +30,23 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
         if (data) setDbEvents(data as NoctEvent[]);
       });
 
-    // Fetch trending venues
+    // Trending venues now means "Venues with the most upcoming events"
     supabase
-      .from('venues')
-      .select('name, followers')
+      .from('events')
+      .select('venue')
       .eq('city', cityLabel)
-      .order('followers', { ascending: false })
-      .limit(10)
+      .gte('date', today)
       .then(({ data }) => {
         if (data) {
-          setTrendingVenues(data.map(v => ({ name: v.name, count: v.followers || 0 })));
+          const counts: Record<string, number> = {};
+          data.forEach(ev => {
+            counts[ev.venue] = (counts[ev.venue] || 0) + 1;
+          });
+          const sorted = Object.entries(counts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+          setTrendingVenues(sorted);
         }
       });
   }, [activeCity, today]);
@@ -129,6 +136,7 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
                   </span>
                 </div>
                 <span className="text-[9px] text-noctvm-silver/60 text-center line-clamp-1 w-full font-medium transition-colors group-hover:text-white">{venue.name}</span>
+                <span className="text-[8px] text-noctvm-silver/40 font-mono -mt-1 group-hover:text-noctvm-violet transition-colors">{venue.count} events</span>
               </button>
             );
           })}

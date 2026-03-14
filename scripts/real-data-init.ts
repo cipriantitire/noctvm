@@ -35,6 +35,15 @@ async function init() {
     { name: 'Doors Club', address: 'Str. Traian 68, Constanta', city: 'Constanta', followers: 1500, rating: 4.3 },
     { name: 'Azimuth Beach & Lounge', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 3400, rating: 4.7 },
     { name: 'Amos Mamaia', address: 'Promenada Mamaia, Constanta', city: 'Constanta', followers: 1200, rating: 4.4 },
+    { name: 'Club Momo', address: 'Strada Lipscani, Bucharest', city: 'Bucharest', followers: 2200, rating: 4.4 },
+    { name: 'Kran', address: 'Strada Gabroveni, Bucharest', city: 'Bucharest', followers: 1800, rating: 4.5 },
+    { name: 'Eden', address: 'Calea Victoriei 107, Bucharest', city: 'Bucharest', followers: 7200, rating: 4.7 },
+    { name: 'Face Club', address: 'Piata Presei Libere 3-5, Bucharest', city: 'Bucharest', followers: 9500, rating: 4.3 },
+    { name: 'BAMBOO', address: 'Strada Ramuri Tei, Bucharest', city: 'Bucharest', followers: 12000, rating: 4.2 },
+    { name: 'BIARETTI', address: 'Strada Academiei, Bucharest', city: 'Bucharest', followers: 1100, rating: 4.1 },
+    { name: 'BOA', address: 'Soseaua Pavel D. Kiseleff 32, Bucharest', city: 'Bucharest', followers: 8900, rating: 4.4 },
+    { name: 'The Pub Universitatii', address: 'Blv Regina Elisabeta 9, Bucharest', city: 'Bucharest', followers: 4500, rating: 4.6 },
+    { name: 'Quantic', address: 'Soseaua Grozavesti 82, Bucharest', city: 'Bucharest', followers: 5400, rating: 4.7 },
   ];
 
   console.log('Inserting Venues...');

@@ -244,10 +244,10 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
           {event.description && (
             <div className="pt-1">
               <div className="w-full h-px bg-noctvm-border mb-3" />
-              <p className={`text-sm text-noctvm-silver/80 leading-relaxed ${!descExpanded ? 'line-clamp-4' : ''}`}>
+              <p className={`text-sm text-noctvm-silver/80 leading-relaxed ${!descExpanded ? 'line-clamp-[15]' : ''}`}>
                 {event.description}
               </p>
-              {event.description.length > 200 && (
+              {event.description.length > 800 && (
                 <button
                   onClick={() => setDescExpanded(prev => !prev)}
                   className="mt-1.5 text-xs text-noctvm-violet hover:text-noctvm-violet/80 font-medium transition-colors"
