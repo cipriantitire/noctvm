@@ -268,12 +268,12 @@ export default function UserProfilePage({
         {/* Avatar + stats */}
         <div className="flex items-center gap-6 mb-4">
           <div className="relative flex-shrink-0">
-            {hasActiveStories ? (
-              <div className="p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500 rounded-full">
-                <div
-                  className="w-20 h-20 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 overflow-hidden ring-2 ring-noctvm-black cursor-pointer"
-                  onClick={fetchAndOpenMyStories}
-                >
+            <div
+              className="w-20 h-20 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500 cursor-pointer"
+              onClick={hasActiveStories ? fetchAndOpenMyStories : undefined}
+            >
+              <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
+                <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
                   {profile?.avatar_url ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -284,18 +284,7 @@ export default function UserProfilePage({
                   )}
                 </div>
               </div>
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 overflow-hidden ring-2 ring-noctvm-border">
-                {profile?.avatar_url ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-2xl font-bold text-white">{initials}</span>
-                  </div>
-                )}
-              </div>
-            )}
+            </div>
           </div>
 
           <div className="flex-1 flex justify-around">
