@@ -13,6 +13,7 @@ export const SAMPLE_EVENTS: NoctEvent[] = [
     event_url: "https://zilesinopti.ro/evenimente/admina-chlorys-von-bulove/",
     genres: ["Electronic", "Techno", "House", "Experimental", "Minimal"],
     price: "Free",
+    city: "Bucharest",
   },
   {
     id: "evt-2",

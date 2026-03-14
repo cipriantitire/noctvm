@@ -10,6 +10,7 @@ export interface NoctEvent {
   event_url: string;
   genres: string[];
   price: string | null;
+  city?: string;
   rating?: string;
   reviews?: number;
 }

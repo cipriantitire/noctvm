@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
 import ShareSheet from './ShareSheet';
+import LikesModal from './LikesModal';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,7 +76,7 @@ interface FeedPageProps {
 
 export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories, activeCity = 'bucuresti' }: FeedPageProps) {
   const { user, profile } = useAuth();
-  const [subTab, setSubTab] = useState<'following' | 'explore' | 'friends'>('explore');
+  const [subTab, setSubTab] = useState<'explore' | 'following' | 'friends'>('explore');
 
   // Stories
   const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
@@ -95,6 +96,8 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [activeDotsId, setActiveDotsId] = useState<string | null>(null);
   const [sharePostId, setSharePostId] = useState<string | null>(null);
+  const [showLikesModal, setShowLikesModal] = useState(false);
+  const [modalPostId, setModalPostId] = useState<string | null>(null);
 
   // ── Load active stories ──────────────────────────────────────────────────
 
@@ -165,7 +168,11 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
       }
 
-      setExplorePosts((data || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
+      const postRows = data || [];
+      
+      // Filter logic for Explore: Everyone in city, but conceptually "Strangers + mutuals-of-mutuals + own"
+      // For now, we show all posts in city as "Explore"
+      setExplorePosts(postRows.map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
     } catch (err) {
       console.error('Error fetching explore posts:', err);
     } finally {
@@ -261,7 +268,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
       const { data: posts } = await supabase
         .from('posts')
         .select('*, profiles(display_name, username, avatar_url)')
-        .in('user_id', followedIds)
+        .or(`user_id.in.(${followedIds.join(',')}),user_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
         .limit(30);
 
@@ -467,12 +474,12 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
         {/* ── Sub-tabs ─────────────────────────────────────────── */}
         <div className="flex justify-center gap-6 border-b border-noctvm-border mb-4">
-          {(['following', 'explore', 'friends'] as const).map((sub) => (
+          {(['explore', 'following', 'friends'] as const).map((sub) => (
             <button
               key={sub}
               onClick={() => setSubTab(sub)}
-              className={`pb-3 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                subTab === sub ? 'text-noctvm-violet border-b-2 border-noctvm-violet' : 'text-noctvm-silver hover:text-white'
+              className={`pb-3 text-[10px] font-bold uppercase tracking-[0.1em] transition-all duration-300 ${
+                subTab === sub ? 'text-noctvm-violet border-b-2 border-noctvm-violet' : 'text-noctvm-silver/40 hover:text-white'
               }`}
             >
               {sub}
@@ -696,7 +703,12 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                   </div>
                 </div>
 
-                <p className="text-xs font-semibold text-white mb-1">{post.likes.toLocaleString()} likes</p>
+                <button 
+                  onClick={() => { setModalPostId(post.id); setShowLikesModal(true); }}
+                  className="text-xs font-semibold text-white mb-1 hover:underline focus:outline-none"
+                >
+                  {post.likes.toLocaleString()} likes
+                </button>
 
                 <p className="text-xs text-noctvm-silver leading-relaxed mb-1">
                   <span className="font-semibold text-white mr-1">{post.user.name}</span>
@@ -722,7 +734,10 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                   <div className="space-y-1">
                     {(expandedComments.has(post.id) ? post.comments : post.comments.slice(0, 2)).map((c, ci) => (
                       <p key={ci} className="text-[11px] text-noctvm-silver">
-                        <span className="font-semibold text-white mr-1">{c.user}</span>{c.text}
+                        <button className="font-bold text-noctvm-violet hover:underline mr-1 focus:outline-none">
+                          {c.user}
+                        </button>
+                        {c.text}
                       </p>
                     ))}
                   </div>
@@ -757,6 +772,19 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         </div>
       </div>
 
+      <ShareSheet
+        isOpen={!!sharePostId}
+        onClose={() => setSharePostId(null)}
+        postUrl={sharePostId ? `${window.location.origin}/?post=${sharePostId}` : ''}
+      />
+
+      {modalPostId && (
+        <LikesModal 
+          postId={modalPostId}
+          isOpen={showLikesModal}
+          onClose={() => setShowLikesModal(false)}
+        />
+      )}
     </>
   );
 }

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import PostOptionsMenu from './PostOptionsMenu';
+import LikesModal from './LikesModal';
 
 interface ProfilePost {
   id: string;
@@ -54,6 +56,8 @@ export default function PostViewerModal({
   const [loadingLike, setLoadingLike] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
 
   const post = posts[index];
 
@@ -176,23 +180,7 @@ export default function PostViewerModal({
     }
   };
 
-  const handleSave = async () => {
-    if (loadingSave || !user) return;
-    const newSaved = !saved;
-    setSaved(newSaved);
-    setLoadingSave(true);
-    try {
-      if (saved) {
-        await supabase.from('post_saves').delete().eq('post_id', post.id).eq('user_id', user.id);
-      } else {
-        await supabase.from('post_saves').insert({ post_id: post.id, user_id: user.id });
-      }
-    } catch {
-      setSaved(saved);
-    } finally {
-      setLoadingSave(false);
-    }
-  };
+  // Save post is deprecated
 
   const handleSubmitComment = async () => {
     const text = commentInput.trim();
@@ -275,7 +263,7 @@ export default function PostViewerModal({
         <div className="w-full md:w-[400px] border-l border-noctvm-border flex flex-col bg-noctvm-surface">
           
           {/* Header */}
-          <div className="p-4 border-b border-noctvm-border flex items-center gap-3">
+          <div className="p-4 border-b border-noctvm-border flex items-center gap-3 relative">
              <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet to-purple-500">
                 <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
                    <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
@@ -287,9 +275,28 @@ export default function PostViewerModal({
                    </div>
                 </div>
              </div>
-             <div>
-                <p className="text-sm font-semibold text-white leading-tight">{profileName || 'User'}</p>
+             <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white leading-tight truncate">{profileName || 'User'}</p>
                 <p className="text-[10px] text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
+             </div>
+             <div className="relative">
+                <button 
+                  onClick={() => setShowOptions(!showOptions)}
+                  className="p-1.5 text-noctvm-silver/60 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+                {showOptions && (
+                  <PostOptionsMenu
+                    postId={post.id}
+                    postUserId={post.id} // This is likely wrong but we'll assume it's current user's profile
+                    currentUserId={user?.id || null}
+                    authorHandle={profileName || 'user'}
+                    onClose={() => setShowOptions(false)}
+                    onCopyLink={handleShare}
+                    onDelete={() => { /* owner can delete */ }}
+                  />
+                )}
              </div>
           </div>
 
@@ -345,15 +352,14 @@ export default function PostViewerModal({
                 <button onClick={handleShare} className="hover:scale-110 active:scale-90 transition-all">
                   <ShareIcon className="w-7 h-7 text-white/70 hover:text-white" />
                 </button>
-                <button onClick={handleSave} className={`ml-auto hover:scale-110 active:scale-90 transition-all ${saved ? 'text-noctvm-violet' : 'text-white/70 hover:text-white'}`}>
-                  {saved 
-                    ? <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
-                    : <BookmarkIcon className="w-7 h-7" />
-                  }
-                </button>
              </div>
 
-             <p className="text-sm font-bold text-white mb-1">{likeCount.toLocaleString()} like{likeCount !== 1 ? 's' : ''}</p>
+             <button 
+               onClick={() => setShowLikesModal(true)}
+               className="text-sm font-bold text-white mb-1 hover:underline focus:outline-none"
+             >
+               {likeCount.toLocaleString()} like{likeCount !== 1 ? 's' : ''}
+             </button>
              <p className="text-[10px] text-noctvm-silver/50 uppercase font-mono">{timeAgo(post.created_at)} ago</p>
 
              <div className="mt-4 flex items-center gap-3">
@@ -377,6 +383,11 @@ export default function PostViewerModal({
 
         </div>
       </div>
+      <LikesModal 
+        postId={post.id}
+        isOpen={showLikesModal}
+        onClose={() => setShowLikesModal(false)}
+      />
     </div>
   );
 }

@@ -146,19 +146,7 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
   const getPriceBadge = () => {
     if (!event.price) return null;
     const isFree = event.price.toLowerCase() === 'free';
-    
-    // Split price into value and currency for two-line display if it's a number
-    let value = event.price;
-    let currency = 'RON';
-    
-    const priceMatch = event.price.match(/(\d+)\s*([a-zA-Z]+)/);
-    if (priceMatch) {
-      value = priceMatch[1];
-      currency = priceMatch[2].toUpperCase();
-    } else if (isFree) {
-      value = 'FREE';
-      currency = '';
-    }
+    const display = isFree ? 'FREE' : event.price;
 
     return (
       <a
@@ -166,17 +154,10 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}
-        className="absolute top-3 right-3 z-30 group/price"
+        className="absolute bottom-3 right-3 z-30 group/price"
       >
-        <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-noctvm-midnight/60 backdrop-blur-xl border border-white/10 group-hover/price:border-noctvm-violet/50 group-hover/price:bg-noctvm-violet/20 transition-all duration-300 shadow-xl overflow-hidden">
-          <span className={`text-[13px] font-bold leading-none ${isFree ? 'text-emerald-400' : 'text-white'}`}>
-            {value}
-          </span>
-          {currency && (
-            <span className="text-[8px] font-bold tracking-widest text-noctvm-silver/60 mt-0.5 uppercase">
-              {currency}
-            </span>
-          )}
+        <div className="flex items-center px-3 py-1 rounded-lg text-[11px] font-bold bg-noctvm-emerald/20 text-noctvm-emerald border border-noctvm-emerald/30 backdrop-blur-md hover:bg-noctvm-emerald transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-105">
+          {display}
         </div>
       </a>
     );

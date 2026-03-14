@@ -58,12 +58,12 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp }:
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
-  const [activeCity, setActiveCity] = useState<'Bucharest' | 'Constanța'>('Bucharest');
+  const [activeCity, setActiveCity] = useState<'Bucharest' | 'Constanta'>('Bucharest');
 
   // Sync prop to state
   useEffect(() => {
     if (activeCityProp) {
-      setActiveCity(activeCityProp === 'bucuresti' ? 'Bucharest' : 'Constanța');
+      setActiveCity(activeCityProp === 'bucuresti' ? 'Bucharest' : 'Constanta');
     }
   }, [activeCityProp]);
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -154,11 +154,11 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp }:
           <div className="relative">
             <select
               value={activeCity}
-              onChange={e => setActiveCity(e.target.value as 'Bucharest' | 'Constanța')}
+              onChange={e => setActiveCity(e.target.value as 'Bucharest' | 'Constanta')}
               className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
             >
               <option value="Bucharest">București</option>
-              <option value="Constanța">Constanța</option>
+              <option value="Constanta">Constanța</option>
             </select>
             <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </div>

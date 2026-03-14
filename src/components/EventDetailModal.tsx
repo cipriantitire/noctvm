@@ -168,7 +168,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md z-10 hover:scale-105 transition-transform"
+              className="absolute bottom-4 right-4 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold liquid-glass-price z-10 hover:scale-105 transition-transform text-white"
             >
               {isFree ? 'FREE' : event.price}
             </a>

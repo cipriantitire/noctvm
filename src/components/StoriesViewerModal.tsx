@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import PostOptionsMenu from './PostOptionsMenu';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ export default function StoriesViewerModal({
   const [userIndex, setUserIndex]     = useState(startIndex);
   const [storyIndex, setStoryIndex]   = useState(0);
   const [progress, setProgress]       = useState(0);
+  const [showOptions, setShowOptions] = useState(false);
 
   const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef  = useRef<number>(0);
@@ -160,31 +162,7 @@ export default function StoriesViewerModal({
         ))}
       </div>
 
-      {/* Delete own story button */}
-      {myUserId && story.user_id === myUserId && (
-        <button
-          onClick={async (e) => {
-            e.stopPropagation();
-            await supabase.from('stories').delete().eq('id', story.id);
-            if (storyIndex < totalStories - 1) {
-              setStoryIndex(s => s + 1);
-              resetProgress();
-            } else if (userIndex < users.length - 1) {
-              setUserIndex(u => u + 1);
-              setStoryIndex(0);
-              resetProgress();
-            } else {
-              handleClose();
-            }
-          }}
-          className="absolute top-4 left-14 z-30 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-black/80 transition-all"
-          title="Delete story"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-          </svg>
-        </button>
-      )}
+      {/* 3-dots button moved to header */}
 
       {/* Header */}
       <div className="absolute top-7 left-0 right-0 flex items-center justify-between px-4 z-20">
@@ -200,9 +178,47 @@ export default function StoriesViewerModal({
             <div className="text-white/60 text-[10px]">{timeAgo(story.created_at)}</div>
           </div>
         </div>
-        <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors" aria-label="Close">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button 
+            onClick={() => setShowOptions(!showOptions)}
+            className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors relative" 
+            aria-label="Options"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            
+            {showOptions && (
+              <div className="absolute top-full right-0 mt-2 pointer-events-auto">
+                <PostOptionsMenu
+                  postId={story.id}
+                  postUserId={story.user_id}
+                  currentUserId={myUserId || null}
+                  authorHandle={currentUser.name}
+                  onClose={() => setShowOptions(false)}
+                  onDelete={async () => {
+                    await supabase.from('stories').delete().eq('id', story.id);
+                    if (storyIndex < totalStories - 1) {
+                      setStoryIndex(s => s + 1);
+                      resetProgress();
+                    } else if (userIndex < users.length - 1) {
+                      setUserIndex(u => u + 1);
+                      setStoryIndex(0);
+                      resetProgress();
+                    } else {
+                      handleClose();
+                    }
+                  }}
+                  onCopyLink={() => {
+                    const url = `${window.location.origin}/?story=${story.id}`;
+                    navigator.clipboard.writeText(url);
+                  }}
+                />
+              </div>
+            )}
+          </button>
+          <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors" aria-label="Close">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
       </div>
 
       {/* Story caption */}

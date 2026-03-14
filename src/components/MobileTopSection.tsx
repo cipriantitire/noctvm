@@ -14,10 +14,10 @@ interface MobileTopSectionProps {
 export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti' }: MobileTopSectionProps) {
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
-    const today = new Date().toISOString().split('T')[0];
     
     // Fetch tonight's events
     supabase
@@ -44,10 +44,13 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
       });
   }, [activeCity]);
 
-  // Fallback to sample events for tonights events in Bucharest only
+  // Fallback to sample events
   const tonightEvents = dbEvents.length > 0 
     ? dbEvents 
-    : (activeCity === 'bucuresti' ? SAMPLE_EVENTS.filter(e => e.date === new Date().toISOString().split('T')[0]) : []);
+    : SAMPLE_EVENTS.filter(e => {
+        const matchesCity = e.city?.toLowerCase() === (activeCity === 'bucuresti' ? 'bucharest' : 'constanta');
+        return matchesCity && e.date === today;
+      });
 
   return (
     <div className="lg:hidden space-y-2 mb-3 animate-fade-in">
