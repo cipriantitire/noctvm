@@ -145,6 +145,61 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
   useEffect(() => { fetchExplorePosts(); }, []);
 
+  // ── Real-time: likes ──────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('post_likes_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'post_likes' },
+        async (payload) => {
+          const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
+          if (!postId) return;
+          // Re-fetch count for that post
+          const { count } = await supabase
+            .from('post_likes')
+            .select('id', { count: 'exact', head: true })
+            .eq('post_id', postId);
+          // Update in all three post lists
+          setExplorePosts(prev => prev.map(p => p.id === postId ? { ...p, likes: count ?? 0 } : p));
+          setFollowingPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: count ?? 0 } : p));
+          setFriendsPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: count ?? 0 } : p));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Real-time: comments ───────────────────────────────────────────────────
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('post_comments_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'post_comments' },
+        async (payload) => {
+          const postId = (payload.new as any)?.post_id;
+          if (!postId) return;
+          // Fetch new comment
+          const newComment = {
+            user: (payload.new as any)?.profiles?.username || 'user',
+            text: (payload.new as any)?.text || '',
+          };
+          // Update comments array for that post if comments are expanded
+          setLoadedComments(prev => {
+            if (!prev[postId]) return prev; // Only update if comments were already loaded
+            return { ...prev, [postId]: [...prev[postId], newComment] };
+          });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const fetchExplorePosts = async () => {
     setLoadingTab(true);
     try {
