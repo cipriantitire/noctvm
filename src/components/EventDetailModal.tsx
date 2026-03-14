@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,14 +46,14 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   const [saveCount, setSaveCount]     = useState(0);
   const [isSaved,   setIsSaved]       = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
-  const handleClose = () => setIsClosing(true);
+  const handleClose = useCallback(() => setIsClosing(true), []);
 
   useEffect(() => {
     if (!event) return;
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [event]);
+  }, [event, handleClose]);
 
   useEffect(() => {
     if (!event || !isRealEvent(event.id)) { setSaveCount(0); setIsSaved(false); return; }
@@ -86,7 +86,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [event?.id, user]);
+  }, [event, user]);
 
   const handleSave = async () => {
     if (!user) { onOpenAuth(); return; }

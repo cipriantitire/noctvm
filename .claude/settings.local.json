@@ -24,7 +24,10 @@
       "Read(//mnt/c/Users/cipri/**)",
       "Read(//mnt/c/Users/cipri/NOCTVM/**)",
       "Skill(hookify:list)",
-      "Skill(hookify:list:*)"
+      "Skill(hookify:list:*)",
+      "Skill(commit-commands:commit-push-pr)",
+      "Skill(commit-commands:commit-push-pr:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

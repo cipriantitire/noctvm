@@ -1,36 +1,56 @@
-'use client';
-
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { NoctEvent } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 
 interface RightPanelProps {
   onVenueClick?: (venueName: string) => void;
   onEventClick?: (event: NoctEvent) => void;
+  activeCity?: 'bucuresti' | 'constanta';
 }
 
-export default function RightPanel({ onVenueClick, onEventClick }: RightPanelProps) {
-  // Get tonight's events
+export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'bucuresti' }: RightPanelProps) {
+  const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
+  const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
+
+  useEffect(() => {
+    const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Fetch tonight's events
+    supabase
+      .from('events')
+      .select('*')
+      .eq('city', cityLabel)
+      .eq('date', today)
+      .limit(10)
+      .then(({ data }) => {
+        if (data) setDbEvents(data as NoctEvent[]);
+      });
+
+    // Fetch trending venues (top followers or most events in next 7 days)
+    supabase
+      .from('venues')
+      .select('name, followers')
+      .eq('city', cityLabel)
+      .order('followers', { ascending: false })
+      .limit(6)
+      .then(({ data }) => {
+        if (data) {
+          setTrendingVenues(data.map(v => ({ name: v.name, count: Math.floor(v.followers / 100) }))); // Using followers as a proxy for "trending" for now
+        }
+      });
+  }, [activeCity]);
+
+  // Fallback to sample events if no DB events for TONIGHT in Bucharest only
   const tonightEvents = useMemo(() => {
+    if (dbEvents.length > 0) return dbEvents;
+    if (activeCity !== 'bucuresti') return [];
+    
     const today = new Date().toISOString().split('T')[0];
     return SAMPLE_EVENTS.filter(e => e.date === today);
-  }, []);
-
-  // Get trending venues (most events)
-  const trendingVenues = useMemo(() => {
-    const counts: Record<string, { count: number; image: string }> = {};
-    SAMPLE_EVENTS.forEach(e => {
-      if (!counts[e.venue]) {
-        counts[e.venue] = { count: 0, image: e.image_url };
-      }
-      counts[e.venue].count++;
-    });
-    return Object.entries(counts)
-      .sort(([, a], [, b]) => b.count - a.count)
-      .slice(0, 6)
-      .map(([name, data]) => ({ name, ...data }));
-  }, []);
+  }, [dbEvents, activeCity]);
 
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-noctvm-border p-6 overflow-y-auto">

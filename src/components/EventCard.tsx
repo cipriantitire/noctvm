@@ -48,21 +48,55 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
 
   // Fetch save count + user's saved state
   useEffect(() => {
-    if (!real) return;
-    supabase
-      .from('event_saves')
-      .select('id, user_id', { count: 'exact' })
-      .eq('event_id', event.id)
-      .then(({ data, count }) => {
-        setSaveCount(count ?? 0);
-        if (user) setIsSaved((data ?? []).some((r: { user_id: string }) => r.user_id === user.id));
-      });
+    if (!real) {
+      setSaveCount(0);
+      setIsSaved(false);
+      return;
+    }
+    
+    const fetchSaveData = async () => {
+      const { data, count } = await supabase
+        .from('event_saves')
+        .select('id, user_id', { count: 'exact' })
+        .eq('event_id', event.id);
+      
+      setSaveCount(count ?? 0);
+      if (user) setIsSaved((data ?? []).some((r: { user_id: string }) => r.user_id === user.id));
+    };
+
+    fetchSaveData();
+
+    // Realtime subscription for this event's saves
+    const channel = supabase
+      .channel(`event_saves_${event.id}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'event_saves', 
+        filter: `event_id=eq.${event.id}` 
+      }, () => {
+        fetchSaveData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [event.id, user, real]);
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) { onSaveRequireAuth?.(); return; }
-    if (!real || saveLoading) return;
+    if (saveLoading) return;
+    
+    // If it's a sample event, it can't be saved to DB (foreign key constraint)
+    if (!real) {
+      // Just toggle local state for UI demo purposes if it's a sample event
+      setIsSaved(!isSaved);
+      setSaveCount(c => !isSaved ? c + 1 : Math.max(0, c - 1));
+      return;
+    }
+
     const newSaved = !isSaved;
     setIsSaved(newSaved);
     setSaveCount(c => newSaved ? c + 1 : Math.max(0, c - 1));
@@ -73,7 +107,9 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
       } else {
         await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
       }
-    } catch {
+    } catch (err) {
+      console.error('Error saving event:', err);
+      // Revert on error
       setIsSaved(isSaved);
       setSaveCount(c => newSaved ? Math.max(0, c - 1) : c + 1);
     } finally {
@@ -83,25 +119,27 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
 
   const bookmarkButton = (
     <button
-      onClick={real ? handleSave : undefined}
-      disabled={saveLoading || !real}
-      className={`flex items-center gap-1 p-1 rounded transition-colors ${
-        isSaved ? 'text-noctvm-violet' : 'text-noctvm-silver/40 hover:text-noctvm-violet/70'
-      } ${!real ? 'cursor-default' : ''}`}
-      title={real ? (isSaved ? 'Remove from saved' : 'Save event') : undefined}
+      onClick={handleSave}
+      disabled={saveLoading}
+      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-200 ${
+        isSaved 
+          ? 'bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/30' 
+          : 'bg-white/5 text-noctvm-silver/50 hover:bg-white/10 hover:text-white border border-white/5'
+      } active:scale-95`}
+      title={isSaved ? 'Remove from saved' : 'Save event'}
     >
       <svg
-        className="w-3.5 h-3.5 flex-shrink-0"
+        className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${isSaved ? 'scale-110' : ''}`}
         viewBox="0 0 24 24"
         fill={isSaved ? 'currentColor' : 'none'}
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
       </svg>
-      {saveCount > 0 && <span className="text-[10px] font-mono leading-none">{saveCount}</span>}
+      <span className="text-[10px] font-bold font-mono tracking-tight">{saveCount}</span>
     </button>
   );
 

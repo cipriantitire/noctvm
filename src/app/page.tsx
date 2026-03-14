@@ -105,8 +105,16 @@ export default function Home() {
 
   const filteredEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    // Use DB events when loaded; fall back to sample data if DB is empty or still loading
-    let events = dbEvents && dbEvents.length > 0 ? dbEvents : SAMPLE_EVENTS.filter(e => e.date >= today);
+    const isBuc = activeCity === 'bucuresti';
+    
+    // Use DB events when loaded; fall back to sample data ONLY for Bucharest if DB is empty
+    let events: NoctEvent[] = [];
+    if (dbEvents && dbEvents.length > 0) {
+      events = dbEvents;
+    } else if (isBuc && (!dbEvents || dbEvents.length === 0)) {
+      events = SAMPLE_EVENTS.filter(e => e.date >= today);
+    }
+
     if (!activeGenres.includes('All')) {
       events = events.filter(e =>
         e.genres.some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
@@ -124,7 +132,7 @@ export default function Home() {
       events = events.filter(e => e.date === selectedDate);
     }
     return events;
-  }, [dbEvents, activeGenres, searchQuery, selectedDate]);
+  }, [dbEvents, activeGenres, searchQuery, selectedDate, activeCity]);
 
   const handleVenueClick = (name: string) => setSelectedVenue(name);
   const handleCloseVenue = () => setVenueClosing(true);
@@ -323,6 +331,7 @@ export default function Home() {
                   onOpenCreatePost={() => setShowCreatePost(true)}
                   onOpenCreateStory={() => setShowCreateStory(true)}
                   onOpenStories={(users, index) => handleOpenStories(users, index)}
+                  activeCity={activeCity}
                 />
               </div>
             )}
@@ -514,7 +523,11 @@ export default function Home() {
 
         {/* Right panel */}
         {(activeTab === 'events' || activeTab === 'feed' || activeTab === 'venues') && (
-          <RightPanel onVenueClick={handleVenueClick} onEventClick={(e) => setSelectedEvent(e)} />
+          <RightPanel 
+            onVenueClick={handleVenueClick} 
+            onEventClick={(e) => setSelectedEvent(e)} 
+            activeCity={activeCity}
+          />
         )}
 
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />

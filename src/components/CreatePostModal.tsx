@@ -216,7 +216,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
             {imagePreview ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="" className="w-full rounded-xl object-contain max-h-80" />
+                <img src={imagePreview} alt="Preview" className="w-full rounded-xl object-contain max-h-80" />
                 <button
                   onClick={(e) => { e.stopPropagation(); setImagePreview(null); setImageFile(null); }}
                   className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
@@ -245,7 +245,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
           <div className="flex items-start gap-3 px-4 py-4 border-b border-noctvm-border">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {profile?.avatar_url
-                ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="My profile" className="w-full h-full object-cover" />
                 : <span className="text-xs font-bold text-white">{(profile?.display_name || 'N')[0].toUpperCase()}</span>
               }
             </div>

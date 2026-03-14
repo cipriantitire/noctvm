@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { HeartIcon, ChatIcon, ShareIcon } from './icons';
+import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -46,11 +46,13 @@ export default function PostViewerModal({
 
   // Per-post live state
   const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState<{ user: string; text: string }[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
 
   const post = posts[index];
@@ -74,11 +76,14 @@ export default function PostViewerModal({
 
   // Load post data from Supabase on post change
   const loadPostData = useCallback(async (postId: string) => {
-    // Like count + user's own like
-    const [countRes, userLikeRes, commentsRes] = await Promise.all([
+    // Like count + user's own like + user's own save
+    const [countRes, userLikeRes, userSaveRes, commentsRes] = await Promise.all([
       supabase.from('post_likes').select('id', { count: 'exact', head: true }).eq('post_id', postId),
       user
         ? supabase.from('post_likes').select('id').eq('post_id', postId).eq('user_id', user.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      user
+        ? supabase.from('post_saves').select('id').eq('post_id', postId).eq('user_id', user.id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabase
         .from('post_comments')
@@ -87,14 +92,23 @@ export default function PostViewerModal({
         .order('created_at', { ascending: true })
         .limit(50),
     ]);
+    
     setLikeCount(countRes.count ?? 0);
-    setLiked(!!(userLikeRes as { data: unknown }).data);
-    setComments(
-      ((commentsRes.data ?? []) as { text: string; profiles: { username: string } | null }[]).map(c => ({
-        user: c.profiles?.username || 'user',
-        text: c.text,
-      }))
-    );
+    setLiked(!!userLikeRes.data);
+    setSaved(!!userSaveRes.data);
+    
+    if (commentsRes.data) {
+      // Cast through unknown to resolve type overlap error in build
+      const rawComments = commentsRes.data as unknown as any[];
+      const formattedComments = rawComments.map(c => ({
+        user: (Array.isArray(c.profiles) ? c.profiles[0]?.username : c.profiles?.username) || 'user',
+        text: c.text
+      }));
+      setComments(formattedComments);
+    } else {
+      setComments([]);
+    }
+    
     setCommentInput('');
     setShowComments(false);
   }, [user]);
@@ -111,13 +125,24 @@ export default function PostViewerModal({
 
     const channel = supabase
       .channel(`post_viewer_${postId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes', filter: `post_id=eq.${postId}` }, async () => {
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'post_likes', 
+        filter: `post_id=eq.${postId}` 
+      }, async () => {
         const { count } = await supabase.from('post_likes').select('id', { count: 'exact', head: true }).eq('post_id', postId);
         setLikeCount(count ?? 0);
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_comments', filter: `post_id=eq.${postId}` }, (payload) => {
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'post_comments', 
+        filter: `post_id=eq.${postId}` 
+      }, async (payload) => {
         const row = payload.new as { text: string; user_id: string };
-        setComments(prev => [...prev, { user: 'user', text: row.text }]);
+        const { data: prof } = await supabase.from('profiles').select('username').eq('id', row.user_id).single();
+        setComments(prev => [...prev, { user: prof?.username || 'user', text: row.text }]);
       })
       .subscribe();
 
@@ -151,6 +176,24 @@ export default function PostViewerModal({
     }
   };
 
+  const handleSave = async () => {
+    if (loadingSave || !user) return;
+    const newSaved = !saved;
+    setSaved(newSaved);
+    setLoadingSave(true);
+    try {
+      if (saved) {
+        await supabase.from('post_saves').delete().eq('post_id', post.id).eq('user_id', user.id);
+      } else {
+        await supabase.from('post_saves').insert({ post_id: post.id, user_id: user.id });
+      }
+    } catch {
+      setSaved(saved);
+    } finally {
+      setLoadingSave(false);
+    }
+  };
+
   const handleSubmitComment = async () => {
     const text = commentInput.trim();
     if (!text || !user || submittingComment) return;
@@ -158,7 +201,11 @@ export default function PostViewerModal({
     setSubmittingComment(true);
     try {
       await supabase.from('post_comments').insert({ post_id: post.id, user_id: user.id, text });
-      setComments(prev => [...prev, { user: profile?.username || 'you', text }]);
+      // Optimistic update already handled by realtime insert? 
+      // Actually we update here too for immediate feedback
+      if (!comments.some(c => c.text === text && c.user === (profile?.username || 'you'))) {
+        setComments(prev => [...prev, { user: profile?.username || 'you', text }]);
+      }
     } finally {
       setSubmittingComment(false);
     }
@@ -174,144 +221,160 @@ export default function PostViewerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity animate-fade-in" onClick={onClose} />
 
-      {/* Prev arrow */}
-      {hasPrev && (
+      {/* Close button top right */}
+      <button 
+        onClick={onClose}
+        className="absolute top-6 right-6 z-[110] p-2 text-white/50 hover:text-white transition-colors"
+      >
+        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Nav Arrows */}
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-6 pointer-events-none z-[110]">
         <button
           onClick={() => setIndex(i => i - 1)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/80 transition-all z-20"
+          disabled={!hasPrev}
+          className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all pointer-events-auto ${!hasPrev ? 'opacity-0 scale-90' : 'opacity-100'}`}
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
-      )}
-
-      {/* Next arrow */}
-      {hasNext && (
         <button
           onClick={() => setIndex(i => i + 1)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/80 transition-all z-20"
+          disabled={!hasNext}
+          className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all pointer-events-auto ${!hasNext ? 'opacity-0 scale-90' : 'opacity-100'}`}
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
         </button>
-      )}
+      </div>
 
-      {/* Post card — styled exactly like a FeedPage article */}
-      <div className="relative w-full max-w-sm bg-noctvm-surface rounded-xl border border-noctvm-border overflow-hidden shadow-2xl z-10 flex flex-col max-h-[92vh]">
-
-        {/* Header */}
-        <div className="flex items-center gap-3 p-3 flex-shrink-0">
-          <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0">
-            {profileAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profileAvatar} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-xs font-bold text-white">{profileInitial || 'U'}</span>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white leading-tight truncate">{profileName || 'User'}</p>
-            <p className="text-[10px] text-noctvm-silver">{timeAgo(post.created_at)}</p>
-          </div>
-          <span className="text-[11px] text-noctvm-silver/60 font-mono flex-shrink-0">{index + 1}/{posts.length}</span>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all ml-1 flex-shrink-0"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Image */}
-        <div className="aspect-square bg-noctvm-black flex-shrink-0 overflow-hidden">
+      {/* Main Container */}
+      <div className="relative w-full max-w-5xl h-[90vh] bg-noctvm-black rounded-xl overflow-hidden shadow-2xl z-[105] flex flex-col md:flex-row transition-transform animate-scale-in mx-4 md:mx-0">
+        
+        {/* Left: Image Side */}
+        <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
           {post.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+            <img 
+              src={post.image_url} 
+              alt="Post media" 
+              className="w-full h-full object-contain"
+            />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/20 flex items-center justify-center">
-              <span className="text-noctvm-silver/30 text-sm px-4 text-center line-clamp-4">{post.caption}</span>
-            </div>
+             <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/40 p-12 flex items-center justify-center">
+                <p className="text-noctvm-silver text-center italic text-lg leading-relaxed">{post.caption}</p>
+             </div>
           )}
         </div>
 
-        {/* Actions + content (scrollable) */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Action row */}
-          <div className="flex items-center gap-3 px-3 pt-3">
-            <button onClick={handleLike} disabled={loadingLike} className="hover:scale-110 active:animate-micro-pop transition-transform">
-              {liked
-                ? <svg className="w-6 h-6 text-red-500 animate-micro-pop" viewBox="0 0 24 24" fill="currentColor"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
-                : <HeartIcon className="w-6 h-6 text-noctvm-silver hover:text-red-400 transition-colors" />
-              }
-            </button>
-            <button onClick={() => setShowComments(s => !s)} className="hover:scale-110 transition-transform">
-              <ChatIcon className="w-6 h-6 text-noctvm-silver hover:text-white transition-colors" />
-            </button>
-            <button onClick={handleShare} className="ml-auto hover:scale-110 transition-transform">
-              <ShareIcon className="w-6 h-6 text-noctvm-silver hover:text-white transition-colors" />
-            </button>
+        {/* Right: Info + Comments Side */}
+        <div className="w-full md:w-[400px] border-l border-noctvm-border flex flex-col bg-noctvm-surface">
+          
+          {/* Header */}
+          <div className="p-4 border-b border-noctvm-border flex items-center gap-3">
+             <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet to-purple-500">
+                <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
+                   <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                      {profileAvatar ? (
+                        <img src={profileAvatar} alt={profileName || 'Profile'} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xs font-bold text-white">{profileInitial || 'U'}</span>
+                      )}
+                   </div>
+                </div>
+             </div>
+             <div>
+                <p className="text-sm font-semibold text-white leading-tight">{profileName || 'User'}</p>
+                <p className="text-[10px] text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
+             </div>
           </div>
 
-          <p className="px-3 pt-2 text-xs font-semibold text-white">{likeCount.toLocaleString()} like{likeCount !== 1 ? 's' : ''}</p>
+          {/* Comments Section (Scrollable) */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+             {post.caption && !post.image_url === false && (
+               <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-noctvm-midnight flex-shrink-0 flex items-center justify-center ring-1 ring-noctvm-border overflow-hidden">
+                    {profileAvatar ? <img src={profileAvatar} alt={profileName || 'Author'} className="w-full h-full object-cover" /> : userInitial}
+                  </div>
+                  <div>
+                     <p className="text-xs text-white leading-relaxed">
+                        <span className="font-bold mr-2">{profileName}</span>
+                        {post.caption}
+                     </p>
+                  </div>
+               </div>
+             )}
 
-          {post.caption && (
-            <p className="px-3 pt-1 pb-2 text-xs text-noctvm-silver leading-relaxed">{post.caption}</p>
-          )}
+             {comments.map((c, i) => (
+               <div key={i} className="flex gap-3 animate-fade-in-up" style={{ animationDelay: `${i * 30}ms` }}>
+                  <div className="w-8 h-8 rounded-full bg-noctvm-violet/10 flex-shrink-0 flex items-center justify-center ring-1 ring-noctvm-border overflow-hidden">
+                    <span className="text-[10px] text-noctvm-violet font-bold">{c.user[0].toUpperCase()}</span>
+                  </div>
+                  <div>
+                     <p className="text-xs text-white leading-relaxed">
+                        <span className="font-bold mr-2">{c.user}</span>
+                        {c.text}
+                     </p>
+                  </div>
+               </div>
+             ))}
+             {comments.length === 0 && !post.caption && (
+               <div className="flex flex-col items-center justify-center h-full py-20 opacity-30">
+                  <ChatIcon className="w-8 h-8 mb-2" />
+                  <p className="text-xs">No comments yet.</p>
+               </div>
+             )}
+          </div>
 
-          {/* Comments */}
-          <div className="px-3 pb-3">
-            {comments.length > 0 && !showComments && (
-              <button onClick={() => setShowComments(true)} className="text-[11px] text-noctvm-silver/60 hover:text-noctvm-silver mb-1 transition-colors">
-                View all {comments.length} comment{comments.length !== 1 ? 's' : ''}
-              </button>
-            )}
-            {showComments && (
-              <div className="space-y-1 mb-2">
-                {comments.length === 0 && <p className="text-[11px] text-noctvm-silver/40 italic">No comments yet.</p>}
-                {comments.map((c, ci) => (
-                  <p key={ci} className="text-[11px] text-noctvm-silver">
-                    <span className="font-semibold text-white mr-1">{c.user}</span>{c.text}
-                  </p>
-                ))}
-              </div>
-            )}
+          {/* Interaction Area */}
+          <div className="p-4 border-t border-noctvm-border bg-noctvm-midnight/30">
+             <div className="flex items-center gap-4 mb-3">
+                <button onClick={handleLike} className={`${liked ? 'scale-110' : 'hover:scale-110 active:scale-90'} transition-all`}>
+                  {liked 
+                    ? <svg className="w-7 h-7 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                    : <HeartIcon className="w-7 h-7 text-white/70 hover:text-white" />
+                  }
+                </button>
+                <button className="hover:scale-110 active:scale-90 transition-all">
+                  <ChatIcon className="w-7 h-7 text-white/70 hover:text-white" />
+                </button>
+                <button onClick={handleShare} className="hover:scale-110 active:scale-90 transition-all">
+                  <ShareIcon className="w-7 h-7 text-white/70 hover:text-white" />
+                </button>
+                <button onClick={handleSave} className={`ml-auto hover:scale-110 active:scale-90 transition-all ${saved ? 'text-noctvm-violet' : 'text-white/70 hover:text-white'}`}>
+                  {saved 
+                    ? <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+                    : <BookmarkIcon className="w-7 h-7" />
+                  }
+                </button>
+             </div>
 
-            {/* Comment input */}
-            <div className="flex items-center gap-2 pt-2 border-t border-noctvm-border">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                {profile?.avatar_url
-                  ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                  : <span className="text-[8px] font-bold text-white">{userInitial}</span>
-                }
-              </div>
-              <input
-                type="text"
-                placeholder={user ? 'Add a comment...' : 'Sign in to comment'}
-                value={commentInput}
-                onChange={e => setCommentInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleSubmitComment(); }}
-                disabled={!user}
-                className="flex-1 bg-transparent text-[11px] text-noctvm-silver placeholder:text-noctvm-silver/30 outline-none disabled:cursor-not-allowed"
-              />
-              {commentInput.trim() && (
-                <button
+             <p className="text-sm font-bold text-white mb-1">{likeCount.toLocaleString()} like{likeCount !== 1 ? 's' : ''}</p>
+             <p className="text-[10px] text-noctvm-silver/50 uppercase font-mono">{timeAgo(post.created_at)} ago</p>
+
+             <div className="mt-4 flex items-center gap-3">
+                <input 
+                  type="text" 
+                  value={commentInput}
+                  onChange={e => setCommentInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSubmitComment()}
+                  placeholder="Add a comment..."
+                  className="flex-1 bg-transparent text-sm text-white placeholder:text-noctvm-silver/30 outline-none"
+                />
+                <button 
                   onClick={handleSubmitComment}
-                  disabled={submittingComment}
-                  className="text-[10px] text-noctvm-violet font-semibold hover:text-noctvm-violet/80 transition-colors disabled:opacity-50 flex-shrink-0"
+                  disabled={!commentInput.trim() || !user || submittingComment}
+                  className="text-sm font-bold text-noctvm-violet hover:text-white transition-colors disabled:opacity-30"
                 >
                   Post
                 </button>
-              )}
-            </div>
+             </div>
           </div>
+
         </div>
       </div>
     </div>

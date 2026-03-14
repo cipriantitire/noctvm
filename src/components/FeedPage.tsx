@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import { HeartIcon, ChatIcon, ShareIcon } from './icons';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
@@ -70,9 +70,10 @@ interface FeedPageProps {
   onOpenCreatePost: () => void;
   onOpenCreateStory: () => void;
   onOpenStories: (users: StoryUser[], index: number) => void;
+  activeCity?: 'bucuresti' | 'constanta';
 }
 
-export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories }: FeedPageProps) {
+export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories, activeCity = 'bucuresti' }: FeedPageProps) {
   const { user, profile } = useAuth();
   const [subTab, setSubTab] = useState<'following' | 'explore' | 'friends'>('explore');
 
@@ -141,9 +142,41 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     setLiveStoryUsers(Array.from(userMap.values()));
   };
 
-  // ── Load explore posts ────────────────────────────────────────────────────
+  const fetchExplorePosts = useCallback(async () => {
+    setLoadingTab(true);
+    const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
+    try {
+      const { data } = await supabase
+        .from('posts')
+        .select('*, profiles(display_name, username, avatar_url)')
+        .eq('city', cityLabel)
+        .order('created_at', { ascending: false })
+        .limit(40);
 
-  useEffect(() => { fetchExplorePosts(); }, []);
+      let likedSet = new Set<string>();
+      let savedSet = new Set<string>();
+      if (user && data && data.length > 0) {
+        const postIds = data.map((p: any) => p.id);
+        const [likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+          supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+        ]);
+        likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
+        savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
+      }
+
+      setExplorePosts((data || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
+    } catch (err) {
+      console.error('Error fetching explore posts:', err);
+    } finally {
+      setLoadingTab(false);
+    }
+  }, [activeCity, user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Load explore posts ────────────────────────────────────────────────────
+  useEffect(() => { 
+    fetchExplorePosts(); 
+  }, [activeCity, fetchExplorePosts]);
 
   // ── Real-time: likes ──────────────────────────────────────────────────────
 
@@ -181,12 +214,14 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'post_comments' },
         async (payload) => {
-          const postId = (payload.new as any)?.post_id;
+          const row = payload.new as any;
+          const postId = row.post_id;
           if (!postId) return;
-          // Fetch new comment
+          // Fetch new comment profile
+          const { data: prof } = await supabase.from('profiles').select('username').eq('id', row.user_id).single();
           const newComment = {
-            user: (payload.new as any)?.profiles?.username || 'user',
-            text: (payload.new as any)?.text || '',
+            user: prof?.username || 'user',
+            text: row.text || '',
           };
           // Update comments array for that post if comments are expanded
           setLoadedComments(prev => {
@@ -199,33 +234,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
     return () => { supabase.removeChannel(channel); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchExplorePosts = async () => {
-    setLoadingTab(true);
-    try {
-      const { data } = await supabase
-        .from('posts')
-        .select('*, profiles(display_name, username, avatar_url)')
-        .order('created_at', { ascending: false })
-        .limit(40);
-
-      let likedSet = new Set<string>();
-      let savedSet = new Set<string>();
-      if (user && data && data.length > 0) {
-        const postIds = data.map((p: any) => p.id);
-        const [likesRes, savesRes] = await Promise.all([
-          supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
-          supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
-        ]);
-        likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
-        savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
-      }
-
-      setExplorePosts((data || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
-    } finally {
-      setLoadingTab(false);
-    }
-  };
 
   // ── Load real posts for Following / Friends tabs ─────────────────────────
 
@@ -723,7 +731,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                   <div className="flex items-center gap-2 mt-2 pt-2 border-t border-noctvm-border">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {profile?.avatar_url
-                        ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                        ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="My profile" className="w-full h-full object-cover" />
                         : <span className="text-[8px] font-bold text-white">{userInitial}</span>
                       }
                     </div>
