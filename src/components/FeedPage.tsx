@@ -479,15 +479,17 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                 className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer group"
               >
                 <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors relative">
-                  {profile?.avatar_url
-                    ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full opacity-60" />
-                    : null}
+                  {profile?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    <svg className="w-6 h-6 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                  )}
                   <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-noctvm-violet flex items-center justify-center border-2 border-noctvm-black">
                     <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
                   </div>
-                  {!profile?.avatar_url && <svg className="w-6 h-6 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>}
                 </div>
                 <span className="text-[9px] text-noctvm-silver">Add Story</span>
               </div>
