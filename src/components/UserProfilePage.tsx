@@ -489,6 +489,9 @@ export default function UserProfilePage({
         initialIndex={viewerIndex}
         isOpen={viewerOpen}
         onClose={() => setViewerOpen(false)}
+        profileName={profile?.display_name || profile?.username || 'User'}
+        profileAvatar={profile?.avatar_url ?? null}
+        profileInitial={initials}
       />
     </div>
   );
