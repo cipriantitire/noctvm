@@ -7,39 +7,17 @@ import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
 
 interface Venue {
+  id: string;
   name: string;
   address: string;
   genres: string[];
   capacity: number;
   rating: number;
-  reviewCount: number;
+  review_count: number;
   description: string;
   followers: number;
   city: 'Bucharest' | 'Constanța';
 }
-
-const BUCHAREST_VENUES: Venue[] = [
-  { name: 'Control Club', address: 'Str. Constantin Mille 4, Sector 1', genres: ['Techno', 'House', 'Electronic'], capacity: 400, rating: 4.7, reviewCount: 342, description: 'Underground electronic music club. Known for quality bookings and intimate atmosphere.', followers: 2841, city: 'Bucharest' as const },
-  { name: 'Expirat Halele Carol', address: 'Halele Carol, Piața Libertății, Sector 4', genres: ['Techno', 'Underground', 'Experimental'], capacity: 600, rating: 4.8, reviewCount: 567, description: 'Legendary underground venue in Halele Carol complex. Raw industrial aesthetic and uncompromising sound.', followers: 4120, city: 'Bucharest' as const },
-  { name: 'Nook Club', address: 'Bd. Nicolae Bălcescu 2, Sector 1', genres: ['House', 'Disco', 'Electronic'], capacity: 300, rating: 4.5, reviewCount: 218, description: 'Boutique club experience with curated lineups and a premium sound system.', followers: 1654, city: 'Bucharest' as const },
-  { name: 'Club Guesthouse', address: 'Str. Batistei 14, Sector 2', genres: ['Electronic', 'Live', 'Alternative'], capacity: 500, rating: 4.4, reviewCount: 189, description: 'Multi-room venue hosting diverse events from electronic to live music.', followers: 1982, city: 'Bucharest' as const },
-  { name: 'OXYA Club', address: 'Piața Victoriei, Sector 1', genres: ['Electronic', 'Techno', 'House'], capacity: 800, rating: 4.3, reviewCount: 423, description: 'Premium nightlife destination with world-class sound and production.', followers: 3340, city: 'Bucharest' as const },
-  { name: 'Fratelli', address: 'Str. Gabroveni 16, Sector 3', genres: ['House', 'Commercial', 'R&B'], capacity: 600, rating: 4.1, reviewCount: 312, description: 'Trendy club in the old town with multiple floors and a rooftop terrace.', followers: 2210, city: 'Bucharest' as const },
-  { name: 'Quantic Club', address: 'Bd. Magheru 12, Sector 1', genres: ['Indie', 'Jazz', 'Electronic'], capacity: 350, rating: 4.6, reviewCount: 276, description: 'The go-to spot for alternative music lovers. Eclectic programming, great cocktails.', followers: 1780, city: 'Bucharest' as const },
-  { name: 'Club Eclipse', address: 'Str. Ion Câmpineanu 22, Sector 1', genres: ['EDM', 'Commercial', 'Latin'], capacity: 700, rating: 3.9, reviewCount: 445, description: 'Massive venue with state-of-the-art lighting rigs and impressive production value.', followers: 2990, city: 'Bucharest' as const },
-  { name: 'Baraka', address: 'Str. Gabroveni 26, Sector 3', genres: ['Minimal', 'Techno', 'Deep House'], capacity: 250, rating: 4.5, reviewCount: 189, description: 'Intimate venue with a focus on minimal and deep electronic sounds.', followers: 1220, city: 'Bucharest' as const },
-  { name: 'Midi Club', address: 'Str. Foișorului 23, Sector 3', genres: ['Drum & Bass', 'Electronic', 'Experimental'], capacity: 300, rating: 4.4, reviewCount: 134, description: 'Dedicated to experimental and underground sounds. A haven for music purists.', followers: 890, city: 'Bucharest' as const },
-  { name: 'Void Club', address: 'Str. Vasile Lascăr 72, Sector 2', genres: ['Techno', 'Industrial', 'Dark'], capacity: 350, rating: 4.2, reviewCount: 167, description: 'Dark, raw, and unapologetically underground. For those who truly live the night.', followers: 1100, city: 'Bucharest' as const },
-  { name: 'Fabrica', address: 'Str. Fabricii 4, Sector 6', genres: ['Alternative', 'Rock', 'Electronic'], capacity: 1000, rating: 4.3, reviewCount: 892, description: 'Creative hub turned nightlife destination. A converted factory with soul.', followers: 5670, city: 'Bucharest' as const },
-];
-
-const CONSTANTA_VENUES: Venue[] = [
-  { name: 'Vox Maris Beach Club', address: 'Sat Costinești, Constanța', genres: ['House', 'Electronic', 'Commercial'], capacity: 2000, rating: 4.5, reviewCount: 312, description: 'Iconic Black Sea beach club. Massive outdoor dancefloor with sea views and world-class DJs every summer.', followers: 5200, city: 'Constanța' },
-  { name: 'Nuba Club', address: 'Bd. Mamaia, Constanța', genres: ['House', 'Techno', 'Electronic'], capacity: 800, rating: 4.3, reviewCount: 189, description: 'Premium nightclub on the Mamaia strip. Multiple rooms and a rooftop with Black Sea panoramas.', followers: 2800, city: 'Constanța' },
-  { name: 'Doors Club', address: 'Str. Mircea cel Bătrân, Constanța', genres: ['Techno', 'Underground', 'Minimal'], capacity: 350, rating: 4.4, reviewCount: 134, description: 'Underground club bringing the best of Romanian techno to the coast.', followers: 1400, city: 'Constanța' },
-  { name: 'Euphoria Music Hall', address: 'Bd. Aurel Vlaicu, Constanța', genres: ['EDM', 'Commercial', 'Party'], capacity: 1200, rating: 4.0, reviewCount: 267, description: 'Largest indoor venue in Constanța. Concert-grade production for big events and festivals.', followers: 3100, city: 'Constanța' },
-  { name: 'Eden Club', address: 'Mamaia Nord, Constanța', genres: ['House', 'Disco', 'R&B'], capacity: 600, rating: 4.2, reviewCount: 98, description: 'Beachfront open-air club at Mamaia Nord. Sunset sessions and deep house vibes.', followers: 1750, city: 'Constanța' },
-];
 
 const MOCK_REVIEWS: Record<string, { user: string; text: string; rating: number; time: string }[]> = {
   'Control Club': [
@@ -80,6 +58,22 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
   const [activeCity, setActiveCity] = useState<'Bucharest' | 'Constanța'>('Bucharest');
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [loadingVenues, setLoadingVenues] = useState(true);
+
+  // Fetch venues from Supabase when city changes
+  useEffect(() => {
+    setLoadingVenues(true);
+    supabase
+      .from('venues')
+      .select('*')
+      .eq('city', activeCity)
+      .order('followers', { ascending: false })
+      .then(({ data }) => {
+        setVenues((data ?? []) as Venue[]);
+        setLoadingVenues(false);
+      });
+  }, [activeCity]);
 
   // Load current user's venue follows
   useEffect(() => {
@@ -121,9 +115,6 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
     }
     setLoadingFollows(prev => { const next = new Set(prev); next.delete(venueName); return next; });
   };
-
-  // City-filtered venues
-  const venues = activeCity === 'Bucharest' ? BUCHAREST_VENUES : CONSTANTA_VENUES;
 
   // Genre filters
   const allGenres = ['All', ...Array.from(new Set(venues.flatMap(v => v.genres))).sort()];
@@ -223,6 +214,13 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
       </div>
 
       {/* Venues list/grid */}
+      {loadingVenues ? (
+        <div className="space-y-3 pb-24 lg:pb-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-24 rounded-2xl bg-noctvm-surface animate-pulse" />
+          ))}
+        </div>
+      ) : (
       <div className={`pb-24 lg:pb-6 ${venueView === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3'}`}>
         {sortedVenues.map((venue, idx) => {
           const isFollowed = followedVenues.has(venue.name);
@@ -322,7 +320,7 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
                   </div>
                   <div className="flex items-center gap-2 mb-1">
                     <StarRating rating={venue.rating} />
-                    <span className="text-[10px] text-noctvm-silver/60">{venue.rating} · {venue.reviewCount} reviews</span>
+                    <span className="text-[10px] text-noctvm-silver/60">{venue.rating} · {venue.review_count} reviews</span>
                   </div>
                   <p className="text-[10px] text-noctvm-silver/50 truncate">{venue.address}</p>
                 </div>
@@ -444,6 +442,7 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
