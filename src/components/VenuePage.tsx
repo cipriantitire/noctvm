@@ -60,7 +60,14 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
   return (
     <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0">
       {/* Header */}
-      <div className="h-6" /> {/* Spacer instead of header */}
+      <button
+        onClick={onBack}
+        className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all mb-6"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
 
       {/* Venue Identity */}
       <div className="flex items-start gap-6 mb-8">
