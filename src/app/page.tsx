@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar from '@/components/FilterBar';
@@ -63,11 +63,11 @@ export default function Home() {
   const [storyUsers, setStoryUsers] = useState<StoryUser[]>([]);
   const [dbEvents, setDbEvents] = useState<NoctEvent[] | null>(null);
 
-  const handleOpenStories = (users: StoryUser[], index: number) => {
+  const handleOpenStories = useCallback((users: StoryUser[], index: number) => {
     setStoryUsers(users);
     setStoryStartIndex(index);
     setShowStories(true);
-  };
+  }, []);
 
   useLiquidGlass();
 
@@ -92,17 +92,17 @@ export default function Home() {
   }, [activeCity]);
 
   // Switch to profile tab and show the account menu
-  const handleSettingsClick = () => {
+  const handleSettingsClick = useCallback(() => {
     setPreviousTab(activeTab);
     setActiveTab('profile');
     setProfileView('account-menu');
-  };
+  }, [activeTab]);
 
   // Switch to a tab and reset profile view to 'profile'
-  const handleTabChange = (tab: TabType) => {
+  const handleTabChange = useCallback((tab: TabType) => {
     setActiveTab(tab);
     if (tab === 'profile') setProfileView('profile');
-  };
+  }, []);
 
   const filteredEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -110,10 +110,12 @@ export default function Home() {
     
     // Use DB events when loaded; fall back to sample data ONLY for Bucharest if DB is empty
     let events: NoctEvent[] = [];
-    if (dbEvents && dbEvents.length > 0) {
-      events = dbEvents;
-    } else if (isBuc && (!dbEvents || dbEvents.length === 0)) {
-      events = SAMPLE_EVENTS.filter(e => e.date >= today);
+    if (dbEvents !== null) {
+      if (dbEvents.length > 0) {
+        events = dbEvents;
+      } else if (isBuc) {
+        events = SAMPLE_EVENTS.filter(e => e.date >= today);
+      }
     }
 
     if (!activeGenres.includes('All')) {
@@ -135,8 +137,8 @@ export default function Home() {
     return events;
   }, [dbEvents, activeGenres, searchQuery, selectedDate, activeCity]);
 
-  const handleVenueClick = (name: string) => setSelectedVenue(name);
-  const handleCloseVenue = () => setVenueClosing(true);
+  const handleVenueClick = useCallback((name: string) => setSelectedVenue(name), []);
+  const handleCloseVenue = useCallback(() => setVenueClosing(true), []);
 
   // ── Account menu icons ────────────────────────────────────────────────────
   const addLocationIcon = (
@@ -316,11 +318,23 @@ export default function Home() {
                           : 'grid grid-cols-1 lg:grid-cols-2 gap-4'
                       }`}
                     >
-                      {filteredEvents.map((event, index) => (
-                        <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
-                          <EventCard event={event} variant={viewMode} onClick={(e) => setSelectedEvent(e)} onSaveRequireAuth={() => setShowAuthModal(true)} />
-                        </div>
-                      ))}
+                      {dbEvents === null ? (
+                        // Loading State (Skeleton)
+                        Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="bg-noctvm-surface/40 rounded-2xl h-[320px] animate-pulse border border-white/5" />
+                        ))
+                      ) : (
+                        filteredEvents.map((event, index) => (
+                          <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
+                            <EventCard 
+                              event={event} 
+                              variant={viewMode} 
+                              onClick={(e: NoctEvent) => setSelectedEvent(e)} 
+                              onSaveRequireAuth={() => setShowAuthModal(true)} 
+                            />
+                          </div>
+                        ))
+                      )}
                     </div>
                     {filteredEvents.length === 0 && (
                       <div className="text-center py-16 animate-fade-in">

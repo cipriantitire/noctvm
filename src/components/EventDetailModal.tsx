@@ -43,6 +43,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   const { user } = useAuth();
   const [descExpanded, setDescExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [saveCount, setSaveCount]     = useState(0);
   const [isSaved,   setIsSaved]       = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -117,6 +118,29 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   const isFree = event.price?.toLowerCase() === 'free';
 
   return (
+    <>
+    {/* Image lightbox */}
+    {lightboxOpen && (
+      <div
+        className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 cursor-zoom-out"
+        onClick={() => setLightboxOpen(false)}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={event.image_url}
+          alt={event.title}
+          className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        />
+        <button
+          onClick={() => setLightboxOpen(false)}
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        </button>
+      </div>
+    )}
+
     <div
       className={`fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
     >
@@ -135,7 +159,8 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
           <img
             src={event.image_url}
             alt={event.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover cursor-zoom-in"
+            onClick={() => event.image_url && setLightboxOpen(true)}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
           {/* Close button */}
@@ -275,5 +300,6 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
         </div>
       </div>
     </div>
+    </>
   );
 }

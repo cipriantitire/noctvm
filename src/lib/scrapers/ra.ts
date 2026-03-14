@@ -1,19 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Resident Advisor (ra.co) scraper
 // Uses the official RA GraphQL API — most reliable source
-// Bucharest area ID: 34 (Bucharest, Romania)
+// Bucharest area ID: 381 (Bucharest, Romania)
+// Romania area ID: 50 (All Romania — parent area)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, clean, guessGenres } from './utils';
+import { parseDate, clean, guessGenres, splitTitleVenue } from './utils';
 
 const RA_GRAPHQL = 'https://ra.co/graphql';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
 
-// RA area ID for Bucharest, Romania is 34. 
-// Constanta doesn't have a specific RA area usually, it's often under 'Romania' (229)
-const BUCHAREST_AREA_ID = 34;
-const ROMANIA_AREA_ID = 229;
+// RA area ID for Bucharest, Romania is 381 (verified via GraphQL).
+// Romania parent area is 50; subregions: Bucharest=381, Cluj-Napoca=382, Iasi=383, Timisoara=546
+// Constanta doesn't have its own RA area — Sunwaves/Mamaia events appear under area 50 (All Romania)
+const BUCHAREST_AREA_ID = 381;
+const ROMANIA_AREA_ID = 50;
 
 const QUERY = `
   query GET_POPULAR_EVENTS($filters: FilterInputDtoInput, $pageSize: Int) {
@@ -95,7 +97,7 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
               areas: { eq: areaId },
               listingDate: { gte: today, lte: oneMonthFromNow },
             },
-            pageSize: 20,
+            pageSize: 50,
           },
         }),
       });
@@ -106,7 +108,11 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
 
       return listings.map((l: any) => {
         const ev = l.event;
-        const genres = guessGenres(ev.title, '');
+        const { title: rawTitle, venueHint } = splitTitleVenue(clean(ev.title));
+        // Pass venue name as a genre hint — RA titles are cryptic (e.g. "GH 14.03 - Cap, Christian AB")
+        // so venue names like "Control Club", "Club Guesthouse" carry the genre signal.
+        const raVenueName = clean(ev.venue?.name || '');
+        const genres = guessGenres(rawTitle, raVenueName || venueHint || 'electronic club party');
         if (!genres) return null;
 
         const date = parseDate(ev.date) || today;
@@ -114,8 +120,8 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
         const image_url = img?.filename ? (img.filename.startsWith('http') ? img.filename : `https://img.ra.co/events/${img.filename}`) : '';
 
         return {
-          title: clean(ev.title),
-          venue: clean(ev.venue?.name || 'Venue TBC'),
+          title: rawTitle,
+          venue: raVenueName || venueHint || 'Venue TBC',
           date,
           time: null,
           description: null,

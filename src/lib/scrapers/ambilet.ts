@@ -1,148 +1,74 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ambilet.ro scraper
-// Site: Romanian ticketing platform
-// Strategy: JSON-LD extraction + HTML card parsing
+// Site: WordPress with a custom Tailwind events plugin.
+//   • Detail pages have NO "@type":"Event" JSON-LD — only WebPage/Organization.
+//   • Detail pages DO have full OG meta (title, image, description).
+//   • Date appears as Romanian text in the HTML body ("14 mar 2026").
+//   • Venue is embedded in the OG title after "@" ("Grimus @The Pub").
+//   • Listing page uses ABSOLUTE hrefs: https://www.ambilet.ro/bilete/…
+// Strategy:
+//   1. Extract all unique event URLs from listing-page absolute hrefs.
+//   2. Pre-filter slugs that are clearly non-music (teatru, copii, etc.).
+//   3. Deep-fetch each detail page — parseDetailPage handles OG+HTML date+venue.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { extractJsonLd, parseDate, extractTime, clean, guessGenres, fetchHtml } from './utils';
+import { fetchHtml, batchFetch } from './utils';
 
 const LIST_URLS = [
   { url: 'https://www.ambilet.ro/orase/bucuresti/', city: 'Bucharest' },
   { url: 'https://www.ambilet.ro/orase/constanta/', city: 'Constanta' },
 ];
-const BASE_URL  = 'https://www.ambilet.ro';
+const BASE_URL = 'https://www.ambilet.ro';
 
-function fromJsonLd(html: string, city: string): ScrapedEvent[] {
-  const today = new Date().toISOString().split('T')[0];
-  const events: ScrapedEvent[] = [];
+// Slug segments that strongly indicate a non-music event — skip without fetching
+const SLUG_BLOCK = [
+  'teatru', 'teatro', 'copii', 'marionete', 'papusi', 'balet', 'ballet',
+  'opera', 'simfonie', 'filarmon', 'stand-up', 'standup', 'comedy',
+  'cinema', 'film', 'yoga', 'culinar', 'cooking', 'targ', 'expozitie',
+];
 
-  for (const block of extractJsonLd(html)) {
-    const b = block as Record<string, unknown>;
-    if (String(b['@type'] ?? '') !== 'Event' && !String(b['@type'] ?? '').includes('Event')) continue;
-
-    const startDate = String(b.startDate ?? '');
-    const date = parseDate(startDate);
-    if (!date || date < today) continue;
-
-    const location = (b.location as Record<string, unknown>) ?? {};
-    const venue = clean(String(location.name ?? 'Venue TBC'));
-    const title = clean(b.name as string);
-    if (!title) continue;
-
-    const description = clean(b.description as string);
-    const img = b.image;
-    const image_url = typeof img === 'string' ? img
-      : Array.isArray(img) ? (img[0]?.url || img[0] || '')
-      : (img as any)?.url ?? '';
-
-    const offers = b.offers as Record<string, unknown> | undefined;
-    const price = offers?.price != null
-      ? (Number(offers.price) === 0 ? 'Free' : `${offers.price} RON`)
-      : null;
-
-    const genres = guessGenres(title, description || '');
-    if (!genres) continue;
-
-    events.push({
-      title,
-      venue,
-      date,
-      time: extractTime(startDate),
-      description: description || null,
-      image_url,
-      event_url: String(b.url ?? ''),
-      genres,
-      price,
-      city,
-    });
-  }
-
-  return events;
-}
-
-function fromHtml(html: string, city: string): ScrapedEvent[] {
-  const events: ScrapedEvent[] = [];
-  const today = new Date().toISOString().split('T')[0];
-
-  // Capture the entire card div
-  const cardRegex = /<div[^>]*class="[^"]*\bevent\b[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi;
-  let match: RegExpExecArray | null;
+/** Extract unique event detail URLs from the listing page HTML. */
+function extractEventUrls(html: string): string[] {
   const seen = new Set<string>();
+  const urls: string[] = [];
 
-  while ((match = cardRegex.exec(html)) !== null) {
-    const block = match[1];
-    
-    // 1. Extract Event URL
-    const linkMatch = block.match(/href="([^"]+)"/i);
-    if (!linkMatch) continue;
-    let eventUrl = linkMatch[1];
-    if (!eventUrl.startsWith('http')) eventUrl = `${BASE_URL}${eventUrl}`;
-    if (seen.has(eventUrl)) continue;
-    seen.add(eventUrl);
+  // ambilet listing page uses absolute hrefs
+  const re = /href="(https?:\/\/www\.ambilet\.ro\/bilete\/([^"?#]+))"/gi;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const [, fullUrl, slug] = m;
+    // Skip very short slugs (category roots like /bilete/)
+    if (!slug || slug.length < 5) continue;
+    // Skip known non-music slugs
+    if (SLUG_BLOCK.some(term => slug.includes(term))) continue;
 
-    // 2. Extract Title - AmBilet usually has the title in an <a> tag inside a div with leading-5
-    const titleBlockMatch = block.match(/class="[^"]*leading-5[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    const title = clean(titleBlockMatch?.[1]?.replace(/<[^>]+>/g, '') || '');
-    if (!title || title.length < 3) continue;
-
-    // 3. Extract Image
-    const imgMatch = block.match(/background-image:\s*url\(([^)]+)\)/i) || block.match(/<img[^>]+src="([^"]+)"/i);
-    const image_url = clean(imgMatch?.[1]?.replace(/['"]/g, '') ?? '');
-
-    // 4. Extract Date and Venue
-    const dateBoxMatch = block.match(/class="[^"]*bg-ab-red[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    const dateStr = clean(dateBoxMatch?.[1]?.replace(/<[^>]+>/g, ''));
-    
-    const date = dateStr ? parseDate(dateStr) : null;
-    if (!date || date < today) continue;
-
-    // Venue is usually in a div with items-center and gap-x-1 or text-gray-500
-    const venueTextMatch = block.match(/class="[^"]*items-center[^"]*gap-x-1[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
-                          block.match(/class="[^"]*text-gray-500[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
-                          block.match(/class="[^"]*text-slate-500[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    const rawVenueText = clean(venueTextMatch?.[1]?.replace(/<[^>]+>/g, '') ?? '');
-
-    const genres = guessGenres(title, '');
-    if (!genres) continue;
-
-    events.push({
-      title,
-      venue: rawVenueText.split(',')[0] || 'Venue TBC',
-      date,
-      time: null,
-      description: null,
-      image_url,
-      event_url: eventUrl,
-      genres,
-      price: null,
-      city,
-    });
+    const normalised = fullUrl.replace(/\/$/, '') + '/';
+    if (!seen.has(normalised)) {
+      seen.add(normalised);
+      urls.push(normalised);
+    }
   }
 
-  return events;
+  return urls;
 }
 
 export async function scrapeAmbilet(): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
+
   for (const { url, city } of LIST_URLS) {
     try {
       const html = await fetchHtml(url, 15_000);
-      const fromLd = fromJsonLd(html, city);
-      const fromH = fromHtml(html, city);
-      
-      // Merge results, preferring LD if URL matches
-      const seen = new Set(fromLd.map(e => e.event_url));
-      const cityBatch = [...fromLd];
-      for (const h of fromH) {
-        if (!seen.has(h.event_url)) {
-          cityBatch.push(h);
-        }
-      }
-      allEvents.push(...cityBatch);
+      const eventUrls = extractEventUrls(html);
+      console.log(`[ambilet] ${city}: ${eventUrls.length} candidate URLs (slug-filtered)`);
+
+      const events = await batchFetch(eventUrls, city, { limit: 30, batchSize: 5 });
+      console.log(`[ambilet] ${city}: kept ${events.length} music events`);
+      allEvents.push(...events);
     } catch (err) {
       console.warn(`[ambilet] failed for ${url}:`, err);
     }
   }
+
   return allEvents;
 }

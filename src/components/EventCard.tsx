@@ -37,7 +37,7 @@ interface EventCardProps {
   onSaveRequireAuth?: () => void;
 }
 
-export default function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: EventCardProps) {
+function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: EventCardProps) {
   const { user } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
   const [saveCount, setSaveCount] = useState(0);
@@ -55,33 +55,20 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
     }
     
     const fetchSaveData = async () => {
-      const { data, count } = await supabase
-        .from('event_saves')
-        .select('id, user_id', { count: 'exact' })
-        .eq('event_id', event.id);
-      
-      setSaveCount(count ?? 0);
-      if (user) setIsSaved((data ?? []).some((r: { user_id: string }) => r.user_id === user.id));
+      try {
+        const { data, count } = await supabase
+          .from('event_saves')
+          .select('id, user_id', { count: 'exact' })
+          .eq('event_id', event.id);
+        
+        setSaveCount(count ?? 0);
+        if (user) setIsSaved((data ?? []).some((r: { user_id: string }) => r.user_id === user.id));
+      } catch (err) {
+        console.warn('Error fetching save data for card:', event.id);
+      }
     };
 
     fetchSaveData();
-
-    // Realtime subscription for this event's saves
-    const channel = supabase
-      .channel(`event_saves_${event.id}`)
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'event_saves', 
-        filter: `event_id=eq.${event.id}` 
-      }, () => {
-        fetchSaveData();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [event.id, user, real]);
 
   const handleSave = async (e: React.MouseEvent) => {
@@ -290,3 +277,5 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
     </Wrapper>
   );
 }
+
+export default React.memo(EventCard);

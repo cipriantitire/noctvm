@@ -2,6 +2,10 @@
 // Shared scraper utilities
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { ScrapedEvent } from './types';
+
+// ── JSON-LD ───────────────────────────────────────────────────────────────────
+
 /** Extract all JSON-LD blocks from raw HTML. */
 export function extractJsonLd(html: string): unknown[] {
   const results: unknown[] = [];
@@ -9,11 +13,9 @@ export function extractJsonLd(html: string): unknown[] {
   let match;
   while ((match = regex.exec(html)) !== null) {
     try {
-      let content = match[1].trim();
-      // Remove CDATA tags if present
-      content = content.replace(/\/\*<!\[CDATA\[\*\//g, '').replace(/\/\*\]\]>\*\//g, '');
-      content = content.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
-      
+      let content = match[1].trim()
+        .replace(/\/\*<!\[CDATA\[\*\//g, '').replace(/\/\*\]\]>\*\//g, '')
+        .replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '');
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed)) {
         results.push(...parsed);
@@ -22,12 +24,38 @@ export function extractJsonLd(html: string): unknown[] {
       } else {
         results.push(parsed);
       }
-    } catch {
-      // malformed JSON-LD — skip
-    }
+    } catch { /* malformed JSON-LD — skip */ }
   }
   return results;
 }
+
+// ── Open Graph ────────────────────────────────────────────────────────────────
+
+/** Extract og: and twitter: meta tag values from HTML (handles any attribute order). */
+export function extractOgMeta(html: string): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  // Match any <meta> tag and then pull property/name + content from it
+  const tagRe = /<meta\s([^>]+?)(?:\s*\/)?>/gi;
+  let tag;
+  while ((tag = tagRe.exec(html)) !== null) {
+    const attrs = tag[1];
+
+    const propMatch  = attrs.match(/property=["']([^"']+)["']/i);
+    const nameMatch  = attrs.match(/name=["']([^"']+)["']/i);
+    const contMatch  = attrs.match(/content=["']([^"']*)["']/i);
+
+    if (!contMatch) continue;
+    const value = contMatch[1];
+
+    if (propMatch) result[propMatch[1]] = value;       // og:title, twitter:image …
+    if (nameMatch) result[nameMatch[1]] = value;       // description, keywords …
+  }
+
+  return result;
+}
+
+// ── Date / Time ───────────────────────────────────────────────────────────────
 
 const RO_MONTHS: Record<string, string> = {
   ianuarie: '01', ian: '01',
@@ -47,9 +75,9 @@ const RO_MONTHS: Record<string, string> = {
 /** Normalise various date strings to YYYY-MM-DD. Returns null if unparseable. */
 export function parseDate(raw: string): string | null {
   if (!raw) return null;
-  const currentYear = '2026';
+  const currentYear = new Date().getFullYear().toString();
 
-  // ISO-like: 2026-03-15 or 2026-3-15 or 2026-3-1
+  // ISO-like: 2026-03-15 or 2026-3-15
   const isoMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (isoMatch) {
     const [, y, m, d] = isoMatch;
@@ -63,7 +91,7 @@ export function parseDate(raw: string): string | null {
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
 
-  // Short numeric: 14/03 or 14.03 -> 2026-03-14
+  // Short numeric without year: 14/03 or 14.03
   const shortNumeric = raw.match(/(\d{1,2})[.\/](\d{1,2})(?!\d)/);
   if (shortNumeric) {
     const [, d, m] = shortNumeric;
@@ -76,8 +104,7 @@ export function parseDate(raw: string): string | null {
     const [, day, monthStr, , year] = roText;
     const monthNum = RO_MONTHS[monthStr] ?? RO_MONTHS[monthStr.slice(0, 3)];
     if (monthNum) {
-      const targetYear = year || currentYear;
-      return `${targetYear}-${monthNum}-${day.padStart(2, '0')}`;
+      return `${year || currentYear}-${monthNum}-${day.padStart(2, '0')}`;
     }
   }
 
@@ -96,49 +123,128 @@ export function extractTime(iso: string): string | null {
   return match ? match[1] : null;
 }
 
-/** Collapse whitespace and trim. */
-export function clean(text: string | null | undefined): string {
-  return (text ?? '').replace(/\s+/g, ' ').trim();
+// ── Text helpers ──────────────────────────────────────────────────────────────
+
+/**
+ * If a title encodes the venue as "Event @ Venue" or "Event @Venue", split them.
+ * Handles both " @ " (space-at-space) and " @X" (no space after @, used by ambilet).
+ * Returns cleaned title and an optional venue hint.
+ */
+export function splitTitleVenue(title: string): { title: string; venueHint: string | null } {
+  // Prefer " @ " (unambiguous separator)
+  const spaceAtSpace = title.indexOf(' @ ');
+  if (spaceAtSpace > 3) {
+    return {
+      title: title.slice(0, spaceAtSpace).trim(),
+      venueHint: title.slice(spaceAtSpace + 3).trim() || null,
+    };
+  }
+  // Also handle " @Venue" (ambilet: "Grimus @The Pub Universității")
+  const compactAt = title.search(/ @\S/);
+  if (compactAt > 3) {
+    return {
+      title: title.slice(0, compactAt).trim(),
+      venueHint: title.slice(compactAt + 2).trim() || null,
+    };
+  }
+  return { title, venueHint: null };
 }
 
-const NON_MUSIC_TERMS = [
-  'workshop', 'curs', 'conference', 'conferinta', 'teatru', 'theatre', 'play', 'piesa teatru', 
-  'kids', 'copii', 'targ', 'expo', 'fair', 'exhibition', 'business', 'seminar',
-  'comedy', 'stand-up', 'standup', 'stand up', 'yoga', 'wellness', 'gastronomy', 'food',
-  'cinema', 'film', 'movie', 'sport', 'atletism', 'maraton', 'match', 'meci', 'fotbal',
-  'culinary', 'cooking', 'tasting', 'degustari', 'vernissage', 'vernisaj', 'lectura',
-  'educational', 'training', 'prezentare', 'lansare carte', 'book launch', 'reprezentatie',
-  'spectacol teatru', 'actori:', 'regia:', 'distributia:', 'conferința', 'simulare', 'cambridge',
-  'atelier', 'personală', 'dezvoltare', 'cursuri', 'clasa a', 'evaluare', 'păpuși', 'marionete', 'spectacol copii'
+/** Collapse whitespace, strip HTML entities, and trim. */
+export function clean(text: string | null | undefined): string {
+  return (text ?? '')
+    .replace(/<[^>]+>/g, ' ')        // strip any residual HTML tags
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&bull;/g, '•')
+    .replace(/&#8226;/g, '•')
+    .replace(/&#\d+;/g, c => { try { return String.fromCodePoint(parseInt(c.slice(2, -1), 10)); } catch { return c; } })
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// ── Genre / music filter ──────────────────────────────────────────────────────
+
+/**
+ * ABSOLUTE blocks — dropped even if the title also contains a music term.
+ * "Concert pentru copii" IS still a children's event, not nightlife.
+ */
+const HARD_BLOCK_TERMS = [
+  'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii',
+  'copii', 'marionete', 'papusi', 'păpuși', 'copilași', 'bebeluși', 'părinți', 'mămici',
+  'educativ', 'educational', 'clasa a', 'cambridge', 'școală', 'gradiniță', 'grădiniță',
+  'balet', 'ballet', 'lectii', 'lecții',
+  'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
+  'teatru de vara', 'teatrul de vara', 'teatru vara', 'teatru aer liber',
+  'piesa de teatru', 'teatru cu', 'joc de rol', 'magie pentru',
+  'magician', 'clovn', 'ursitoare', 'animatori',
+  'salsa revolution', 'salsa congress',
 ];
 
-/** Guess genres from title/desc. Returns null if definitively non-music. */
+/** Soft blocks — dropped unless a strong music term is also present. */
+const SOFT_BLOCK_TERMS = [
+  'teatru', 'theatre', 'piesa de teatru', 'spectacol de teatru',
+  'actori:', 'regia:', 'distributia:', 'reprezentatie',
+  'opera ', 'operă', 'simfon', 'filarmon', 'orchester', 'cor ', 'fanfara',
+  'stand-up', 'standup', 'stand up', 'comedy show', 'improv',
+  'targ', 'târg', 'expo ', 'expozitie', 'expozitia', 'expoziție', 'vernisaj', 'vernissage', 'bazar',
+  'sport', 'atletism', 'maraton', 'match', 'meci', 'fotbal', 'tenis',
+  'cinema', 'film ', ' film', 'movie', 'proiectie',
+  'culinar', 'cooking', 'tasting', 'degustare', 'degustari',
+  'yoga', 'wellness', 'meditatie', 'meditație',
+  'conferinta', 'conferința', 'conference', 'business', 'forum', 'summit',
+  'circ', 'circus', 'magie', 'magic show', 'lectura', 'simulare',
+  'training', 'curs', 'cursuri', 'workshop', 'seminar', 'atelier',
+  'prezentare', 'lansare carte', 'book launch', 'dezvoltare',
+  // Automotive / off-road events (not music)
+  'off-road', 'offroad', '4x4', 'automobilism', 'rally', 'curse auto', 'motorsport',
+];
+
+const STRONG_MUSIC_TERMS = [
+  'festival', 'live set', 'dj set', 'rave', 'club night',
+  'techno', 'house', 'trance', 'drum and bass', 'dnb', 'edm', 'electronic',
+  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock ', 'metal', 'punk',
+  'disco', 'funk', 'soul', 'reggae', 'clubbing', 'dancefloor',
+  'manele', 'manea',
+];
+
+/** Returns genre array if music event, null if definitively non-music. */
 export function guessGenres(title: string, desc: string): string[] | null {
-  // Normalize stylized unicode characters (like bold 𝐓𝐚𝐤𝐞 𝐌𝐞 𝐇𝐨𝐦𝐞)
   const normTitle = (title || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
-  const t = (normTitle + ' ' + desc).toLowerCase();
-  
-  // Hard filter for definitely non-music
-  if (NON_MUSIC_TERMS.some(term => t.includes(term))) {
-    // Exception: if it also has strong music terms (concert, festival), maybe it's okay
-    const strongMusic = ['festival', 'concert', 'live', 'dj set', 'rave'];
-    if (!strongMusic.some(sm => t.includes(sm))) return null;
-  }
+  const t = (normTitle + ' ' + (desc || '')).toLowerCase();
+
+  // Hard blocks: no exceptions, regardless of any music term
+  if (HARD_BLOCK_TERMS.some(term => t.includes(term))) return null;
+
+  // Soft blocks: pass only if a strong music-specific term is also present
+  const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(term));
+  const isStrongMusic  = STRONG_MUSIC_TERMS.some(sm => t.includes(sm));
+
+  if (isSoftBlocked && !isStrongMusic) return null;
 
   const found = new Set<string>();
   const mapping: Record<string, string[]> = {
-    'Techno': ['techno', 'dark techno', 'industrial'],
-    'House': ['house', 'deep house', 'tech house', 'progressive house'],
-    'Electronic': ['electronic', 'electronica', 'synth', 'modular'],
-    'Minimal': ['minimal', 'microhouse', 'rominimal'],
-    'Hip-Hop': ['hiphop', 'hip-hop', 'rap', 'trap'],
-    'Jazz': ['jazz', 'blues'],
-    'Rock': ['rock', 'alternative', 'indie', 'punk'],
-    'Metal': ['metal', 'hardcore', 'doom', 'sludge'],
-    'Drum & Bass': ['dnb', 'drum and bass', 'drum & bass', 'jungle'],
-    'Live Music': ['live band', 'concert', 'live music', 'lansare album'],
-    'Disco': ['disco', 'nu-disco', '80s', '90s'],
-    'Party': ['party', 'clubbing', 'nightlife', 'dancing', 'club'],
+    'Techno':       ['techno', 'dark techno', 'industrial techno'],
+    'House':        ['house music', 'deep house', 'tech house', 'progressive house', 'afro house'],
+    'Electronic':   ['electronic', 'electronica', 'synth', 'modular', 'edm'],
+    'Minimal':      ['minimal', 'microhouse', 'rominimal'],
+    'Hip-Hop':      ['hip-hop', 'hip hop', 'hiphop', 'rap', 'trap', 'grime'],
+    'Manele':       ['manele', 'manea', 'maneliada', 'manelist'],
+    'Jazz':         ['jazz', 'blues', 'soul', 'funk'],
+    'Rock':         ['rock ', ' rock', 'alternative', 'indie', 'punk', 'grunge'],
+    'Metal':        ['metal', 'hardcore', 'doom', 'sludge', 'deathcore'],
+    'Drum & Bass':  ['dnb', 'drum and bass', 'drum & bass', 'jungle', 'liquid'],
+    'Live Music':   ['live band', 'concert', 'live music', 'lansare album'],
+    'Disco':        ['disco', 'nu-disco', '80s', '90s', 'retro'],
+    'Trance':       ['trance', 'psytrance', 'psy trance', 'goa'],
+    'Reggae':       ['reggae', 'dancehall', 'ska', 'dub'],
+    'Party':        ['party', 'clubbing', 'nightlife', 'dancing', 'club night'],
+    'Festival':     ['festival'],
   };
 
   for (const [genre, keywords] of Object.entries(mapping)) {
@@ -146,44 +252,137 @@ export function guessGenres(title: string, desc: string): string[] | null {
   }
 
   if (found.size === 0) {
-    // If it mentions party/night/club but no genre found, it's probably Electronic or general Party
-    if (/party|club|night|rave|dance|dancing|discote/.test(t)) {
+    // Use word boundaries so "Clubul Țăranului" doesn't match "club", etc.
+    if (/\b(party|club|night|rave|dancefloor|discoteca|clubbing|afterparty|nightlife)\b/.test(t)) {
       found.add('Electronic');
+    } else if (isStrongMusic) {
+      found.add('Live Music');
     } else {
-      // If we found NO music terms at all and it didn't even match "Party", definitively non-music
       return null;
     }
-  }
-  
-  // Final check: if it has non-music terms AND No strong music headers, discard
-  if (NON_MUSIC_TERMS.some(term => t.includes(term))) {
-    const strongMusic = ['festival', 'concert', 'live', 'dj set', 'rave', 'party', 'techno', 'house'];
-    if (!strongMusic.some(sm => t.includes(sm))) return null;
   }
 
   return Array.from(found);
 }
 
+// ── Parse events directly from listing-page JSON-LD ──────────────────────────
+
+/**
+ * Extract ScrapedEvents directly from JSON-LD blocks in a listing page.
+ * Use this when the listing page already embeds full event data (ambilet, zilesinopti).
+ * Returns an array — empty if no Event blocks are found.
+ */
+export function parseEventsFromJsonLd(html: string, city: string): ScrapedEvent[] {
+  const today = new Date().toISOString().split('T')[0];
+  const events: ScrapedEvent[] = [];
+
+  for (const block of extractJsonLd(html)) {
+    const b = block as Record<string, unknown>;
+    if (!String(b['@type'] ?? '').includes('Event')) continue;
+
+    const startDate = String(b.startDate ?? '');
+    const date = parseDate(startDate);
+    if (!date || date < today) continue;
+
+    const rawName = clean(String(b.name ?? ''));
+    if (!rawName) continue;
+    const { title, venueHint } = splitTitleVenue(rawName);
+
+    const description = clean(String(b.description ?? '')) || null;
+
+    const genres = guessGenres(title, description ?? '');
+    if (!genres) continue;
+
+    const location = (b.location as Record<string, unknown>) ?? {};
+    const addr = (location.address as Record<string, unknown>) ?? {};
+    const venueName = clean(String(location.name ?? addr.name ?? ''));
+    // Prefer title hint over an address-like location.name (some sites set location.name = street address)
+    const resolvedVenueHint =
+      venueHint && isAddressString(venueHint) ? extractVenueFromAddress(venueHint) : venueHint;
+    const venue = (venueName && !isAddressString(venueName))
+      ? venueName
+      : resolvedVenueHint || 'Venue TBC';
+
+    const rawImg = b.image;
+    const image_url =
+      typeof rawImg === 'string' ? rawImg
+      : Array.isArray(rawImg) ? String((rawImg[0] as Record<string, unknown>)?.url ?? rawImg[0] ?? '')
+      : String((rawImg as Record<string, unknown>)?.url ?? '');
+
+    events.push({
+      title,
+      venue,
+      date,
+      time: extractTime(startDate),
+      description,
+      image_url,
+      event_url: String(b.url ?? ''),
+      genres,
+      price: extractPriceFromOffers(b.offers),
+      city,
+    });
+  }
+
+  return events;
+}
+
+// ── URL extraction from listing-page JSON-LD ──────────────────────────────────
+
+/**
+ * Extract event detail page URLs from a listing page's JSON-LD blocks.
+ * This is the most reliable extraction method — it works even when the page
+ * renders event cards with JavaScript (no `href` links in raw HTML).
+ *
+ * @param baseUrl  Only return URLs whose origin matches this (avoids cross-domain noise).
+ */
+export function extractUrlsFromJsonLd(html: string, baseUrl?: string): string[] {
+  const today = new Date().toISOString().split('T')[0];
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  for (const block of extractJsonLd(html)) {
+    const b = block as Record<string, unknown>;
+    const type = String(b['@type'] ?? '');
+    if (!type.includes('Event')) continue;
+
+    // Skip past events early
+    const startDate = String(b.startDate ?? '');
+    const date = parseDate(startDate);
+    if (date && date < today) continue;
+
+    const url = String(b.url ?? '').trim();
+    if (!url || seen.has(url)) continue;
+
+    // Optionally restrict to same origin
+    if (baseUrl) {
+      try {
+        const base = new URL(baseUrl).origin;
+        if (!url.startsWith(base)) continue;
+      } catch { /* ignore */ }
+    }
+
+    seen.add(url);
+    urls.push(url);
+  }
+
+  return urls;
+}
+
+// ── Network ───────────────────────────────────────────────────────────────────
+
 /** Fetch HTML with a browser-like User-Agent and a timeout. */
-export async function fetchHtml(url: string, timeoutMs = 8_000): Promise<string> {
+export async function fetchHtml(url: string, timeoutMs = 10_000): Promise<string> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'ro,en;q=0.9,en-US;q=0.8',
-        'Cache-Control': 'max-age=0',
-        'Sec-Ch-Ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-        'Sec-Ch-Ua-Mobile': '?0',
-        'Sec-Ch-Ua-Platform': '"Windows"',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Cache-Control': 'no-cache',
+        'Upgrade-Insecure-Requests': '1',
       },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
@@ -191,4 +390,284 @@ export async function fetchHtml(url: string, timeoutMs = 8_000): Promise<string>
   } finally {
     clearTimeout(timer);
   }
+}
+
+// ── Price extraction ──────────────────────────────────────────────────────────
+
+/** Try to extract a price from Schema.org offers block (single or array). */
+export function extractPriceFromOffers(offers: unknown): string | null {
+  if (!offers) return null;
+  const offerList = Array.isArray(offers) ? offers : [offers];
+  let min = Infinity;
+  for (const o of offerList as Record<string, unknown>[]) {
+    const p = parseFloat(String(o.price ?? o.lowPrice ?? ''));
+    if (!isNaN(p) && p < min) min = p;
+  }
+  if (min === Infinity) return null;
+  if (min === 0) return 'Free';
+  const currency = (offerList[0] as Record<string, unknown>).priceCurrency ?? 'RON';
+  return `${min} ${currency}`;
+}
+
+/**
+ * Returns true if the string looks like a street address rather than a venue name.
+ * Used to avoid storing "Strada 11 Iunie nr. 30" as the venue.
+ */
+export function isAddressString(s: string): boolean {
+  return /\b(str\.?\s|strada\s|bd\.?\s|bulevardul\s|calea\s|nr\.?\s|piata\s|pia[țt]a\s|\d{5,})\b/i.test(s);
+}
+
+/**
+ * When a venue hint extracted from a title looks like "Calea Floreasca 246, Royal Hall"
+ * (an address followed by the actual venue name), this tries to recover the venue name
+ * by returning the last comma-separated segment that isn't itself address-like.
+ */
+function extractVenueFromAddress(addrStr: string): string | null {
+  const parts = addrStr.split(',').map(s => s.trim()).filter(Boolean);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    if (!isAddressString(p) && p.length >= 4) return p;
+  }
+  return null;
+}
+
+const VENUE_BLOCK_TERMS = [
+  'copii', 'pentru copii', 'teatru pentru', 'teatrul pentru',
+  'educativ', 'educational', 'pentru tineret', 'centrul multifunc',
+  'muzeu', 'monument', 'parc ', 'gradina ',
+];
+
+/**
+ * Returns true if a venue name is valid (not an address, not too short/long, not TBC, not a non-venue type).
+ */
+export function isValidVenueName(name: string): boolean {
+  if (!name || name === 'Venue TBC') return false;
+  if (name.length < 3 || name.length > 80) return false;
+  if (isAddressString(name)) return false;
+  const lower = name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  if (VENUE_BLOCK_TERMS.some(t => lower.includes(t))) return false;
+  return true;
+}
+
+/**
+ * Try to extract a venue name from HTML when JSON-LD location.name is absent.
+ * Tries: itemprop="location", JSON fragment, common class names.
+ */
+function extractVenueFromHtml(html: string): string {
+  // Schema.org itemprop inline: <span itemprop="location">…<span itemprop="name">Club</span>
+  const itemProp = html.match(/itemprop=["']location["'][^>]*>[\s\S]{0,200}?itemprop=["']name["'][^>]*>([^<]{2,60})</i);
+  if (itemProp) return clean(itemProp[1]);
+
+  // JSON fragment buried in a script: "location":{"name":"Club Momo"
+  const jsonFrag = html.match(/"location"\s*:\s*\{[^}]{0,200}"name"\s*:\s*"([^"]{2,60})"/);
+  if (jsonFrag) return clean(jsonFrag[1]);
+
+  // Common CSS class patterns used by event sites
+  const cssClass = html.match(/class="[^"]*(?:venue|location|place|club)[^"]*"[^>]*>\s*<[^>]+>\s*([^<]{2,60})\s*</i)
+    ?? html.match(/class="[^"]*(?:venue|location|place|club)[^"]*"[^>]*>([^<]{2,60})</i);
+  if (cssClass) return clean(cssClass[1]);
+
+  return 'Venue TBC';
+}
+
+/** Scrape a price from raw HTML text as a last resort. */
+function extractPriceFromHtml(html: string): string | null {
+  const match = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|ron)\b/i);
+  if (match) return `${match[1].replace(',', '.')} RON`;
+  if (/\bfree\b|\bgratuit/i.test(html)) return 'Free';
+  return null;
+}
+
+// ── Deep-fetch core ───────────────────────────────────────────────────────────
+
+/**
+ * Fetch an individual event detail page and extract a complete ScrapedEvent.
+ * Strategy: JSON-LD Event block → OG meta tags → raw HTML price fallback.
+ * Returns null if the event is non-music, in the past, or the page is unreachable.
+ *
+ * @param allowedCities  Optional list of lowercase city/region substrings that must appear
+ *                       in the JSON-LD addressLocality (e.g. ['bucuresti','bucharest','ilfov']).
+ *                       If the page encodes a different city, the event is rejected.
+ *                       Pass undefined/null to skip city verification (default).
+ */
+export async function parseDetailPage(
+  url: string,
+  city: string,
+  timeoutMs = 10_000,
+  allowedCities?: string[],
+): Promise<ScrapedEvent | null> {
+  let html: string;
+  try {
+    html = await fetchHtml(url, timeoutMs);
+  } catch {
+    return null;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const og = extractOgMeta(html);
+
+  // ── 1. Try JSON-LD Event blocks ──────────────────────────────────────────
+  for (const block of extractJsonLd(html)) {
+    const b = block as Record<string, unknown>;
+    const type = String(b['@type'] ?? '');
+    if (!type.includes('Event')) continue;
+
+    const startDate = String(b.startDate ?? '');
+    const date = parseDate(startDate);
+    if (!date || date < today) continue;
+
+    const rawName = clean(String(b.name ?? og['og:title'] ?? ''));
+    if (!rawName) continue;
+    const { title, venueHint } = splitTitleVenue(rawName);
+
+    const rawDesc = String(b.description ?? og['og:description'] ?? og['description'] ?? '');
+    const description = clean(rawDesc) || null;
+
+    // Venue: JSON-LD location.name > title "@Venue" hint > HTML itemprop/class > "Venue TBC"
+    // Skip location.name if it looks like a street address (some sites set it to the street address)
+    const location = (b.location as Record<string, unknown>) ?? {};
+    const addrBlock = (location.address as Record<string, unknown>) ?? {};
+
+    // ── City verification (iabilet lists national events under Bucharest URL) ──
+    if (allowedCities && allowedCities.length > 0) {
+      // Normalize diacritics so "București" (ș U+015F) matches allowedCity "bucuresti"
+      const addrLocality = clean(String(
+        addrBlock.addressLocality ?? addrBlock.addressRegion ?? location.address ?? ''
+      )).toLowerCase()
+        .normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+      if (addrLocality && !allowedCities.some(c => addrLocality.includes(c))) {
+        // The event is in a city that doesn't match — skip silently
+        continue;
+      }
+    }
+
+    const venueName = clean(String(location.name ?? addrBlock.name ?? ''));
+    const htmlVenue = extractVenueFromHtml(html);
+    // If venueHint looks like an address, try to salvage the venue name from it
+    const resolvedVenueHint =
+      venueHint && isAddressString(venueHint) ? extractVenueFromAddress(venueHint) : venueHint;
+    const venue = (venueName && !isAddressString(venueName))
+      ? venueName
+      : resolvedVenueHint || (!isAddressString(htmlVenue) ? htmlVenue : 'Venue TBC');
+
+    // Image: JSON-LD image > og:image
+    const rawImg = b.image;
+    let image_url =
+      typeof rawImg === 'string' ? rawImg
+      : Array.isArray(rawImg) ? String((rawImg[0] as Record<string, unknown>)?.url ?? rawImg[0] ?? '')
+      : String((rawImg as Record<string, unknown>)?.url ?? '');
+    if (!image_url) image_url = og['og:image'] ?? '';
+
+    // Price: JSON-LD offers > raw HTML
+    const price = extractPriceFromOffers(b.offers) ?? extractPriceFromHtml(html);
+
+    // Genre filter
+    const genres = guessGenres(title, description ?? '');
+    if (!genres) return null;
+
+    return {
+      title,
+      venue,
+      date,
+      time: extractTime(startDate),
+      description,
+      image_url,
+      event_url: url,
+      genres,
+      price,
+      city,
+    };
+  }
+
+  // ── 2. OG-meta fallback (no JSON-LD Event found) ─────────────────────────
+  // Used for sites like ambilet.ro whose detail pages only have WebPage JSON-LD
+  // but carry full event info in OG tags and visible HTML text.
+  const rawOgTitle = clean(og['og:title']);
+  if (!rawOgTitle) return null;
+
+  // Split "Event Name @ Venue" in the OG title
+  const { title: ogTitle, venueHint: ogVenueHint } = splitTitleVenue(rawOgTitle);
+
+  // Date strategy: "startDate" JSON-LD → Romanian text in HTML → DD.MM.YYYY
+  const sdRaw = (html.match(/"startDate"\s*:\s*"([^"]+)"/) ?? [])[1] ?? '';
+  let dateStr = sdRaw;
+  if (!dateStr) {
+    // e.g. "14 mar 2026", "14 martie 2026"
+    const roM = html.match(/(\d{1,2})\s+(ian|feb|mar|apr|mai|iun|iul|aug|sep|oct|nov|dec)\w*\.?\s+(\d{4})/i);
+    if (roM) dateStr = `${roM[1]} ${roM[2]} ${roM[3]}`;
+  }
+  if (!dateStr) {
+    const numM = html.match(/(\d{1,2}[.\/]\d{1,2}[.\/]\d{4})/);
+    if (numM) dateStr = numM[1];
+  }
+  const date = dateStr ? parseDate(dateStr) : null;
+  if (!date || date < today) return null;
+
+  const ogDesc = clean(og['og:description'] ?? og['description'] ?? '') || null;
+  const genres = guessGenres(ogTitle, ogDesc ?? '');
+  if (!genres) return null;
+
+  // Venue strategy: JSON-LD location fragment → title "@Venue" hint → " – Venue" → HTML
+  let venue = 'Venue TBC';
+  const locMatch = html.match(/"location"\s*:\s*\{[^}]*"name"\s*:\s*"([^"]{2,})"/);
+  if (locMatch && !isAddressString(clean(locMatch[1]))) {
+    venue = clean(locMatch[1]);
+  } else if (ogVenueHint) {
+    venue = ogVenueHint;
+  } else {
+    // Fallback: "Event – Venue" separator in original OG title
+    const dashM = rawOgTitle.match(/\s+[–—]\s+(.+)$/);
+    if (dashM) venue = clean(dashM[1]);
+    else {
+      const htmlVenue = extractVenueFromHtml(html);
+      venue = isAddressString(htmlVenue) ? 'Venue TBC' : htmlVenue;
+    }
+  }
+
+  return {
+    title: ogTitle,
+    venue,
+    date,
+    time: sdRaw ? extractTime(sdRaw) : null,
+    description: ogDesc,
+    image_url: og['og:image'] ?? '',
+    event_url: url,
+    genres,
+    price: extractPriceFromHtml(html),
+    city,
+  };
+}
+
+// ── Batch fetcher ─────────────────────────────────────────────────────────────
+
+/**
+ * Fetch up to `limit` event detail pages from `urls`, in parallel batches of `batchSize`.
+ * Silently drops failures and non-music events.
+ *
+ * @param allowedCities  Passed to parseDetailPage for city verification (see that fn for details).
+ */
+export async function batchFetch(
+  urls: string[],
+  city: string,
+  {
+    limit = 25,
+    batchSize = 5,
+    timeoutMs = 10_000,
+    allowedCities,
+  }: { limit?: number; batchSize?: number; timeoutMs?: number; allowedCities?: string[] } = {},
+): Promise<ScrapedEvent[]> {
+  const results: ScrapedEvent[] = [];
+  const capped = urls.slice(0, limit);
+
+  for (let i = 0; i < capped.length; i += batchSize) {
+    const chunk = capped.slice(i, i + batchSize);
+    const settled = await Promise.allSettled(
+      chunk.map(url => parseDetailPage(url, city, timeoutMs, allowedCities)),
+    );
+    for (const r of settled) {
+      if (r.status === 'fulfilled' && r.value) results.push(r.value);
+    }
+  }
+
+  return results;
 }

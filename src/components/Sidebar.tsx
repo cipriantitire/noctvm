@@ -19,63 +19,59 @@ interface SidebarProps {
   activeCity?: 'bucuresti' | 'constanta';
 }
 
-export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, onSettingsClick, activeCity = 'bucuresti' }: SidebarProps) {
+export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, onSettingsClick }: SidebarProps) {
   const { profile, user } = useAuth();
 
   const profileLabel = user
     ? (profile?.username || profile?.display_name || 'Profile')
     : 'Log In';
 
+  // Shared label class: zero width when collapsed (no space taken), fades in when expanded.
+  // max-w change is instant (no layout transition), only opacity animates (GPU composited).
+  const labelCls = 'max-w-0 group-hover/sidebar:max-w-[160px] overflow-hidden opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75 whitespace-nowrap';
+
   return (
-    <aside className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-all duration-300 ease-in-out py-6 overflow-hidden">
+    <aside className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-200 ease-out py-6 overflow-hidden">
       {/* Moon Logo */}
-      <div className="flex items-center gap-3 px-5 mb-10 w-full">
+      <div className="flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-3 px-5 mb-10 w-full">
         <MoonIcon className="w-8 h-8 text-noctvm-violet flex-shrink-0" />
-        <span className="font-heading text-xl font-bold text-glow opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">NOCTVM</span>
+        <span className={labelCls + ' font-heading text-xl font-bold text-glow'}>NOCTVM</span>
       </div>
 
-      {/* Centered nav icons */}
+      {/* Nav icons — centered when collapsed, left-aligned when expanded */}
       <nav className="flex-1 flex flex-col items-center justify-center w-full space-y-1 px-3">
         {NAV_ITEMS.map(({ icon: Icon, label, tab }) => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
-            className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+            className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
               activeTab === tab
                 ? 'bg-noctvm-violet/10 text-white'
                 : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
             }`}
           >
-            <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
-            <span className="max-w-0 overflow-hidden opacity-0 group-hover/sidebar:max-w-[160px] group-hover/sidebar:opacity-100 transition-all duration-300 whitespace-nowrap">{label}</span>
+            <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''}`} />
+            <span className={labelCls}>{label}</span>
           </button>
         ))}
       </nav>
 
-      {/* Bottom: City Info + Cogwheel + Profile */}
+      {/* Bottom: Cogwheel + Profile */}
       <div className="px-3 w-full space-y-1">
-        {/* City Info - visible only when expanded */}
-        <div className="hidden group-hover/sidebar:flex items-center gap-3 px-4 py-2 mb-2 bg-white/5 rounded-xl border border-white/5 animate-fade-in">
-          <div className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
-          <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-wider">
-            {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta'}
-          </span>
-        </div>
-
-        {/* Cogwheel / Settings */}
+        {/* Settings */}
         <button
           onClick={onSettingsClick}
-          className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+          className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
           title="Account Settings"
         >
-          <CogIcon className="w-6 h-6 flex-shrink-0 transition-transform" />
-          <span className="max-w-0 overflow-hidden opacity-0 group-hover/sidebar:max-w-[160px] group-hover/sidebar:opacity-100 transition-all duration-300 whitespace-nowrap">Settings</span>
+          <CogIcon className="w-6 h-6 flex-shrink-0" />
+          <span className={labelCls}>Settings</span>
         </button>
 
         {/* Profile */}
         <button
           onClick={() => onTabChange('profile')}
-          className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+          className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
             activeTab === 'profile'
               ? 'bg-noctvm-violet/10 text-white'
               : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
@@ -89,9 +85,7 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
               <UserIcon className="w-4 h-4 text-white" />
             )}
           </div>
-          <span className="max-w-0 overflow-hidden opacity-0 group-hover/sidebar:max-w-[120px] group-hover/sidebar:opacity-100 transition-all duration-300 whitespace-nowrap truncate">
-            {profileLabel}
-          </span>
+          <span className={labelCls + ' truncate'}>{profileLabel}</span>
         </button>
       </div>
     </aside>

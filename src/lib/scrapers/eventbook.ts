@@ -1,108 +1,73 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // eventbook.ro scraper
-// Site: Romanian ticketing platform
-// Strategy: HTML search results + JSON-LD extraction
+// Strategy:
+//   1. Use the city search endpoint (the /muzica category URL returns 404).
+//   2. Extract event URLs — only follow music-category paths to prevent non-music
+//      events from entering the pipeline at the URL level.
+//   3. Also pull URLs from any JSON-LD on the search results page.
+//   4. Deep-fetch each event detail page for full data.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { extractJsonLd, parseDate, extractTime, clean, guessGenres, fetchHtml } from './utils';
+import { fetchHtml, batchFetch, extractUrlsFromJsonLd } from './utils';
 
 const LIST_URLS = [
-  { url: 'https://eventbook.ro/event/search?term=Bucuresti', city: 'Bucharest' },
-  { url: 'https://eventbook.ro/event/search?term=Constanta', city: 'Constanta' },
+  {
+    url: 'https://eventbook.ro/event/search?term=Bucuresti',
+    city: 'Bucharest',
+    allowedCities: ['bucuresti', 'bucharest', 'ilfov', 'sector'],
+  },
+  {
+    url: 'https://eventbook.ro/event/search?term=Constanta',
+    city: 'Constanta',
+    allowedCities: ['constanta', 'constanța', 'mamaia', 'eforie', 'neptun', 'mangalia'],
+  },
 ];
 const BASE_URL = 'https://eventbook.ro';
 
-export async function scrapeEventbook(): Promise<ScrapedEvent[]> {
-  const allEvents: ScrapedEvent[] = [];
-  const today = new Date().toISOString().split('T')[0];
+const MUSIC_CATEGORIES = new Set(['muzica', 'music', 'concert', 'festival', 'club', 'party']);
+const SKIP_SEGMENTS = new Set([
+  'about', 'contact', 'terms', 'privacy', 'blog', 'help',
+  'login', 'register', 'search', 'categories', 'tag', 'page', 'ajax',
+  'event',
+]);
 
-  for (const { url, city } of LIST_URLS) {
-    try {
-      const html = await fetchHtml(url, 15_000);
-      
-      // 1. Find event links in search results - more robust regex
-      // Eventbook links look like /music/event-name or /other/event-name
-      const linkRegex = /href="\/([a-z-]+)\/([^"]+)"/gi;
-      const seenLinks = new Set<string>();
-      let match: RegExpExecArray | null;
-
-      while ((match = linkRegex.exec(html)) !== null) {
-        const category = match[1];
-        const slug = match[2];
-        
-        // Filter out obvious noise
-        if (['about', 'contact', 'terms', 'privacy', 'blog', 'help'].includes(category)) continue;
-        
-        const link = `/${category}/${slug}`;
-        if (!seenLinks.has(link)) {
-          seenLinks.add(link);
-        }
-      }
-
-      // 2. Fetch first 15 event pages to get rich JSON-LD
-      const linksToFetch = Array.from(seenLinks).slice(0, 15);
-      for (const link of linksToFetch) {
-        try {
-          const detailUrl = link.startsWith('http') ? link : `${BASE_URL}${link}`;
-          const detailHtml = await fetchHtml(detailUrl, 10_000);
-          const fromLd = fromJsonLd(detailHtml, city);
-          
-          for (const ev of fromLd) {
-            // Only add if it's music or guestures genres suggest its music
-            if (link.includes('/music/') || ev.genres.length > 0) {
-              ev.event_url = detailUrl;
-              allEvents.push(ev);
-            }
-          }
-        } catch (err) {
-          console.warn(`[eventbook] detail failed for ${link}:`, err);
-        }
-      }
-
-    } catch (err) {
-      console.warn(`[eventbook] list failed for ${url}:`, err);
-    }
+/** Extract music-category event hrefs from search results HTML. */
+function extractHtmlUrls(html: string): string[] {
+  const seen = new Set<string>();
+  const urls: string[] = [];
+  const re = /href="(\/([a-z0-9\-]+)\/([^"?#\s]+))"/gi;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const [, path, category, slug] = m;
+    if (SKIP_SEGMENTS.has(category) || !slug || slug.length < 3) continue;
+    // Only follow music-related category paths
+    if (!MUSIC_CATEGORIES.has(category)) continue;
+    const full = `${BASE_URL}${path}`;
+    if (!seen.has(full)) { seen.add(full); urls.push(full); }
   }
-  return allEvents;
+  return urls;
 }
 
-function fromJsonLd(html: string, city: string): ScrapedEvent[] {
-  const events: ScrapedEvent[] = [];
-  const today = new Date().toISOString().split('T')[0];
+export async function scrapeEventbook(): Promise<ScrapedEvent[]> {
+  const allEvents: ScrapedEvent[] = [];
 
-  for (const block of extractJsonLd(html)) {
-    const b = block as Record<string, unknown>;
-    const type = String(b['@type'] ?? '');
-    if (!type.includes('Event')) continue;
+  for (const { url, city, allowedCities } of LIST_URLS) {
+    try {
+      const html = await fetchHtml(url, 15_000);
 
-    const startDate = String(b.startDate ?? '');
-    const date = parseDate(startDate);
-    if (!date || date < today) continue;
+      const ldUrls   = extractUrlsFromJsonLd(html, BASE_URL);
+      const htmlUrls = extractHtmlUrls(html);
+      const allUrls  = Array.from(new Set([...ldUrls, ...htmlUrls]));
+      console.log(`[eventbook] ${city}: ${ldUrls.length} JSON-LD + ${htmlUrls.length} HTML = ${allUrls.length} URLs`);
 
-    const title = clean(b.name as string);
-    if (!title) continue;
-
-    const description = clean(b.description as string);
-    const location = (b.location as any)?.name ?? 'Venue TBC';
-    const image = (b.image as any)?.url ?? b.image;
-    
-    // Genre filtering
-    const genres = guessGenres(title, description || '');
-    if (!genres) continue;
-
-    events.push({
-      title,
-      venue: clean(location),
-      date,
-      time: extractTime(startDate),
-      description: description || null,
-      image_url: typeof image === 'string' ? image : '',
-      event_url: String(b.url ?? ''),
-      genres,
-      price: null,
-      city,
-    });
+      const events = await batchFetch(allUrls, city, { limit: 25, batchSize: 4, allowedCities });
+      console.log(`[eventbook] ${city}: kept ${events.length} music events`);
+      allEvents.push(...events);
+    } catch (err) {
+      console.warn(`[eventbook] failed for ${url}:`, err);
+    }
   }
-  return events;
+
+  return allEvents;
 }

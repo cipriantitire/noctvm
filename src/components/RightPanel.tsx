@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from 'react';
-import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
@@ -39,6 +38,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
         if (data) {
           const counts: Record<string, number> = {};
           data.forEach(ev => {
+            if (!ev.venue || ev.venue === 'Venue TBC') return; // skip empty / unresolved
             counts[ev.venue] = (counts[ev.venue] || 0) + 1;
           });
           const sorted = Object.entries(counts)
@@ -50,18 +50,19 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
       });
   }, [activeCity]);
 
-  // Fallback to sample events
-  const tonightEvents = useMemo(() => {
-    if (dbEvents.length > 0) return dbEvents;
-    const today = new Date().toISOString().split('T')[0];
-    return SAMPLE_EVENTS.filter(e => {
-      const matchesCity = e.city?.toLowerCase() === (activeCity === 'bucuresti' ? 'bucharest' : 'constanta');
-      return matchesCity && e.date === today;
-    });
-  }, [dbEvents, activeCity]);
+  // Only real DB events — no sample fallback (prevents phantom events)
+  const tonightEvents = useMemo(() => dbEvents, [dbEvents]);
 
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-hidden">
+      {/* City indicator */}
+      <div className="flex items-center gap-2 mb-5 px-1">
+        <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
+        <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">
+          {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'} · Live
+        </span>
+      </div>
+
       {/* Map placeholder */}
       <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border">
         <div className="aspect-[4/3] bg-noctvm-midnight flex items-center justify-center">

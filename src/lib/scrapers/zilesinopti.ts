@@ -1,11 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Zilesinopti.ro scraper
-// Site: WordPress + The Events Calendar plugin
-// Strategy: JSON-LD extraction from listing page, fallback to HTML article cards
+// Site: WordPress + The Events Calendar plugin + custom "kzn" widget
+// The listing page embeds event data in HTML cards (class="kzn-sw-item").
+// Individual event pages have full JSON-LD via The Events Calendar plugin.
+// Strategy:
+//   Phase 1 — Parse listing-page JSON-LD (if present).
+//   Phase 2 — Parse listing-page HTML "kzn-sw-item" cards.
+//   Phase 3 — Deep-fetch each event's detail page for full venue/image/price.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { extractJsonLd, parseDate, extractTime, clean, guessGenres, fetchHtml } from './utils';
+import { fetchHtml, parseEventsFromJsonLd, parseDetailPage, parseDate, clean, guessGenres } from './utils';
 
 const BASE_URL = 'https://zilesinopti.ro';
 const LIST_URLS = [
@@ -13,133 +18,101 @@ const LIST_URLS = [
   { url: 'https://zilesinopti.ro/evenimente-constanta/', city: 'Constanta' },
 ];
 
-/** Try to extract events from JSON-LD blocks embedded in the page. */
-function fromJsonLd(html: string, city: string): ScrapedEvent[] {
-  const blocks = extractJsonLd(html);
-  const events: ScrapedEvent[] = [];
+/** Collect event stubs (title + url + date) from the listing-page HTML cards. */
+function collectStubsFromHtml(html: string): Array<{ title: string; url: string; rawDate: string }> {
+  const stubs: Array<{ title: string; url: string; rawDate: string }> = [];
+  const seen = new Set<string>();
 
-  for (const block of blocks) {
-    const b = block as Record<string, unknown>;
-    const type = (b['@type'] as string) ?? '';
-    if (type !== 'Event' && !type.includes('Event')) continue;
+  // kzn-sw-item is the The Events Calendar superwidget card
+  const cardRe = /<div[^>]*class="[^"]*kzn-sw-item[^"]*"[^>]*>([\s\S]*?)(?=<div[^>]*class="[^"]*kzn-sw-item|$)/gi;
+  let m;
+  while ((m = cardRe.exec(html)) !== null) {
+    const block = m[1];
 
-    const startDate = String(b.startDate ?? '');
-    const date = parseDate(startDate);
-    if (!date) continue;
+    // URL — look for first meaningful <a href>
+    const linkM = block.match(/href="(https?:\/\/zilesinopti\.ro\/[^"?#]+)"/i)
+      ?? block.match(/href="(\/[^"?#]+)"/i);
+    if (!linkM) continue;
+    const url = linkM[1].startsWith('http') ? linkM[1] : `${BASE_URL}${linkM[1]}`;
+    if (seen.has(url)) continue;
+    seen.add(url);
 
-    const location = (b.location as Record<string, unknown>) ?? {};
-    const venue = clean(
-      (location.name as string) ??
-      ((location.address as any)?.streetAddress as string) ??
-      'Venue TBC'
-    );
-
-    const title = clean(b.name as string);
-    if (!title) continue;
-
-    const description = clean(b.description as string);
-    const image = (() => {
-      const img = b.image;
-      if (typeof img === 'string') return img;
-      if (Array.isArray(img)) return (img[0] as Record<string, unknown>)?.url as string ?? '';
-      return (img as any)?.url as string ?? '';
-    })();
-
-    const genres = guessGenres(title, description);
-    if (!genres) continue;
-
-    events.push({
-      title,
-      venue,
-      date,
-      time: extractTime(startDate),
-      description: description || null,
-      image_url: image,
-      event_url: String(b.url ?? ''),
-      genres,
-      price: null,
-      city,
-    });
-  }
-
-  return events;
-}
-
-/** Fallback: parse event cards from HTML. */
-async function fromHtml(html: string, city: string): Promise<ScrapedEvent[]> {
-  const events: ScrapedEvent[] = [];
-  const today = new Date().toISOString().split('T')[0];
-
-  // Specific container for Zile și Nopți "superwidgets"
-  const cardRegex = /<div[^>]*class="[^"]*kzn-sw-item[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
-  let match: RegExpExecArray | null;
-
-  while ((match = cardRegex.exec(html)) !== null) {
-    const block = match[1];
-    const titleMatch = block.match(/<h3[^>]*class="[^"]*kzn-sw-item-titlu[^"]*"[^>]*>([\s\S]*?)<\/h3>/i) || 
-                       block.match(/<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
-    if (!titleMatch) continue;
-
-    // Use link from h3 if available
-    const linkMatch = titleMatch[0].match(/href="([^"]+)"/i);
-    const eventUrl = linkMatch?.[1] ?? '';
-    if (!eventUrl) continue;
-
-    const title = clean(titleMatch[0].replace(/<[^>]+>/g, ''));
+    // Title
+    const titleM = block.match(/class="[^"]*kzn-sw-item-titlu[^"]*"[^>]*>([\s\S]*?)<\/\w+>/i)
+      ?? block.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/i);
+    const title = clean(titleM?.[1] ?? '');
     if (!title || title.length < 3) continue;
 
-    const dateMatch = block.match(/class="[^"]*kzn-one-event-date[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    const rawDate = clean(dateMatch?.[1]?.replace(/<[^>]+>/g, '') ?? '');
-    const date = parseDate(rawDate);
-    if (!date || date < today) continue;
+    // Date string (will be refined by parseDetailPage)
+    const dateM = block.match(/class="[^"]*kzn-one-event-date[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    const rawDate = clean(dateM?.[1] ?? '');
 
-    const venueMatch = block.match(/class="[^"]*kzn-one-event-locatie[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
-                        block.match(/class="[^"]*kzn-loc-name[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
-    const venue = clean(venueMatch?.[1]?.replace(/<[^>]+>/g, '') ?? 'Venue TBC');
-
-    const imgMatch = block.match(/<img[^>]+src="([^"]+)"/i);
-
-    const genres = guessGenres(title, '');
-    if (!genres) continue;
-
-    let image = imgMatch?.[1] ?? '';
-    // If no image in listing, try to fetch from detail page
-    if (!image && eventUrl) {
-      try {
-        const detailHtml = await fetchHtml(eventUrl.startsWith('http') ? eventUrl : `${BASE_URL}${eventUrl}`, 5000);
-        const ogImage = detailHtml.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i);
-        image = ogImage?.[1] ?? '';
-      } catch { /* skip */ }
-    }
-
-    events.push({
-      title,
-      venue,
-      date,
-      time: extractTime(rawDate),
-      description: null,
-      image_url: image,
-      event_url: eventUrl.startsWith('http') ? eventUrl : `${BASE_URL}${eventUrl}`,
-      genres,
-      price: null,
-      city,
-    });
+    stubs.push({ title, url, rawDate });
   }
 
-  return events;
+  // Also capture plain <article> or <li> links that might exist on the page
+  if (stubs.length === 0) {
+    const linkRe = /href="(https?:\/\/zilesinopti\.ro\/event[^"?#]*)"/gi;
+    let lm;
+    while ((lm = linkRe.exec(html)) !== null) {
+      const url = lm[1].replace(/\/$/, '') + '/';
+      if (!seen.has(url)) {
+        seen.add(url);
+        stubs.push({ title: '', url, rawDate: '' });
+      }
+    }
+  }
+
+  return stubs;
 }
 
 export async function scrapeZilesinopti(): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
+  const today = new Date().toISOString().split('T')[0];
+
   for (const { url, city } of LIST_URLS) {
     try {
-      const html = await fetchHtml(url);
-      const fromLd = fromJsonLd(html, city);
-      const fromH = await fromHtml(html, city);
-      allEvents.push(...(fromLd.length > 0 ? fromLd : fromH));
+      const html = await fetchHtml(url, 15_000);
+
+      // Phase 1: listing-page JSON-LD
+      let events = parseEventsFromJsonLd(html, city);
+
+      if (events.length > 0) {
+        console.log(`[zilesinopti] ${city}: ${events.length} events from listing JSON-LD`);
+        allEvents.push(...events);
+        continue;
+      }
+
+      // Phase 2: collect stubs from HTML cards
+      const stubs = collectStubsFromHtml(html);
+      console.log(`[zilesinopti] ${city}: ${stubs.length} card stubs from HTML`);
+      if (stubs.length === 0) continue;
+
+      // Filter stubs to future events using rough date check
+      const futureStubs = stubs.filter(s => {
+        if (!s.rawDate) return true; // can't tell — let detail page decide
+        const d = parseDate(s.rawDate);
+        return !d || d >= today;
+      });
+
+      // Phase 3: deep-fetch each stub's detail page for full data
+      const capped = futureStubs.slice(0, 30);
+      for (let i = 0; i < capped.length; i += 5) {
+        const chunk = capped.slice(i, i + 5);
+        const results = await Promise.allSettled(
+          chunk.map(s => parseDetailPage(s.url, city, 12_000)),
+        );
+        for (const r of results) {
+          if (r.status === 'fulfilled' && r.value) allEvents.push(r.value);
+        }
+      }
+
+      const kept = allEvents.filter(e => e.city === city).length;
+      console.log(`[zilesinopti] ${city}: kept ${kept} music events`);
     } catch (err) {
       console.warn(`[zilesinopti] failed for ${url}:`, err);
     }
   }
+
   return allEvents;
 }
