@@ -209,12 +209,6 @@ export default function Home() {
             className={`relative w-full h-full sm:w-[95%] sm:h-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-2xl liquid-glass overflow-hidden shadow-2xl shadow-black/50 flex flex-col ${venueClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
             onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
           >
-            <button
-              onClick={handleCloseVenue}
-              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-noctvm-surface/80 backdrop-blur-sm border border-noctvm-border flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-noctvm-surface transition-all"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-            </button>
             <VenuePage
               venueName={selectedVenue!}
               onBack={handleCloseVenue}
@@ -280,17 +274,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                {activeCity === 'constanta' ? (
-                  <div className="text-center py-20 animate-fade-in">
-                    <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/20 flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-noctvm-violet/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                    </div>
-                    <h3 className="font-heading text-lg font-bold text-white mb-2">Constanța — Coming Soon</h3>
-                    <p className="text-sm text-noctvm-silver/60">We&apos;re working on bringing the best of Constanța&apos;s nightlife to NOCTVM.</p>
-                    <p className="text-xs text-noctvm-silver/30 mt-2">Summer 2026</p>
-                  </div>
-                ) : (
-                  <>
+                <>
                     <FilterBar
                       activeGenres={activeGenres}
                       onGenreChange={setActiveGenres}
@@ -328,7 +312,6 @@ export default function Home() {
                       </div>
                     )}
                   </>
-                )}
               </div>
             )}
 

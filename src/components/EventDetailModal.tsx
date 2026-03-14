@@ -92,6 +92,9 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
     if (!user) { onOpenAuth(); return; }
     if (!event || !isRealEvent(event.id) || saveLoading) return;
     const eventId = event.id;
+    const newSaved = !isSaved;
+    setIsSaved(newSaved);
+    setSaveCount(c => newSaved ? c + 1 : Math.max(0, c - 1));
     setSaveLoading(true);
     try {
       if (isSaved) {
@@ -99,6 +102,9 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
       } else {
         await supabase.from('event_saves').insert({ event_id: eventId, user_id: user.id });
       }
+    } catch {
+      setIsSaved(isSaved);
+      setSaveCount(c => newSaved ? Math.max(0, c - 1) : c + 1);
     } finally {
       setSaveLoading(false);
     }

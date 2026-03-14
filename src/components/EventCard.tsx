@@ -40,53 +40,58 @@ interface EventCardProps {
 export default function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: EventCardProps) {
   const { user } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
+  const [saveCount, setSaveCount] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
 
   const sourceBadge = getSourceBadge(event.source);
+  const real = isRealEvent(event.id);
 
-  // Fetch initial saved state
+  // Fetch save count + user's saved state
   useEffect(() => {
-    if (!user || !isRealEvent(event.id)) return;
+    if (!real) return;
     supabase
       .from('event_saves')
-      .select('id')
+      .select('id, user_id', { count: 'exact' })
       .eq('event_id', event.id)
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => setIsSaved(!!data));
-  }, [event.id, user]);
+      .then(({ data, count }) => {
+        setSaveCount(count ?? 0);
+        if (user) setIsSaved((data ?? []).some((r: { user_id: string }) => r.user_id === user.id));
+      });
+  }, [event.id, user, real]);
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) { onSaveRequireAuth?.(); return; }
-    if (!isRealEvent(event.id) || saveLoading) return;
+    if (!real || saveLoading) return;
+    const newSaved = !isSaved;
+    setIsSaved(newSaved);
+    setSaveCount(c => newSaved ? c + 1 : Math.max(0, c - 1));
     setSaveLoading(true);
     try {
       if (isSaved) {
         await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
-        setIsSaved(false);
       } else {
         await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
-        setIsSaved(true);
       }
+    } catch {
+      setIsSaved(isSaved);
+      setSaveCount(c => newSaved ? Math.max(0, c - 1) : c + 1);
     } finally {
       setSaveLoading(false);
     }
   };
 
-  const bookmarkButton = isRealEvent(event.id) ? (
+  const bookmarkButton = (
     <button
-      onClick={handleSave}
-      disabled={saveLoading}
-      className={`p-1 rounded transition-colors ${
-        isSaved
-          ? 'text-noctvm-violet'
-          : 'text-noctvm-silver/40 hover:text-noctvm-violet/70'
-      }`}
-      title={isSaved ? 'Remove from saved' : 'Save event'}
+      onClick={real ? handleSave : undefined}
+      disabled={saveLoading || !real}
+      className={`flex items-center gap-1 p-1 rounded transition-colors ${
+        isSaved ? 'text-noctvm-violet' : 'text-noctvm-silver/40 hover:text-noctvm-violet/70'
+      } ${!real ? 'cursor-default' : ''}`}
+      title={real ? (isSaved ? 'Remove from saved' : 'Save event') : undefined}
     >
       <svg
-        className="w-3.5 h-3.5"
+        className="w-3.5 h-3.5 flex-shrink-0"
         viewBox="0 0 24 24"
         fill={isSaved ? 'currentColor' : 'none'}
         stroke="currentColor"
@@ -96,8 +101,9 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
       </svg>
+      {saveCount > 0 && <span className="text-[10px] font-mono leading-none">{saveCount}</span>}
     </button>
-  ) : null;
+  );
 
   const getPriceBadge = () => {
     if (!event.price) return null;
@@ -240,11 +246,7 @@ export default function EventCard({ event, variant = 'portrait', onClick, onSave
               <span className="text-[10px] font-mono text-noctvm-violet leading-none flex-shrink-0">{event.time}</span>
             </>
           )}
-          {isRealEvent(event.id) && (
-            <div className="ml-auto">
-              {bookmarkButton}
-            </div>
-          )}
+          <div className="ml-auto">{bookmarkButton}</div>
         </div>
       </div>
     </Wrapper>
