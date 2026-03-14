@@ -20,6 +20,11 @@ function formatDate(dateStr: string): string {
   return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
 }
 
+function isRealEvent(id: string | undefined): boolean {
+  if (!id) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
 function getSourceBadge(source: string) {
   switch (source) {
     case 'fever':       return { label: 'Fever',        color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
@@ -51,7 +56,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   }, [event]);
 
   useEffect(() => {
-    if (!event?.id) { setSaveCount(0); setIsSaved(false); return; }
+    if (!isRealEvent(event?.id)) { setSaveCount(0); setIsSaved(false); return; }
 
     // Initial fetch
     supabase
@@ -84,7 +89,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
 
   const handleSave = async () => {
     if (!user) { onOpenAuth(); return; }
-    if (!event?.id || saveLoading) return;
+    if (!isRealEvent(event?.id) || saveLoading) return;
     setSaveLoading(true);
     try {
       if (isSaved) {
@@ -108,7 +113,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
       className={`fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={handleClose} />
 
       {/* Modal */}
       <div
@@ -210,12 +215,12 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
             </div>
             <button
               onClick={handleSave}
-              disabled={saveLoading || !event?.id}
+              disabled={saveLoading || !isRealEvent(event?.id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 isSaved
                   ? 'bg-noctvm-violet/20 text-noctvm-violet border-noctvm-violet/40'
                   : 'bg-black/40 text-noctvm-silver border-white/10 hover:border-noctvm-violet/30 hover:text-noctvm-violet'
-              } ${!event?.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${!isRealEvent(event?.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
