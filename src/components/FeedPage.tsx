@@ -431,6 +431,21 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     navigator.clipboard.writeText(`${window.location.origin}/?post=${postId}`);
   };
 
+  const deletePost = async (postId: string) => {
+    if (!user) return;
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+      const { error } = await supabase.from('posts').delete().eq('id', postId).eq('user_id', user.id);
+      if (error) throw error;
+      setExplorePosts(prev => prev.filter(p => p.id !== postId));
+      setFollowingPosts(prev => prev.filter(p => p.id !== postId));
+      setFriendsPosts(prev => prev.filter(p => p.id !== postId));
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      alert('Failed to delete post.');
+    }
+  };
+
   // ── Render helpers ───────────────────────────────────────────────────────
 
   const userInitial = profile ? (profile.display_name || profile.username || 'N')[0].toUpperCase() : 'N';
@@ -642,6 +657,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                       isFollowing={true}
                       onClose={() => setActiveDotsId(null)}
                       onCopyLink={() => copyLink(post.id)}
+                      onDelete={() => deletePost(post.id)}
                       onNotInterested={() => setExplorePosts(prev => prev.filter(p => p.id !== post.id))}
                       onReport={() => {/* TODO: report modal */}}
                     />
@@ -747,12 +763,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
                   {/* Comment input */}
                   <div className="flex items-center gap-2 mt-2 pt-2 border-t border-noctvm-border">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {profile?.avatar_url
-                        ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="My profile" className="w-full h-full object-cover" />
-                        : <span className="text-[8px] font-bold text-white">{userInitial}</span>
-                      }
-                    </div>
                     <input
                       type="text"
                       placeholder="Add a comment..."

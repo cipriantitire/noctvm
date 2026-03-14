@@ -20,6 +20,10 @@ async function init() {
     { name: 'Breeze Constanta', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 2500, rating: 4.8 },
     { name: 'Fratelli Beach & Club', address: 'Mamaia Beach, Constanta', city: 'Constanta', followers: 4200, rating: 4.7 },
     { name: 'Luv Constanta', address: 'Bulevardul Tomis 122, Constanta', city: 'Constanta', followers: 1800, rating: 4.5 },
+    { name: 'Goblin Constanta', address: 'Faleză Nord, Constanta', city: 'Constanta', followers: 1200, rating: 4.4 },
+    { name: 'Ego Club Mamaia', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 3100, rating: 4.6 },
+    { name: 'Nuba Beach Club', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 2900, rating: 4.5 },
+    { name: 'Doors Club', address: 'Str. Traian 68, Constanta', city: 'Constanta', followers: 1500, rating: 4.3 },
   ];
 
   console.log('Inserting Venues...');

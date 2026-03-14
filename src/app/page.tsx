@@ -76,7 +76,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const city = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
+    // DB uses "Bucharest" and "Constanta" (no accent)
+    const city = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta';
     const today = new Date().toISOString().split('T')[0];
     supabase
       .from('events')
@@ -182,10 +183,10 @@ export default function Home() {
       />
 
       {/* ── Create Post Modal ───────────────────────────────────── */}
-      <CreatePostModal isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} onPostCreated={() => {}} onOpenAuth={() => setShowAuthModal(true)} />
+      <CreatePostModal isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} onPostCreated={() => {}} onOpenAuth={() => setShowAuthModal(true)} activeCity={activeCity} />
 
       {/* ── Create Story Modal ──────────────────────────────────── */}
-      <CreateStoryModal isOpen={showCreateStory} onClose={() => setShowCreateStory(false)} onOpenAuth={() => setShowAuthModal(true)} />
+      <CreateStoryModal isOpen={showCreateStory} onClose={() => setShowCreateStory(false)} onOpenAuth={() => setShowAuthModal(true)} activeCity={activeCity} />
 
       {/* ── Stories Viewer Modal ──────────────────────────────────── */}
       <StoriesViewerModal

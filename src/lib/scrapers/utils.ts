@@ -101,31 +101,55 @@ export function clean(text: string | null | undefined): string {
   return (text ?? '').replace(/\s+/g, ' ').trim();
 }
 
-/** Infer likely genres from title + description text. */
-export function guessGenres(title: string, desc: string): string[] {
-  const text = `${title} ${desc}`.toLowerCase();
-  const genres: string[] = [];
+const NON_MUSIC_TERMS = [
+  'workshop', 'curs', 'conference', 'conferinta', 'teatru', 'theatre', 'play', 'piesa', 
+  'kids', 'copii', 'targ', 'expo', 'fair', 'exhibition', 'business', 'seminar',
+  'comedy', 'stand-up', 'standup', 'stand up', 'yoga', 'wellness', 'gastronomy', 'food'
+];
 
-  if (/techno/.test(text))                     genres.push('Techno');
-  if (/\bhouse\b/.test(text))                  genres.push('House');
-  if (/deep house/.test(text))                 genres.push('Deep House');
-  if (/minimal/.test(text))                    genres.push('Minimal');
-  if (/hip.?hop|rap\b/.test(text))             genres.push('Hip-Hop');
-  if (/drum.?n.?bass|dnb/.test(text))          genres.push('Drum & Bass');
-  if (/latin|reggaeton|salsa|merengue/.test(text)) genres.push('Latin');
-  if (/reggae/.test(text))                     genres.push('Reggae');
-  if (/experimental/.test(text))               genres.push('Experimental');
-  if (/acid/.test(text))                       genres.push('Acid');
-  if (/\bebm\b/.test(text))                    genres.push('EBM');
-  if (/hard\s?dance|hardcore/.test(text))      genres.push('Hard Dance');
-  if (/bass/.test(text))                       genres.push('Bass Music');
-  if (/live|concert|band/.test(text))          genres.push('Live Music');
-  if (/underground/.test(text))                genres.push('Underground');
-  if (/electronic|electro/.test(text))         genres.push('Electronic');
-  if (/club|party|petrecere/.test(text))       genres.push('Club');
+/** Guess genres from title/desc. Returns null if definitively non-music. */
+export function guessGenres(title: string, desc: string): string[] | null {
+  // Normalize stylized unicode characters (like bold 𝐓𝐚𝐤𝐞 𝐌𝐞 𝐇𝐨𝐦𝐞)
+  const normTitle = (title || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+  const t = (normTitle + ' ' + desc).toLowerCase();
+  
+  // Hard filter for definitely non-music
+  if (NON_MUSIC_TERMS.some(term => t.includes(term))) {
+    // Exception: if it also has strong music terms (concert, festival), maybe it's okay
+    const strongMusic = ['festival', 'concert', 'live', 'dj set', 'rave'];
+    if (!strongMusic.some(sm => t.includes(sm))) return null;
+  }
 
-  if (genres.length === 0) genres.push('Electronic');
-  return Array.from(new Set(genres));
+  const found = new Set<string>();
+  const mapping: Record<string, string[]> = {
+    'Techno': ['techno', 'dark techno', 'industrial'],
+    'House': ['house', 'deep house', 'tech house', 'progressive house'],
+    'Electronic': ['electronic', 'electronica', 'synth', 'modular'],
+    'Minimal': ['minimal', 'microhouse', 'rominimal'],
+    'Hip-Hop': ['hiphop', 'hip-hop', 'rap', 'trap'],
+    'Jazz': ['jazz', 'blues'],
+    'Rock': ['rock', 'alternative', 'indie', 'punk'],
+    'Metal': ['metal', 'hardcore', 'doom', 'sludge'],
+    'Drum & Bass': ['dnb', 'drum and bass', 'drum & bass', 'jungle'],
+    'Live Music': ['live band', 'concert', 'live music', 'lansare album'],
+    'Disco': ['disco', 'nu-disco', '80s', '90s'],
+    'Party': ['party', 'clubbing', 'nightlife', 'dancing', 'club'],
+  };
+
+  for (const [genre, keywords] of Object.entries(mapping)) {
+    if (keywords.some(k => t.includes(k))) found.add(genre);
+  }
+
+  if (found.size === 0) {
+    // If it mentions party/night/club but no genre found, it's probably Electronic or general Party
+    if (/party|club|night|rave|dance|dancing/.test(t)) {
+      found.add('Electronic');
+    } else {
+      // If we found NO music terms at all and it didn't even match "Party", maybe it's still non-music
+      return null;
+    }
+  }
+  return Array.from(found);
 }
 
 /** Fetch HTML with a browser-like User-Agent and a timeout. */

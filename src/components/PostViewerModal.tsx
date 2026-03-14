@@ -9,11 +9,11 @@ import LikesModal from './LikesModal';
 
 interface ProfilePost {
   id: string;
-  user_id?: string; // Add user_id
+  user_id: string; // Added user_id
   image_url: string | null;
-  caption: string | null;
+  caption: string;
   created_at: string;
-  likes_count?: number;
+  likes_count: number;
 }
 
 interface PostViewerModalProps {
@@ -199,6 +199,21 @@ export default function PostViewerModal({
     }
   };
 
+  const handleDelete = async () => {
+    if (!user || user.id !== post.user_id) return;
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    
+    try {
+      const { error } = await supabase.from('posts').delete().eq('id', post.id).eq('user_id', user.id);
+      if (error) throw error;
+      onClose();
+      window.location.reload(); // Simple way to refresh lists
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      alert('Failed to delete post.');
+    }
+  };
+
   const handleShare = () => {
     const url = `${window.location.origin}/?post=${post.id}`;
     if (navigator.share) {
@@ -291,12 +306,12 @@ export default function PostViewerModal({
                 {showOptions && (
                   <PostOptionsMenu
                     postId={post.id}
-                    postUserId={post.user_id || null}
+                    postUserId={post.user_id}
                     currentUserId={user?.id || null}
                     authorHandle={profileName || 'user'}
                     onClose={() => setShowOptions(false)}
                     onCopyLink={handleShare}
-                    onDelete={() => { /* owner can delete */ }}
+                    onDelete={handleDelete}
                   />
                 )}
              </div>
@@ -304,11 +319,8 @@ export default function PostViewerModal({
 
           {/* Comments Section (Scrollable) */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-             {post.caption && !post.image_url === false && (
+             {post.caption && (
                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-noctvm-midnight flex-shrink-0 flex items-center justify-center ring-1 ring-noctvm-border overflow-hidden">
-                    {profileAvatar ? <img src={profileAvatar} alt={profileName || 'Author'} className="w-full h-full object-cover" /> : userInitial}
-                  </div>
                   <div>
                      <p className="text-xs text-white leading-relaxed">
                         <button className="font-bold mr-2 text-noctvm-violet hover:underline focus:outline-none">

@@ -14,6 +14,7 @@ import PostViewerModal from './PostViewerModal';
 
 interface ProfilePost {
   id: string;
+  user_id: string;
   image_url: string | null;
   caption: string;
   created_at: string;
@@ -102,10 +103,33 @@ export default function UserProfilePage({
     try {
       const { data } = await supabase
         .from('posts')
-        .select('id, image_url, caption, created_at, likes_count')
+        .select('id, user_id, image_url, caption, created_at, likes_count')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      setPosts((data || []) as ProfilePost[]);
+      
+      const postRows = (data || []) as any[];
+      const postIds = postRows.map(p => p.id);
+
+      if (postIds.length > 0) {
+        // Fetch actual likes counts to bypass potentially out-of-sync column
+        const { data: likesData } = await supabase
+          .from('post_likes')
+          .select('post_id')
+          .in('post_id', postIds);
+          
+        const counts: Record<string, number> = {};
+        (likesData || []).forEach((l: any) => {
+          counts[l.post_id] = (counts[l.post_id] || 0) + 1;
+        });
+        
+        const finalPosts = postRows.map(p => ({
+          ...p,
+          likes_count: counts[p.id] || 0
+        }));
+        setPosts(finalPosts);
+      } else {
+        setPosts([]);
+      }
     } finally {
       setLoadingPosts(false);
     }

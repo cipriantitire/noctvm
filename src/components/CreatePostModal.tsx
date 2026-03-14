@@ -9,6 +9,7 @@ interface CreatePostModalProps {
   onClose: () => void;
   onPostCreated?: () => void;
   onOpenAuth?: () => void;
+  activeCity?: 'bucuresti' | 'constanta';
 }
 
 const BUCHAREST_VENUES = [
@@ -17,7 +18,7 @@ const BUCHAREST_VENUES = [
   'Club Eclipse', 'Baraka', 'Midi Club',
 ];
 
-export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpenAuth }: CreatePostModalProps) {
+export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpenAuth, activeCity = 'bucuresti' }: CreatePostModalProps) {
   const { user, profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -109,8 +110,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
           caption: caption.trim(),
           image_url: uploadedUrl,
           venue_name: selectedVenue || null,
-          tags,
+          tags: tags.length > 0 ? tags : null,
           tagged_users: taggedUsers.length > 0 ? taggedUsers : null,
+          city: activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta',
         });
 
       if (insertError) throw insertError;
@@ -183,7 +185,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}>
       <div
-        className={`w-full max-w-lg liquid-glass rounded-2xl overflow-hidden shadow-2xl shadow-black/60 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+        className={`w-full max-w-lg liquid-glass rounded-2xl overflow-hidden shadow-2xl shadow-black/80 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
       >

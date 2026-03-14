@@ -9,6 +9,7 @@ interface CreateStoryModalProps {
   onClose: () => void;
   onStoryCreated?: () => void;
   onOpenAuth?: () => void;
+  activeCity?: 'bucuresti' | 'constanta';
 }
 
 const BUCHAREST_VENUES = [
@@ -16,7 +17,7 @@ const BUCHAREST_VENUES = [
   'OXYA Club', 'Fratelli', 'Quantic Club', 'Club Eclipse', 'Baraka', 'Midi Club',
 ];
 
-export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOpenAuth }: CreateStoryModalProps) {
+export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOpenAuth, activeCity = 'bucuresti' }: CreateStoryModalProps) {
   const { user, profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -102,6 +103,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
         venue_name: selectedVenue || null,
         expires_at: expiresAt,
         tags: tags.length > 0 ? tags : null,
+        city: activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta',
       });
       if (insertError) throw insertError;
       onStoryCreated?.();

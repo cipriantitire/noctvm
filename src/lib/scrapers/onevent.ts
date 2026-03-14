@@ -33,16 +33,22 @@ function fromJsonLd(html: string, city: string): ScrapedEvent[] {
     const img = (b.image as any)?.url ?? b.image;
     const image_url = typeof img === 'string' ? img : '';
 
+    const venue = clean(((b.location as any)?.name as string) ?? 'Venue TBC');
+    const price = null; // Assuming price is always null for now based on original code
+
+    const genres = guessGenres(title, description);
+    if (!genres) continue;
+
     events.push({
       title,
-      venue: clean(((b.location as any)?.name as string) ?? 'Venue TBC'),
+      venue,
       date,
       time: extractTime(startDate),
       description: description || null,
       image_url,
       event_url: String(b.url ?? ''),
-      genres: guessGenres(title, description || ''),
-      price: null,
+      genres,
+      price,
       city,
     });
   }
@@ -74,6 +80,9 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
     const eventUrlMatch = outer.match(/href="([^"]+)"/i);
     const event_url = eventUrlMatch?.[1] ?? '';
 
+    const genres = guessGenres(title, '');
+    if (!genres) continue;
+
     events.push({
       title,
       venue: 'Venue TBC',
@@ -82,7 +91,7 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
       description: null,
       image_url,
       event_url: event_url.startsWith('http') ? event_url : `${BASE_URL}${event_url}`,
-      genres: guessGenres(title, ''),
+      genres,
       price: null,
       city,
     });

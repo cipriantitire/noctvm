@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo } from '@/lib/venue-logos';
+import { supabase } from '@/lib/supabase';
 import EventCard from './EventCard';
 
 interface VenuePageProps {
@@ -38,8 +39,33 @@ const GALLERY_THEMES = [
 
 export default function VenuePage({ venueName, onBack, onClose, onEventClick }: VenuePageProps) {
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
+  const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const info = getVenueInfo(venueName);
-  const venueEvents = useMemo(() => SAMPLE_EVENTS.filter(e => e.venue === venueName), [venueName]);
+
+  useEffect(() => {
+    supabase
+      .from('events')
+      .select('*')
+      .eq('venue', venueName)
+      .order('date', { ascending: true })
+      .then(({ data }) => {
+        if (data) setDbEvents(data as NoctEvent[]);
+      });
+  }, [venueName]);
+
+  const venueEvents = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    // Merge sample and DB events
+    const sample = SAMPLE_EVENTS.filter(e => e.venue === venueName);
+    const combined = [...dbEvents];
+    // Add samples if not already in DB (by title+date)
+    sample.forEach(se => {
+       if (!combined.some(ce => ce.title === se.title && ce.date === se.date)) {
+         combined.push(se);
+       }
+    });
+    return combined.sort((a,b) => a.date.localeCompare(b.date));
+  }, [venueName, dbEvents]);
 
   const today = new Date().toISOString().split('T')[0];
   const liveEvents = venueEvents.filter(e => e.date === today);

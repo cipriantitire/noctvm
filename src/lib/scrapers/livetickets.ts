@@ -53,6 +53,9 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
           ? (Number(item.price_min) === 0 ? 'Free' : `${item.price_min} ${item.currency?.symbol ?? 'RON'}`)
           : null;
 
+        const genres = guessGenres(title, description || '');
+        if (!genres) continue;
+
         allEvents.push({
           title,
           venue: clean(item.location ?? 'Venue TBC'),
@@ -61,7 +64,7 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
           description: description || null,
           image_url,
           event_url,
-          genres: guessGenres(title, description || ''),
+          genres,
           price,
           city,
         });

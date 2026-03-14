@@ -106,6 +106,9 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
 
       return listings.map((l: any) => {
         const ev = l.event;
+        const genres = guessGenres(ev.title, '');
+        if (!genres) return null;
+
         const date = parseDate(ev.date) || today;
         const img = ev.images?.find((i: any) => i.type === 'landscape') || ev.images?.[0];
         const image_url = img?.filename ? (img.filename.startsWith('http') ? img.filename : `https://img.ra.co/events/${img.filename}`) : '';
@@ -114,15 +117,15 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
           title: clean(ev.title),
           venue: clean(ev.venue?.name || 'Venue TBC'),
           date,
-          time: null, // startTime not in this simple query but title usually has it if important
+          time: null,
           description: null,
           image_url,
           event_url: `https://ra.co${ev.contentUrl}`,
-          genres: guessGenres(ev.title, ''),
+          genres,
           price: null,
           city: cityLabel
         };
-      });
+      }).filter(Boolean) as ScrapedEvent[];
     } catch (e) {
       console.warn(`[ra] failed for ${cityLabel}:`, e);
       return [];

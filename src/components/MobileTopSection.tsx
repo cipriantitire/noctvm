@@ -17,7 +17,7 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța';
+    const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta';
     
     // Fetch tonight's events
     supabase
@@ -42,7 +42,7 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
           setTrendingVenues(data.map(v => ({ name: v.name, count: Math.floor(v.followers / 100) })));
         }
       });
-  }, [activeCity]);
+  }, [activeCity, today]);
 
   // Fallback to sample events
   const tonightEvents = dbEvents.length > 0 

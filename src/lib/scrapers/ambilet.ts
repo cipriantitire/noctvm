@@ -41,6 +41,9 @@ function fromJsonLd(html: string, city: string): ScrapedEvent[] {
       ? (Number(offers.price) === 0 ? 'Free' : `${offers.price} RON`)
       : null;
 
+    const genres = guessGenres(title, description || '');
+    if (!genres) continue;
+
     events.push({
       title,
       venue,
@@ -49,7 +52,7 @@ function fromJsonLd(html: string, city: string): ScrapedEvent[] {
       description: description || null,
       image_url,
       event_url: String(b.url ?? ''),
-      genres: guessGenres(title, description || ''),
+      genres,
       price,
       city,
     });
@@ -97,6 +100,9 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
                       block.match(/class="[^"]*text-slate-800[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
     const rawText = clean(textMatch?.[1]?.replace(/<[^>]+>/g, '') ?? '');
 
+    const genres = guessGenres(title, '');
+    if (!genres) continue;
+
     events.push({
       title,
       venue: rawText.split(',')[0] || 'Venue TBC',
@@ -105,7 +111,7 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
       description: null,
       image_url,
       event_url: eventUrl,
-      genres: guessGenres(title, ''),
+      genres,
       price: null,
       city,
     });
