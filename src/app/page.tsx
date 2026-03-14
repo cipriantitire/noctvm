@@ -234,6 +234,7 @@ export default function Home() {
           activeTab={activeTab}
           onTabChange={handleTabChange}
           onSettingsClick={handleSettingsClick}
+          activeCity={activeCity}
         />
 
         <main className="flex-1 min-h-screen overflow-y-auto">
@@ -246,7 +247,17 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse"></span>
-                <span className="text-[10px] text-noctvm-silver font-mono">Bucharest</span>
+                <div className="relative">
+                  <select
+                    value={activeCity}
+                    onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
+                    className="bg-transparent text-[10px] text-noctvm-silver font-mono capitalize focus:outline-none cursor-pointer appearance-none pr-4"
+                  >
+                    <option value="bucuresti">București</option>
+                    <option value="constanta">Constanța</option>
+                  </select>
+                  <svg className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </div>
                 <button
                   onClick={handleSettingsClick}
                   className="p-1.5 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-surface transition-colors"
@@ -340,7 +351,11 @@ export default function Home() {
             {/* ── Venues Tab ──────────────────────────────────── */}
             {activeTab === 'venues' && (
               <div className="tab-content">
-                <VenuesPage onVenueClick={handleVenueClick} activeCity={activeCity} />
+                <VenuesPage
+                  onVenueClick={handleVenueClick}
+                  activeCity={activeCity}
+                  onCityChange={setActiveCity}
+                />
               </div>
             )}
 

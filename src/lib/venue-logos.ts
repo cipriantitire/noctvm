@@ -9,12 +9,19 @@
 // -- Venues with local image assets (in public/venues/) --
 const LOCAL_LOGOS: Record<string, string> = {
   'Control Club':     '/venues/control.jpg',
+  'Expirat Halele Carol': '/venues/expirat.jpg', // Guessed or using interbelic as proxy if missing
+  'Interbelic':       '/venues/interbelic.jpg',
+  'KAYO Club':        '/venues/kayo.jpg',
+  'Maison 64':        '/venues/maison64.jpg',
+  'Club Mono':        '/venues/mono.png',
+  'Noar Hall':        '/venues/noar.png',
+  'Nook Club':        '/venues/nook.webp',
   'OXYA Club':        '/venues/oxya.jpg',
+  'Princess Club':    '/venues/princess.jpg',
+  'Quantic':          '/venues/quantic.png',
+  'Quantic Club':     '/venues/quantic.png',
   'Club Guesthouse':  '/venues/guesthouse.png',
   'Platforma Wolff':  '/venues/wolff.jpg',
-  'Princess Club':    '/venues/princess.jpg',
-  'Noar Hall':        '/venues/noar.png',
-  'Quantic':          '/venues/quantic.png',
 };
 
 // -- SVG data URI fallbacks for venues without local logos --

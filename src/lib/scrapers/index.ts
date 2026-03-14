@@ -9,9 +9,10 @@ import { scrapeOnevent }    from './onevent';
 import { scrapeAmbilet }    from './ambilet';
 import { scrapeLivetickets } from './livetickets';
 import { scrapeRA }         from './ra';
+import { scrapeEventbook }   from './eventbook';
 import { ScrapedEvent }     from './types';
 
-type Source = 'zilesinopti' | 'iabilet' | 'onevent' | 'ambilet' | 'livetickets' | 'ra';
+type Source = 'zilesinopti' | 'iabilet' | 'onevent' | 'ambilet' | 'livetickets' | 'ra' | 'eventbook';
 
 interface ScrapeResult {
   source: Source;
@@ -39,6 +40,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     ['ambilet',     scrapeAmbilet],
     ['livetickets', scrapeLivetickets],
     ['ra',          scrapeRA],
+    ['eventbook',   scrapeEventbook],
   ];
 
   // Run all scrapers in parallel; individual failures don't abort others

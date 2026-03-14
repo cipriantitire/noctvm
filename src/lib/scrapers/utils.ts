@@ -102,9 +102,14 @@ export function clean(text: string | null | undefined): string {
 }
 
 const NON_MUSIC_TERMS = [
-  'workshop', 'curs', 'conference', 'conferinta', 'teatru', 'theatre', 'play', 'piesa', 
+  'workshop', 'curs', 'conference', 'conferinta', 'teatru', 'theatre', 'play', 'piesa teatru', 
   'kids', 'copii', 'targ', 'expo', 'fair', 'exhibition', 'business', 'seminar',
-  'comedy', 'stand-up', 'standup', 'stand up', 'yoga', 'wellness', 'gastronomy', 'food'
+  'comedy', 'stand-up', 'standup', 'stand up', 'yoga', 'wellness', 'gastronomy', 'food',
+  'cinema', 'film', 'movie', 'sport', 'atletism', 'maraton', 'match', 'meci', 'fotbal',
+  'culinary', 'cooking', 'tasting', 'degustari', 'vernissage', 'vernisaj', 'lectura',
+  'educational', 'training', 'prezentare', 'lansare carte', 'book launch', 'reprezentatie',
+  'spectacol teatru', 'actori:', 'regia:', 'distributia:', 'conferința', 'simulare', 'cambridge',
+  'atelier', 'personală', 'dezvoltare', 'cursuri', 'clasa a', 'evaluare', 'păpuși', 'marionete', 'spectacol copii'
 ];
 
 /** Guess genres from title/desc. Returns null if definitively non-music. */
@@ -142,13 +147,20 @@ export function guessGenres(title: string, desc: string): string[] | null {
 
   if (found.size === 0) {
     // If it mentions party/night/club but no genre found, it's probably Electronic or general Party
-    if (/party|club|night|rave|dance|dancing/.test(t)) {
+    if (/party|club|night|rave|dance|dancing|discote/.test(t)) {
       found.add('Electronic');
     } else {
-      // If we found NO music terms at all and it didn't even match "Party", maybe it's still non-music
+      // If we found NO music terms at all and it didn't even match "Party", definitively non-music
       return null;
     }
   }
+  
+  // Final check: if it has non-music terms AND No strong music headers, discard
+  if (NON_MUSIC_TERMS.some(term => t.includes(term))) {
+    const strongMusic = ['festival', 'concert', 'live', 'dj set', 'rave', 'party', 'techno', 'house'];
+    if (!strongMusic.some(sm => t.includes(sm))) return null;
+  }
+
   return Array.from(found);
 }
 

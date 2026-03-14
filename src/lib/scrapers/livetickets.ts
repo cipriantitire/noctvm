@@ -56,6 +56,12 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
         const genres = guessGenres(title, description || '');
         if (!genres) continue;
 
+        // Skip external links that aren't ticket-related (like Neversea.com)
+        if (event_url && !event_url.includes('livetickets.ro') && !event_url.includes('bilete')) {
+          console.log(`[livetickets] skipping external link: ${event_url}`);
+          continue;
+        }
+
         allEvents.push({
           title,
           venue: clean(item.location ?? 'Venue TBC'),

@@ -29,7 +29,6 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
         if (data) setDbEvents(data as NoctEvent[]);
       });
 
-    // Fetch trending venues
     supabase
       .from('venues')
       .select('name, followers')
@@ -38,7 +37,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
       .limit(10)
       .then(({ data }) => {
         if (data) {
-          setTrendingVenues(data.map(v => ({ name: v.name, count: Math.floor(v.followers / 100) })));
+          setTrendingVenues(data.map(v => ({ name: v.name, count: v.followers || 0 })));
         }
       });
   }, [activeCity]);
@@ -135,7 +134,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-xs font-medium text-white group-hover:text-noctvm-violet transition-colors truncate">{name}</p>
-                <p className="text-[10px] text-noctvm-silver">{count} upcoming event{count !== 1 ? 's' : ''}</p>
+                <p className="text-[10px] text-noctvm-silver">Trending · {count.toLocaleString()} followers</p>
               </div>
             </button>
           ))}

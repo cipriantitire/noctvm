@@ -178,6 +178,19 @@ export default function UserProfilePage({
         following: followingRes.count ?? 0,
       });
     });
+
+    // Real-time listener for likes to update the grid
+    const channel = supabase
+      .channel('profile_likes_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes' }, async (payload) => {
+        const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
+        if (!postId) return;
+        const { count } = await supabase.from('post_likes').select('id', { count: 'exact', head: true }).eq('post_id', postId);
+        setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes_count: count ?? 0 } : p));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   // ── Fetch and open my stories ─────────────────────────────────────────────

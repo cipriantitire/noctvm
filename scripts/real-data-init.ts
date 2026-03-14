@@ -17,6 +17,15 @@ async function init() {
     { name: 'Control Club', address: 'Str. Constantin Mille 4, Bucharest', city: 'Bucharest', followers: 15400, rating: 4.8 },
     { name: 'Expirat Halele Carol', address: 'Str. Constantin Istrati 1, Bucharest', city: 'Bucharest', followers: 12200, rating: 4.7 },
     { name: 'Apollo111', address: 'Str. Ion Brezoianu 23-25, Bucharest', city: 'Bucharest', followers: 8500, rating: 4.6 },
+    { name: 'Club Guesthouse', address: 'Splaiul Unirii 160, Bucharest', city: 'Bucharest', followers: 9200, rating: 4.9 },
+    { name: 'Platforma Wolff', address: 'Str. Dr. Constantin Istrati 1, Bucharest', city: 'Bucharest', followers: 5800, rating: 4.8 },
+    { name: 'OXYA Club', address: 'Str. Caroteni 11, Bucharest', city: 'Bucharest', followers: 3100, rating: 4.4 },
+    { name: 'Interbelic', address: 'Calea Victoriei 17, Bucharest', city: 'Bucharest', followers: 4200, rating: 4.5 },
+    { name: 'KAYO Club', address: 'Soseaua Nordului 1, Bucharest', city: 'Bucharest', followers: 2800, rating: 4.3 },
+    { name: 'Maison 64', address: 'Soseaua Nordului 64, Bucharest', city: 'Bucharest', followers: 1500, rating: 4.6 },
+    { name: 'Noar Hall', address: 'Soseaua Pipera 48, Bucharest', city: 'Bucharest', followers: 1200, rating: 4.2 },
+    { name: 'Nook Club', address: 'Soseaua Nordului 7-9, Bucharest', city: 'Bucharest', followers: 2100, rating: 4.5 },
+    { name: 'Quantic Club', address: 'Soseaua Grozavesti 82, Bucharest', city: 'Bucharest', followers: 5400, rating: 4.7 },
     { name: 'Breeze Constanta', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 2500, rating: 4.8 },
     { name: 'Fratelli Beach & Club', address: 'Mamaia Beach, Constanta', city: 'Constanta', followers: 4200, rating: 4.7 },
     { name: 'Luv Constanta', address: 'Bulevardul Tomis 122, Constanta', city: 'Constanta', followers: 1800, rating: 4.5 },
@@ -24,6 +33,8 @@ async function init() {
     { name: 'Ego Club Mamaia', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 3100, rating: 4.6 },
     { name: 'Nuba Beach Club', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 2900, rating: 4.5 },
     { name: 'Doors Club', address: 'Str. Traian 68, Constanta', city: 'Constanta', followers: 1500, rating: 4.3 },
+    { name: 'Azimuth Beach & Lounge', address: 'Mamaia Nord, Constanta', city: 'Constanta', followers: 3400, rating: 4.7 },
+    { name: 'Amos Mamaia', address: 'Promenada Mamaia, Constanta', city: 'Constanta', followers: 1200, rating: 4.4 },
   ];
 
   console.log('Inserting Venues...');

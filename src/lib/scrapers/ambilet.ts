@@ -65,8 +65,8 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
   const events: ScrapedEvent[] = [];
   const today = new Date().toISOString().split('T')[0];
 
-  // Search for the Start of an event div and capture up to the title (h3)
-  const cardRegex = /<div[^>]*class="[^"]*\bevent\b[^"]*"[^>]*>([\s\S]*?)<\/h3>/gi;
+  // Capture the entire card div
+  const cardRegex = /<div[^>]*class="[^"]*\bevent\b[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi;
   let match: RegExpExecArray | null;
   const seen = new Set<string>();
 
@@ -81,8 +81,9 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
     if (seen.has(eventUrl)) continue;
     seen.add(eventUrl);
 
-    // 2. Extract Title
-    const title = clean(block.split('<h3')[1]?.replace(/<[^>]+>/g, '') || block.replace(/<[^>]+>/g, '').trim().split('\n')[0]);
+    // 2. Extract Title - AmBilet usually has the title in an <a> tag inside a div with leading-5
+    const titleBlockMatch = block.match(/class="[^"]*leading-5[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    const title = clean(titleBlockMatch?.[1]?.replace(/<[^>]+>/g, '') || '');
     if (!title || title.length < 3) continue;
 
     // 3. Extract Image
@@ -96,16 +97,18 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
     const date = dateStr ? parseDate(dateStr) : null;
     if (!date || date < today) continue;
 
-    const textMatch = block.match(/class="[^"]*text-gray-500[^"]*"[^>]*>([\s\S]*?)<\/div>/i) || 
-                      block.match(/class="[^"]*text-slate-800[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    const rawText = clean(textMatch?.[1]?.replace(/<[^>]+>/g, '') ?? '');
+    // Venue is usually in a div with items-center and gap-x-1 or text-gray-500
+    const venueTextMatch = block.match(/class="[^"]*items-center[^"]*gap-x-1[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+                          block.match(/class="[^"]*text-gray-500[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+                          block.match(/class="[^"]*text-slate-500[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    const rawVenueText = clean(venueTextMatch?.[1]?.replace(/<[^>]+>/g, '') ?? '');
 
     const genres = guessGenres(title, '');
     if (!genres) continue;
 
     events.push({
       title,
-      venue: rawText.split(',')[0] || 'Venue TBC',
+      venue: rawVenueText.split(',')[0] || 'Venue TBC',
       date,
       time: null,
       description: null,

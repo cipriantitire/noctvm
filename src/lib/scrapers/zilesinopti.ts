@@ -66,7 +66,7 @@ function fromJsonLd(html: string, city: string): ScrapedEvent[] {
 }
 
 /** Fallback: parse event cards from HTML. */
-function fromHtml(html: string, city: string): ScrapedEvent[] {
+async function fromHtml(html: string, city: string): Promise<ScrapedEvent[]> {
   const events: ScrapedEvent[] = [];
   const today = new Date().toISOString().split('T')[0];
 
@@ -93,7 +93,8 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
     const date = parseDate(rawDate);
     if (!date || date < today) continue;
 
-    const venueMatch = block.match(/class="[^"]*kzn-one-event-locatie[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    const venueMatch = block.match(/class="[^"]*kzn-one-event-locatie[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+                        block.match(/class="[^"]*kzn-loc-name[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
     const venue = clean(venueMatch?.[1]?.replace(/<[^>]+>/g, '') ?? 'Venue TBC');
 
     const imgMatch = block.match(/<img[^>]+src="([^"]+)"/i);
@@ -101,13 +102,23 @@ function fromHtml(html: string, city: string): ScrapedEvent[] {
     const genres = guessGenres(title, '');
     if (!genres) continue;
 
+    let image = imgMatch?.[1] ?? '';
+    // If no image in listing, try to fetch from detail page
+    if (!image && eventUrl) {
+      try {
+        const detailHtml = await fetchHtml(eventUrl.startsWith('http') ? eventUrl : `${BASE_URL}${eventUrl}`, 5000);
+        const ogImage = detailHtml.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i);
+        image = ogImage?.[1] ?? '';
+      } catch { /* skip */ }
+    }
+
     events.push({
       title,
       venue,
       date,
       time: extractTime(rawDate),
       description: null,
-      image_url: imgMatch?.[1] ?? '',
+      image_url: image,
       event_url: eventUrl.startsWith('http') ? eventUrl : `${BASE_URL}${eventUrl}`,
       genres,
       price: null,
@@ -124,7 +135,7 @@ export async function scrapeZilesinopti(): Promise<ScrapedEvent[]> {
     try {
       const html = await fetchHtml(url);
       const fromLd = fromJsonLd(html, city);
-      const fromH = fromHtml(html, city);
+      const fromH = await fromHtml(html, city);
       allEvents.push(...(fromLd.length > 0 ? fromLd : fromH));
     } catch (err) {
       console.warn(`[zilesinopti] failed for ${url}:`, err);

@@ -138,24 +138,25 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
             className="w-full h-full object-cover"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-noctvm-midnight via-noctvm-midnight/40 to-transparent" />
-
           {/* Close button */}
           <button
             onClick={handleClose}
+            title="Close modal"
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all z-10"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
+        </div>
 
+        {/* Absolute floating elements positioned relative to modal but outside hero container to avoid clipping shadows */}
+        <div className="absolute top-0 left-0 right-0 h-[260px] sm:h-[300px] pointer-events-none">
           {/* Source badge (ticket platform) — clickable link */}
           <a
             href={event.event_url}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            className={`absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border z-10 hover:scale-105 transition-transform`}
+            className={`absolute top-4 left-4 pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border z-10 hover:scale-105 transition-transform`}
           >
             <TicketIcon className="w-3 h-3" />
             {sourceBadge.label}
@@ -163,18 +164,21 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
 
           {/* Price badge on image */}
           {(hasPrice || isFree) && (
-            <a
-              href={event.event_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="absolute bottom-4 right-4 flex items-center justify-center px-4 py-2 rounded-xl text-xs font-bold liquid-glass-price z-10 hover:scale-105 transition-all text-white"
-            >
-              <div className="relative z-10">{isFree ? 'FREE' : event.price}</div>
-            </a>
+            <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
+              <a
+                href={event.event_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold liquid-glass-price hover:scale-105 transition-all text-white border border-noctvm-emerald/30 shadow-xl shadow-black/40 flex items-center justify-center min-w-[60px]"
+              >
+                <span className="relative z-10">{isFree ? 'FREE' : event.price}</span>
+              </a>
+            </div>
           )}
+        </div>
 
-          {/* Rating */}
+
           {event.rating && (
             <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/10 z-10">
               <StarIcon className="w-3.5 h-3.5 text-noctvm-gold" />
@@ -182,7 +186,6 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
               {event.reviews && <span className="text-[10px] text-noctvm-silver/60">({event.reviews} reviews)</span>}
             </div>
           )}
-        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">

@@ -16,9 +16,10 @@ interface SidebarProps {
   activeTab?: TabType;
   onTabChange?: (tab: TabType) => void;
   onSettingsClick?: () => void;
+  activeCity?: 'bucuresti' | 'constanta';
 }
 
-export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, onSettingsClick }: SidebarProps) {
+export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, onSettingsClick, activeCity = 'bucuresti' }: SidebarProps) {
   const { profile, user } = useAuth();
 
   const profileLabel = user
@@ -51,8 +52,16 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
         ))}
       </nav>
 
-      {/* Bottom: Cogwheel + Profile */}
+      {/* Bottom: City Info + Cogwheel + Profile */}
       <div className="px-3 w-full space-y-1">
+        {/* City Info - visible only when expanded */}
+        <div className="hidden group-hover/sidebar:flex items-center gap-3 px-4 py-2 mb-2 bg-white/5 rounded-xl border border-white/5 animate-fade-in">
+          <div className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
+          <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-wider">
+            {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta'}
+          </span>
+        </div>
+
         {/* Cogwheel / Settings */}
         <button
           onClick={onSettingsClick}

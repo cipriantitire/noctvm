@@ -8,8 +8,8 @@ import { ScrapedEvent } from './types';
 import { extractJsonLd, parseDate, extractTime, clean, guessGenres, fetchHtml } from './utils';
 
 const LIST_URLS = [
-  { url: 'https://www.onevent.ro/orase/bucuresti/', city: 'Bucharest' },
-  { url: 'https://www.onevent.ro/orase/constanta/', city: 'Constanta' },
+  { url: 'https://www.onevent.ro/bucuresti/music/', city: 'Bucharest' },
+  { url: 'https://www.onevent.ro/constanta/music/', city: 'Constanta' },
 ];
 const BASE_URL  = 'https://www.onevent.ro';
 
@@ -104,6 +104,13 @@ export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
   for (const { url, city } of LIST_URLS) {
     try {
       const html = await fetchHtml(url, 20_000); // Massive pages
+      
+      // Stop if 'Oups!' message is present (indicates no events in this category)
+      if (html.includes('Oups!') || html.includes('Niciun eveniment')) {
+        console.log(`[onevent] No music events found for ${city}, skipping recommended section.`);
+        continue;
+      }
+
       const fromLd = fromJsonLd(html, city);
       const fromH = fromHtml(html, city);
       

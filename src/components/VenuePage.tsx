@@ -46,7 +46,7 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
     supabase
       .from('events')
       .select('*')
-      .eq('venue', venueName)
+      .or(`venue.ilike.%${venueName}%,venue.ilike.%${venueName.replace(/([a-zA-Z])(\d)/g, '$1 $2')}%`)
       .order('date', { ascending: true })
       .then(({ data }) => {
         if (data) setDbEvents(data as NoctEvent[]);

@@ -16,7 +16,7 @@ interface Venue {
   review_count: number;
   description: string;
   followers: number;
-  city: 'Bucharest' | 'Constanța';
+  city: 'Bucharest' | 'Constanta';
 }
 
 const MOCK_REVIEWS: Record<string, { user: string; text: string; rating: number; time: string }[]> = {
@@ -46,28 +46,22 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md
 interface VenuesPageProps {
   onVenueClick: (venueName: string) => void;
   activeCity?: 'bucuresti' | 'constanta';
+  onCityChange?: (city: 'bucuresti' | 'constanta') => void;
 }
 
-export default function VenuesPage({ onVenueClick, activeCity: activeCityProp }: VenuesPageProps) {
+export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, onCityChange }: VenuesPageProps) {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [followedVenues, setFollowedVenues] = useState<Set<string>>(new Set());
   const [loadingFollows, setLoadingFollows] = useState<Set<string>>(new Set());
+  const cityToQuery = activeCityProp === 'bucuresti' ? 'Bucharest' : 'Constanta';
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [loadingVenues, setLoadingVenues] = useState(true);
   const [expandedVenue, setExpandedVenue] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
-  const [activeCity, setActiveCity] = useState<'Bucharest' | 'Constanta'>('Bucharest');
-
-  // Sync prop to state
-  useEffect(() => {
-    if (activeCityProp) {
-      setActiveCity(activeCityProp === 'bucuresti' ? 'Bucharest' : 'Constanta');
-    }
-  }, [activeCityProp]);
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [loadingVenues, setLoadingVenues] = useState(true);
 
   // Fetch venues from Supabase when city changes
   useEffect(() => {
@@ -75,13 +69,13 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp }:
     supabase
       .from('venues')
       .select('*')
-      .eq('city', activeCity)
+      .eq('city', cityToQuery)
       .order('followers', { ascending: false })
       .then(({ data }) => {
         setVenues((data ?? []) as Venue[]);
         setLoadingVenues(false);
       });
-  }, [activeCity]);
+  }, [cityToQuery]);
 
   // Load current user's venue follows
   useEffect(() => {
@@ -153,12 +147,12 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp }:
           <span className="text-sm text-noctvm-silver">Venues in</span>
           <div className="relative">
             <select
-              value={activeCity}
-              onChange={e => setActiveCity(e.target.value as 'Bucharest' | 'Constanta')}
+              value={activeCityProp}
+              onChange={(e) => onCityChange?.(e.target.value as 'bucuresti' | 'constanta')}
               className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
             >
-              <option value="Bucharest">București</option>
-              <option value="Constanta">Constanța</option>
+              <option value="bucuresti">București</option>
+              <option value="constanta">Constanța</option>
             </select>
             <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </div>

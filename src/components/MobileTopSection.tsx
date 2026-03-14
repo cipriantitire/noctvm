@@ -39,7 +39,7 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
       .limit(10)
       .then(({ data }) => {
         if (data) {
-          setTrendingVenues(data.map(v => ({ name: v.name, count: Math.floor(v.followers / 100) })));
+          setTrendingVenues(data.map(v => ({ name: v.name, count: v.followers || 0 })));
         }
       });
   }, [activeCity, today]);

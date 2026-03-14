@@ -242,6 +242,46 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     return () => { supabase.removeChannel(channel); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Real-time: new posts ───────────────────────────────────────────────────
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('new_posts_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'posts' },
+        async (payload) => {
+          const row = payload.new as any;
+          // Check if it belongs to current city
+          const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta';
+          if (row.city !== cityLabel) return;
+          
+          // Re-fetch profiles for the new post
+          const { data: postWithProfile } = await supabase
+            .from('posts')
+            .select('*, profiles(display_name, username, avatar_url)')
+            .eq('id', row.id)
+            .single();
+            
+          if (postWithProfile) {
+            const mapped = mapSupabasePost(postWithProfile);
+            setExplorePosts(prev => [mapped, ...prev].slice(0, 40));
+            
+            // If it's my post or someone I follow, add to following list
+            if (user) {
+              const { data: follow } = await supabase.from('follows').select('id').eq('follower_id', user.id).eq('target_id', row.user_id).single();
+              if (row.user_id === user.id || follow) {
+                setFollowingPosts(prev => [mapped, ...prev].slice(0, 40));
+              }
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [activeCity, user]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Load real posts for Following / Friends tabs ─────────────────────────
 
   useEffect(() => {
