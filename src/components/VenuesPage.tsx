@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
 
-interface VenueData {
+interface Venue {
   name: string;
   address: string;
   genres: string[];
@@ -15,21 +15,30 @@ interface VenueData {
   reviewCount: number;
   description: string;
   followers: number;
+  city: 'Bucharest' | 'Constanța';
 }
 
-const ALL_VENUES: VenueData[] = [
-  { name: 'Control Club', address: 'Str. Constantin Mille 4, Sector 1', genres: ['Techno', 'House', 'Electronic'], capacity: 400, rating: 4.7, reviewCount: 342, description: 'Underground electronic music club. Known for quality bookings and intimate atmosphere.', followers: 2841 },
-  { name: 'Expirat Halele Carol', address: 'Halele Carol, Piața Libertății, Sector 4', genres: ['Techno', 'Underground', 'Experimental'], capacity: 600, rating: 4.8, reviewCount: 567, description: 'Legendary underground venue in Halele Carol complex. Raw industrial aesthetic and uncompromising sound.', followers: 4120 },
-  { name: 'Nook Club', address: 'Bd. Nicolae Bălcescu 2, Sector 1', genres: ['House', 'Disco', 'Electronic'], capacity: 300, rating: 4.5, reviewCount: 218, description: 'Boutique club experience with curated lineups and a premium sound system.', followers: 1654 },
-  { name: 'Club Guesthouse', address: 'Str. Batistei 14, Sector 2', genres: ['Electronic', 'Live', 'Alternative'], capacity: 500, rating: 4.4, reviewCount: 189, description: 'Multi-room venue hosting diverse events from electronic to live music.', followers: 1982 },
-  { name: 'OXYA Club', address: 'Piața Victoriei, Sector 1', genres: ['Electronic', 'Techno', 'House'], capacity: 800, rating: 4.3, reviewCount: 423, description: 'Premium nightlife destination with world-class sound and production.', followers: 3340 },
-  { name: 'Fratelli', address: 'Str. Gabroveni 16, Sector 3', genres: ['House', 'Commercial', 'R&B'], capacity: 600, rating: 4.1, reviewCount: 312, description: 'Trendy club in the old town with multiple floors and a rooftop terrace.', followers: 2210 },
-  { name: 'Quantic Club', address: 'Bd. Magheru 12, Sector 1', genres: ['Indie', 'Jazz', 'Electronic'], capacity: 350, rating: 4.6, reviewCount: 276, description: 'The go-to spot for alternative music lovers. Eclectic programming, great cocktails.', followers: 1780 },
-  { name: 'Club Eclipse', address: 'Str. Ion Câmpineanu 22, Sector 1', genres: ['EDM', 'Commercial', 'Latin'], capacity: 700, rating: 3.9, reviewCount: 445, description: 'Massive venue with state-of-the-art lighting rigs and impressive production value.', followers: 2990 },
-  { name: 'Baraka', address: 'Str. Gabroveni 26, Sector 3', genres: ['Minimal', 'Techno', 'Deep House'], capacity: 250, rating: 4.5, reviewCount: 189, description: 'Intimate venue with a focus on minimal and deep electronic sounds.', followers: 1220 },
-  { name: 'Midi Club', address: 'Str. Foișorului 23, Sector 3', genres: ['Drum & Bass', 'Electronic', 'Experimental'], capacity: 300, rating: 4.4, reviewCount: 134, description: 'Dedicated to experimental and underground sounds. A haven for music purists.', followers: 890 },
-  { name: 'Void Club', address: 'Str. Vasile Lascăr 72, Sector 2', genres: ['Techno', 'Industrial', 'Dark'], capacity: 350, rating: 4.2, reviewCount: 167, description: 'Dark, raw, and unapologetically underground. For those who truly live the night.', followers: 1100 },
-  { name: 'Fabrica', address: 'Str. Fabricii 4, Sector 6', genres: ['Alternative', 'Rock', 'Electronic'], capacity: 1000, rating: 4.3, reviewCount: 892, description: 'Creative hub turned nightlife destination. A converted factory with soul.', followers: 5670 },
+const BUCHAREST_VENUES: Venue[] = [
+  { name: 'Control Club', address: 'Str. Constantin Mille 4, Sector 1', genres: ['Techno', 'House', 'Electronic'], capacity: 400, rating: 4.7, reviewCount: 342, description: 'Underground electronic music club. Known for quality bookings and intimate atmosphere.', followers: 2841, city: 'Bucharest' as const },
+  { name: 'Expirat Halele Carol', address: 'Halele Carol, Piața Libertății, Sector 4', genres: ['Techno', 'Underground', 'Experimental'], capacity: 600, rating: 4.8, reviewCount: 567, description: 'Legendary underground venue in Halele Carol complex. Raw industrial aesthetic and uncompromising sound.', followers: 4120, city: 'Bucharest' as const },
+  { name: 'Nook Club', address: 'Bd. Nicolae Bălcescu 2, Sector 1', genres: ['House', 'Disco', 'Electronic'], capacity: 300, rating: 4.5, reviewCount: 218, description: 'Boutique club experience with curated lineups and a premium sound system.', followers: 1654, city: 'Bucharest' as const },
+  { name: 'Club Guesthouse', address: 'Str. Batistei 14, Sector 2', genres: ['Electronic', 'Live', 'Alternative'], capacity: 500, rating: 4.4, reviewCount: 189, description: 'Multi-room venue hosting diverse events from electronic to live music.', followers: 1982, city: 'Bucharest' as const },
+  { name: 'OXYA Club', address: 'Piața Victoriei, Sector 1', genres: ['Electronic', 'Techno', 'House'], capacity: 800, rating: 4.3, reviewCount: 423, description: 'Premium nightlife destination with world-class sound and production.', followers: 3340, city: 'Bucharest' as const },
+  { name: 'Fratelli', address: 'Str. Gabroveni 16, Sector 3', genres: ['House', 'Commercial', 'R&B'], capacity: 600, rating: 4.1, reviewCount: 312, description: 'Trendy club in the old town with multiple floors and a rooftop terrace.', followers: 2210, city: 'Bucharest' as const },
+  { name: 'Quantic Club', address: 'Bd. Magheru 12, Sector 1', genres: ['Indie', 'Jazz', 'Electronic'], capacity: 350, rating: 4.6, reviewCount: 276, description: 'The go-to spot for alternative music lovers. Eclectic programming, great cocktails.', followers: 1780, city: 'Bucharest' as const },
+  { name: 'Club Eclipse', address: 'Str. Ion Câmpineanu 22, Sector 1', genres: ['EDM', 'Commercial', 'Latin'], capacity: 700, rating: 3.9, reviewCount: 445, description: 'Massive venue with state-of-the-art lighting rigs and impressive production value.', followers: 2990, city: 'Bucharest' as const },
+  { name: 'Baraka', address: 'Str. Gabroveni 26, Sector 3', genres: ['Minimal', 'Techno', 'Deep House'], capacity: 250, rating: 4.5, reviewCount: 189, description: 'Intimate venue with a focus on minimal and deep electronic sounds.', followers: 1220, city: 'Bucharest' as const },
+  { name: 'Midi Club', address: 'Str. Foișorului 23, Sector 3', genres: ['Drum & Bass', 'Electronic', 'Experimental'], capacity: 300, rating: 4.4, reviewCount: 134, description: 'Dedicated to experimental and underground sounds. A haven for music purists.', followers: 890, city: 'Bucharest' as const },
+  { name: 'Void Club', address: 'Str. Vasile Lascăr 72, Sector 2', genres: ['Techno', 'Industrial', 'Dark'], capacity: 350, rating: 4.2, reviewCount: 167, description: 'Dark, raw, and unapologetically underground. For those who truly live the night.', followers: 1100, city: 'Bucharest' as const },
+  { name: 'Fabrica', address: 'Str. Fabricii 4, Sector 6', genres: ['Alternative', 'Rock', 'Electronic'], capacity: 1000, rating: 4.3, reviewCount: 892, description: 'Creative hub turned nightlife destination. A converted factory with soul.', followers: 5670, city: 'Bucharest' as const },
+];
+
+const CONSTANTA_VENUES: Venue[] = [
+  { name: 'Vox Maris Beach Club', address: 'Sat Costinești, Constanța', genres: ['House', 'Electronic', 'Commercial'], capacity: 2000, rating: 4.5, reviewCount: 312, description: 'Iconic Black Sea beach club. Massive outdoor dancefloor with sea views and world-class DJs every summer.', followers: 5200, city: 'Constanța' },
+  { name: 'Nuba Club', address: 'Bd. Mamaia, Constanța', genres: ['House', 'Techno', 'Electronic'], capacity: 800, rating: 4.3, reviewCount: 189, description: 'Premium nightclub on the Mamaia strip. Multiple rooms and a rooftop with Black Sea panoramas.', followers: 2800, city: 'Constanța' },
+  { name: 'Doors Club', address: 'Str. Mircea cel Bătrân, Constanța', genres: ['Techno', 'Underground', 'Minimal'], capacity: 350, rating: 4.4, reviewCount: 134, description: 'Underground club bringing the best of Romanian techno to the coast.', followers: 1400, city: 'Constanța' },
+  { name: 'Euphoria Music Hall', address: 'Bd. Aurel Vlaicu, Constanța', genres: ['EDM', 'Commercial', 'Party'], capacity: 1200, rating: 4.0, reviewCount: 267, description: 'Largest indoor venue in Constanța. Concert-grade production for big events and festivals.', followers: 3100, city: 'Constanța' },
+  { name: 'Eden Club', address: 'Mamaia Nord, Constanța', genres: ['House', 'Disco', 'R&B'], capacity: 600, rating: 4.2, reviewCount: 98, description: 'Beachfront open-air club at Mamaia Nord. Sunset sessions and deep house vibes.', followers: 1750, city: 'Constanța' },
 ];
 
 const MOCK_REVIEWS: Record<string, { user: string; text: string; rating: number; time: string }[]> = {
@@ -70,6 +79,7 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
+  const [activeCity, setActiveCity] = useState<'Bucharest' | 'Constanța'>('Bucharest');
 
   // Load current user's venue follows
   useEffect(() => {
@@ -112,10 +122,13 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
     setLoadingFollows(prev => { const next = new Set(prev); next.delete(venueName); return next; });
   };
 
-  // Genre filters
-  const allGenres = ['All', ...Array.from(new Set(ALL_VENUES.flatMap(v => v.genres))).sort()];
+  // City-filtered venues
+  const venues = activeCity === 'Bucharest' ? BUCHAREST_VENUES : CONSTANTA_VENUES;
 
-  const filteredVenues = ALL_VENUES.filter(v => {
+  // Genre filters
+  const allGenres = ['All', ...Array.from(new Set(venues.flatMap(v => v.genres))).sort()];
+
+  const filteredVenues = venues.filter(v => {
     const matchesSearch = v.name.toLowerCase().includes(search.toLowerCase()) ||
       v.genres.some(g => g.toLowerCase().includes(search.toLowerCase()));
     const matchesGenre = activeFilter === 'All' || v.genres.includes(activeFilter);
@@ -137,7 +150,20 @@ export default function VenuesPage({ onVenueClick }: VenuesPageProps) {
       {/* Header */}
       <div className="mb-6 animate-fade-in">
         <h1 className="font-heading text-2xl font-bold text-white">Venues</h1>
-        <p className="text-sm text-noctvm-silver mt-1">Bucharest&apos;s nightlife scene — {ALL_VENUES.length} venues</p>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-sm text-noctvm-silver">Venues in</span>
+          <div className="relative">
+            <select
+              value={activeCity}
+              onChange={e => setActiveCity(e.target.value as 'Bucharest' | 'Constanța')}
+              className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
+            >
+              <option value="Bucharest">București</option>
+              <option value="Constanța">Constanța</option>
+            </select>
+            <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+          </div>
+        </div>
       </div>
 
       {/* Search */}
