@@ -27,7 +27,7 @@ interface PostViewerModalProps {
   profileName?: string;
   profileAvatar?: string | null;
   profileInitial?: string;
-  profileBadge?: 'none' | 'blue' | 'gold';
+  profileBadge?: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
 }
 
 function timeAgo(dateStr: string): string {
@@ -56,7 +56,7 @@ export default function PostViewerModal({
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [comments, setComments] = useState<{ user: string; text: string; badge: 'none' | 'blue' | 'gold' }[]>([]);
+  const [comments, setComments] = useState<{ user: string; text: string; badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified' }[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);

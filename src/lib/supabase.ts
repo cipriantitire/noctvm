@@ -14,7 +14,7 @@ export type Profile = {
   bio: string | null;
   city: string;
   role: 'admin' | 'owner' | 'user';
-  badge: 'none' | 'blue' | 'gold';
+  badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
   is_verified: boolean;
   created_at: string;
   updated_at: string;

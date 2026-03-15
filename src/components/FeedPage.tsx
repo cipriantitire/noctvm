@@ -22,13 +22,13 @@ interface FeedPost {
     avatar: string; 
     avatarUrl: string | null; 
     verified: boolean;
-    badge: 'none' | 'blue' | 'gold';
+    badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
   };
   caption: string;
   venue: { name: string; tagged: boolean };
   tags: string[];
   likes: number;
-  comments: { user: string; text: string; badge: 'none' | 'blue' | 'gold' }[];
+  comments: { user: string; text: string; badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified' }[];
   timeAgo: string;
   createdAt: string;
   liked: boolean;

@@ -49,7 +49,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   const [saveCount, setSaveCount]     = useState(0);
   const [isSaved,   setIsSaved]       = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
-  const [venueBadge, setVenueBadge] = useState<'none' | 'blue' | 'gold'>('none');
+  const [venueBadge, setVenueBadge] = useState<'none' | 'owner' | 'admin' | 'gold' | 'verified'>('none');
   const handleClose = useCallback(() => setIsClosing(true), []);
 
   useEffect(() => {
