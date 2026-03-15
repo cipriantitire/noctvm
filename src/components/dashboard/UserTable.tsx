@@ -5,12 +5,15 @@ import { UserIcon, ShieldCheckIcon, SearchIcon, EditIcon, TrashIcon, CheckIcon, 
 import Image from 'next/image';
 import VerifiedBadge from '@/components/VerifiedBadge';
 
+import UserEditModal from './UserEditModal';
+
 export default function UserTable() {
   const { profile: adminProfile } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -173,17 +176,19 @@ export default function UserTable() {
                       </button>
 
                       {user.is_verified && (
-                        <select 
-                          value={user.badge || 'none'}
-                          onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
-                          disabled={updatingId === user.id}
-                          title="Update User Badge"
-                          className="bg-transparent text-[9px] font-bold py-1 px-1 rounded-lg hover:bg-white/5 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-gold"
-                        >
-                          <option value="none" className="bg-noctvm-black">None</option>
-                          <option value="blue" className="bg-noctvm-black">Blue</option>
-                          <option value="gold" className="bg-noctvm-black">Gold</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <VerifiedBadge type="blue" />
+                          <select 
+                            value={user.badge || 'none'}
+                            onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
+                            disabled={updatingId === user.id}
+                            title="Update User Badge"
+                            className="bg-transparent text-[9px] font-bold py-1 px-1 rounded-lg hover:bg-white/5 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-silver/40"
+                          >
+                            <option value="none" className="bg-noctvm-black">Regular</option>
+                            <option value="blue" className="bg-noctvm-black">Verified</option>
+                          </select>
+                        </div>
                       )}
                     </div>
                   </td>
@@ -197,7 +202,7 @@ export default function UserTable() {
                        <button 
                         className="p-2 rounded-xl text-noctvm-silver/30 hover:text-white hover:bg-white/5 transition-all"
                         title="Edit User"
-                        onClick={() => {/* Show improved edit modal */}}
+                        onClick={() => setEditingUser(user)}
                       >
                         <EditIcon className="w-4 h-4" />
                       </button>
@@ -227,6 +232,16 @@ export default function UserTable() {
           </table>
         </div>
       </div>
+
+      {editingUser && (
+        <UserEditModal 
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSuccess={() => {
+            fetchUsers();
+          }}
+        />
+      )}
     </div>
   );
 }

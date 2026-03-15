@@ -49,13 +49,13 @@ function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in pb-20">
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 relative">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 relative">
           <div className="space-y-1">
-            <h1 className="text-6xl font-heading font-black text-white tracking-tighter italic bg-gradient-to-br from-white via-white to-white/40 bg-clip-text text-transparent">
-              COMMAND CENTER
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              Dashboard Overview
             </h1>
-            <p className="text-noctvm-silver text-lg font-medium flex items-center gap-2">
-              LATEST SIGNAL: <span className="text-noctvm-violet font-mono text-sm tracking-widest uppercase">SYSTE_ONLINE_AUTHORIZED</span>
+            <p className="text-noctvm-silver text-sm font-medium flex items-center gap-2">
+              System Status: <span className="text-noctvm-violet font-mono text-[10px] uppercase tracking-widest bg-noctvm-violet/10 px-2 py-0.5 rounded border border-noctvm-violet/20">System Online</span>
             </p>
           </div>
           <div className="flex gap-4">
@@ -155,15 +155,15 @@ function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right flex flex-col items-end gap-1">
-                    <span className="text-[10px] text-white/40 font-mono font-bold">
+                    <span className="text-[10px] text-white/40 font-mono">
                       {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                    <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono">Synchronized</span>
+                    <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono tracking-tighter">Event Created</span>
                   </div>
                 </div>
               )) : (
-                <div className="p-20 text-center text-noctvm-silver/40 italic text-sm font-mono">
-                  WAITING FOR NEXT SIGNAL...
+                <div className="p-20 text-center text-noctvm-silver/40 italic text-sm font-mono uppercase tracking-widest">
+                  No recent activity
                 </div>
               )}
             </div>

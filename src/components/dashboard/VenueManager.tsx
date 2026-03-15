@@ -73,13 +73,14 @@ export default function VenueManager() {
       </div>
 
       {(showForm || editingVenue) && (
-        <div className="animate-fade-in relative z-50">
-          <div className="absolute inset-0 bg-noctvm-violet/5 blur-3xl -z-10 rounded-full"></div>
-          <VenueForm 
-            initialData={editingVenue || undefined}
-            onSuccess={() => { setShowForm(false); setEditingVenue(null); fetchVenues(); }}
-            onCancel={() => { setShowForm(false); setEditingVenue(null); }}
-          />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
+          <div className="w-full max-w-4xl my-auto">
+            <VenueForm 
+              initialData={editingVenue || undefined}
+              onSuccess={() => { setShowForm(false); setEditingVenue(null); fetchVenues(); }}
+              onCancel={() => { setShowForm(false); setEditingVenue(null); }}
+            />
+          </div>
         </div>
       )}
 

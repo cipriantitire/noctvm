@@ -66,38 +66,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             );
           })}
-          
-          <div className="pt-8 px-4">
-            <p className="text-[9px] uppercase font-mono tracking-widest text-noctvm-silver/40 mb-4">Account</p>
-            <button 
-              onClick={() => router.push('/')}
-              className="w-full flex items-center gap-4 px-1 py-2 text-noctvm-silver/60 hover:text-white transition-colors group"
-            >
-              <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-noctvm-violet/30 transition-all">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </div>
-              <span className="text-xs font-bold uppercase font-mono">Return to App</span>
-            </button>
-          </div>
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3 border border-white/5">
-            <div className="w-10 h-10 rounded-xl bg-noctvm-violet/10 flex items-center justify-center border border-noctvm-violet/30 overflow-hidden shadow-lg relative">
+          <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3 border border-white/5 group">
+            <div className="w-10 h-10 rounded-xl bg-noctvm-violet/10 flex items-center justify-center border border-noctvm-violet/30 overflow-hidden shadow-lg relative flex-shrink-0">
               {profile?.avatar_url ? (
-                <Image src={profile.avatar_url} alt="" fill className="object-cover" />
+                <Image 
+                  src={profile.avatar_url} 
+                  alt={profile.display_name || 'User'} 
+                  fill 
+                  className="object-cover"
+                  sizes="40px"
+                  priority
+                />
               ) : (
                 <UserIcon className="w-5 h-5 text-noctvm-violet" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-black truncate tracking-tight uppercase">{profile?.display_name || 'Admin'}</p>
-              <span className="text-[8px] text-noctvm-violet font-black uppercase tracking-[0.2em]">
+              <p className="text-xs font-black truncate tracking-tight uppercase text-white">{profile?.display_name || 'Admin'}</p>
+              <p className="text-[8px] text-noctvm-violet font-black uppercase tracking-[0.2em] truncate">
                 {profile?.role || 'User'}
-              </span>
+              </p>
             </div>
+            <button
+              onClick={() => router.push('/')}
+              className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/5 transition-all"
+              title="Return to App"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
