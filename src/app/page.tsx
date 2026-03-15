@@ -87,6 +87,7 @@ export default function Home() {
       .select('*')
       .eq('city', city)
       .gte('date', today)
+      .order('is_promoted', { ascending: false })
       .order('date')
       .then(({ data }) => {
         if (data && data.length > 0) setDbEvents(data as NoctEvent[]);

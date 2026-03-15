@@ -68,12 +68,24 @@ export default function VenuesPage({
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
+  const [venueSort, setVenueSort] = useState<'name' | 'popularity' | 'events'>('popularity');
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
   const [loadedReviews, setLoadedReviews] = useState<Record<string, VenueReview[]>>({});
   const [loadingReviews, setLoadingReviews] = useState<Set<string>>(new Set());
   const [submittingReview, setSubmittingReview] = useState(false);
   const [preloadedStats, setPreloadedStats] = useState<Record<string, { avg: number; count: number }>>({});
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
   const genreDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Fetch event counts for sorting
+    const today = new Date().toISOString().split('T')[0];
+    supabase.from('events').select('venue').gte('date', today).then(({ data }) => {
+      const counts: Record<string, number> = {};
+      data?.forEach(e => { counts[e.venue] = (counts[e.venue] || 0) + 1; });
+      setEventCounts(counts);
+    });
+  }, [cityToQuery]);
 
   useEffect(() => {
     if (!genreDropdownOpen) return;
@@ -89,16 +101,16 @@ export default function VenuesPage({
   // Fetch venues from Supabase when city changes
   useEffect(() => {
     setLoadingVenues(true);
-    supabase
-      .from('venues')
-      .select('*')
-      .eq('city', cityToQuery)
-      .order('followers', { ascending: false })
-      .then(({ data }) => {
-        setVenues((data ?? []) as Venue[]);
-        setLoadingVenues(false);
-      });
-  }, [cityToQuery]);
+    let query = supabase.from('venues').select('*').eq('city', cityToQuery);
+    
+    if (venueSort === 'name') query = query.order('name');
+    else if (venueSort === 'popularity') query = query.order('followers', { ascending: false });
+
+    query.then(({ data }) => {
+      setVenues((data ?? []) as Venue[]);
+      setLoadingVenues(false);
+    });
+  }, [cityToQuery, venueSort]);
 
   // Preload review stats (avg + count) for all venues so toggle shows real data immediately
   useEffect(() => {
@@ -174,12 +186,23 @@ export default function VenuesPage({
     return matchesSearch && matchesGenre;
   });
 
-  // Sort: followed first, then by rating
+  // Sort: followed first, then by chosen sort
   const sortedVenues = [...filteredVenues].sort((a, b) => {
     const aFollowed = followedVenues.has(a.name) ? 1 : 0;
     const bFollowed = followedVenues.has(b.name) ? 1 : 0;
     if (bFollowed !== aFollowed) return bFollowed - aFollowed;
-    return b.rating - a.rating;
+
+    if (venueSort === 'events') {
+      const aEvents = eventCounts[a.name] || 0;
+      const bEvents = eventCounts[b.name] || 0;
+      return bEvents - aEvents;
+    }
+    
+    if (venueSort === 'name') return a.name.localeCompare(b.name);
+    // popularity is already handled by query order mostly, but for completeness:
+    if (venueSort === 'popularity') return (b.followers || 0) - (a.followers || 0);
+
+    return b.rating - a.rating; // fallback
   });
 
   const fetchReviews = async (venueName: string) => {
@@ -300,6 +323,20 @@ export default function VenuesPage({
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
               </button>
+            </div>
+
+            {/* Sort selector */}
+            <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px] items-center px-3">
+              <span className="text-[9px] text-noctvm-silver font-mono uppercase tracking-tighter mr-2">Sort:</span>
+              <select 
+                value={venueSort}
+                onChange={(e) => setVenueSort(e.target.value as any)}
+                className="bg-transparent text-[11px] font-bold text-white focus:outline-none cursor-pointer appearance-none uppercase"
+              >
+                <option value="name">Name</option>
+                <option value="popularity">Popularity</option>
+                <option value="events">Events</option>
+              </select>
             </div>
           </div>
 

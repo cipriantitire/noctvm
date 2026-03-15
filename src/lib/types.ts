@@ -37,6 +37,7 @@ export interface NoctEvent {
   lat?: number;
   lng?: number;
   featured?: boolean;
+  is_promoted?: boolean;
   view_count?: number;
   save_count?: number;
 }

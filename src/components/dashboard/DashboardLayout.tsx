@@ -27,9 +27,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen bg-noctvm-black overflow-hidden font-sans text-white">
       {/* Dashboard Sidebar */}
       <aside className="w-64 border-r border-white/5 bg-noctvm-midnight/50 backdrop-blur-xl flex flex-col pt-6">
-        <div className="px-6 mb-8 flex items-center gap-2">
-          <MoonIcon className="w-8 h-8 text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
-          <span className="font-heading text-xl font-bold tracking-tight">COMMAND</span>
+        <div className="px-6 mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MoonIcon className="w-8 h-8 text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
+            <span className="font-heading text-xl font-bold tracking-tight">COMMAND</span>
+          </div>
+          <Link 
+            href="/"
+            className="p-2 rounded-lg bg-white/5 text-noctvm-silver hover:text-white hover:bg-white/10 transition-all border border-white/5"
+            title="Exit to App"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </Link>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">

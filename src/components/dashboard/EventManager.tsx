@@ -41,7 +41,7 @@ export default function EventManager() {
       return;
     }
 
-    const { data: eventData } = await eventQuery.order('date', { ascending: false });
+    const { data: eventData } = await eventQuery.order('is_promoted', { ascending: false }).order('date', { ascending: false });
     if (eventData) setEvents(eventData as any[]);
     
     setLoading(false);
@@ -51,6 +51,15 @@ export default function EventManager() {
     const { error } = await supabase
       .from('events')
       .update({ featured: !event.featured })
+      .eq('id', event.id);
+    
+    if (!error) fetchInitialData();
+  };
+
+  const handleTogglePromoted = async (event: NoctEvent) => {
+    const { error } = await supabase
+      .from('events')
+      .update({ is_promoted: !event.is_promoted })
       .eq('id', event.id);
     
     if (!error) fetchInitialData();
@@ -113,15 +122,38 @@ export default function EventManager() {
                 <td className="px-6 py-4 text-sm text-noctvm-silver">
                   {event.venue}
                 </td>
-                <td className="px-6 py-4 text-sm font-mono text-noctvm-silver">
-                  {event.date}
+                <td className="px-6 py-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-tighter">
+                      {event.date}
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {event.featured && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-noctvm-violet/10 text-noctvm-violet text-[9px] font-bold border border-noctvm-violet/20">
+                          FEATURED
+                        </span>
+                      )}
+                      {event.is_promoted && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-noctvm-emerald/10 text-noctvm-emerald text-[9px] font-bold border border-noctvm-emerald/20">
+                          PROMOTED
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
+                      onClick={() => handleTogglePromoted(event)}
+                      className={`p-2 rounded-lg transition-all ${event.is_promoted ? 'bg-noctvm-emerald/20 text-noctvm-emerald' : 'bg-white/5 text-noctvm-silver hover:text-noctvm-emerald'}`}
+                      title={event.is_promoted ? "Unpromote Event" : "Promote Event"}
+                    >
+                      🚀
+                    </button>
+                    <button 
                       onClick={() => handleToggleFeatured(event)}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-noctvm-silver hover:text-noctvm-gold transition-all"
-                      title="Toggle Featured"
+                      className={`p-2 rounded-lg transition-all ${event.featured ? 'bg-noctvm-violet/20 text-noctvm-violet' : 'bg-white/5 text-noctvm-silver hover:text-noctvm-violet'}`}
+                      title={event.featured ? "Unfeature Event" : "Feature Event"}
                     >
                       ⭐
                     </button>

@@ -6,6 +6,7 @@ import { supabase, Profile } from '@/lib/supabase';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   profile: Profile | null;
   loading: boolean;
   isAdmin: boolean;
@@ -16,6 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  session: null,
   profile: null,
   loading: true,
   isAdmin: false,
@@ -26,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Restore existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) fetchProfile(session.user.id);
       setLoading(false);
@@ -49,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes (login, logout, OAuth redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event: string, session: Session | null) => {
+        setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
           fetchProfile(session.user.id);
@@ -65,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
     setProfile(null);
   }, []);
 
@@ -76,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isOwner = profile?.role === 'owner';
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isOwner, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, isAdmin, isOwner, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

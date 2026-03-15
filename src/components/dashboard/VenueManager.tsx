@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Venue } from '@/lib/types';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import VenueForm from './VenueForm';
+import ClaimModal from './ClaimModal';
 
 export default function VenueManager() {
   const { profile, isAdmin } = useAuth();
@@ -13,22 +14,43 @@ export default function VenueManager() {
   const [loading, setLoading] = useState(true);
   const [editingVenue, setEditingVenue] = useState<any | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [claimingVenue, setClaimingVenue] = useState<any | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'popularity' | 'events'>('name');
 
   useEffect(() => {
     fetchVenues();
-  }, [profile, isAdmin]);
+  }, [profile, isAdmin, sortBy]);
 
   async function fetchVenues() {
     setLoading(true);
+    
+    // We fetch venue names + event counts if possible
+    // For now, let's fetch basic venues and sorting happens here or in query
     let query = supabase.from('venues').select('*');
     
-    // Owners only see their venues
     if (!isAdmin && profile?.id) {
       query = query.eq('owner_id', profile.id);
     }
 
-    const { data } = await query.order('name');
-    if (data) setVenues(data as any[]);
+    if (sortBy === 'name') query = query.order('name');
+    else if (sortBy === 'popularity') query = query.order('view_count', { ascending: false });
+
+    const { data, error } = await query;
+    let venuesData = data || [];
+
+    if (sortBy === 'events') {
+      // Manual sort for events count for now or complex query
+      // Let's just fetch everything and sort
+      const { data: events } = await supabase.from('events').select('venue');
+      const counts: Record<string, number> = {};
+      events?.forEach(e => {
+        counts[e.venue] = (counts[e.venue] || 0) + 1;
+      });
+      venuesData = venuesData.map(v => ({ ...v, event_count: counts[v.name] || 0 }));
+      venuesData.sort((a, b) => b.event_count - a.event_count);
+    }
+
+    if (venuesData) setVenues(venuesData as any[]);
     setLoading(false);
   }
 
@@ -41,25 +63,29 @@ export default function VenueManager() {
     if (!error) fetchVenues();
   };
 
-  const handleClaim = async (venue: Venue) => {
-    if (!profile?.id) return;
-    const { error } = await supabase
-      .from('venues')
-      .update({ owner_id: profile.id, is_verified: true, badge: 'gold' })
-      .eq('id', venue.id);
-    
-    if (!error) fetchVenues();
-  };
-
   if (loading) return <div className="p-8 text-center text-noctvm-silver">Loading venues...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-heading font-bold">Manage Venues</h2>
+        <div className="flex items-center gap-6">
+          <h2 className="text-2xl font-heading font-bold">Manage Venues</h2>
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1">
+            <span className="text-[10px] text-noctvm-silver font-mono uppercase tracking-widest">Sort:</span>
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent text-sm font-bold focus:outline-none cursor-pointer"
+            >
+              <option value="name">NAME</option>
+              <option value="popularity">POPULARITY</option>
+              <option value="events">EVENTS COUNT</option>
+            </select>
+          </div>
+        </div>
         <button 
           onClick={() => { setEditingVenue(null); setShowForm(true); }}
-          className="px-4 py-2 bg-noctvm-violet rounded-xl text-sm font-semibold hover:bg-noctvm-violet/80 transition-all"
+          className="px-4 py-2 bg-noctvm-violet rounded-xl text-sm font-semibold hover:bg-noctvm-violet/80 transition-all shadow-[0_0_15px_rgba(139,92,246,0.2)]"
         >
           Add Venue
         </button>
@@ -73,6 +99,14 @@ export default function VenueManager() {
             onCancel={() => { setShowForm(false); setEditingVenue(null); }}
           />
         </div>
+      )}
+
+      {claimingVenue && (
+        <ClaimModal 
+          venue={claimingVenue}
+          onSuccess={() => { setClaimingVenue(null); fetchVenues(); }}
+          onCancel={() => setClaimingVenue(null)}
+        />
       )}
 
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden frosted-noise">
@@ -106,15 +140,18 @@ export default function VenueManager() {
                   {venue.city}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-1">
                     {venue.is_verified ? (
-                      <span className="px-2 py-0.5 rounded-full bg-noctvm-emerald/10 text-noctvm-emerald text-[10px] font-bold border border-noctvm-emerald/20">
+                      <span className="w-fit px-2 py-0.5 rounded-full bg-noctvm-emerald/10 text-noctvm-emerald text-[10px] font-bold border border-noctvm-emerald/20">
                         VERIFIED
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-white/10 text-noctvm-silver text-[10px] font-bold border border-white/20">
+                      <span className="w-fit px-2 py-0.5 rounded-full bg-white/10 text-noctvm-silver text-[10px] font-bold border border-white/20">
                         PENDING
                       </span>
+                    )}
+                    {venue.owner_id && (
+                      <span className="text-[9px] text-white/40 font-mono">OWNED</span>
                     )}
                   </div>
                 </td>
@@ -122,8 +159,8 @@ export default function VenueManager() {
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     {!venue.owner_id && (
                       <button 
-                        onClick={() => handleClaim(venue)}
-                        className="px-3 py-1 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-[10px] font-bold border border-noctvm-violet/30 hover:bg-noctvm-violet/30 transition-all"
+                        onClick={() => setClaimingVenue(venue)}
+                        className="px-3 py-1 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-[10px] font-bold border border-noctvm-violet/30 hover:bg-noctvm-violet/30 transition-all shadow-[0_0_10px_rgba(139,92,246,0.1)]"
                       >
                         CLAIM VENUE
                       </button>
