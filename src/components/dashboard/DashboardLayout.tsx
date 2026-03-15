@@ -39,24 +39,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
           </div>
           
-          <div className="flex justify-center flex-col items-center">
-            <p className="text-[10px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-0.5 opacity-60 scale-75">Status</p>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-              <span className="text-[10px] font-black text-white/90 uppercase tracking-tighter italic">{profile?.role}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end">
+          <div className="flex justify-center">
             <button
               onClick={() => router.push('/')}
-              className="p-1.5 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-surface transition-colors"
+              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
               title="Return to App"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
             </button>
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            <span className="text-[10px] font-black text-white/90 uppercase tracking-tighter italic">{profile?.role}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
           </div>
         </div>
       </header>

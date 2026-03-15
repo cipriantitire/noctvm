@@ -32,13 +32,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string, userMetadata?: any) => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
-    if (data) setProfile(data as Profile);
+    
+    if (data) {
+      const p = data as Profile;
+      // Auto-verify Google users
+      if (!p.is_verified && userMetadata?.provider === 'google') {
+        await supabase.from('profiles').update({ is_verified: true }).eq('id', userId);
+        p.is_verified = true;
+      }
+      setProfile(p);
+    }
   }, []);
 
   useEffect(() => {
@@ -46,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) fetchProfile(session.user.id, session.user.app_metadata);
       setLoading(false);
     });
 
@@ -56,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id);
+          fetchProfile(session.user.id, session.user.app_metadata);
         } else {
           setProfile(null);
         }
@@ -75,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) await fetchProfile(user.id, user.app_metadata);
   }, [user, fetchProfile]);
 
   const isAdmin = profile?.role === 'admin';

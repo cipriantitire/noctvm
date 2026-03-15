@@ -127,7 +127,9 @@ export default function UserTable() {
                     </div>
                   )}
                   {/* Status Indicator */}
-                  <div className="absolute bottom-1 right-1 w-3 h-3 bg-noctvm-emerald rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                  <div className={`absolute bottom-1 right-1 w-3 h-3 rounded-full border-2 border-noctvm-black shadow-lg transition-colors ${
+                    user.is_verified ? 'bg-noctvm-emerald' : 'bg-noctvm-gold animate-pulse'
+                  }`}></div>
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -141,21 +143,48 @@ export default function UserTable() {
               </div>
             </div>
 
-            <div className="space-y-4 relative z-10 flex-1">
+            <div className="space-y-3 relative z-10 flex-1">
+              {/* Account Status Toggle */}
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Account Status</p>
+                  <span className={`text-[7px] px-1.5 py-0.5 rounded font-black tracking-widest uppercase ${
+                    user.is_verified 
+                      ? 'bg-noctvm-emerald/10 text-noctvm-emerald border border-noctvm-emerald/20' 
+                      : 'bg-noctvm-gold/10 text-noctvm-gold border border-noctvm-gold/20'
+                  }`}>
+                    {user.is_verified ? 'Verified' : 'Pending'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleToggleVerified(user.id, user.is_verified)}
+                  disabled={updatingId === user.id}
+                  className={`w-full py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    user.is_verified 
+                      ? 'bg-noctvm-emerald text-white shadow-lg shadow-noctvm-emerald/20' 
+                      : 'bg-white/5 text-noctvm-silver hover:text-white hover:bg-white/10 border border-white/10'
+                  }`}
+                  title={user.is_verified ? "Unverify User" : "Verify User"}
+                >
+                  {user.is_verified ? (
+                    <><CheckIcon className="w-3 h-3" /> VERIFIED</>
+                  ) : (
+                    <><XIcon className="w-3 h-3" /> UNVERIFIED</>
+                  )}
+                </button>
+              </div>
+
               {/* Role Selection */}
               <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Access Level</p>
-                  {user.role === 'admin' && (
-                    <span className="text-[7px] px-1.5 py-0.5 bg-noctvm-rose/10 text-noctvm-rose border border-noctvm-rose/20 rounded uppercase font-black tracking-widest">Critical Access</span>
-                  )}
                 </div>
                 <select 
                   value={user.role}
                   onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                   disabled={updatingId === user.id}
                   title="Update Access Level"
-                  className="w-full bg-noctvm-black/40 text-xs font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-violet transition-all appearance-none"
+                  className="w-full bg-noctvm-black/40 text-[10px] font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-violet transition-all appearance-none"
                 >
                   <option value="user">Regular User</option>
                   <option value="owner">Venue Owner</option>
