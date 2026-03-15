@@ -239,7 +239,7 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8">
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
-            className={`relative w-full h-full sm:w-[95%] sm:h-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-2xl liquid-glass overflow-hidden shadow-2xl shadow-black/50 flex flex-col ${venueClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+            className={`relative w-full h-full sm:w-[95%] sm:h-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-2xl liquid-glass overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${venueClosing ? 'animate-scale-out' : 'animate-scale-in'} border-0 sm:border border-white/10`}
             onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
           >
             <VenuePage
@@ -303,6 +303,7 @@ export default function Home() {
                   activeCity={activeCity} 
                   activeGenres={activeGenres}
                   activeTab={activeTab}
+                  headerHidden={headerHidden}
                 />
 
                 {/* Sticky auto-hide header */}

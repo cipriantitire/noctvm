@@ -12,13 +12,15 @@ interface MobileTopSectionProps {
   activeCity?: 'bucuresti' | 'constanta';
   activeGenres?: string[];
   activeTab?: string;
+  headerHidden?: boolean;
 }
 
 export default function MobileTopSection({ 
   onVenueClick, 
   activeCity = 'bucuresti',
   activeGenres = ['All'],
-  activeTab = 'events'
+  activeTab = 'events',
+  headerHidden = false
 }: MobileTopSectionProps) {
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -103,6 +105,7 @@ export default function MobileTopSection({
             activeCity={activeCity}
             activeTab={activeTab as any}
             onVenueClick={onVenueClick}
+            headerHidden={headerHidden}
           />
         </div>
       </div>

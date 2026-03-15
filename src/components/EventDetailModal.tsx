@@ -150,7 +150,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
 
       {/* Modal */}
       <div
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] bg-noctvm-midnight sm:rounded-2xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-noctvm-border`}
+        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] bg-noctvm-midnight/80 sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 liquid-glass frosted-noise`}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
       >

@@ -234,6 +234,7 @@ export default function VenuesPage({
             activeCity={activeCityProp || 'bucuresti'}
             activeTab="venues"
             onVenueClick={onVenueClick}
+            headerHidden={headerHidden}
           />
         </div>
       </div>

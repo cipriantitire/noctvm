@@ -16,6 +16,7 @@ interface MapProps {
   activeCity: 'bucuresti' | 'constanta';
   activeTab: 'feed' | 'venues' | 'explore' | 'profile' | 'messages' | 'notifications';
   onVenueClick?: (venueName: string) => void;
+  headerHidden?: boolean;
 }
 
 // Dynamic imports for the map components
@@ -58,7 +59,7 @@ const MapController = ({ center }: { center: [number, number] }) => {
   return useMapHook ? <MapViewUpdater center={center} useMap={useMapHook} /> : null;
 };
 
-export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }: MapProps) {
+export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, headerHidden = false }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [L, setL] = useState<any>(null);
 
@@ -80,7 +81,6 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
 
   const center = CITY_CENTERS[activeCity] || CITY_CENTERS.bucuresti;
   
-  // Custom Icon using Leaflet's L
   const customIcon = L.divIcon({
     className: 'custom-div-icon',
     html: `<div style="background-color: #a78bfa; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px #a78bfa;"></div>`,
@@ -89,14 +89,7 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
   });
 
   return (
-    <div className="w-full h-full relative group overflow-hidden">
-      {/* Radar Effect Overlays */}
-      <div className="absolute inset-0 z-[999] pointer-events-none overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] radar-sweep opacity-40" />
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 rounded-full border border-noctvm-violet/30 radar-pulse" />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full border border-noctvm-violet/15 radar-pulse stagger-2" />
-      </div>
-
+    <div className={`w-full h-full relative group overflow-hidden transition-transform duration-300 ease-in-out ${headerHidden ? '-translate-y-[calc(100%+1rem)]' : ''}`}>
       <MapContainer 
         center={center} 
         zoom={12} 
@@ -108,6 +101,13 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         
+        {/* Radar Effect Overlays Moved Inside with lower Z-index */}
+        <div className="absolute inset-0 z-[400] pointer-events-none overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] radar-sweep opacity-20" />
+          <div className="absolute top-1/2 left-1/2 w-32 h-32 rounded-full border border-noctvm-violet/20 radar-pulse" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full border border-noctvm-violet/10 radar-pulse stagger-2" />
+        </div>
+
         <MapController center={center} />
 
         {venues.map((venue) => (
@@ -120,19 +120,22 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
               <Popup className="noctvm-popup">
                 <div 
                   onClick={() => onVenueClick?.(venue.name)}
-                  className="bg-noctvm-black text-white p-2.5 rounded-xl border border-white/10 min-w-[140px] cursor-pointer hover:border-noctvm-violet/50 hover:bg-noctvm-midnight/80 transition-all group/pop"
+                  className="bg-noctvm-black/95 text-white p-3 rounded-2xl border border-white/10 min-w-[150px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <p className="text-[11px] font-bold text-noctvm-violet truncate">{venue.name}</p>
-                    <svg className="w-3 h-3 text-noctvm-silver/40 group-hover/pop:text-noctvm-violet transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                  <p className="text-[9px] text-noctvm-silver/60 truncate mb-1.5">{venue.address}</p>
-                  <div className="flex gap-1 overflow-hidden">
-                    {venue.genres?.slice(0, 2).map((g, i) => (
-                      <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
-                        {g}
-                      </span>
-                    ))}
+                  <p className="text-[11px] font-bold text-noctvm-violet truncate mb-0.5">{venue.name}</p>
+                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-3">{venue.address}</p>
+                  
+                  <div className="flex items-end justify-between">
+                    <div className="flex gap-1 overflow-hidden">
+                      {venue.genres?.slice(0, 2).map((g, i) => (
+                        <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-noctvm-violet/5 text-noctvm-violet/70 border border-noctvm-violet/10">
+                          {g}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="w-6 h-6 rounded-lg bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all shadow-sm">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
                   </div>
                 </div>
               </Popup>
