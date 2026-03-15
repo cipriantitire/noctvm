@@ -123,16 +123,18 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, 
                   className="bg-noctvm-black/95 text-white p-3 rounded-2xl border border-white/10 min-w-[150px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
                   <p className="text-[11px] font-bold text-noctvm-violet truncate mb-0.5">{venue.name}</p>
-                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-3">{venue.address}</p>
                   
-                  <div className="flex items-end justify-between">
-                    <div className="flex gap-1 overflow-hidden">
-                      {venue.genres?.slice(0, 2).map((g, i) => (
-                        <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-noctvm-violet/5 text-noctvm-violet/70 border border-noctvm-violet/10">
-                          {g}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="flex gap-1 overflow-hidden mb-1.5">
+                    {venue.genres?.slice(0, 2).map((g, i) => (
+                      <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-noctvm-violet/5 text-noctvm-violet/70 border border-noctvm-violet/10">
+                        {g}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-2">{venue.address}</p>
+                  
+                  <div className="flex items-center justify-end">
                     <div className="w-6 h-6 rounded-lg bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all shadow-sm">
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>

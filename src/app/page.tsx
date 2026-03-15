@@ -113,6 +113,15 @@ export default function Home() {
     return () => el.removeEventListener('scroll', handler);
   }, []);
 
+  // Lock body scroll when overlay is active
+  useEffect(() => {
+    if (selectedVenue || selectedEvent || showAuthModal || showCreatePost || showCreateStory || showStories) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [selectedVenue, selectedEvent, showAuthModal, showCreatePost, showCreateStory, showStories]);
+
   // Switch to profile tab and show the account menu
   const handleSettingsClick = useCallback(() => {
     setPreviousTab(activeTab);
@@ -236,10 +245,12 @@ export default function Home() {
 
       {/* ── Venue Overlay ───────────────────────────────────────── */}
       {(selectedVenue || venueClosing) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 lg:p-8">
+        <div className="fixed inset-0 z-[100] flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8">
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
-            className={`relative w-full h-full sm:w-[95%] sm:h-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-2xl liquid-glass overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${venueClosing ? 'animate-scale-out' : 'animate-scale-in'} border-0 sm:border border-white/10`}
+            className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl bg-noctvm-midnight overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
+              venueClosing ? 'animate-scale-out' : 'sm:animate-scale-in animate-slide-up'
+            } border-0 sm:border border-white/10`}
             onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
           >
             <VenuePage

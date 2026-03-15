@@ -84,10 +84,11 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
   };
 
   return (
-    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0">
+    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0 overscroll-contain">
       {/* Header */}
       <button
         onClick={onBack}
+        title="Go back"
         className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all mb-6"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -150,6 +151,7 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
           <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
             <button 
               onClick={() => scroll('left')}
+              title="Scroll left"
               className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-95"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
@@ -157,6 +159,7 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
             <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
             <button 
               onClick={() => scroll('right')}
+              title="Scroll right"
               className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-95"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
@@ -203,12 +206,14 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
             <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
               <button
                 onClick={() => setViewMode('portrait')}
+                title="Portrait view"
                 className={`p-2 rounded-lg transition-all ${viewMode === 'portrait' ? 'bg-noctvm-violet text-white shadow-xl scale-110' : 'text-noctvm-silver hover:text-white'}`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
               </button>
               <button
                 onClick={() => setViewMode('landscape')}
+                title="Landscape view"
                 className={`p-2 rounded-lg transition-all ${viewMode === 'landscape' ? 'bg-noctvm-violet text-white shadow-xl scale-110' : 'text-noctvm-silver hover:text-white'}`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>

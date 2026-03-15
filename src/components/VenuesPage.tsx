@@ -278,7 +278,7 @@ export default function VenuesPage({
                 className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
               />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-white transition-colors">
+                <button onClick={() => setSearch('')} title="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-white transition-colors">
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               )}
@@ -307,6 +307,7 @@ export default function VenuesPage({
           <div className="relative" ref={genreDropdownRef}>
             <button
               onClick={() => setGenreDropdownOpen(o => !o)}
+              title="Filter by genre"
               className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
                 activeGenre === 'All'
                   ? 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:border-noctvm-violet/30'
@@ -428,6 +429,7 @@ export default function VenuesPage({
                 {/* Logo */}
                 <button
                   onClick={(e) => { e.stopPropagation(); onVenueClick(venue.name); }}
+                  title="View venue details"
                   className="w-14 h-14 rounded-2xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 hover:border-noctvm-violet/40 transition-colors"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -570,6 +572,7 @@ export default function VenuesPage({
                           <button
                             key={s}
                             onClick={(e) => { e.stopPropagation(); setReviewRatings(prev => ({ ...prev, [venue.name]: s })); }}
+                            title={`Rate ${s} stars`}
                             className="hover:scale-110 transition-transform"
                           >
                             <StarIcon className={`w-5 h-5 ${s <= (reviewRatings[venue.name] || 0) ? 'text-noctvm-gold' : 'text-noctvm-silver/20'}`} />
@@ -589,6 +592,7 @@ export default function VenuesPage({
                         <button
                           onClick={(e) => { e.stopPropagation(); submitReview(venue.name); }}
                           disabled={!reviewInputs[venue.name]?.trim() || !reviewRatings[venue.name] || submittingReview}
+                          title="Post review"
                           className="px-3 py-2 rounded-lg bg-noctvm-violet text-white text-xs font-semibold disabled:opacity-40 hover:bg-noctvm-violet/80 transition-colors"
                         >
                           Post
