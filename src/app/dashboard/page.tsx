@@ -54,18 +54,6 @@ function DashboardPage() {
             <h1 className="text-3xl font-bold text-white tracking-tight">
               Dashboard Overview
             </h1>
-            <p className="text-noctvm-silver text-sm font-medium flex items-center gap-2">
-              System Status: <span className="text-noctvm-violet font-mono text-[10px] uppercase tracking-widest bg-noctvm-violet/10 px-2 py-0.5 rounded border border-noctvm-violet/20">System Online</span>
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 backdrop-blur-xl frosted-noise border-glow-on-hover transition-all flex flex-col items-center justify-center min-w-[140px]">
-              <p className="text-[10px] text-noctvm-silver uppercase font-mono tracking-[0.2em] mb-1 opacity-60">Auth Level</p>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
-                <span className="text-lg font-black text-white uppercase tracking-tighter italic">{profile?.role}</span>
-              </div>
-            </div>
           </div>
         </header>
 

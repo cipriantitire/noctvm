@@ -92,97 +92,104 @@ export default function VenueManager() {
         />
       )}
 
-      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden frosted-noise shadow-xl">
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/5">
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Venue Details</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Location</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Status</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredVenues.map((venue) => (
-                <tr key={venue.id} className="group hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 shadow-lg">
-                        {venue.image_url ? (
-                          <Image 
-                            src={venue.image_url} 
-                            alt={venue.name} 
-                            fill 
-                            className="object-cover"
-                            sizes="48px"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center text-lg">🏢</div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="font-bold text-white tracking-tight text-sm">
-                            {venue.name}
-                          </span>
-                          {venue.is_verified && <VerifiedBadge type={venue.badge} size="sm" />}
-                        </div>
-                        <p className="text-[9px] font-mono text-noctvm-silver/40 uppercase tracking-widest">{venue.address || 'No Address'}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-white/70">{venue.city}</span>
-                      <span className="text-[9px] font-mono text-noctvm-silver/30 uppercase tracking-tighter">{venue.country}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col gap-1.5">
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded border tracking-tighter uppercase font-mono w-fit ${
-                        venue.is_verified 
-                          ? 'bg-noctvm-emerald/10 text-noctvm-emerald border-noctvm-emerald/20' 
-                          : 'bg-white/5 text-noctvm-silver border-white/10'
-                      }`}>
-                        {venue.is_verified ? 'Verified' : 'Pending'}
-                      </span>
-                      {venue.owner_id && (
-                        <span className="text-[8px] font-bold text-noctvm-violet uppercase tracking-widest">Managed</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                       {!venue.owner_id && (
-                        <button 
-                          onClick={() => setClaimingVenue(venue)}
-                          className="px-3 py-1 bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet hover:text-white transition-all"
-                        >
-                          Claim
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => setEditingVenue(venue)}
-                        className="p-2 rounded-xl text-noctvm-silver/40 hover:text-white hover:bg-white/5 transition-all"
-                        title="Edit Venue"
-                      >
-                        <EditIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredVenues.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-20 text-center text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">
-                    No venues found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20 px-2 mt-4">
+        {filteredVenues.map((venue) => (
+          <div 
+            key={venue.id} 
+            className="group relative bg-white/5 border border-white/10 rounded-[2rem] p-5 frosted-noise hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-xl overflow-hidden"
+          >
+            {/* Glossy Overlay */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-noctvm-violet/10 transition-colors duration-700"></div>
+
+            <div className="flex items-start justify-between mb-6 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                  {venue.image_url ? (
+                    <Image 
+                      src={venue.image_url} 
+                      alt={venue.name} 
+                      fill 
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center text-2xl">🏢</div>
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-white tracking-tight text-lg group-hover:text-noctvm-violet transition-colors">
+                      {venue.name}
+                    </h3>
+                    {venue.is_verified && <VerifiedBadge type={venue.badge} size="sm" />}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase font-mono tracking-widest text-noctvm-silver/60">
+                      {venue.city}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border tracking-tighter uppercase font-mono ${
+                      venue.is_verified 
+                        ? 'bg-noctvm-emerald/10 text-noctvm-emerald border-noctvm-emerald/20' 
+                        : 'bg-white/5 text-noctvm-silver border-white/10'
+                    }`}>
+                      {venue.is_verified ? 'Verified' : 'Pending'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 relative z-10">
+              <div className="flex flex-col gap-1 px-1">
+                <p className="text-[10px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Address</p>
+                <p className="text-xs text-white/80 font-medium truncate">{venue.address || 'No Address Listed'}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                  <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">Status</p>
+                  <p className="text-[10px] font-bold text-white uppercase tracking-tight">
+                    {venue.owner_id ? 'Managed' : 'Unclaimed'}
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                  <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">Country</p>
+                  <p className="text-[10px] font-bold text-white uppercase tracking-tight">{venue.country || 'Romania'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 mt-8 pt-4 border-t border-white/5 relative z-10">
+              <div className="flex gap-2">
+                {!venue.owner_id && (
+                  <button 
+                    onClick={() => setClaimingVenue(venue)}
+                    className="flex-1 px-4 py-2 bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/30 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet hover:text-white transition-all shadow-glow-sm"
+                  >
+                    Claim
+                  </button>
+                )}
+                <button 
+                  onClick={() => setEditingVenue(venue)}
+                  className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-noctvm-silver hover:text-white hover:bg-white/10 transition-all"
+                >
+                  Edit
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-xl border border-white/5 opacity-40 group-hover:opacity-100 transition-opacity">
+                 <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse"></span>
+                 <span className="text-[8px] font-mono text-noctvm-silver uppercase tracking-widest">Live</span>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filteredVenues.length === 0 && (
+          <div className="col-span-full py-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
+            <p className="text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">No venues found</p>
+          </div>
+        )}
       </div>
     </div>
   );

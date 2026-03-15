@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PlayIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, XIcon, CogIcon } from '@/components/icons';
+import { PlayIcon, CogIcon, RefreshIcon, CheckIcon, XIcon, EyeIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import ScraperSettingsModal from './ScraperSettingsModal';
@@ -141,15 +141,22 @@ export default function ScraperManager() {
               <div key={source.id} className="px-6 py-4 flex items-center justify-between group hover:bg-white/[0.02] transition-all cursor-pointer" onClick={() => setSelectedSource(source)}>
                 <div>
                   <h4 className="text-sm font-bold text-white mb-0.5">{source.name}</h4>
-                  <p className="text-[10px] text-noctvm-silver/40 lowercase font-mono">{source.description}</p>
+                  <p className="text-[10px] text-noctvm-silver/60 lowercase font-mono">{source.description}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
+                    onClick={(e) => { e.stopPropagation(); setSelectedSource(source); }}
+                    className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-white transition-all bg-white/5 border border-white/10"
+                    title="View Source"
+                  >
+                    <EyeIcon className="w-4 h-4" />
+                  </button>
+                  <button 
                     onClick={(e) => { e.stopPropagation(); setSettingSource(source); }}
-                    className="p-1.5 hover:bg-white/5 rounded-lg text-noctvm-silver/40 hover:text-noctvm-violet transition-all"
+                    className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-white transition-all bg-white/5 border border-white/10"
                     title="Settings"
                   >
-                    <CogIcon className="w-3.5 h-3.5" />
+                    <CogIcon className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}

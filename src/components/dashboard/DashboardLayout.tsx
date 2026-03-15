@@ -31,24 +31,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-noctvm-emerald/10 blur-[120px] rounded-full animate-pulse-slow [animation-delay:2s]"></div>
       </div>
 
-      {/* Mobile Top Header */}
-      <header className="lg:hidden sticky top-0 z-40 bg-noctvm-midnight/60 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2" onClick={() => router.push('/dashboard')}>
-          <MoonIcon className="w-6 h-6 text-noctvm-violet" />
-          <div className="flex flex-col">
-            <span className="font-heading text-base font-black tracking-tighter leading-none">NOCTVM</span>
-            <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver opacity-50">Dashboard</span>
+      {/* Mobile Top Header - Matching Webapp Style */}
+      <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
+        <div className="grid grid-cols-3 items-center">
+          <div className="flex items-center gap-2" onClick={() => router.push('/dashboard')}>
+            <MoonIcon className="w-6 h-6 text-noctvm-violet" />
+            <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
+          </div>
+          
+          <div className="flex justify-center flex-col items-center">
+            <p className="text-[10px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-0.5 opacity-60 scale-75">Status</p>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+              <span className="text-[10px] font-black text-white/90 uppercase tracking-tighter italic">{profile?.role}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end">
+            <button
+              onClick={() => router.push('/')}
+              className="p-1.5 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-surface transition-colors"
+              title="Return to App"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </button>
           </div>
         </div>
-        <button
-          onClick={() => router.push('/')}
-          className="p-2 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/60"
-          title="Return to App"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-        </button>
       </header>
 
       {/* Dashboard Sidebar (Desktop) */}
@@ -124,23 +134,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-noctvm-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-4 shadow-2xl">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={item.label}
-              className={`p-3 rounded-xl transition-all ${
-                isActive ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40'
-              }`}
-            >
-              {item.icon}
-            </Link>
-          );
-        })}
+      {/* Mobile Bottom Navigation - Matching Webapp Style */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-noctvm-border">
+        <div className="flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom)]">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                title={item.label}
+                className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
+                  isActive ? 'text-white' : 'text-noctvm-silver hover:text-white'
+                }`}
+              >
+                <div className={`transition-transform duration-200 ${isActive ? 'scale-110 text-white' : ''}`}>
+                  {React.cloneElement(item.icon as React.ReactElement, { className: "w-6 h-6" })}
+                </div>
+                <span className={`text-[10px] font-medium ${isActive ? 'text-white' : ''}`}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Main Content Area */}
@@ -148,7 +163,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Subtle Content Grid Overlay */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none"></div>
         
-        <div className="p-6 lg:p-10 max-w-[1600px] mx-auto min-h-screen">
+        <div className="p-4 lg:p-10 max-w-[1600px] mx-auto min-h-screen">
           {children}
         </div>
       </main>

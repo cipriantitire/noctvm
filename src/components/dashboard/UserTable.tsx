@@ -101,136 +101,119 @@ export default function UserTable() {
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden frosted-noise shadow-xl">
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/5">
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">User Details</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Role</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Verification</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Created</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="group hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 shadow-lg">
-                        {user.avatar_url ? (
-                          <Image 
-                            src={user.avatar_url} 
-                            alt={user.display_name || 'User'} 
-                            fill
-                            className="object-cover"
-                            sizes="48px"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                            <UserIcon className="w-5 h-5 text-noctvm-violet/40" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="font-bold text-white tracking-tight text-sm truncate">
-                            {user.display_name || user.username || 'Anonymous'}
-                          </span>
-                          {user.role === 'admin' && (
-                            <span className="text-[7px] px-1 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded uppercase font-black tracking-widest">Admin</span>
-                          )}
-                        </div>
-                        <p className="text-[9px] font-mono text-noctvm-silver/40 uppercase tracking-widest truncate">{user.email || 'NO_EMAIL'}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <select 
-                      value={user.role}
-                      onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                      disabled={updatingId === user.id}
-                      title="Update User Role"
-                      className="bg-transparent text-[9px] font-bold py-1 px-2 rounded-lg border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-violet transition-all"
-                    >
-                      <option value="user" className="bg-noctvm-black">User</option>
-                      <option value="owner" className="bg-noctvm-black">Owner</option>
-                      <option value="admin" className="bg-noctvm-black">Admin</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <button 
-                        onClick={() => handleToggleVerified(user.id, user.is_verified)}
-                        disabled={updatingId === user.id}
-                        className={`flex items-center gap-2 px-2 py-1 rounded-lg border transition-all ${
-                          user.is_verified 
-                            ? 'bg-noctvm-emerald/10 text-noctvm-emerald border-noctvm-emerald/20' 
-                            : 'bg-white/5 text-noctvm-silver border-white/10 opacity-40 hover:opacity-100'
-                        }`}
-                      >
-                        <span className="text-[9px] font-bold uppercase font-mono tracking-widest">
-                          {user.is_verified ? 'Verified' : 'Verify'}
-                        </span>
-                      </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 px-2 mt-4">
+        {filteredUsers.map((user) => (
+          <div 
+            key={user.id} 
+            className="group relative bg-white/5 border border-white/10 rounded-[2rem] p-5 frosted-noise hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-xl overflow-hidden flex flex-col"
+          >
+            {/* Glossy Overlay */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-noctvm-violet/10 transition-colors duration-700"></div>
 
-                      {user.is_verified && (
-                        <div className="flex items-center gap-2">
-                          <VerifiedBadge type="blue" />
-                          <select 
-                            value={user.badge || 'none'}
-                            onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
-                            disabled={updatingId === user.id}
-                            title="Update User Badge"
-                            className="bg-transparent text-[9px] font-bold py-1 px-1 rounded-lg hover:bg-white/5 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-silver/40"
-                          >
-                            <option value="none" className="bg-noctvm-black">Regular</option>
-                            <option value="blue" className="bg-noctvm-black">Verified</option>
-                          </select>
-                        </div>
-                      )}
+            <div className="relative z-10 mb-6">
+              <div className="flex items-center gap-4">
+                <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                  {user.avatar_url ? (
+                    <Image 
+                      src={user.avatar_url} 
+                      alt={user.display_name || 'User'} 
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                      <UserIcon className="w-8 h-8 text-noctvm-violet/40" />
                     </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[10px] font-mono text-noctvm-silver/60">
-                      {user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB') : '---'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                       <button 
-                        className="p-2 rounded-xl text-noctvm-silver/30 hover:text-white hover:bg-white/5 transition-all"
-                        title="Edit User"
-                        onClick={() => setEditingUser(user)}
-                      >
-                        <EditIcon className="w-4 h-4" />
-                      </button>
-                      <button 
-                        className="p-2 rounded-xl text-noctvm-silver/30 hover:text-noctvm-rose hover:bg-noctvm-rose/5 transition-all"
-                        title="Delete User"
-                        onClick={() => {
-                          if (window.confirm('Are you sure you want to delete this user? This action is permanent.')) {
-                            // handle delete
-                          }
-                        }}
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredUsers.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-20 text-center text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">
-                    No users matching criteria found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  )}
+                  {/* Status Indicator */}
+                  <div className="absolute bottom-1 right-1 w-3 h-3 bg-noctvm-emerald rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-white tracking-tight text-base truncate group-hover:text-noctvm-violet transition-colors">
+                      {user.display_name || user.username || 'Anonymous'}
+                    </h3>
+                    <VerifiedBadge type={user.badge} size="xs" />
+                  </div>
+                  <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest truncate">{user.email || 'NO_EMAIL'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 relative z-10 flex-1">
+              {/* Role Selection */}
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Access Level</p>
+                  {user.role === 'admin' && (
+                    <span className="text-[7px] px-1.5 py-0.5 bg-noctvm-rose/10 text-noctvm-rose border border-noctvm-rose/20 rounded uppercase font-black tracking-widest">Critical Access</span>
+                  )}
+                </div>
+                <select 
+                  value={user.role}
+                  onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                  disabled={updatingId === user.id}
+                  className="w-full bg-noctvm-black/40 text-xs font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-violet transition-all appearance-none"
+                >
+                  <option value="user">Regular User</option>
+                  <option value="owner">Venue Owner</option>
+                  <option value="admin">System Admin</option>
+                </select>
+              </div>
+
+              {/* Badge Management */}
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-3">Verification Badge</p>
+                <div className="flex items-center gap-3">
+                   <select 
+                    value={user.badge || 'none'}
+                    onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
+                    disabled={updatingId === user.id}
+                    className="flex-1 bg-noctvm-black/40 text-[10px] font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-white transition-all appearance-none"
+                  >
+                    <option value="none">No Badge</option>
+                    <option value="owner">Verified Owner (Purple)</option>
+                    <option value="admin">Admin Official (Pink)</option>
+                  </select>
+                  <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                    <VerifiedBadge type={user.badge} size="sm" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between px-1">
+                <div className="flex flex-col">
+                  <p className="text-[8px] text-noctvm-silver/30 uppercase font-mono tracking-tighter">Joined Date</p>
+                  <p className="text-[10px] font-mono text-noctvm-silver/60">
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB') : '---'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button 
+                    onClick={() => setEditingUser(user)}
+                    className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (window.confirm('Delete this user?')) { /* handle delete */ }
+                    }}
+                    className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 border border-white/5 transition-all"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        {filteredUsers.length === 0 && (
+          <div className="col-span-full py-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
+            <p className="text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">No users found</p>
+          </div>
+        )}
       </div>
 
       {editingUser && (

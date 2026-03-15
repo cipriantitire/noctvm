@@ -14,7 +14,7 @@ export interface Venue {
   lat: number | null;
   lng: number | null;
   owner_id?: string;
-  badge: 'none' | 'blue' | 'gold';
+  badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
   is_verified: boolean;
   featured: boolean;
   view_count: number;
