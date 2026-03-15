@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar from '@/components/FilterBar';
+import Link from 'next/link';
 import EventCard from '@/components/EventCard';
 import RightPanel from '@/components/RightPanel';
 import VenuePage from '@/components/VenuePage';
@@ -18,7 +19,7 @@ import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
-import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon, CogIcon } from '@/components/icons';
+import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon, CogIcon, GridIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
@@ -43,7 +44,7 @@ type ProfileView =
   | 'app-settings';
 
 export default function Home() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin, isOwner } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
@@ -276,12 +277,25 @@ export default function Home() {
         <main ref={mainRef} className="flex-1 min-h-screen overflow-y-auto">
           {/* Mobile header */}
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
-            <div className="flex items-center justify-between">
+            <div className="grid grid-cols-3 items-center">
               <div className="flex items-center gap-2">
                 <MoonIcon className="w-6 h-6 text-noctvm-violet" />
                 <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
               </div>
-              <div className="flex items-center gap-2">
+              
+              <div className="flex justify-center">
+                {(isAdmin || isOwner) && (
+                  <Link 
+                    href="/dashboard"
+                    className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                    title="Dashboard"
+                  >
+                    <GridIcon className="w-3.5 h-3.5" />
+                  </Link>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 justify-end">
                 <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse"></span>
                 <div className="relative">
                   <select
