@@ -26,9 +26,22 @@ const VENUE_ALIASES: Record<string, string> = {
   'quantic pub':  'Quantic',
   // Club Doors / Doors Club duplicate
   'club doors': 'Doors Club',
-  // Address-style entries that slip through
+  // B52 variants
   'b52 the club': 'B52',
-  'club b52': 'B52',
+  'club b52':     'B52',
+  // Bucharest club duplicates
+  'encore':             'Encore Club',
+  'nether':             'Nether Club',
+  'noar hall':          'Noar Hall',
+  'the pub universitatii': 'The Pub Universității',
+  // Constanta venue duplicates
+  'club phoenix, constanta': 'Club Phoenix',
+  'phoenix':                 'Club Phoenix',
+  'nuba club':               'Nuba Beach Club',
+  // Restaurant Dorna — strip HTML entities / bullet variants
+  'restaurant dorna mamaia &bull; zile și nopți': 'Restaurant Dorna Mamaia',
+  'restaurant dorna mamaia • zile și nopți':      'Restaurant Dorna Mamaia',
+  'restaurant dorna mamaia • zile si nopti':      'Restaurant Dorna Mamaia',
 };
 
 // Event-title–aware overrides: if (title pattern) + wrong venue → correct venue.
@@ -174,22 +187,63 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     'Clubul Țăranului – La Mama MȚR',
     'Clubul Taranului - La Mama',
     'La Mama - Clubul Taranului',
+    'La Mama - Clubul Țăranului',
+    'Clubul Țăranului – La Mama (MTR)',
     'La Mama MȚR',
     'Teatrul de Vara Radu Beligan',
     'Teatrul de Vară Radu Beligan',
     'Sala Luceafarul',  // will be re-inserted with correct alias after this run
+    // Berlin / wrong-country venues
+    'DSTRKT Club Berlin',
+    'KREUZWERK',
+    'Lokschuppen Berlin',
+    'Renate',
+    'OST',
+    // Wrong-city / nonsensical venues
+    'altfel cluj',
+    'LOG OUT',
+    'secret location announced a few hours before',
+    'Royal Hall, 1 Piața Presei Libere, Bucharest, Romania',
+    'Monumentul Răscoalei de la Bobâlna',
+    'Băile Figa',
   ];
   const BAD_VENUES_VENUES_TABLE = [
     'Clubul Țăranului – La Mama MȚR',
     'Clubul Taranului - La Mama',
     'La Mama - Clubul Taranului',
+    'La Mama - Clubul Țăranului',
+    'Clubul Țăranului – La Mama (MTR)',
     'Teatrul de Vara Radu Beligan',
     'Teatrul de Vară Radu Beligan',
     'Sala Luceafarul',
     'Quantic Club',    // normalised → "Quantic"
+    'Quantic Pub',     // normalised → "Quantic"
     'Club Doors',      // normalised → "Doors Club"
     'DSTRKT Club',
+    'DSTRKT Club Berlin',
     'Kreuzwerk',
+    'KREUZWERK',
+    'Lokschuppen Berlin',
+    'Renate',
+    'OST',
+    'altfel cluj',
+    'LOG OUT',
+    'secret location announced a few hours before',
+    'Royal Hall, 1 Piața Presei Libere, Bucharest, Romania',
+    'Monumentul Răscoalei de la Bobâlna',
+    'Băile Figa',
+    // Constanta duplicate stubs
+    'Club Phoenix, Constanta',
+    'Phoenix',
+    'Nuba Club',
+    'Restaurant Dorna Mamaia &bull; Zile și Nopți',
+    'Restaurant Dorna Mamaia • Zile și Nopți',
+    // Bucharest duplicate stubs
+    'Encore',
+    'Nether',
+    'NOAR HALL',
+    'B52 The Club',
+    'The Pub Universitatii',
   ];
   await Promise.all([
     ...BAD_VENUES_EVENTS.map(v => supabase.from('events').delete().eq('venue', v)),
