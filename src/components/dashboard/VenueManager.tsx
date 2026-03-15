@@ -7,7 +7,7 @@ import { Venue } from '@/lib/types';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import VenueForm from './VenueForm';
 import ClaimModal from './ClaimModal';
-import { PlusIcon, EditIcon, CheckIcon, SearchIcon, GridIcon } from '@/components/icons';
+import { PlusIcon, EditIcon, CheckIcon, SearchIcon, GridIcon, UsersIcon } from '@/components/icons';
 import Image from 'next/image';
 import { getVenueLogo } from '@/lib/venue-logos';
 
@@ -87,53 +87,54 @@ export default function VenueManager() {
       <div className="flex flex-col gap-4 px-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight text-white uppercase italic">Venues</h2>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Venues</h2>
             <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your partner locations</p>
           </div>
         </div>
+      </div>
 
-        <div className="sticky top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3">
-          <div className="relative flex-1 w-full">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
-            <input 
-              type="text"
-              placeholder="Search venues..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 h-[42px]">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
-                title="Grid View"
-              >
-                <GridIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
-                title="List View"
-              >
-                <div className="w-4 h-4 flex flex-col justify-between py-0.5 px-0.5">
-                  <div className="h-[2px] w-full bg-current rounded-full"></div>
-                  <div className="h-[2px] w-full bg-current rounded-full"></div>
-                  <div className="h-[2px] w-full bg-current rounded-full"></div>
-                </div>
-              </button>
-            </div>
-
-            <button 
-              onClick={() => { setEditingVenue(null); setShowForm(true); }}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-[10px] font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+      <div className="sticky top-0 lg:top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2">
+        <div className="relative flex-1 w-full">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
+          <input 
+            type="text"
+            placeholder="Search venues..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
+          />
+        </div>
+        
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Layout Toggle */}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 h-[42px]">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              title="Grid View"
             >
-              <PlusIcon className="w-3.5 h-3.5" />
-              Add Venue
+              <GridIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              title="List View"
+            >
+              <div className="w-4 h-4 flex flex-col justify-between py-0.5 px-0.5">
+                <div className="h-[2px] w-full bg-current rounded-full"></div>
+                <div className="h-[2px] w-full bg-current rounded-full"></div>
+                <div className="h-[2px] w-full bg-current rounded-full"></div>
+              </div>
             </button>
           </div>
+
+          <button 
+            onClick={() => { setEditingVenue(null); setShowForm(true); }}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-[10px] font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+          >
+            <PlusIcon className="w-3.5 h-3.5" />
+            Add Venue
+          </button>
         </div>
       </div>
 
@@ -222,7 +223,8 @@ export default function VenueManager() {
                       <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Followers</span>
                    </div>
                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                      <span className="text-[9px] font-black text-white">👥 {venue.capacity || 'N/A'}</span>
+                      <UsersIcon className="w-2.5 h-2.5 text-noctvm-emerald" />
+                      <span className="text-[9px] font-black text-white">{venue.capacity || 'N/A'}</span>
                       <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Capacity</span>
                    </div>
                 </div>
@@ -230,7 +232,7 @@ export default function VenueManager() {
                 <div className="flex flex-wrap gap-1.5 mb-5">
                   {venue.genres.slice(0, 3).map(g => (
                     <span key={g} className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20 flex items-center gap-1">
-                      <span className="text-[10px]">✨</span> {g}
+                      {g}
                     </span>
                   ))}
                   {venue.genres.length > 3 && (
@@ -240,7 +242,7 @@ export default function VenueManager() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between gap-3 mt-auto pt-4 border-t border-white/5">
+                 <div className="flex items-center justify-between gap-2 mt-auto pt-4 border-t border-white/5">
                   <div className="flex gap-2 w-full">
                     {!venue.owner_id && (
                       <button 
@@ -253,7 +255,7 @@ export default function VenueManager() {
                     {viewMode === 'grid' && (
                       <button 
                         onClick={() => setEditingVenue(venue)}
-                        className={`px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 ${!venue.owner_id ? 'flex-1' : 'w-full'}`}
+                        className={`flex-1 px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20`}
                        >
                         Edit Venue
                       </button>

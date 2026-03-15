@@ -93,25 +93,25 @@ export default function UserTable() {
       <div className="flex flex-col gap-4 px-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight text-white uppercase italic">Users</h2>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Users</h2>
             <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage authorized accounts</p>
           </div>
         </div>
+      </div>
 
-        <div className="sticky top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3">
-          <div className="relative flex-1 w-full">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
-            <input 
-              type="text"
-              placeholder="Search by name, email, or username..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
-            />
-          </div>
-          <div className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-mono text-noctvm-silver uppercase tracking-widest flex items-center justify-center gap-2">
-            User Count: <span className="text-white font-bold">{users.length}</span>
-          </div>
+      <div className="sticky top-0 lg:top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2">
+        <div className="relative flex-1 w-full">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
+          <input 
+            type="text"
+            placeholder="Search by name, email, or username..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
+          />
+        </div>
+        <div className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-mono text-noctvm-silver uppercase tracking-widest flex items-center justify-center gap-2">
+          User Count: <span className="text-white font-bold">{users.length}</span>
         </div>
       </div>
 
@@ -188,28 +188,22 @@ export default function UserTable() {
                 </button>
               </div>
 
-              {/* Status Display (Derived) */}
-              <div className="bg-white/5 rounded-2xl p-4 border border-white/5 flex items-center justify-between">
-                <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Access Role</p>
-                <div className="px-3 py-1 bg-noctvm-violet/10 border border-noctvm-violet/20 rounded-lg">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-noctvm-violet">{user.role || 'user'}</span>
-                </div>
-              </div>
 
-              {/* Badge Management */}
+
+              {/* Access Level Management */}
               <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-3">Verification Badge</p>
+                <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-3">Access Level</p>
                 <div className="flex items-center gap-3">
                    <select 
                     value={user.badge || 'none'}
                     onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
                     disabled={updatingId === user.id}
-                    title="Update Verification Badge"
+                    title="Update Access Level"
                     className="flex-1 bg-noctvm-black/40 text-[10px] font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-white transition-all appearance-none"
                   >
-                    <option value="none">No Badge</option>
-                    <option value="owner">Verified Owner (Purple)</option>
-                    <option value="admin">Admin Official (Pink)</option>
+                    <option value="none">Regular</option>
+                    <option value="owner">Owner</option>
+                    <option value="admin">Admin</option>
                   </select>
                   <div className="bg-white/5 p-2 rounded-xl border border-white/5">
                     <VerifiedBadge type={user.badge} size="sm" />

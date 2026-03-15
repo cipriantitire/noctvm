@@ -8,6 +8,7 @@ import AnalyticsPanel from '@/components/dashboard/AnalyticsPanel';
 import VenueForm from '@/components/dashboard/VenueForm';
 import EventForm from '@/components/dashboard/EventForm';
 import { withAuth } from '@/components/hoc/withAuth';
+import { PlusIcon, MapPinIcon, StarIcon, HubIcon } from '@/components/icons';
 
 function DashboardPage() {
   const { profile, isAdmin } = useAuth();
@@ -49,9 +50,9 @@ function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in pb-20">
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 relative">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 relative px-2">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">
               Dashboard Overview
             </h1>
           </div>
@@ -63,8 +64,8 @@ function DashboardPage() {
           {/* Quick Actions */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-white tracking-tight uppercase font-mono flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-noctvm-violet"></span>
+              <h3 className="text-sm font-bold text-white tracking-tight uppercase flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-noctvm-violet"></span>
                 Quick Actions
               </h3>
             </div>
@@ -75,9 +76,11 @@ function DashboardPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-4xl mb-4 group-hover:scale-125 group-hover:rotate-12 transition-transform duration-500 ease-out">📅</span>
-                  <span className="text-xs font-black tracking-widest uppercase font-mono">Add Event</span>
-                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono letter-spacing-widest">Create nightlife</span>
+                  <div className="w-12 h-12 rounded-2xl bg-noctvm-violet/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 group-hover:bg-noctvm-violet/40">
+                    <PlusIcon className="w-6 h-6 text-noctvm-violet" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Add Event</span>
+                  <span className="text-[8px] text-noctvm-silver/40 uppercase tracking-widest">Create nightlife</span>
                 </div>
               </button>
 
@@ -87,9 +90,11 @@ function DashboardPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-noctvm-emerald/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-4xl mb-4 group-hover:scale-125 group-hover:-rotate-12 transition-transform duration-500 ease-out">📍</span>
-                  <span className="text-xs font-black tracking-widest uppercase font-mono">Add Venue</span>
-                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono">List location</span>
+                   <div className="w-12 h-12 rounded-2xl bg-noctvm-emerald/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 group-hover:bg-noctvm-emerald/40">
+                    <MapPinIcon className="w-6 h-6 text-noctvm-emerald" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Add Venue</span>
+                  <span className="text-[8px] text-noctvm-silver/40 uppercase">List location</span>
                 </div>
               </button>
 
@@ -99,9 +104,11 @@ function DashboardPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-noctvm-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-500 ease-out">✨</span>
-                  <span className="text-xs font-black tracking-widest uppercase font-mono">Promote</span>
-                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono">Boost reach</span>
+                  <div className="w-12 h-12 rounded-2xl bg-noctvm-gold/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 group-hover:bg-noctvm-gold/40">
+                    <StarIcon className="w-6 h-6 text-noctvm-gold" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Promote</span>
+                  <span className="text-[8px] text-noctvm-silver/40 uppercase">Boost reach</span>
                 </div>
               </button>
 
@@ -111,9 +118,11 @@ function DashboardPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-500 ease-out">🤖</span>
-                  <span className="text-xs font-black tracking-widest uppercase font-mono">Automate</span>
-                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono">Run scrapers</span>
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 group-hover:bg-white/20">
+                    <HubIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Automate</span>
+                  <span className="text-[8px] text-noctvm-silver/40 uppercase">Run scrapers</span>
                 </div>
               </button>
             </div>
@@ -122,8 +131,8 @@ function DashboardPage() {
           {/* Recent Activity */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-white tracking-tight uppercase font-mono flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-noctvm-emerald"></span>
+              <h3 className="text-sm font-bold text-white tracking-tight uppercase flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald"></span>
                 Activity Feed
               </h3>
             </div>
