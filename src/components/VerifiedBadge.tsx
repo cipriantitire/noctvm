@@ -26,24 +26,23 @@ export default function VerifiedBadge({ type, size = 'md', className = '' }: Ver
 
   const isGold = type === 'gold';
   
-  // Color palette derived from the user request and image
+  // Color palette derived from the new images
   const colors = {
-    blue: {
-      inner: '#48CBF4',
-      stripes: '#9EE7F9',
-      border: '#6B21A8', // Deep Purple Margin
-      check: '#FFFFFF',
-    },
-    premium: {
+    user: { // Purple
       inner: '#995BFF',
-      border: '#7C3AED', // Slightly darker purple margin
-      check: '#5EFFA1', // Mint Green Tick
+      margin: '#FFFFFF', // White wavy inner margin
+      check: '#5EFFA1', // Green Tick
+      border: '#7C3AED', // Purple border
+    },
+    venue: { // Green
+      inner: '#5EFFA1',
+      check: '#FFD700', // Gold Tick
+      border: '#065F46', // Dark Green Border
     }
   };
 
-  const activeColors = isGold ? colors.premium : colors.blue;
+  const activeColors = isGold ? colors.venue : colors.user;
   
-  // The chunky seal path from the image
   const chunkySealPath = "M12 2L14.2 3.6L16.8 3.2L18.4 5.3L21 5.8L21.4 8.5L23.4 10.4L22.6 13L23.4 15.6L21.4 17.5L21 20.2L18.4 20.7L16.8 22.8L14.2 22.4L12 24L9.8 22.4L7.2 22.8L5.6 20.7L3 20.2L2.6 17.5L0.6 15.6L1.4 13L0.6 10.4L2.6 8.5L3 5.8L5.6 5.3L7.2 3.2L9.8 3.6L12 2Z";
 
   return (
@@ -57,26 +56,24 @@ export default function VerifiedBadge({ type, size = 'md', className = '' }: Ver
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
       >
-        <defs>
-          <pattern id="badgeStripes" patternUnits="userSpaceOnUse" width="24" height="2" patternTransform="rotate(0)">
-            <rect width="24" height="1" fill={colors.blue.stripes} fillOpacity="0.6" />
-          </pattern>
-        </defs>
-
         {/* 1. Hard Black Shadow (Offset) */}
         <path d={chunkySealPath} fill="black" transform="translate(1, 1.5)" />
         
-        {/* 2. Outer Border (The Margin Color) */}
+        {/* 2. Outer Border */}
         <path d={chunkySealPath} fill={activeColors.border} />
         
-        {/* 3. Main Colored Insert (Slightly smaller to show the border/margin) */}
+        {/* 3. Main Colored Body */}
         <path d={chunkySealPath} fill={activeColors.inner} transform="scale(0.88) translate(1.6, 1.6)" />
         
-        {/* 4. Pattern Layer for Blue */}
+        {/* 4. White Wavy Margin (User/Purple only) */}
         {!isGold && (
-          <g transform="scale(0.88) translate(1.6, 1.6)">
-             <path d={chunkySealPath} fill="url(#badgeStripes)" />
-          </g>
+          <path 
+            d={chunkySealPath} 
+            stroke="white" 
+            strokeWidth="0.8" 
+            fill="none" 
+            transform="scale(0.8) translate(3, 3)" 
+          />
         )}
 
         {/* 5. Checkmark Hard Shadow */}
