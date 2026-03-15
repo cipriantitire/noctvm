@@ -125,7 +125,11 @@ export default function EventManager() {
                     >
                       ⭐
                     </button>
-                    <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-noctvm-silver hover:text-white transition-all">
+                    <button 
+                      onClick={() => setEditingEvent(event)}
+                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-noctvm-silver hover:text-white transition-all"
+                      title="Edit Event"
+                    >
                       Edit
                     </button>
                   </div>
