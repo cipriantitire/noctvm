@@ -5,6 +5,7 @@ import { NoctEvent } from '@/lib/types';
 import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import VerifiedBadge from './VerifiedBadge';
 
 interface EventDetailModalProps {
   event: NoctEvent | null;
@@ -48,6 +49,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
   const [saveCount, setSaveCount]     = useState(0);
   const [isSaved,   setIsSaved]       = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [venueBadge, setVenueBadge] = useState<'none' | 'blue' | 'gold'>('none');
   const handleClose = useCallback(() => setIsClosing(true), []);
 
   useEffect(() => {
@@ -86,6 +88,17 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
         if (user) setIsSaved((data ?? []).some((r: any) => r.user_id === user.id));
       })
       .subscribe();
+
+    // Fetch venue badge
+    supabase
+      .from('venues')
+      .select('badge')
+      .eq('name', event.venue)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setVenueBadge(data.badge as any);
+        else setVenueBadge('none');
+      });
 
     return () => { supabase.removeChannel(channel); };
   }, [event, user]);
@@ -238,14 +251,16 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
               <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
-              {event.venue}
+              <span>{event.venue}</span>
+              {venueBadge !== 'none' && <VerifiedBadge type={venueBadge} size="xs" />}
             </button>
           ) : (
             <p className="flex items-center gap-1.5 text-noctvm-violet font-medium text-sm">
               <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
-              {event.venue}
+              <span>{event.venue}</span>
+              {venueBadge !== 'none' && <VerifiedBadge type={venueBadge} size="xs" />}
             </p>
           )}
 

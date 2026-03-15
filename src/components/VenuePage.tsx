@@ -5,7 +5,9 @@ import { NoctEvent } from '@/lib/types';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo } from '@/lib/venue-logos';
 import { supabase } from '@/lib/supabase';
+import { Venue } from '@/lib/types';
 import EventCard from './EventCard';
+import VerifiedBadge from './VerifiedBadge';
 
 interface VenuePageProps {
   venueName: string;
@@ -40,7 +42,20 @@ const GALLERY_THEMES = [
 export default function VenuePage({ venueName, onBack, onClose, onEventClick }: VenuePageProps) {
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
+  const [venue, setVenue] = useState<Venue | null>(null);
   const info = getVenueInfo(venueName);
+
+  useEffect(() => {
+    // Fetch venue details
+    supabase
+      .from('venues')
+      .select('*')
+      .eq('name', venueName)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setVenue(data as Venue);
+      });
+  }, [venueName]);
 
   useEffect(() => {
     supabase
@@ -113,7 +128,12 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
           <span className="fallback hidden text-4xl font-bold text-noctvm-violet">{venueName.charAt(0)}</span>
         </div>
         <div className="flex-1 pt-1">
-          <h1 className="text-2xl lg:text-4xl font-bold text-white leading-tight">{venueName}</h1>
+          <div className="flex items-center gap-2 lg:gap-3 flex-wrap">
+            <h1 className="text-2xl lg:text-4xl font-bold text-white leading-tight">{venueName}</h1>
+            {venue?.badge && venue.badge !== 'none' && (
+              <VerifiedBadge type={venue.badge} size="lg" className="translate-y-0.5" />
+            )}
+          </div>
           <p className="text-noctvm-silver font-medium text-xs lg:text-sm mt-0.5">{info.address}</p>
           <div className="flex flex-wrap gap-1.5 mt-2 mb-4">
             {info.genres.map(g => (

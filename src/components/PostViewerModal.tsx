@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
 import LikesModal from './LikesModal';
 
+import VerifiedBadge from './VerifiedBadge';
+
 interface ProfilePost {
   id: string;
   user_id: string; // Added user_id
@@ -25,6 +27,7 @@ interface PostViewerModalProps {
   profileName?: string;
   profileAvatar?: string | null;
   profileInitial?: string;
+  profileBadge?: 'none' | 'blue' | 'gold';
 }
 
 function timeAgo(dateStr: string): string {
@@ -44,6 +47,7 @@ export default function PostViewerModal({
   profileName,
   profileAvatar,
   profileInitial,
+  profileBadge = 'none',
 }: PostViewerModalProps) {
   const { user, profile } = useAuth();
   const [index, setIndex] = useState(initialIndex);
@@ -52,7 +56,7 @@ export default function PostViewerModal({
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [comments, setComments] = useState<{ user: string; text: string }[]>([]);
+  const [comments, setComments] = useState<{ user: string; text: string; badge: 'none' | 'blue' | 'gold' }[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
@@ -93,7 +97,7 @@ export default function PostViewerModal({
         : Promise.resolve({ data: null }),
       supabase
         .from('post_comments')
-        .select('text, profiles(username)')
+        .select('text, profiles(username, badge)')
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
         .limit(50),
@@ -106,10 +110,14 @@ export default function PostViewerModal({
     if (commentsRes.data) {
       // Cast through unknown to resolve type overlap error in build
       const rawComments = commentsRes.data as unknown as any[];
-      const formattedComments = rawComments.map(c => ({
-        user: (Array.isArray(c.profiles) ? c.profiles[0]?.username : c.profiles?.username) || 'user',
-        text: c.text
-      }));
+      const formattedComments = rawComments.map(c => {
+        const prof = Array.isArray(c.profiles) ? c.profiles[0] : c.profiles;
+        return {
+          user: prof?.username || 'user',
+          text: c.text,
+          badge: (prof?.badge as any) || 'none'
+        };
+      });
       setComments(formattedComments);
     } else {
       setComments([]);
@@ -146,8 +154,12 @@ export default function PostViewerModal({
         filter: `post_id=eq.${postId}` 
       }, async (payload) => {
         const row = payload.new as { text: string; user_id: string };
-        const { data: prof } = await supabase.from('profiles').select('username').eq('id', row.user_id).single();
-        setComments(prev => [...prev, { user: prof?.username || 'user', text: row.text }]);
+        const { data: prof } = await supabase.from('profiles').select('username, badge').eq('id', row.user_id).single();
+        setComments(prev => [...prev, { 
+          user: prof?.username || 'user', 
+          text: row.text,
+          badge: (prof?.badge as any) || 'none'
+        }]);
       })
       .subscribe();
 
@@ -193,7 +205,11 @@ export default function PostViewerModal({
       // Optimistic update already handled by realtime insert? 
       // Actually we update here too for immediate feedback
       if (!comments.some(c => c.text === text && c.user === (profile?.username || 'you'))) {
-        setComments(prev => [...prev, { user: profile?.username || 'you', text }]);
+        setComments(prev => [...prev, { 
+          user: profile?.username || 'you', 
+          text,
+          badge: (profile?.badge as any) || 'none'
+        }]);
       }
     } finally {
       setSubmittingComment(false);
@@ -292,9 +308,12 @@ export default function PostViewerModal({
                 </div>
              </div>
               <div className="flex-1 min-w-0">
-                 <button className="text-sm font-semibold text-white leading-tight truncate hover:text-noctvm-violet transition-colors">
-                   {profileName || 'User'}
-                 </button>
+                 <div className="flex items-center gap-1.5">
+                    <button className="text-sm font-semibold text-white leading-tight truncate hover:text-noctvm-violet transition-colors">
+                      {profileName || 'User'}
+                    </button>
+                    {profileBadge !== 'none' && <VerifiedBadge type={profileBadge} size="sm" />}
+                 </div>
                  <p className="text-[10px] text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
               </div>
              <div className="relative">
@@ -324,9 +343,12 @@ export default function PostViewerModal({
                <div className="flex gap-3">
                   <div>
                      <p className="text-xs text-white leading-relaxed">
-                        <button className="font-bold mr-2 text-noctvm-violet hover:underline focus:outline-none">
-                          {profileName}
-                        </button>
+                        <div className="flex items-center gap-1 line-relaxed mb-1">
+                          <button className="font-bold text-noctvm-violet hover:underline focus:outline-none">
+                            {profileName}
+                          </button>
+                          {profileBadge !== 'none' && <VerifiedBadge type={profileBadge} size="xs" />}
+                        </div>
                         {post.caption}
                      </p>
                   </div>
@@ -336,12 +358,15 @@ export default function PostViewerModal({
               {comments.map((c, i) => (
                 <div key={i} className="flex gap-3 animate-fade-in-up" style={{ animationDelay: `${i * 30}ms` }}>
                   <div className="flex-1">
-                    <p className="text-xs text-noctvm-silver leading-relaxed">
-                      <button className="font-bold text-white hover:text-noctvm-violet transition-colors mr-1 focus:outline-none">
-                        {c.user}
-                      </button>
-                      {c.text}
-                    </p>
+                    <div className="text-xs text-noctvm-silver leading-relaxed flex items-center flex-wrap gap-x-1">
+                      <span className="flex items-center gap-1">
+                        <button className="font-bold text-white hover:text-noctvm-violet transition-colors focus:outline-none">
+                          {c.user}
+                        </button>
+                        {c.badge !== 'none' && <VerifiedBadge type={c.badge} size="xs" />}
+                      </span>
+                      <span>{c.text}</span>
+                    </div>
                     <div className="flex items-center gap-3 mt-1 op-60">
                       <span className="text-[10px] text-noctvm-silver/50">12h</span>
                       <button className="text-[10px] items-center font-semibold text-noctvm-silver/50 hover:text-white transition-colors">Reply</button>

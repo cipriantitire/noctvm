@@ -7,6 +7,7 @@ import { Venue } from '@/lib/types';
 import VenueMap from './VenueMap';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
+import VerifiedBadge from './VerifiedBadge';
 
 interface VenueReview {
   id: string;
@@ -432,7 +433,10 @@ export default function VenuesPage({
               </div>
               {/* Info */}
               <div className="p-3 flex flex-col flex-1">
-                <h3 className="font-heading font-semibold text-white text-sm leading-tight mb-1 group-hover:text-noctvm-violet transition-colors line-clamp-1">{venue.name}</h3>
+                <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                  <h3 className="font-heading font-semibold text-white text-sm leading-tight group-hover:text-noctvm-violet transition-colors truncate">{venue.name}</h3>
+                  {venue.badge !== 'none' && <VerifiedBadge type={venue.badge} size="xs" />}
+                </div>
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <StarRating rating={venue.rating} />
                   <span className="text-[9px] text-noctvm-silver/60">{venue.rating}</span>
@@ -488,7 +492,10 @@ export default function VenuesPage({
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <span className="font-heading font-semibold text-white text-sm truncate">{venue.name}</span>
+                    {venue.badge !== 'none' && <VerifiedBadge type={venue.badge} size="xs" />}
+                  </div>
                     {isFollowed && (
                       <span className="px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet text-[9px] font-semibold flex-shrink-0">Following</span>
                     )}

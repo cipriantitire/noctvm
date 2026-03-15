@@ -28,7 +28,7 @@ interface FeedPost {
   venue: { name: string; tagged: boolean };
   tags: string[];
   likes: number;
-  comments: { user: string; text: string }[];
+  comments: { user: string; text: string; badge: 'none' | 'blue' | 'gold' }[];
   timeAgo: string;
   createdAt: string;
   liked: boolean;
@@ -475,12 +475,16 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     if (isExpanding && !loadedComments[id]) {
       const { data } = await supabase
         .from('post_comments')
-        .select('text, profiles(username)')
+        .select('text, profiles(username, badge)')
         .eq('post_id', id)
         .order('created_at', { ascending: true })
         .limit(50);
       if (data) {
-        const comments = data.map((c: any) => ({ user: c.profiles?.username || 'user', text: c.text }));
+        const comments = data.map((c: any) => ({ 
+          user: c.profiles?.username || 'user', 
+          text: c.text,
+          badge: (c.profiles?.badge as any) || 'none'
+        }));
         setLoadedComments(prev => ({ ...prev, [id]: comments }));
         updatePost(id, { comments });
       }
@@ -498,7 +502,11 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
       text: text,
     });
     if (!error) {
-      const newComment = { user: profile?.username || 'you', text };
+      const newComment = { 
+        user: profile?.username || 'you', 
+        text,
+        badge: (profile?.badge as any) || 'none'
+      };
       updatePost(post.id, { comments: [...(activePosts.find(p => p.id === post.id)?.comments || []), newComment] });
     }
   };
@@ -829,12 +837,15 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                   )}
                   <div className="space-y-1">
                     {(expandedComments.has(post.id) ? post.comments : post.comments.slice(0, 2)).map((c, ci) => (
-                      <p key={ci} className="text-[11px] text-noctvm-silver">
-                        <button className="font-bold text-noctvm-violet hover:underline mr-1 focus:outline-none">
-                          {c.user}
-                        </button>
-                        {c.text}
-                      </p>
+                      <div key={ci} className="text-[11px] text-noctvm-silver flex items-center gap-1.5 leading-relaxed">
+                        <div className="flex items-center gap-1">
+                          <button className="font-bold text-noctvm-violet hover:underline focus:outline-none">
+                            {c.user}
+                          </button>
+                          {c.badge && c.badge !== 'none' && <VerifiedBadge type={c.badge} size="xs" />}
+                        </div>
+                        <span>{c.text}</span>
+                      </div>
                     ))}
                   </div>
 
