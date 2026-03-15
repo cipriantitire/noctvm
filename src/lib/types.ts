@@ -9,6 +9,8 @@ export interface Venue {
   description: string;
   followers: number;
   city: 'Bucharest' | 'Constanta';
+  country?: string;
+  image_url?: string;
   lat: number | null;
   lng: number | null;
   owner_id?: string;

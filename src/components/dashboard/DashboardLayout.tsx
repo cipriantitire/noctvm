@@ -1,9 +1,8 @@
-'use client';
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MoonIcon, UserIcon, CogIcon, GridIcon, SearchIcon, HubIcon, VenuesIcon, EventsIcon } from '@/components/icons';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -29,20 +28,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Dynamic Background Noise/Gradient */}
       <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-noctvm-violet/20 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-noctvm-emerald/10 blur-[120px] rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-noctvm-emerald/10 blur-[120px] rounded-full animate-pulse-slow [animation-delay:2s]"></div>
       </div>
 
       {/* Dashboard Sidebar */}
-      <aside className="w-72 border-r border-white/5 bg-noctvm-midnight/40 backdrop-blur-2xl flex flex-col relative z-20">
-        <div className="px-8 py-10 mb-2 flex items-center justify-between">
+      <aside className="w-64 border-r border-white/5 bg-noctvm-midnight/40 backdrop-blur-2xl flex flex-col relative z-20">
+        <div className="px-6 py-8 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/dashboard')}>
             <div className="relative">
-              <MoonIcon className="w-10 h-10 text-noctvm-violet drop-shadow-[0_0_15px_rgba(139,92,246,0.6)] group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-noctvm-violet/20 blur-xl rounded-full scale-150 animate-pulse"></div>
+              <MoonIcon className="w-8 h-8 text-noctvm-violet drop-shadow-[0_0_10px_rgba(139,92,246,0.4)] group-hover:scale-105 transition-transform duration-500" />
             </div>
             <div className="flex flex-col">
-              <span className="font-heading text-2xl font-black tracking-tighter leading-none italic">NOCTVM</span>
-              <span className="text-[10px] uppercase font-mono tracking-[0.3em] text-noctvm-silver opacity-60">Control Panel</span>
+              <span className="font-heading text-xl font-black tracking-tighter leading-none">NOCTVM</span>
+              <span className="text-[9px] uppercase font-mono tracking-[0.2em] text-noctvm-silver opacity-50">Dashboard</span>
             </div>
           </div>
         </div>
@@ -55,22 +53,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group relative ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-noctvm-violet/10 text-white border border-noctvm-violet/20 shadow-[0_4px_20px_rgba(0,0,0,0.2)]'
+                    ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/10'
                     : 'text-noctvm-silver/60 hover:text-white hover:bg-white/5'
                 }`}
               >
-                {isActive && (
-                  <div className="absolute left-0 w-1 y-1/2 -translate-y-1/2 h-6 bg-noctvm-violet rounded-r-full shadow-[0_0_10px_rgba(139,92,246,0.8)]"></div>
-                )}
-                <span className={`${isActive ? 'text-noctvm-violet glow-sm' : 'group-hover:text-noctvm-violet'} transition-colors duration-300 scale-110`}>
+                <span className={`${isActive ? 'text-white' : 'group-hover:text-noctvm-violet'} transition-colors duration-200`}>
                   {item.icon}
                 </span>
-                <span className="font-bold tracking-tight text-sm uppercase font-mono">{item.label}</span>
-                {!isActive && (
-                  <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-white/0 group-hover:bg-white/10 transition-all"></div>
-                )}
+                <span className="font-bold text-xs uppercase tracking-wider">{item.label}</span>
               </Link>
             );
           })}
@@ -91,36 +83,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </nav>
 
-        <div className="p-6">
-          <div className="bg-gradient-to-br from-white/10 to-transparent rounded-3xl p-[1px] shadow-2xl">
-            <div className="bg-noctvm-black/60 backdrop-blur-md rounded-[23px] p-5 flex items-center gap-4">
-              <div className="relative group/avatar">
-                <div className="w-12 h-12 rounded-2xl bg-noctvm-violet/20 flex items-center justify-center border border-noctvm-violet/30 overflow-hidden shadow-lg group-hover/avatar:border-noctvm-violet/60 transition-all duration-500">
-                  {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <UserIcon className="w-6 h-6 text-noctvm-violet" />
-                  )}
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-noctvm-emerald rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-black truncate tracking-tighter uppercase">{profile?.display_name || 'Admin'}</p>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20 w-fit mt-1">
-                  <span className="text-[8px] text-noctvm-violet font-black uppercase tracking-widest">
-                    {profile?.role || 'User'}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => signOut()}
-                className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-red-400 hover:bg-red-500/10 transition-all border border-white/0 hover:border-red-500/20 shadow-inner"
-                title="Sign Out"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+        <div className="p-4 border-t border-white/5">
+          <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3 border border-white/5">
+            <div className="w-10 h-10 rounded-xl bg-noctvm-violet/10 flex items-center justify-center border border-noctvm-violet/30 overflow-hidden shadow-lg relative">
+              {profile?.avatar_url ? (
+                <Image src={profile.avatar_url} alt="" fill className="object-cover" />
+              ) : (
+                <UserIcon className="w-5 h-5 text-noctvm-violet" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black truncate tracking-tight uppercase">{profile?.display_name || 'Admin'}</p>
+              <span className="text-[8px] text-noctvm-violet font-black uppercase tracking-[0.2em]">
+                {profile?.role || 'User'}
+              </span>
             </div>
           </div>
         </div>

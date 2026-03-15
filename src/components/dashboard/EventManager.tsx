@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { NoctEvent, Venue } from '@/lib/types';
 import EventForm from './EventForm';
 import Image from 'next/image';
-import { CheckIcon, XIcon, PlusIcon, EditIcon } from '@/components/icons';
+import { CheckIcon, XIcon, PlusIcon, EditIcon, SearchIcon } from '@/components/icons';
 
 export default function EventManager() {
   const { profile, isAdmin } = useAuth();
@@ -81,27 +81,46 @@ export default function EventManager() {
     if (!error) refreshData();
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredEvents = events.filter(event => 
+    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.venue.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
-      <div className="w-12 h-12 border-4 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
-      <p className="text-noctvm-silver font-mono text-xs uppercase tracking-widest animate-pulse">Syncing Event Database...</p>
+      <div className="w-10 h-10 border-4 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
+      <p className="text-noctvm-silver font-mono text-[10px] uppercase tracking-widest animate-pulse">Loading Events...</p>
     </div>
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between px-2">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
-          <h2 className="text-3xl font-heading font-black tracking-tighter italic uppercase text-white">Event Streams</h2>
-          <p className="text-noctvm-silver text-xs font-mono uppercase tracking-[0.2em] mt-1 opacity-60">Manage your nightlife broadcasts</p>
+          <h2 className="text-2xl font-bold tracking-tight text-white">Events</h2>
+          <p className="text-noctvm-silver text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your nightlife listings</p>
         </div>
-        <button 
-          onClick={() => { setEditingEvent(null); setShowForm(true); }}
-          className="group flex items-center gap-2 px-6 py-3 bg-noctvm-violet rounded-2xl text-sm font-black uppercase tracking-widest text-white hover:bg-noctvm-violet/80 transition-all shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:scale-105 active:scale-95"
-        >
-          <PlusIcon className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-          Create Event
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
+            <input 
+              type="text"
+              placeholder="Search events or venues..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-64"
+            />
+          </div>
+          <button 
+            onClick={() => { setEditingEvent(null); setShowForm(true); }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-noctvm-violet rounded-xl text-xs font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95"
+          >
+            <PlusIcon className="w-3 h-3" />
+            Create Event
+          </button>
+        </div>
       </div>
 
       {(showForm || editingEvent) && (
@@ -116,89 +135,70 @@ export default function EventManager() {
         </div>
       )}
 
-      <div className="bg-white/5 border border-white/10 rounded-[32px] overflow-hidden frosted-noise shadow-2xl">
+      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden frosted-noise shadow-xl">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/5 bg-white/5">
-                <th className="px-8 py-5 text-[10px] uppercase tracking-[0.2em] text-white font-black font-mono">Channel Information</th>
-                <th className="px-8 py-5 text-[10px] uppercase tracking-[0.2em] text-white font-black font-mono">Location</th>
-                <th className="px-8 py-5 text-[10px] uppercase tracking-[0.2em] text-white font-black font-mono">Timestamp</th>
-                <th className="px-8 py-5 text-[10px] uppercase tracking-[0.2em] text-white font-black font-mono text-right">Sequence Control</th>
+                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Event Details</th>
+                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Venue</th>
+                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono">Date</th>
+                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-noctvm-silver font-bold font-mono text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {events.map((event, index) => (
-                <tr key={event.id || index} className="group hover:bg-noctvm-violet/5 transition-all duration-300">
-                  <td className="px-8 py-6">
+              {filteredEvents.map((event, index) => (
+                <tr key={event.id || index} className="group hover:bg-white/[0.02] transition-colors">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-white/10 group-hover:border-noctvm-violet/30 transition-all shadow-xl">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 shadow-lg">
                         {event.image_url ? (
                           <Image 
                             src={event.image_url} 
                             alt={event.title} 
                             fill 
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            sizes="56px"
+                            className="object-cover"
+                            sizes="48px"
                           />
                         ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center">📷</div>
-                        )}
-                        {event.is_promoted && (
-                          <div className="absolute top-0 right-0 p-1">
-                            <div className="w-2 h-2 rounded-full bg-noctvm-emerald shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
-                          </div>
+                          <div className="w-full h-full bg-white/5 flex items-center justify-center text-lg">📷</div>
                         )}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-white tracking-tight text-lg group-hover:text-noctvm-violet transition-colors">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold text-white tracking-tight text-sm">
                             {event.title}
                           </span>
                           {event.featured && (
-                            <span className="text-[8px] font-black text-noctvm-gold bg-noctvm-gold/10 px-2 py-0.5 rounded-full border border-noctvm-gold/20 tracking-widest uppercase">
-                              Prime
+                            <span className="text-[8px] font-bold text-noctvm-gold bg-noctvm-gold/10 px-1.5 py-0.5 rounded border border-noctvm-gold/20 tracking-tighter uppercase font-mono">
+                              Featured
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest flex items-center gap-2">
-                          <span className="w-1 h-3 bg-noctvm-violet/20 rounded-full"></span>
-                          SOURCE_{event.source?.replace(/\s+/g, '_').toUpperCase()}
+                        <p className="text-[9px] font-mono text-noctvm-silver/40 uppercase tracking-widest">
+                          {event.source?.replace(/\s+/g, '_').toUpperCase() || 'MANUAL'}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors">@{event.venue}</span>
-                      <span className="text-[9px] font-mono text-noctvm-silver/30 uppercase tracking-widest">Active Station</span>
-                    </div>
+                  <td className="px-6 py-5">
+                    <span className="text-xs font-bold text-white/70 group-hover:text-white transition-colors">@{event.venue}</span>
                   </td>
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-xs font-black font-mono text-noctvm-silver tracking-tighter">
-                        {event.date}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {event.featured && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-noctvm-gold shadow-[0_0_6px_rgba(251,191,36,0.6)]" title="Featured"></div>
-                        )}
-                        {event.is_promoted && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald shadow-[0_0_6px_rgba(16,185,129,0.6)]" title="Promoted"></div>
-                        )}
-                      </div>
-                    </div>
+                  <td className="px-6 py-5">
+                    <span className="text-xs font-mono text-noctvm-silver tracking-tight">
+                      {event.date}
+                    </span>
                   </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                  <td className="px-6 py-5 text-right">
+                    <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => handleTogglePromoted(event)}
-                        className={`p-3 rounded-2xl transition-all border shadow-inner ${
+                        className={`p-2 rounded-xl transition-all ${
                           event.is_promoted 
-                            ? 'bg-noctvm-emerald/10 text-noctvm-emerald border-noctvm-emerald/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]' 
-                            : 'bg-white/5 text-noctvm-silver border-white/5 hover:text-noctvm-emerald hover:border-noctvm-emerald/20'
+                            ? 'text-noctvm-emerald bg-noctvm-emerald/10 border border-noctvm-emerald/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]' 
+                            : 'text-noctvm-silver/40 hover:text-noctvm-emerald hover:bg-white/5'
                         }`}
-                        title={event.is_promoted ? "Deactivate Promotion" : "Initialize Promotion"}
+                        title={event.is_promoted ? "Stop Promoting" : "Promote Event"}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -206,12 +206,12 @@ export default function EventManager() {
                       </button>
                       <button 
                         onClick={() => handleToggleFeatured(event)}
-                        className={`p-3 rounded-2xl transition-all border shadow-inner ${
+                        className={`p-2 rounded-xl transition-all ${
                           event.featured 
-                            ? 'bg-noctvm-gold/10 text-noctvm-gold border-noctvm-gold/30 shadow-[0_0_15px_rgba(251,191,36,0.2)]' 
-                            : 'bg-white/5 text-noctvm-silver border-white/5 hover:text-noctvm-gold hover:border-noctvm-gold/20'
+                            ? 'text-noctvm-gold bg-noctvm-gold/10 border border-noctvm-gold/20 shadow-[0_0_10px_rgba(251,191,36,0.2)]' 
+                            : 'text-noctvm-silver/40 hover:text-noctvm-gold hover:bg-white/5'
                         }`}
-                        title={event.featured ? "Remove Prime Focus" : "Set Prime Focus"}
+                        title={event.featured ? "Remove Featured" : "Feature Event"}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.482-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -219,8 +219,8 @@ export default function EventManager() {
                       </button>
                       <button 
                         onClick={() => setEditingEvent(event)}
-                        className="p-3 rounded-2xl bg-white/5 text-noctvm-silver border border-white/5 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all shadow-inner"
-                        title="Mod Access"
+                        className="p-2 rounded-xl text-noctvm-silver/40 hover:text-white hover:bg-white/5 transition-all"
+                        title="Edit Event"
                       >
                         <EditIcon className="w-4 h-4" />
                       </button>
@@ -228,10 +228,10 @@ export default function EventManager() {
                   </td>
                 </tr>
               ))}
-              {events.length === 0 && (
+              {filteredEvents.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-8 py-20 text-center text-noctvm-silver/40 italic font-mono uppercase tracking-[0.3em] text-sm">
-                    SIGNAL LOST: NO_ACTIVE_EVENTS_FOUND
+                  <td colSpan={4} className="px-6 py-20 text-center text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">
+                    No active events found
                   </td>
                 </tr>
               )}
