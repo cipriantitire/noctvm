@@ -56,9 +56,18 @@ interface VenuesPageProps {
   activeCity?: 'bucuresti' | 'constanta';
   onCityChange?: (city: 'bucuresti' | 'constanta') => void;
   headerHidden?: boolean;
+  activeGenre?: string;
+  onGenreChange?: (genre: string) => void;
 }
 
-export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, onCityChange, headerHidden = false }: VenuesPageProps) {
+export default function VenuesPage({ 
+  onVenueClick, 
+  activeCity: activeCityProp, 
+  onCityChange, 
+  headerHidden = false,
+  activeGenre = 'All',
+  onGenreChange
+}: VenuesPageProps) {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [followedVenues, setFollowedVenues] = useState<Set<string>>(new Set());
@@ -67,7 +76,6 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loadingVenues, setLoadingVenues] = useState(true);
   const [expandedVenue, setExpandedVenue] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string>('All');
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
@@ -149,7 +157,7 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
   const filteredVenues = venues.filter(v => {
     const matchesSearch = v.name.toLowerCase().includes(search.toLowerCase()) ||
       v.genres.some(g => g.toLowerCase().includes(search.toLowerCase()));
-    const matchesGenre = activeFilter === 'All' || v.genres.includes(activeFilter);
+    const matchesGenre = activeGenre === 'All' || v.genres.includes(activeGenre);
     return matchesSearch && matchesGenre;
   });
 
@@ -207,7 +215,7 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
     <div className="tab-content">
       {/* Sticky auto-hide header */}
       <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[140%]' : 'translate-y-0'}`}>
-        <div className="bg-noctvm-black/90 backdrop-blur-2xl saturate-150 rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
+        <div className="bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
           {/* Desktop: Title + city */}
           <div className="hidden lg:flex items-center justify-between mb-4">
             <div>
@@ -219,6 +227,7 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
                     value={activeCityProp}
                     onChange={(e) => onCityChange?.(e.target.value as 'bucuresti' | 'constanta')}
                     className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
+                    title="Select city"
                   >
                     <option value="bucuresti">București</option>
                     <option value="constanta">Constanța</option>
@@ -273,12 +282,12 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
             <button
               onClick={() => setGenreDropdownOpen(o => !o)}
               className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
-                activeFilter === 'All'
+                activeGenre === 'All'
                   ? 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:border-noctvm-violet/30'
                   : 'bg-noctvm-violet/10 border-noctvm-violet/50 text-noctvm-violet'
               }`}
             >
-              <span>{activeFilter === 'All' ? 'All Genres' : activeFilter}</span>
+              <span>{activeGenre === 'All' ? 'All Genres' : activeGenre}</span>
               <svg
                 className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${genreDropdownOpen ? 'rotate-180' : ''}`}
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -293,9 +302,9 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
                   {allGenres.map(genre => (
                     <button
                       key={genre}
-                      onClick={() => { setActiveFilter(genre); setGenreDropdownOpen(false); }}
+                      onClick={() => { onGenreChange?.(genre); setGenreDropdownOpen(false); }}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        activeFilter === genre
+                        activeGenre === genre
                           ? 'bg-noctvm-violet text-white shadow-glow'
                           : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
                       }`}
@@ -330,7 +339,6 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
           const isExpanded = expandedVenue === venue.name;
           const reviews = getReviews(venue.name);
           const avgRating = getAvgRating(venue.name, venue.rating);
-          const reviewCount = loadedReviews[venue.name] !== undefined ? reviews.length : venue.review_count;
           const isLoadingReviews = loadingReviews.has(venue.name);
 
           return venueView === 'grid' ? (
@@ -427,7 +435,7 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
                   <div className="flex items-center gap-2 mb-1">
                     <StarRating rating={avgRating} />
                     <span className="text-[10px] text-noctvm-silver/60">
-                      {avgRating > 0 ? avgRating.toFixed(1) : '—'} · {reviewCount} review{reviewCount !== 1 ? 's' : ''}
+                      {avgRating > 0 ? avgRating.toFixed(1) : '—'}{loadedReviews[venue.name] !== undefined ? ` · ${reviews.length} review${reviews.length !== 1 ? 's' : ''}` : ''}
                     </span>
                   </div>
                   <p className="text-[10px] text-noctvm-silver/50 truncate">{venue.address}</p>
@@ -461,14 +469,10 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
                 )}
               </div>
 
-              {/* Description — click to expand reviews */}
+              {/* Description — click to open venue page */}
               {venue.description && (
                 <button
-                  onClick={() => {
-                    const next = isExpanded ? null : venue.name;
-                    setExpandedVenue(next);
-                    if (next) fetchReviews(next);
-                  }}
+                  onClick={() => onVenueClick(venue.name)}
                   className="w-full px-4 pb-3 text-left"
                 >
                   <p className="text-xs text-noctvm-silver/70 leading-relaxed hover:text-noctvm-silver transition-colors">{venue.description}</p>
@@ -485,7 +489,9 @@ export default function VenuesPage({ onVenueClick, activeCity: activeCityProp, o
                 className="w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors"
               >
                 <span>
-                  {reviewCount > 0 ? `${reviewCount} review${reviewCount !== 1 ? 's' : ''}` : 'No reviews yet'}
+                  {loadedReviews[venue.name] !== undefined
+                    ? (reviews.length > 0 ? `${reviews.length} review${reviews.length !== 1 ? 's' : ''}` : 'No reviews yet')
+                    : 'Reviews'}
                   {venue.followers > 0 && ` · ${venue.followers.toLocaleString()} followers`}
                 </span>
                 <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 9l-7 7-7-7" /></svg>

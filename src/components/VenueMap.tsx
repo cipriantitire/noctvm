@@ -40,7 +40,7 @@ const MapViewUpdater = ({ center, useMap }: { center: [number, number], useMap: 
   const map = useMap();
   useEffect(() => {
     if (map) {
-      map.setView(center, 13, { animate: true });
+      map.setView(center, 12, { animate: true });
     }
   }, [map, center]);
   return null;
@@ -92,7 +92,7 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
     <div className="w-full h-full relative group">
       <MapContainer 
         center={center} 
-        zoom={13} 
+        zoom={12} 
         style={{ height: '100%', width: '100%', background: '#0a0a0f' }}
         zoomControl={false}
         attributionControl={false}
@@ -130,18 +130,6 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
           ) : null
         ))}
       </MapContainer>
-      
-      {/* City/Tab Overlay */}
-      <div className="absolute top-3 left-3 z-[1000] flex flex-col gap-1 pointer-events-none">
-        <div className="px-2 py-1 bg-noctvm-black/80 backdrop-blur-md rounded border border-white/10 w-fit">
-          <span className="text-[9px] font-mono text-noctvm-violet uppercase tracking-wider">{activeCity}</span>
-        </div>
-        <div className="px-2 py-1 bg-noctvm-black/60 backdrop-blur-md rounded border border-white/5 w-fit">
-          <span className="text-[8px] font-mono text-noctvm-silver uppercase tracking-wider">
-            {activeTab === 'venues' ? 'Showing All Venues' : 'Venues with Events'}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

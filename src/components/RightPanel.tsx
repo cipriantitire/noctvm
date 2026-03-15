@@ -11,9 +11,16 @@ interface RightPanelProps {
   onEventClick?: (event: NoctEvent) => void;
   activeCity?: 'bucuresti' | 'constanta';
   activeTab?: string;
+  activeGenres?: string[];
 }
 
-export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'bucuresti', activeTab = 'events' }: RightPanelProps) {
+export default function RightPanel({ 
+  onVenueClick, 
+  onEventClick, 
+  activeCity = 'bucuresti', 
+  activeTab = 'events',
+  activeGenres = ['All']
+}: RightPanelProps) {
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
@@ -64,21 +71,31 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
       });
   }, [activeCity]);
 
-  // Filter venues for map based on tab
+  // Filter venues for map based on tab and genres
   const mapVenues = useMemo(() => {
-    if (activeTab === 'venues') return venues;
+    let filtered = venues;
+    
+    // Apply genre filter if not 'All'
+    if (activeGenres && !activeGenres.includes('All')) {
+      filtered = venues.filter(v => 
+        v.genres.some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
+      );
+    }
+
+    if (activeTab === 'venues') return filtered;
+    
+    // For feed/events tab, only show venues with events tonight
     const activeVenueNames = new Set(dbEvents.map(e => e.venue));
-    return venues.filter(v => activeVenueNames.has(v.name));
-  }, [venues, dbEvents, activeTab]);
+    return filtered.filter(v => activeVenueNames.has(v.name));
+  }, [venues, dbEvents, activeTab, activeGenres]);
 
   const tonightEvents = useMemo(() => dbEvents, [dbEvents]);
 
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-hidden">
-      <div className="flex items-center gap-2 mb-5 px-1">
-        <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
+      <div className="flex items-center justify-end gap-2 mb-5 px-1">
         <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">
-          {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'} · Live
+          {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'}
         </span>
       </div>
 
