@@ -53,7 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <div className="flex items-center justify-end gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-            <span className="text-[10px] font-mono text-noctvm-silver capitalize tracking-widest">{profile?.role}</span>
+            <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">{profile?.role || 'User'}</span>
           </div>
         </div>
       </header>
@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-black truncate tracking-tight uppercase text-white">{profile?.display_name || 'Admin'}</p>
-              <p className="text-[9px] text-noctvm-silver font-mono capitalize tracking-widest">
+              <p className="text-[9px] text-noctvm-silver font-mono uppercase tracking-widest">
                 {profile?.role || 'User'}
               </p>
             </div>
