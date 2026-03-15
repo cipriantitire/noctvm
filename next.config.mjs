@@ -11,6 +11,12 @@ const nextConfig = {
       { protocol: 'https', hostname: 'livetickets-cdn.azureedge.net' },
       { protocol: 'https', hostname: '**.iabilet.ro' },
       { protocol: 'https', hostname: '**.livetickets.ro' },
+      { protocol: 'https', hostname: '**.ambilet.ro' },
+      { protocol: 'https', hostname: '**.zilesinopti.ro' },
+      { protocol: 'https', hostname: '**.click-now.ro' },
+      { protocol: 'https', hostname: '**.facebook.com' },
+      { protocol: 'https', hostname: '**.googleusercontent.com' },
+      { protocol: 'https', hostname: '**.twimg.com' },
     ],
   },
 };

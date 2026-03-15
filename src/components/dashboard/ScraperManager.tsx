@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PlayIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, XIcon } from '@/components/icons';
+import { PlayIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, XIcon, CogIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import ScraperSettingsModal from './ScraperSettingsModal';
 
 interface ScraperSource {
   id: string;
@@ -41,6 +42,7 @@ export default function ScraperManager() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [lastRun, setLastRun] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<ScraperSource | null>(null);
+  const [settingSource, setSettingSource] = useState<ScraperSource | null>(null);
 
   const runAllScrapers = async () => {
     if (!window.confirm('Start full system scrape? This will scan all sources and update the database.')) return;
@@ -141,15 +143,24 @@ export default function ScraperManager() {
                   <h4 className="text-sm font-bold text-white mb-0.5">{source.name}</h4>
                   <p className="text-[10px] text-noctvm-silver/40 lowercase font-mono">{source.description}</p>
                 </div>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}
-                  disabled={loading || !!runningSource}
-                  className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest text-noctvm-silver hover:bg-noctvm-violet hover:text-white hover:border-noctvm-violet transition-all active:scale-95 disabled:opacity-30"
-                >
-                  {runningSource === source.id ? (
-                    <div className="w-3 h-3 border-2 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
-                  ) : 'Run'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setSettingSource(source); }}
+                    className="p-1.5 hover:bg-white/5 rounded-lg text-noctvm-silver/40 hover:text-noctvm-violet transition-all"
+                    title="Settings"
+                  >
+                    <CogIcon className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}
+                    disabled={loading || !!runningSource}
+                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest text-noctvm-silver hover:bg-noctvm-violet hover:text-white hover:border-noctvm-violet transition-all active:scale-95 disabled:opacity-30"
+                  >
+                    {runningSource === source.id ? (
+                      <div className="w-3 h-3 border-2 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
+                    ) : 'Run'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -260,6 +271,13 @@ export default function ScraperManager() {
               </div>
             </div>
           </div>
+        )}
+
+        {settingSource && (
+          <ScraperSettingsModal 
+            source={settingSource} 
+            onClose={() => setSettingSource(null)} 
+          />
         )}
     </div>
   );

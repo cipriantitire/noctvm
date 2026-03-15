@@ -52,39 +52,39 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 p-10 bg-white/5 border border-white/10 rounded-[32px] frosted-noise shadow-2xl relative overflow-hidden group">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-noctvm-black border border-white/10 rounded-3xl frosted-noise shadow-2xl relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/5 to-transparent pointer-events-none"></div>
       
-      <div className="flex items-center justify-between border-b border-white/5 pb-6 relative z-10">
+      <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
         <div>
-          <h3 className="text-xl font-bold tracking-tight text-white uppercase">
+          <h3 className="text-lg font-bold tracking-tight text-white uppercase">
             {initialData?.id ? 'Edit Event' : 'Create New Event'}
           </h3>
-          <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest mt-1">Event Management System</p>
+          <p className="text-[9px] font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Event Management</p>
         </div>
         {initialData?.featured && (
-          <div className="px-3 py-1 rounded-xl bg-noctvm-violet/10 text-noctvm-violet text-[10px] font-bold border border-noctvm-violet/20 uppercase tracking-widest">
-            Featured Event
+          <div className="px-2 py-0.5 rounded-lg bg-noctvm-violet/10 text-noctvm-violet text-[8px] font-bold border border-noctvm-violet/20 uppercase tracking-widest">
+            Featured
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-        <div className="space-y-2">
-          <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Event Title</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+        <div className="space-y-1.5">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Event Title</label>
           <input
             required
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise"
-            placeholder="Enter event name..."
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise text-sm"
+            placeholder="Title..."
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue</label>
+        <div className="space-y-1.5">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue</label>
           <div className="relative">
             <select
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white appearance-none frosted-noise cursor-pointer"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white appearance-none frosted-noise cursor-pointer text-sm"
               value={formData.venue}
               onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
               title="Select Venue"
@@ -93,50 +93,50 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
                 <option key={v.id} value={v.name} className="bg-noctvm-black text-white">{v.name}</option>
               ))}
             </select>
-            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-        <div className="space-y-2">
-          <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Event Date</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+        <div className="space-y-1.5">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Date</label>
           <input
             type="date"
             required
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold text-white uppercase tracking-tighter frosted-noise"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold text-white uppercase tracking-tighter frosted-noise text-sm"
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             title="Set Date"
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Event Image URL</label>
+        <div className="space-y-1.5">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Poster URL</label>
           <input
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[10px] text-white uppercase tracking-widest placeholder:text-white/10 frosted-noise"
-            placeholder="https://example.com/image.jpg"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+            placeholder="https://..."
             value={formData.image_url}
             onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-        <div className="space-y-2">
-          <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Ticket URL</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
+        <div className="space-y-1.5">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Ticket URL</label>
           <input
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[10px] text-white uppercase tracking-widest placeholder:text-white/10 frosted-noise"
-            placeholder="https://example.com/tickets"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+            placeholder="https://..."
             value={formData.event_url}
             onChange={(e) => setFormData({ ...formData, event_url: e.target.value })}
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Ticket Price</label>
+        <div className="space-y-1.5">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Price</label>
           <input
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold text-lg text-white placeholder:text-white/10 frosted-noise tracking-tighter italic"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold text-base text-white placeholder:text-white/10 frosted-noise tracking-tighter italic"
             placeholder="e.g. 50 RON"
             value={formData.price || ''}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
@@ -144,15 +144,15 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
         </div>
       </div>
 
-      <div className="space-y-4 relative z-10">
-        <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Genres / Categories</label>
-        <div className="flex flex-wrap gap-2 pt-1">
+      <div className="space-y-3 relative z-10">
+        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Genres</label>
+        <div className="flex flex-wrap gap-1.5">
           {['Techno', 'House', 'Melodic', 'Underground', 'Live Music', 'Art', 'Rooftop'].map((genre) => (
             <button
               key={genre}
               type="button"
               onClick={() => handleGenreChange(genre)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all duration-300 ${
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all duration-300 ${
                 formData.genres?.includes(genre)
                   ? 'bg-noctvm-violet text-white border-noctvm-violet shadow-lg shadow-noctvm-violet/20'
                   : 'bg-white/5 text-noctvm-silver border-white/10 hover:border-white/30 hover:text-white'
@@ -164,36 +164,31 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
         </div>
       </div>
 
-      <div className="space-y-2 relative z-10">
-        <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Event Description</label>
+      <div className="space-y-1.5 relative z-10">
+        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Description</label>
         <textarea
-          rows={4}
-          className="w-full bg-white/5 border border-white/10 rounded-[24px] px-6 py-4 focus:border-noctvm-violet/50 outline-none transition-all resize-none font-medium text-sm text-white/80 placeholder:text-white/10 frosted-noise leading-relaxed"
-          placeholder="Describe the event, lineup, etc..."
+          rows={3}
+          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus:border-noctvm-violet/50 outline-none transition-all resize-none font-medium text-xs text-white/80 placeholder:text-white/10 frosted-noise leading-relaxed"
+          placeholder="Lineup, special info..."
           value={formData.description || ''}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
       </div>
 
-      <div className="flex justify-end gap-3 pt-8 border-t border-white/5 relative z-10">
+      <div className="flex justify-end gap-3 pt-4 border-t border-white/5 relative z-10">
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 text-noctvm-silver hover:text-white transition-all font-bold text-[10px] uppercase tracking-widest"
+          className="px-5 py-2 text-noctvm-silver hover:text-white transition-all font-bold text-[9px] uppercase tracking-widest"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-10 py-3 bg-noctvm-violet text-white rounded-[20px] font-bold text-xs uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95"
+          className="px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95 shadow-lg shadow-noctvm-violet/20"
         >
-          {loading ? (
-            <>
-              <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              <span>Saving...</span>
-            </>
-          ) : (initialData?.id ? 'Save Event' : 'Create Event')}
+          {loading ? <span>Saving...</span> : (initialData?.id ? 'Save Event' : 'Create Event')}
         </button>
       </div>
     </form>
