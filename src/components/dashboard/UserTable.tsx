@@ -154,6 +154,7 @@ export default function UserTable() {
                   value={user.role}
                   onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                   disabled={updatingId === user.id}
+                  title="Update Access Level"
                   className="w-full bg-noctvm-black/40 text-xs font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-violet transition-all appearance-none"
                 >
                   <option value="user">Regular User</option>
@@ -170,6 +171,7 @@ export default function UserTable() {
                     value={user.badge || 'none'}
                     onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
                     disabled={updatingId === user.id}
+                    title="Update Verification Badge"
                     className="flex-1 bg-noctvm-black/40 text-[10px] font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-white transition-all appearance-none"
                   >
                     <option value="none">No Badge</option>
@@ -192,6 +194,7 @@ export default function UserTable() {
                 <div className="flex items-center gap-1.5">
                   <button 
                     onClick={() => setEditingUser(user)}
+                    title="Edit User"
                     className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
                   >
                     <EditIcon className="w-4 h-4" />
@@ -200,6 +203,7 @@ export default function UserTable() {
                     onClick={() => {
                       if (window.confirm('Delete this user?')) { /* handle delete */ }
                     }}
+                    title="Delete User"
                     className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 border border-white/5 transition-all"
                   >
                     <TrashIcon className="w-4 h-4" />
