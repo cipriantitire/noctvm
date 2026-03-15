@@ -116,15 +116,18 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
               key={venue.id || venue.name} 
               position={[venue.lat, venue.lng]} 
               icon={customIcon}
-              eventHandlers={{
-                click: () => onVenueClick?.(venue.name),
-              }}
             >
               <Popup className="noctvm-popup">
-                <div className="bg-noctvm-black text-white p-2 rounded-lg border border-white/10 min-w-[120px]">
-                  <p className="text-[11px] font-bold text-noctvm-violet truncate">{venue.name}</p>
-                  <p className="text-[9px] text-noctvm-silver truncate mt-0.5">{venue.address}</p>
-                  <div className="flex gap-1 mt-1.5 overflow-hidden">
+                <div 
+                  onClick={() => onVenueClick?.(venue.name)}
+                  className="bg-noctvm-black text-white p-2.5 rounded-xl border border-white/10 min-w-[140px] cursor-pointer hover:border-noctvm-violet/50 hover:bg-noctvm-midnight/80 transition-all group/pop"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <p className="text-[11px] font-bold text-noctvm-violet truncate">{venue.name}</p>
+                    <svg className="w-3 h-3 text-noctvm-silver/40 group-hover/pop:text-noctvm-violet transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                  <p className="text-[9px] text-noctvm-silver/60 truncate mb-1.5">{venue.address}</p>
+                  <div className="flex gap-1 overflow-hidden">
                     {venue.genres?.slice(0, 2).map((g, i) => (
                       <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
                         {g}
