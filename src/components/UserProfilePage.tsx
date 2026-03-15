@@ -9,6 +9,7 @@ import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
 import type { NoctEvent } from '@/lib/types';
 import PostViewerModal from './PostViewerModal';
+import VerifiedBadge from './VerifiedBadge';
 
 // ── Post types ────────────────────────────────────────────────────────────────
 
@@ -345,9 +346,14 @@ export default function UserProfilePage({
 
         {/* Name, username, bio */}
         <div className="mb-3 space-y-0.5">
-          <p className="text-sm font-semibold text-white leading-tight">
-            {profile?.display_name || 'Night Owl'}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-semibold text-white leading-tight">
+              {profile?.display_name || 'Night Owl'}
+            </p>
+            {profile?.badge && profile.badge !== 'none' && (
+              <VerifiedBadge type={profile.badge} size="sm" />
+            )}
+          </div>
           <p className="text-xs text-noctvm-silver">@{profile?.username || 'nightowl'}</p>
           {profile?.bio && (
             <p className="text-xs text-noctvm-silver/80 mt-1.5 leading-relaxed">{profile.bio}</p>

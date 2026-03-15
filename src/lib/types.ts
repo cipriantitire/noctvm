@@ -11,11 +11,17 @@ export interface Venue {
   city: 'Bucharest' | 'Constanta';
   lat: number | null;
   lng: number | null;
+  owner_id?: string;
+  badge: 'none' | 'blue' | 'gold';
+  is_verified: boolean;
+  featured: boolean;
+  view_count: number;
+  save_count: number;
 }
 
 export interface NoctEvent {
   id: string;
-  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere' | 'onevent' | 'ambilet';
+  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere' | 'onevent' | 'ambilet' | 'manual';
   title: string;
   venue: string;
   date: string;
@@ -30,4 +36,7 @@ export interface NoctEvent {
   reviews?: number;
   lat?: number;
   lng?: number;
+  featured?: boolean;
+  view_count?: number;
+  save_count?: number;
 }

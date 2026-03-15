@@ -9,13 +9,21 @@ import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
 import ShareSheet from './ShareSheet';
 import LikesModal from './LikesModal';
+import VerifiedBadge from './VerifiedBadge';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface FeedPost {
   id: string;
   userId: string | null;
-  user: { name: string; handle: string; avatar: string; avatarUrl: string | null; verified: boolean };
+  user: { 
+    name: string; 
+    handle: string; 
+    avatar: string; 
+    avatarUrl: string | null; 
+    verified: boolean;
+    badge: 'none' | 'blue' | 'gold';
+  };
   caption: string;
   venue: { name: string; tagged: boolean };
   tags: string[];
@@ -62,7 +70,8 @@ function mapSupabasePost(row: any): FeedPost {
       handle: `@${(row.profiles?.username as string) || 'nightowl'}`,
       avatar: ((row.profiles?.display_name as string) || 'N')[0].toUpperCase(),
       avatarUrl: (row.profiles?.avatar_url as string | null) ?? null,
-      verified: false,
+      verified: !!row.profiles?.is_verified,
+      badge: (row.profiles?.badge as any) || 'none',
     },
     caption: (row.caption as string) || '',
     venue: { name: (row.venue_name as string) || '', tagged: !!row.venue_name },
@@ -700,9 +709,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                     <button className="text-sm font-medium text-white hover:text-noctvm-violet transition-colors">
                       {post.user.name}
                     </button>
-                    {post.user.verified && (
-                      <svg className="w-3.5 h-3.5 text-noctvm-violet" viewBox="0 0 24 24" fill="currentColor"><path d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" /></svg>
-                    )}
+                    {post.user.badge !== 'none' && <VerifiedBadge type={post.user.badge} size="sm" />}
                   </div>
                   <button className="text-[10px] text-noctvm-silver hover:text-noctvm-violet transition-colors">{post.user.handle}</button>
                 </div>

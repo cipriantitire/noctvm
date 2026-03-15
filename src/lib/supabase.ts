@@ -13,6 +13,9 @@ export type Profile = {
   avatar_url: string | null;
   bio: string | null;
   city: string;
+  role: 'admin' | 'owner' | 'user';
+  badge: 'none' | 'blue' | 'gold';
+  is_verified: boolean;
   created_at: string;
   updated_at: string;
 };
