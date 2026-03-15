@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string, userMetadata?: any) => {
+  const fetchProfile = useCallback(async (userId: string, user?: User) => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -41,8 +41,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (data) {
       const p = data as Profile;
+      
       // Auto-verify Google users
-      if (!p.is_verified && userMetadata?.provider === 'google') {
+      const isGoogle = user?.app_metadata?.provider === 'google' || 
+                       user?.app_metadata?.providers?.includes('google') ||
+                       user?.identities?.some(id => id.provider === 'google');
+
+      if (!p.is_verified && isGoogle) {
         await supabase.from('profiles').update({ is_verified: true }).eq('id', userId);
         p.is_verified = true;
       }
@@ -55,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id, session.user.app_metadata);
+      if (session?.user) fetchProfile(session.user.id, session.user);
       setLoading(false);
     });
 
@@ -65,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id, session.user.app_metadata);
+          fetchProfile(session.user.id, session.user);
         } else {
           setProfile(null);
         }
@@ -84,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id, user.app_metadata);
+    if (user) await fetchProfile(user.id, user);
   }, [user, fetchProfile]);
 
   const isAdmin = profile?.role === 'admin';

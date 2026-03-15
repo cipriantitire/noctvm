@@ -27,6 +27,7 @@ function StarRating({ rating }: { rating: number }) {
 export default function VenueManager() {
   const { profile, isAdmin } = useAuth();
   const [venues, setVenues] = useState<Venue[]>([]);
+  const [followCounts, setFollowCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
   const [claimingVenue, setClaimingVenue] = useState<Venue | null>(null);
@@ -36,8 +37,23 @@ export default function VenueManager() {
 
   const fetchVenues = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from('venues').select('*').order('name');
-    if (data) setVenues(data as Venue[]);
+    
+    // Fetch venues
+    const { data: venuesData } = await supabase.from('venues').select('*').order('name');
+    
+    // Fetch follow counts
+    const { data: followsData } = await supabase
+      .from('follows')
+      .select('target_id')
+      .eq('target_type', 'venue');
+    
+    const counts: Record<string, number> = {};
+    followsData?.forEach(f => {
+      counts[f.target_id] = (counts[f.target_id] || 0) + 1;
+    });
+    
+    if (venuesData) setVenues(venuesData as Venue[]);
+    setFollowCounts(counts);
     setLoading(false);
   }, []);
 
@@ -71,7 +87,7 @@ export default function VenueManager() {
       <div className="flex flex-col gap-4 px-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">Venues</h2>
+            <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight text-white uppercase italic">Venues</h2>
             <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your partner locations</p>
           </div>
         </div>
@@ -202,7 +218,7 @@ export default function VenueManager() {
 
                 <div className={`flex items-center gap-3 mb-4 ${viewMode === 'list' ? 'mt-2' : 'mt-1'}`}>
                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                      <span className="text-[9px] font-black text-white">{venue.followers || 0}</span>
+                      <span className="text-[9px] font-black text-white">{followCounts[venue.name] || 0}</span>
                       <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Followers</span>
                    </div>
                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
@@ -225,11 +241,11 @@ export default function VenueManager() {
                 </div>
 
                 <div className="flex items-center justify-between gap-3 mt-auto pt-4 border-t border-white/5">
-                  <div className="flex gap-2 flex-1">
+                  <div className="flex gap-2 w-full">
                     {!venue.owner_id && (
                       <button 
                         onClick={() => setClaimingVenue(venue)}
-                        className="flex-1 px-4 py-2 bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/30 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet hover:text-white transition-all shadow-glow-sm"
+                        className="flex-1 px-4 py-2 bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/40 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet hover:text-white transition-all shadow-glow-sm"
                       >
                         Claim
                       </button>
@@ -237,19 +253,12 @@ export default function VenueManager() {
                     {viewMode === 'grid' && (
                       <button 
                         onClick={() => setEditingVenue(venue)}
-                        className={`px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-noctvm-silver hover:text-white hover:bg-white/10 transition-all ${!venue.owner_id ? 'flex-1' : 'w-full'}`}
-                      >
+                        className={`px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 ${!venue.owner_id ? 'flex-1' : 'w-full'}`}
+                       >
                         Edit Venue
                       </button>
                     )}
                   </div>
-                  
-                  {viewMode === 'grid' && (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-xl border border-white/5 opacity-40 group-hover:opacity-100 transition-opacity">
-                      <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse"></span>
-                      <span className="text-[8px] font-mono text-noctvm-silver uppercase tracking-widest">Live</span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

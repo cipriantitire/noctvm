@@ -8,7 +8,7 @@ import VerifiedBadge from '@/components/VerifiedBadge';
 import UserEditModal from './UserEditModal';
 
 export default function UserTable() {
-  const { profile: adminProfile } = useAuth();
+  const { profile: adminProfile, refreshProfile } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,19 +52,30 @@ export default function UserTable() {
     
     if (!error) {
       setUsers(users.map(u => u.id === userId ? { ...u, is_verified: !currentStatus } : u));
+      if (userId === adminProfile?.id) refreshProfile();
     }
     setUpdatingId(null);
   };
 
   const handleUpdateBadge = async (userId: string, badge: string) => {
     setUpdatingId(userId);
+    
+    // Link badge to role
+    let role = 'user';
+    if (badge === 'admin') role = 'admin';
+    else if (badge === 'owner') role = 'owner';
+
     const { error } = await supabase
       .from('profiles')
-      .update({ badge })
+      .update({ badge, role })
       .eq('id', userId);
     
-    if (!error) {
-      setUsers(users.map(u => u.id === userId ? { ...u, badge } : u));
+    if (error) {
+      console.error('Error updating badge:', error);
+      alert('Failed to update badge');
+    } else {
+      setUsers(users.map(u => u.id === userId ? { ...u, badge, role } : u));
+      if (userId === adminProfile?.id) refreshProfile();
     }
     setUpdatingId(null);
   };
@@ -79,24 +90,27 @@ export default function UserTable() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Users</h2>
-          <p className="text-noctvm-silver text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage authorized accounts</p>
+      <div className="flex flex-col gap-4 px-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex-1">
+            <h2 className="text-xl md:text-2xl font-black font-heading tracking-tight text-white uppercase italic">Users</h2>
+            <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage authorized accounts</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+
+        <div className="sticky top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
             <input 
               type="text"
               placeholder="Search by name, email, or username..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-80 font-mono uppercase tracking-widest"
+              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
             />
           </div>
-          <div className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">
-            Count: <span className="text-white font-bold">{users.length}</span>
+          <div className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-mono text-noctvm-silver uppercase tracking-widest flex items-center justify-center gap-2">
+            User Count: <span className="text-white font-bold">{users.length}</span>
           </div>
         </div>
       </div>
@@ -174,22 +188,12 @@ export default function UserTable() {
                 </button>
               </div>
 
-              {/* Role Selection */}
-              <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Access Level</p>
+              {/* Status Display (Derived) */}
+              <div className="bg-white/5 rounded-2xl p-4 border border-white/5 flex items-center justify-between">
+                <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Access Role</p>
+                <div className="px-3 py-1 bg-noctvm-violet/10 border border-noctvm-violet/20 rounded-lg">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-noctvm-violet">{user.role || 'user'}</span>
                 </div>
-                <select 
-                  value={user.role}
-                  onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                  disabled={updatingId === user.id}
-                  title="Update Access Level"
-                  className="w-full bg-noctvm-black/40 text-[10px] font-bold py-2 px-3 rounded-xl border border-white/5 hover:border-noctvm-violet/30 focus:outline-none cursor-pointer uppercase font-mono tracking-widest text-noctvm-violet transition-all appearance-none"
-                >
-                  <option value="user">Regular User</option>
-                  <option value="owner">Venue Owner</option>
-                  <option value="admin">System Admin</option>
-                </select>
               </div>
 
               {/* Badge Management */}
