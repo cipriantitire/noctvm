@@ -87,25 +87,25 @@ export default function EventManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Events</h2>
-          <p className="text-noctvm-silver text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your nightlife listings</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
+        <div className="flex-1">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">Events</h2>
+          <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your nightlife listings</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 sm:flex-none">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
             <input 
               type="text"
-              placeholder="Search events or venues..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-64"
+              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full sm:w-48 md:w-64"
             />
           </div>
           <button 
             onClick={() => { setEditingEvent(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-noctvm-violet rounded-xl text-xs font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-noctvm-violet rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95 whitespace-nowrap"
           >
             <PlusIcon className="w-3 h-3" />
             Create Event

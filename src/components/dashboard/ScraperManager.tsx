@@ -100,18 +100,18 @@ export default function ScraperManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Scraper Management</h2>
-          <p className="text-noctvm-silver text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Automated event discovery & data sync</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
+        <div className="flex-1">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Scraper Management</h2>
+          <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Automated discovery & data sync</p>
         </div>
         <button
           onClick={runAllScrapers}
           disabled={loading || !!runningSource}
-          className="flex items-center gap-2 px-5 py-2.5 bg-noctvm-violet text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-noctvm-violet text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95 disabled:opacity-50 w-full sm:w-auto"
         >
           <PlayIcon className="w-3.5 h-3.5" />
-          {loading ? 'Processing...' : 'Start Full System Scrape'}
+          {loading ? 'Processing...' : 'Full System Scrape'}
         </button>
       </div>
 

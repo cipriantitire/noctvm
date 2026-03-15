@@ -24,15 +24,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen bg-noctvm-black overflow-hidden font-sans text-white selection:bg-noctvm-violet/30 selection:text-white">
+    <div className="flex flex-col lg:flex-row h-screen bg-noctvm-black overflow-hidden font-sans text-white selection:bg-noctvm-violet/30 selection:text-white">
       {/* Dynamic Background Noise/Gradient */}
       <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-noctvm-violet/20 blur-[120px] rounded-full animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-noctvm-emerald/10 blur-[120px] rounded-full animate-pulse-slow [animation-delay:2s]"></div>
       </div>
 
-      {/* Dashboard Sidebar */}
-      <aside className="w-64 border-r border-white/5 bg-noctvm-midnight/40 backdrop-blur-2xl flex flex-col relative z-20">
+      {/* Mobile Top Header */}
+      <header className="lg:hidden sticky top-0 z-40 bg-noctvm-midnight/60 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2" onClick={() => router.push('/dashboard')}>
+          <MoonIcon className="w-6 h-6 text-noctvm-violet" />
+          <div className="flex flex-col">
+            <span className="font-heading text-base font-black tracking-tighter leading-none">NOCTVM</span>
+            <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver opacity-50">Dashboard</span>
+          </div>
+        </div>
+        <button
+          onClick={() => router.push('/')}
+          className="p-2 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/60"
+          title="Return to App"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </button>
+      </header>
+
+      {/* Dashboard Sidebar (Desktop) */}
+      <aside className="hidden lg:flex w-64 border-r border-white/5 bg-noctvm-midnight/40 backdrop-blur-2xl flex-col relative z-20">
         <div className="px-6 py-8 flex items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/dashboard')}>
             <div className="relative">
@@ -50,9 +70,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
+                <Link
                 key={item.href}
                 href={item.href}
+                title={item.label}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                   isActive
                     ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/10'
@@ -103,12 +124,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-noctvm-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 flex items-center gap-4 shadow-2xl">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={item.label}
+              className={`p-3 rounded-xl transition-all ${
+                isActive ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40'
+              }`}
+            >
+              {item.icon}
+            </Link>
+          );
+        })}
+      </nav>
+
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative no-scrollbar">
+      <main className="flex-1 overflow-y-auto relative no-scrollbar pb-24 lg:pb-0">
         {/* Subtle Content Grid Overlay */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none"></div>
         
-        <div className="p-10 max-w-[1600px] mx-auto min-h-screen pb-32">
+        <div className="p-6 lg:p-10 max-w-[1600px] mx-auto min-h-screen">
           {children}
         </div>
       </main>
