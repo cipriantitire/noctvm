@@ -120,23 +120,22 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, 
               <Popup className="noctvm-popup">
                 <div 
                   onClick={() => onVenueClick?.(venue.name)}
-                  className="bg-noctvm-black/95 text-white p-4 rounded-3xl border border-white/10 min-w-[180px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
+                  className="bg-noctvm-black/95 text-white p-3.5 rounded-[24px] border border-white/10 min-w-[170px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
-                  <p className="text-sm font-bold text-noctvm-violet truncate mb-1">{venue.name}</p>
+                  <p className="text-sm font-bold text-noctvm-violet truncate mb-0.5">{venue.name}</p>
+                  <p className="text-[11px] text-noctvm-silver/40 truncate mb-2">{venue.address}</p>
                   
-                  <div className="flex gap-1.5 overflow-hidden mb-2">
+                  <div className="flex gap-1 overflow-hidden mb-2.5">
                     {venue.genres?.slice(0, 2).map((g, i) => (
-                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet/80 border border-noctvm-violet/20">
+                      <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
                         {g}
                       </span>
                     ))}
                   </div>
 
-                  <p className="text-xs text-noctvm-silver/50 truncate mb-3">{venue.address}</p>
-                  
                   <div className="flex items-center justify-end">
-                    <div className="w-7 h-7 rounded-xl bg-noctvm-violet/15 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all shadow-lg">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <div className="w-6 h-6 rounded-lg bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all shadow-md">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                   </div>
                 </div>

@@ -245,7 +245,7 @@ export default function Home() {
 
       {/* ── Venue Overlay ───────────────────────────────────────── */}
       {(selectedVenue || venueClosing) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4 lg:p-8">
+        <div className="fixed inset-0 z-[100] flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8">
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
             className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl bg-noctvm-midnight/80 overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
