@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -16,47 +16,54 @@ function DashboardPage() {
   const [ownedVenues, setOwnedVenues] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
-  useEffect(() => {
-    fetchData();
-  }, [profile, isAdmin]);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     // Fetch owned venues for the event form
     let venueQuery = supabase.from('venues').select('id, name, owner_id');
     if (!isAdmin && profile?.id) {
       venueQuery = venueQuery.eq('owner_id', profile.id);
     }
-    const { data: venues } = await venueQuery;
-    if (venues) setOwnedVenues(venues);
+    
+    const { data: venuesData } = await venueQuery;
+    if (venuesData) setOwnedVenues(venuesData);
 
-    // Fetch recent activity (mocked from actual table updates if we had logs, but let's show real data)
-    const { data: events } = await supabase
+    // Fetch recent activity
+    const { data: activityData } = await supabase
       .from('events')
-      .select('title, venue, created_at')
+      .select('title, venue:venues(name), created_at')
       .order('created_at', { ascending: false })
       .limit(5);
     
-    if (events) setRecentActivity(events);
-  }
+    if (activityData) {
+      setRecentActivity(activityData.map((d: any) => ({
+        title: d.title,
+        venue: d.venue?.name || 'Unknown',
+        created_at: d.created_at
+      })));
+    }
+  }, [profile, isAdmin]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in pb-20">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-heading font-extrabold text-white mb-2 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-              Command Center
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 relative">
+          <div className="space-y-1">
+            <h1 className="text-6xl font-heading font-black text-white tracking-tighter italic bg-gradient-to-br from-white via-white to-white/40 bg-clip-text text-transparent">
+              COMMAND CENTER
             </h1>
-            <p className="text-noctvm-silver font-medium">
-              Welcome back, <span className="text-noctvm-violet">{profile?.display_name || 'Night Owl'}</span>.
+            <p className="text-noctvm-silver text-lg font-medium flex items-center gap-2">
+              LATEST SIGNAL: <span className="text-noctvm-violet font-mono text-sm tracking-widest uppercase">SYSTE_ONLINE_AUTHORIZED</span>
             </p>
           </div>
-          <div className="flex gap-3">
-            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 backdrop-blur-md">
-              <p className="text-[10px] text-noctvm-silver uppercase font-mono tracking-widest mb-1">Status</p>
+          <div className="flex gap-4">
+            <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 backdrop-blur-xl frosted-noise border-glow-on-hover transition-all flex flex-col items-center justify-center min-w-[140px]">
+              <p className="text-[10px] text-noctvm-silver uppercase font-mono tracking-[0.2em] mb-1 opacity-60">Auth Level</p>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-noctvm-emerald animate-pulse"></span>
-                <span className="text-sm font-bold text-white uppercase tracking-tighter">{profile?.role}</span>
+                <span className="w-2 h-2 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+                <span className="text-lg font-black text-white uppercase tracking-tighter italic">{profile?.role}</span>
               </div>
             </div>
           </div>
@@ -68,55 +75,58 @@ function DashboardPage() {
           {/* Quick Actions */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-white tracking-tight uppercase font-mono">Quick Actions</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight uppercase font-mono flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-noctvm-violet"></span>
+                Quick Actions
+              </h3>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => setShowEventForm(true)}
-                className="flex flex-col items-center justify-center p-6 bg-noctvm-violet/5 border border-noctvm-violet/20 rounded-2xl hover:bg-noctvm-violet/10 hover:border-noctvm-violet/40 transition-all group relative overflow-hidden active:scale-95"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-violet/10 hover:border-noctvm-violet/30 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
               >
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span className="text-4xl text-noctvm-violet">📅</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <span className="text-4xl mb-4 group-hover:scale-125 group-hover:rotate-12 transition-transform duration-500 ease-out">📅</span>
+                  <span className="text-xs font-black tracking-widest uppercase font-mono">Add Event</span>
+                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono letter-spacing-widest">Create nightlife</span>
                 </div>
-                <span className="text-2xl mb-3 group-hover:scale-125 transition-transform duration-300">📅</span>
-                <span className="text-sm font-bold tracking-tight">ADD EVENT</span>
-                <span className="text-[9px] text-noctvm-silver/60 mt-1 uppercase font-mono">Create new nightlife</span>
               </button>
 
               <button 
                 onClick={() => setShowVenueForm(true)}
-                className="flex flex-col items-center justify-center p-6 bg-noctvm-emerald/5 border border-noctvm-emerald/20 rounded-2xl hover:bg-noctvm-emerald/10 hover:border-noctvm-emerald/40 transition-all group relative overflow-hidden active:scale-95"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-emerald/10 hover:border-noctvm-emerald/30 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
               >
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span className="text-4xl text-noctvm-emerald">📍</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-noctvm-emerald/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <span className="text-4xl mb-4 group-hover:scale-125 group-hover:-rotate-12 transition-transform duration-500 ease-out">📍</span>
+                  <span className="text-xs font-black tracking-widest uppercase font-mono">Add Venue</span>
+                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono">List location</span>
                 </div>
-                <span className="text-2xl mb-3 group-hover:scale-125 transition-transform duration-300">📍</span>
-                <span className="text-sm font-bold tracking-tight">ADD VENUE</span>
-                <span className="text-[9px] text-noctvm-silver/60 mt-1 uppercase font-mono">List new location</span>
               </button>
 
               <button 
-                className="flex flex-col items-center justify-center p-6 bg-noctvm-gold/5 border border-noctvm-gold/20 rounded-2xl hover:bg-noctvm-gold/10 hover:border-noctvm-gold/40 transition-all group relative overflow-hidden active:scale-95"
                 onClick={() => window.location.href = '/dashboard/events'}
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-gold/10 hover:border-noctvm-gold/30 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
               >
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span className="text-4xl text-noctvm-gold">✨</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-noctvm-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <span className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-500 ease-out">✨</span>
+                  <span className="text-xs font-black tracking-widest uppercase font-mono">Promote</span>
+                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono">Boost reach</span>
                 </div>
-                <span className="text-2xl mb-3 group-hover:scale-125 transition-transform duration-300">✨</span>
-                <span className="text-sm font-bold tracking-tight">PROMOTIONS</span>
-                <span className="text-[9px] text-noctvm-silver/60 mt-1 uppercase font-mono">Boost visibility</span>
               </button>
 
               <button 
-                className="flex flex-col items-center justify-center p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all group relative overflow-hidden active:scale-95"
                 onClick={() => window.location.href = '/dashboard/scrapers'}
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
               >
-                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span className="text-4xl text-noctvm-silver">📊</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <span className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-500 ease-out">🤖</span>
+                  <span className="text-xs font-black tracking-widest uppercase font-mono">Automate</span>
+                  <span className="text-[8px] text-noctvm-silver/40 mt-1 uppercase font-mono">Run scrapers</span>
                 </div>
-                <span className="text-2xl mb-3 group-hover:scale-125 transition-transform duration-300">📊</span>
-                <span className="text-sm font-bold tracking-tight">SCRAPERS</span>
-                <span className="text-[9px] text-noctvm-silver/60 mt-1 uppercase font-mono">System health</span>
               </button>
             </div>
           </section>
@@ -124,25 +134,36 @@ function DashboardPage() {
           {/* Recent Activity */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-white tracking-tight uppercase font-mono">Recent Activity</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight uppercase font-mono flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-noctvm-emerald"></span>
+                Activity Feed
+              </h3>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 frosted-noise divide-y divide-white/5">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-3 frosted-noise divide-y divide-white/5 shadow-2xl overflow-hidden relative group">
+              <div className="absolute inset-0 bg-gradient-to-b from-noctvm-violet/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
               {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 hover:bg-white/5 transition-all">
-                  <div className={`w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-noctvm-violet animate-pulse' : 'bg-noctvm-silver/40'}`}></div>
+                <div key={i} className="flex items-center gap-5 p-5 hover:bg-white/5 transition-all duration-300 relative z-10">
+                  <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-noctvm-violet shadow-[0_0_8px_rgba(139,92,246,0.8)]' : 'bg-white/10'}`}></div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">
-                      <span className="font-bold text-white">New Event:</span> {activity.title}
+                    <p className="text-sm font-bold text-white truncate group-hover/item:text-noctvm-violet transition-colors">
+                      {activity.title}
                     </p>
-                    <p className="text-[10px] text-noctvm-silver uppercase font-mono mt-0.5">at {activity.venue}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[9px] text-noctvm-silver uppercase font-mono tracking-widest px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
+                        {activity.venue}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-noctvm-silver/40 font-mono italic">
-                    {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <div className="text-right flex flex-col items-end gap-1">
+                    <span className="text-[10px] text-white/40 font-mono font-bold">
+                      {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono">Synchronized</span>
+                  </div>
                 </div>
               )) : (
-                <div className="p-12 text-center text-noctvm-silver italic text-sm">
-                  No recent activity found.
+                <div className="p-20 text-center text-noctvm-silver/40 italic text-sm font-mono">
+                  WAITING FOR NEXT SIGNAL...
                 </div>
               )}
             </div>
