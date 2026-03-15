@@ -1,16 +1,21 @@
+'use client';
+
 import { useMemo, useState, useEffect } from 'react';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
-import { NoctEvent } from '@/lib/types';
+import { NoctEvent, Venue } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import VenueMap from './VenueMap';
 
 interface RightPanelProps {
   onVenueClick?: (venueName: string) => void;
   onEventClick?: (event: NoctEvent) => void;
   activeCity?: 'bucuresti' | 'constanta';
+  activeTab?: string;
 }
 
-export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'bucuresti' }: RightPanelProps) {
+export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'bucuresti', activeTab = 'events' }: RightPanelProps) {
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
+  const [venues, setVenues] = useState<Venue[]>([]);
   const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
 
   useEffect(() => {
@@ -28,7 +33,16 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
         if (data) setDbEvents(data as NoctEvent[]);
       });
 
-    // Trending venues now means "Venues with the most upcoming events"
+    // Fetch venues for map
+    supabase
+      .from('venues')
+      .select('*')
+      .eq('city', cityLabel)
+      .then(({ data }) => {
+        if (data) setVenues(data as Venue[]);
+      });
+
+    // Trending venues
     supabase
       .from('events')
       .select('venue')
@@ -38,7 +52,7 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
         if (data) {
           const counts: Record<string, number> = {};
           data.forEach(ev => {
-            if (!ev.venue || ev.venue === 'Venue TBC') return; // skip empty / unresolved
+            if (!ev.venue || ev.venue === 'Venue TBC') return;
             counts[ev.venue] = (counts[ev.venue] || 0) + 1;
           });
           const sorted = Object.entries(counts)
@@ -50,12 +64,17 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
       });
   }, [activeCity]);
 
-  // Only real DB events — no sample fallback (prevents phantom events)
+  // Filter venues for map based on tab
+  const mapVenues = useMemo(() => {
+    if (activeTab === 'venues') return venues;
+    const activeVenueNames = new Set(dbEvents.map(e => e.venue));
+    return venues.filter(v => activeVenueNames.has(v.name));
+  }, [venues, dbEvents, activeTab]);
+
   const tonightEvents = useMemo(() => dbEvents, [dbEvents]);
 
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-hidden">
-      {/* City indicator */}
       <div className="flex items-center gap-2 mb-5 px-1">
         <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
         <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">
@@ -63,20 +82,13 @@ export default function RightPanel({ onVenueClick, onEventClick, activeCity = 'b
         </span>
       </div>
 
-      {/* Map placeholder */}
-      <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border">
-        <div className="aspect-[4/3] bg-noctvm-midnight flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-full bg-noctvm-violet/10 flex items-center justify-center mx-auto mb-2">
-              <svg className="w-6 h-6 text-noctvm-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-              </svg>
-            </div>
-            <p className="text-noctvm-silver text-xs">Map coming soon</p>
-            <p className="text-noctvm-silver/50 text-[10px] mt-1">{activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'} venues</p>
-          </div>
-        </div>
+      <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border h-[200px]">
+        <VenueMap 
+          venues={mapVenues} 
+          activeCity={activeCity!} 
+          activeTab={activeTab as any}
+          onVenueClick={onVenueClick}
+        />
       </div>
 
       {/* Live Tonight */}

@@ -49,17 +49,18 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* SCROLLBAR                 */
 /* ========================= */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #141414;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
-  border-radius: 3px;
+  background: rgba(124, 58, 237, 0.4);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7C3AED;
+  background: rgba(124, 58, 237, 0.7);
 }
 
 /* ========================= */
@@ -99,14 +100,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   inset: 0;
   background: linear-gradient(
     120deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 40%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 60%,
-    transparent 100%
+    transparent 30%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 70%
   );
-  background-size: 200% 100%;
-  animation: liquidSheen 6s ease-in-out infinite;
+  opacity: 0;
+  animation: liquidSheen 5s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -143,8 +142,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* Liquid glass refraction sheen */
 @keyframes liquidSheen {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 /* Fade in upward - cards, sections */
@@ -236,7 +235,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-scale-out {
@@ -335,18 +334,16 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* VIEW TOGGLE TRANSITION    */
 /* ========================= */
 .view-transition {
-  animation: viewSwitch 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: viewSwitch 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes viewSwitch {
   from {
     opacity: 0;
-    transform: scale(0.97);
-    filter: blur(4px);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
     transform: scale(1);
-    filter: blur(0px);
   }
 }
 
@@ -411,4 +408,33 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     background-size: 100% 100%;
     transition: background 0.15s ease-out;
   }
+}
+
+/* ========================= */
+/* LEAFLET CUSTOM STYLING    */
+/* ========================= */
+.leaflet-popup-content-wrapper {
+  background: transparent !important;
+  color: white !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(13, 13, 13, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.noctvm-popup .leaflet-popup-content {
+  margin: 0 !important;
+  line-height: inherit !important;
+}
+
+.leaflet-container {
+  font-family: inherit !important;
+}
+
+.custom-div-icon {
+  background: transparent;
+  border: none;
 }

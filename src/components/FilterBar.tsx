@@ -62,7 +62,7 @@ export default function FilterBar({
   };
 
   return (
-    <div className="space-y-2 mb-4">
+    <div className="space-y-2">
       {/* Row 1: Search + view toggle */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
@@ -192,7 +192,7 @@ export default function FilterBar({
           </button>
 
           {genreDropdownOpen && (
-            <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-noctvm-midnight border border-noctvm-border rounded-xl shadow-xl overflow-hidden">
+            <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-noctvm-black/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl overflow-hidden">
               <div className="flex flex-wrap gap-1.5 p-3 max-h-48 overflow-y-auto">
                 {GENRE_FILTERS.map(genre => {
                   const isActive = activeGenres.includes(genre);

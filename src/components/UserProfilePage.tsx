@@ -305,23 +305,32 @@ export default function UserProfilePage({
         {/* Avatar + stats */}
         <div className="flex items-center gap-6 mb-4">
           <div className="relative flex-shrink-0">
-            <div
-              className="w-20 h-20 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500 cursor-pointer"
-              onClick={hasActiveStories ? fetchAndOpenMyStories : undefined}
-            >
-              <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
-                <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
-                  {profile?.avatar_url ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+            {hasActiveStories ? (
+              <div
+                className="w-20 h-20 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500 cursor-pointer"
+                onClick={fetchAndOpenMyStories}
+              >
+                <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
+                    {profile?.avatar_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
                       <span className="text-2xl font-bold text-white">{initials}</span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-bold text-white">{initials}</span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 flex justify-around">
@@ -372,7 +381,7 @@ export default function UserProfilePage({
 
       {/* ── Story highlights ──────────────────────────────────── */}
       <div className="border-t border-noctvm-border px-4 py-4">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-1">
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pt-1 px-0.5">
 
           {/* "New" button */}
           <button
@@ -398,13 +407,15 @@ export default function UserProfilePage({
                 onClick={() => openHighlight(hl)}
                 className="focus:outline-none"
               >
-                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} overflow-hidden flex items-center justify-center ring-2 ring-noctvm-border group-hover:ring-noctvm-violet/50 transition-all`}>
-                  {hl.cover_url ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={hl.cover_url} alt={hl.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
-                  )}
+                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} p-[2px] transition-all group-hover:p-[1px]`}>
+                  <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-black flex items-center justify-center">
+                    {hl.cover_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={hl.cover_url} alt={hl.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
+                    )}
+                  </div>
                 </div>
               </button>
 

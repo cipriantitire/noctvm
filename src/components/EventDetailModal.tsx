@@ -27,15 +27,16 @@ function isRealEvent(id: string | undefined): boolean {
 
 function getSourceBadge(source: string) {
   switch (source) {
-    case 'fever':       return { label: 'Fever',        color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
-    case 'ra':          return { label: 'Resident Advisor', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
-    case 'livetickets': return { label: 'LiveTickets',  color: 'bg-pink-500/20 text-pink-400 border-pink-500/30' };
-    case 'iabilet':     return { label: 'iaBilet',      color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
-    case 'beethere':    return { label: 'BeeThere',     color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
-    case 'zilesinopti': return { label: 'Zile și Nopți',color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
-    case 'onevent':     return { label: 'OnEvent',       color: 'bg-violet-500/20 text-violet-400 border-violet-500/30' };
-    case 'ambilet':     return { label: 'Ambilet',       color: 'bg-teal-500/20 text-teal-400 border-teal-500/30' };
-    default:            return { label: source,          color: 'bg-noctvm-silver/20 text-noctvm-silver border-noctvm-border' };
+    case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400 border-white/10' };
+    case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848] border-white/10' };
+    case 'eventbook':   return { label: 'Eventbook',      color: 'bg-[#E01539]/15 text-[#E01539] border-white/10' };
+    case 'livetickets': return { label: 'LiveTickets',    color: 'bg-pink-500/15 text-pink-400 border-white/10' };
+    case 'iabilet':     return { label: 'iaBilet',        color: 'bg-cyan-500/15 text-cyan-400 border-white/10' };
+    case 'beethere':    return { label: 'BeeThere',       color: 'bg-yellow-500/15 text-yellow-400 border-white/10' };
+    case 'zilesinopti': return { label: 'Zile și Nopți',  color: 'bg-amber-500/15 text-amber-400 border-white/10' };
+    case 'onevent':     return { label: 'OnEvent',         color: 'bg-violet-500/15 text-violet-400 border-white/10' };
+    case 'ambilet':     return { label: 'Ambilet',         color: 'bg-teal-500/15 text-teal-400 border-white/10' };
+    default:            return { label: source,            color: 'bg-noctvm-silver/15 text-noctvm-silver border-white/10' };
   }
 }
 
@@ -195,9 +196,9 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-bold liquid-glass-price hover:scale-105 transition-all text-white border border-noctvm-emerald/30 shadow-xl shadow-black/40 flex items-center justify-center min-w-[60px]"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight bg-emerald-500/15 text-emerald-300 backdrop-blur-md border border-white/10 hover:scale-105 transition-transform"
               >
-                <span className="relative z-10">{isFree ? 'FREE' : event.price}</span>
+                {isFree ? 'FREE' : event.price}
               </a>
             </div>
           )}
@@ -232,12 +233,20 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
           {onVenueClick ? (
             <button
               onClick={(e) => { e.stopPropagation(); onVenueClick(event.venue); }}
-              className="text-noctvm-violet font-medium text-sm hover:underline text-left"
+              className="flex items-center gap-1.5 text-noctvm-violet font-medium text-sm hover:underline text-left"
             >
-              @ {event.venue}
+              <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+              {event.venue}
             </button>
           ) : (
-            <p className="text-noctvm-violet font-medium text-sm">@ {event.venue}</p>
+            <p className="flex items-center gap-1.5 text-noctvm-violet font-medium text-sm">
+              <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+              {event.venue}
+            </p>
           )}
 
           {/* Date + Time */}

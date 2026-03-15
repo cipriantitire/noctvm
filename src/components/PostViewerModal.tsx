@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -153,7 +154,7 @@ export default function PostViewerModal({
     return () => { supabase.removeChannel(channel); };
   }, [isOpen, index, post?.id]);
 
-  if (!isOpen || posts.length === 0 || !post) return null;
+  if (!isOpen || posts.length === 0 || !post || typeof document === 'undefined') return null;
 
   const hasPrev = index > 0;
   const hasNext = index < posts.length - 1;
@@ -223,8 +224,8 @@ export default function PostViewerModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity animate-fade-in" onClick={onClose} />
 
@@ -257,7 +258,7 @@ export default function PostViewerModal({
       </div>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-5xl h-[90vh] bg-noctvm-black rounded-xl overflow-hidden shadow-2xl z-[105] flex flex-col md:flex-row transition-transform animate-scale-in mx-4 md:mx-0">
+      <div className="relative w-full max-w-5xl h-full md:h-[90vh] bg-noctvm-black md:rounded-xl overflow-hidden shadow-2xl z-[105] flex flex-col md:flex-row transition-transform animate-scale-in md:mx-0">
         
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
@@ -402,11 +403,12 @@ export default function PostViewerModal({
 
         </div>
       </div>
-      <LikesModal 
+      <LikesModal
         postId={post.id}
         isOpen={showLikesModal}
         onClose={() => setShowLikesModal(false)}
       />
-    </div>
+    </div>,
+    document.body
   );
 }

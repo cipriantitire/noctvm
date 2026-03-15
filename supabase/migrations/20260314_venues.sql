@@ -10,6 +10,8 @@ create table if not exists venues (
   description   text not null default '',
   followers     int not null default 0,
   city          text not null check (city in ('Bucharest', 'Constanța')),
+  lat           numeric(10,7),
+  lng           numeric(10,7),
   created_at    timestamptz default now()
 );
 

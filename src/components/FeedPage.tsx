@@ -15,13 +15,14 @@ import LikesModal from './LikesModal';
 interface FeedPost {
   id: string;
   userId: string | null;
-  user: { name: string; handle: string; avatar: string; verified: boolean };
+  user: { name: string; handle: string; avatar: string; avatarUrl: string | null; verified: boolean };
   caption: string;
   venue: { name: string; tagged: boolean };
   tags: string[];
   likes: number;
   comments: { user: string; text: string }[];
   timeAgo: string;
+  createdAt: string;
   liked: boolean;
   saved: boolean;
   imageTheme: { gradient: string; scene: string };
@@ -39,6 +40,16 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d`;
 }
 
+function formatFullDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const day = d.getDate();
+  const month = d.getMonth() + 1;
+  const year = d.getFullYear();
+  return `${hh}:${mm} ${day}/${month}/${year}`;
+}
+
 // Map Supabase post row → FeedPost
 /* eslint-disable-next-line */
 function mapSupabasePost(row: any): FeedPost {
@@ -50,6 +61,7 @@ function mapSupabasePost(row: any): FeedPost {
       name: (row.profiles?.display_name as string) || 'Night Owl',
       handle: `@${(row.profiles?.username as string) || 'nightowl'}`,
       avatar: ((row.profiles?.display_name as string) || 'N')[0].toUpperCase(),
+      avatarUrl: (row.profiles?.avatar_url as string | null) ?? null,
       verified: false,
     },
     caption: (row.caption as string) || '',
@@ -58,6 +70,7 @@ function mapSupabasePost(row: any): FeedPost {
     likes: (row.likes_count as number) || 0,
     comments: [],
     timeAgo: timeAgo(row.created_at as string),
+    createdAt: row.created_at as string,
     liked: false, saved: false,
     imageUrl: row.image_url,
     imageTheme: { gradient: grad, scene: '' },
@@ -76,7 +89,7 @@ interface FeedPageProps {
 
 export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories, activeCity = 'bucuresti' }: FeedPageProps) {
   const { user, profile } = useAuth();
-  const [subTab, setSubTab] = useState<'explore' | 'following' | 'friends'>('explore');
+  const [subTab, setSubTab] = useState<'explore' | 'following' | 'friends'>('following');
 
   // Stories
   const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
@@ -156,23 +169,29 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         .order('created_at', { ascending: false })
         .limit(40);
 
+      const postRows = data || [];
+      const postIds = postRows.map((p: any) => p.id);
+
       let likedSet = new Set<string>();
       let savedSet = new Set<string>();
-      if (user && data && data.length > 0) {
-        const postIds = data.map((p: any) => p.id);
-        const [likesRes, savesRes] = await Promise.all([
-          supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
-          supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
+      let likeCounts: Record<string, number> = {};
+
+      if (postIds.length > 0) {
+        const [allLikesRes, likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').in('post_id', postIds),
+          user ? supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds) : Promise.resolve({ data: [] }),
+          user ? supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds) : Promise.resolve({ data: [] }),
         ]);
-        likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
-        savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
+        (allLikesRes.data || []).forEach((l: any) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
+        if (user) {
+          likedSet = new Set(((likesRes as any).data || []).map((l: any) => l.post_id));
+          savedSet = new Set(((savesRes as any).data || []).map((s: any) => s.post_id));
+        }
       }
 
-      const postRows = data || [];
-      
       // Filter logic for Explore: Everyone in city, but conceptually "Strangers + mutuals-of-mutuals + own"
       // For now, we show all posts in city as "Explore"
-      setExplorePosts(postRows.map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
+      setExplorePosts(postRows.map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id), likes: likeCounts[row.id] || 0 })));
     } catch (err) {
       console.error('Error fetching explore posts:', err);
     } finally {
@@ -317,17 +336,21 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
       let likedSet = new Set<string>();
       let savedSet = new Set<string>();
-      if (posts && posts.length > 0) {
-        const postIds = posts.map((p: any) => p.id);
-        const [likesRes, savesRes] = await Promise.all([
+      let likeCounts: Record<string, number> = {};
+      const postRows2 = posts || [];
+      if (postRows2.length > 0) {
+        const postIds = postRows2.map((p: any) => p.id);
+        const [allLikesRes, likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').in('post_id', postIds),
           supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
           supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
         ]);
+        (allLikesRes.data || []).forEach((l: any) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
         likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
         savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
       }
 
-      setFollowingPosts((posts || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
+      setFollowingPosts(postRows2.map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id), likes: likeCounts[row.id] || 0 })));
     } finally {
       setLoadingTab(false);
     }
@@ -366,17 +389,21 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
       let likedSet = new Set<string>();
       let savedSet = new Set<string>();
-      if (posts && posts.length > 0) {
-        const postIds = posts.map((p: any) => p.id);
-        const [likesRes, savesRes] = await Promise.all([
+      let likeCounts: Record<string, number> = {};
+      const postRows3 = posts || [];
+      if (postRows3.length > 0) {
+        const postIds = postRows3.map((p: any) => p.id);
+        const [allLikesRes, likesRes, savesRes] = await Promise.all([
+          supabase.from('post_likes').select('post_id').in('post_id', postIds),
           supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', postIds),
           supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', postIds),
         ]);
+        (allLikesRes.data || []).forEach((l: any) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
         likedSet = new Set((likesRes.data || []).map((l: any) => l.post_id));
         savedSet = new Set((savesRes.data || []).map((s: any) => s.post_id));
       }
 
-      setFriendsPosts((posts || []).map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id) })));
+      setFriendsPosts(postRows3.map((row: any) => ({ ...mapSupabasePost(row), liked: likedSet.has(row.id), saved: savedSet.has(row.id), likes: likeCounts[row.id] || 0 })));
     } finally {
       setLoadingTab(false);
     }
@@ -606,17 +633,13 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                 onClick={() => onOpenCreateStory()}
                 className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer relative"
               >
-                <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500">
-                  <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
-                      {profile?.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-white font-bold text-lg">{userInitial}</span>
-                      )}
-                    </div>
-                  </div>
+                <div className="w-16 h-16 rounded-full overflow-hidden bg-noctvm-surface border border-noctvm-border flex items-center justify-center">
+                  {profile?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white font-bold text-lg">{userInitial}</span>
+                  )}
                 </div>
                 <div className="absolute bottom-5 right-0 w-5 h-5 rounded-full bg-noctvm-violet border-2 border-noctvm-black flex items-center justify-center z-20">
                   <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
@@ -664,19 +687,26 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
               {/* ── Post header ────────────────────────────────── */}
               <div className="flex items-center gap-3 p-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-white">{post.user.avatar}</span>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {post.user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={post.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-bold text-white">{post.user.avatar}</span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-white">{post.user.name}</span>
+                    <button className="text-sm font-medium text-white hover:text-noctvm-violet transition-colors">
+                      {post.user.name}
+                    </button>
                     {post.user.verified && (
                       <svg className="w-3.5 h-3.5 text-noctvm-violet" viewBox="0 0 24 24" fill="currentColor"><path d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" /></svg>
                     )}
                   </div>
-                  <span className="text-[10px] text-noctvm-silver">{post.user.handle}</span>
+                  <button className="text-[10px] text-noctvm-silver hover:text-noctvm-violet transition-colors">{post.user.handle}</button>
                 </div>
-                <span className="text-[10px] text-noctvm-silver font-mono">{post.timeAgo}</span>
+                <span title={formatFullDate(post.createdAt)} className="text-[10px] text-noctvm-silver font-mono cursor-help">{post.timeAgo}</span>
 
                 {/* 3-dots */}
                 <div className="relative">
@@ -780,7 +810,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                       @{post.venue.name}
                     </button>
                   )}
-                  {post.tags.map(tag => <span key={tag} className="text-[10px] text-noctvm-violet/60">{tag}</span>)}
+                  {post.tags.map(tag => <button key={tag} className="text-[10px] text-noctvm-violet/60 hover:text-noctvm-violet transition-colors">{tag}</button>)}
                 </div>
 
                 {/* Comments */}

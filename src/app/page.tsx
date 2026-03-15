@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar from '@/components/FilterBar';
@@ -62,6 +62,8 @@ export default function Home() {
   const [storyStartIndex, setStoryStartIndex] = useState(0);
   const [storyUsers, setStoryUsers] = useState<StoryUser[]>([]);
   const [dbEvents, setDbEvents] = useState<NoctEvent[] | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const [headerHidden, setHeaderHidden] = useState(false);
 
   const handleOpenStories = useCallback((users: StoryUser[], index: number) => {
     setStoryUsers(users);
@@ -90,6 +92,25 @@ export default function Home() {
         else setDbEvents([]);
       });
   }, [activeCity]);
+
+  // Reset header visibility on tab change
+  useEffect(() => { setHeaderHidden(false); }, [activeTab]);
+
+  // Auto-hide header on scroll down, reveal on scroll up
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    let lastY = el.scrollTop;
+    const handler = () => {
+      const y = el.scrollTop;
+      const diff = y - lastY;
+      if (diff > 8 && y > 100) setHeaderHidden(true);
+      else if (diff < -8) setHeaderHidden(false);
+      lastY = y;
+    };
+    el.addEventListener('scroll', handler, { passive: true });
+    return () => el.removeEventListener('scroll', handler);
+  }, []);
 
   // Switch to profile tab and show the account menu
   const handleSettingsClick = useCallback(() => {
@@ -239,7 +260,7 @@ export default function Home() {
           activeCity={activeCity}
         />
 
-        <main className="flex-1 min-h-screen overflow-y-auto">
+        <main ref={mainRef} className="flex-1 min-h-screen overflow-y-auto">
           {/* Mobile header */}
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
             <div className="flex items-center justify-between">
@@ -277,26 +298,30 @@ export default function Home() {
             {activeTab === 'events' && (
               <div className="tab-content">
                 <MobileTopSection onVenueClick={handleVenueClick} activeCity={activeCity} />
-                <div className="hidden lg:flex items-center justify-between mb-6 animate-fade-in">
-                  <div>
-                    <h1 className="font-heading text-2xl font-bold text-white">Events</h1>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm text-noctvm-silver">Nightlife in</span>
-                      <div className="relative">
-                        <select
-                          value={activeCity}
-                          onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
-                          className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
-                        >
-                          <option value="bucuresti">București</option>
-                          <option value="constanta">Constanța</option>
-                        </select>
-                        <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+
+                {/* Sticky auto-hide header */}
+                <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[140%]' : 'translate-y-0'}`}>
+                  <div className="bg-noctvm-black/90 backdrop-blur-2xl saturate-150 rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
+                    {/* Desktop: Title + city */}
+                    <div className="hidden lg:flex items-center justify-between mb-4">
+                      <div>
+                        <h1 className="font-heading text-2xl font-bold text-white">Events</h1>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-noctvm-silver">Nightlife in</span>
+                          <div className="relative">
+                            <select
+                              value={activeCity}
+                              onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
+                              className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
+                            >
+                              <option value="bucuresti">București</option>
+                              <option value="constanta">Constanța</option>
+                            </select>
+                            <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <>
                     <FilterBar
                       activeGenres={activeGenres}
                       onGenreChange={setActiveGenres}
@@ -307,9 +332,13 @@ export default function Home() {
                       selectedDate={selectedDate}
                       onDateChange={setSelectedDate}
                     />
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center mt-1">
                       <span className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</span>
                     </div>
+                  </div>
+                </div>
+
+                <>
                     <div
                       key={viewMode}
                       className={`view-transition ${
@@ -369,6 +398,7 @@ export default function Home() {
                   onVenueClick={handleVenueClick}
                   activeCity={activeCity}
                   onCityChange={setActiveCity}
+                  headerHidden={headerHidden}
                 />
               </div>
             )}
@@ -555,8 +585,9 @@ export default function Home() {
         {(activeTab === 'events' || activeTab === 'feed' || activeTab === 'venues') && (
           <RightPanel 
             onVenueClick={handleVenueClick} 
-            onEventClick={(e) => setSelectedEvent(e)} 
+            onEventClick={(e: NoctEvent) => setSelectedEvent(e)} 
             activeCity={activeCity}
+            activeTab={activeTab}
           />
         )}
 

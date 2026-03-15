@@ -13,15 +13,16 @@ function formatDate(dateStr: string): string {
 
 function getSourceBadge(source: string) {
   switch (source) {
-    case 'fever':       return { label: 'Fever',        color: 'bg-orange-500/20 text-orange-400' };
-    case 'ra':          return { label: 'RA',            color: 'bg-blue-500/20 text-blue-400' };
-    case 'livetickets': return { label: 'LiveTickets',  color: 'bg-pink-500/20 text-pink-400' };
-    case 'iabilet':     return { label: 'iaBilet',      color: 'bg-cyan-500/20 text-cyan-400' };
-    case 'beethere':    return { label: 'BeeThere',     color: 'bg-yellow-500/20 text-yellow-400' };
-    case 'zilesinopti': return { label: 'Zile si Nopti',color: 'bg-amber-500/20 text-amber-400' };
-    case 'onevent':     return { label: 'OnEvent',       color: 'bg-violet-500/20 text-violet-400' };
-    case 'ambilet':     return { label: 'Ambilet',       color: 'bg-teal-500/20 text-teal-400' };
-    default:            return { label: source,          color: 'bg-noctvm-silver/20 text-noctvm-silver' };
+    case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400' };
+    case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848]' };
+    case 'eventbook':   return { label: 'Eventbook',      color: 'bg-[#E01539]/15 text-[#E01539]' };
+    case 'livetickets': return { label: 'LiveTickets',    color: 'bg-pink-500/15 text-pink-400' };
+    case 'iabilet':     return { label: 'iaBilet',        color: 'bg-cyan-500/15 text-cyan-400' };
+    case 'beethere':    return { label: 'BeeThere',       color: 'bg-yellow-500/15 text-yellow-400' };
+    case 'zilesinopti': return { label: 'Zile si Nopti',  color: 'bg-amber-500/15 text-amber-400' };
+    case 'onevent':     return { label: 'OnEvent',         color: 'bg-violet-500/15 text-violet-400' };
+    case 'ambilet':     return { label: 'Ambilet',         color: 'bg-teal-500/15 text-teal-400' };
+    default:            return { label: source,            color: 'bg-noctvm-silver/15 text-noctvm-silver' };
   }
 }
 
@@ -143,7 +144,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
         onClick={e => e.stopPropagation()}
         className="absolute bottom-3 right-3 z-30 group/price"
       >
-        <div className="flex items-center px-3 py-1 rounded-lg text-[11px] font-bold liquid-glass-price hover:scale-105 shadow-sm text-white transition-all duration-300">
+        <div className="flex items-center px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight bg-emerald-500/15 text-emerald-300 backdrop-blur-md border border-white/10 hover:scale-105 transition-transform">
           {display}
         </div>
       </a>
