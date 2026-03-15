@@ -36,13 +36,21 @@ const SKIP_SEGMENTS = new Set([
 function extractHtmlUrls(html: string): string[] {
   const seen = new Set<string>();
   const urls: string[] = [];
-  const re = /href="(https?:\/\/www\.onevent\.ro\/([^"?#]+))"/gi;
+  // Match links that look like https://www.onevent.ro/event-name-slug/
+  const re = /href=["'](https?:\/\/www\.onevent\.ro\/([^"?#/\s]+)\/?)["']/gi;
   let m;
   while ((m = re.exec(html)) !== null) {
-    const [, fullUrl, path] = m;
-    const segments = path.split('/').filter(Boolean);
-    if (segments.length < 2) continue;
-    if (SKIP_SEGMENTS.has(segments[0]) && segments.length <= 2) continue;
+    const [, fullUrl, slug] = m;
+    if (!slug) continue;
+    
+    // If the slug is a known category or short segment, skip it
+    if (SKIP_SEGMENTS.has(slug.toLowerCase())) continue;
+    
+    // Ensure it's not a root category page like /bucuresti/music/
+    const pathSegments = new URL(fullUrl).pathname.split('/').filter(Boolean);
+    if (pathSegments.length < 1) continue;
+    if (pathSegments.length === 2 && SKIP_SEGMENTS.has(pathSegments[0])) continue;
+
     const url = fullUrl.replace(/\/$/, '') + '/';
     if (!seen.has(url)) { seen.add(url); urls.push(url); }
   }

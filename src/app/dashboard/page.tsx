@@ -50,13 +50,7 @@ function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in pb-20">
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 relative px-2">
-          <div className="space-y-1">
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">
-              Dashboard Overview
-            </h1>
-          </div>
-        </header>
+
 
         <AnalyticsPanel />
 

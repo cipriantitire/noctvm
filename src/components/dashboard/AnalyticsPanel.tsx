@@ -77,7 +77,7 @@ export default function AnalyticsPanel() {
           </p>
           
           <div className="flex items-end justify-between relative z-10">
-            <h4 className="text-4xl font-heading font-extrabold text-white group-hover:text-glow transition-all tracking-tighter">
+            <h4 className="text-4xl font-heading font-black text-white group-hover:text-glow transition-all tracking-tighter">
               {loading ? '---' : stat.value}
             </h4>
             {!loading && (

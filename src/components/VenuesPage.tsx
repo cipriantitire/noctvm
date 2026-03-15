@@ -264,12 +264,13 @@ export default function VenuesPage({
       </div>
 
       {/* Sticky auto-hide header */}
-      <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[200%]' : ''}`}>
+      <div className={`sticky top-0 z-20 transition-transform duration-300 ease-in-out mb-6 ${headerHidden ? '-translate-y-[200%]' : ''}`}>
         <div className="frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
           {/* Desktop: Title + city */}
           <div className="hidden lg:flex items-center justify-between mb-4">
             <div>
-              <h1 className="font-heading text-2xl font-bold text-white">Venues</h1>
+              {/* Title removed per request */}
+
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-sm text-noctvm-silver">Venues in</span>
                 <div className="relative">
@@ -397,7 +398,7 @@ export default function VenuesPage({
           ))}
         </div>
       ) : (
-      <div className={`pb-24 lg:pb-6 ${venueView === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3'}`}>
+      <div className={`mt-10 pb-24 lg:pb-6 ${venueView === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3'}`}>
         {sortedVenues.map((venue, idx) => {
           const isFollowed = followedVenues.has(venue.name);
           const isLoading = loadingFollows.has(venue.name);

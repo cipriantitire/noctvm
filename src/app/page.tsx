@@ -333,12 +333,13 @@ export default function Home() {
                 />
 
                 {/* Sticky auto-hide header */}
-                <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[200%]' : ''}`}>
+                <div className={`sticky top-0 z-20 transition-transform duration-300 ease-in-out mb-2 ${headerHidden ? '-translate-y-[210%]' : ''}`}>
                   <div className="frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
                     {/* Desktop: Title + city */}
                     <div className="hidden lg:flex items-center justify-between mb-4">
                       <div>
-                        <h1 className="font-heading text-2xl font-bold text-white">Events</h1>
+                        {/* Title removed per request */}
+
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-sm text-noctvm-silver">Nightlife in</span>
                           <div className="relative">
@@ -374,7 +375,7 @@ export default function Home() {
                 <>
                     <div
                       key={viewMode}
-                      className={`view-transition ${
+                      className={`mt-10 view-transition ${
                         viewMode === 'portrait'
                           ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-stretch'
                           : 'grid grid-cols-1 lg:grid-cols-2 gap-4'

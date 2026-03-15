@@ -15,6 +15,14 @@ import { isValidVenueName }  from './utils';
 
 type Source = 'zilesinopti' | 'iabilet' | 'onevent' | 'ambilet' | 'livetickets' | 'ra' | 'eventbook';
 
+interface ScraperSettings {
+  scan_depth?: number;
+  concurrency?: number;
+  auto_update?: boolean;
+  priority?: number;
+  [key: string]: any;
+}
+
 // ── Venue normalisation ───────────────────────────────────────────────────────
 // Simple alias map: scraped name (lowercase) → canonical name stored in DB.
 // Use lowercase keys for case-insensitive matching.
@@ -81,7 +89,7 @@ export interface FetchSummary {
   results: ScrapeResult[];
 }
 
-const SCRAPERS: [Source, () => Promise<ScrapedEvent[]>][] = [
+const SCRAPERS: [Source, (settings?: ScraperSettings) => Promise<ScrapedEvent[]>][] = [
   ['zilesinopti', scrapeZilesinopti],
   ['iabilet',     scrapeIabilet],
   ['onevent',     scrapeOnevent],
@@ -101,10 +109,19 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   // Capture run timestamp BEFORE upserts — used to purge stale events afterwards
   const runStart = new Date().toISOString();
 
+  // Fetch scraper settings from the DB
+  const { data: dbSettings } = await supabase
+    .from('scraper_settings')
+    .select('id, settings');
+  
+  const settingsMap = new Map<string, ScraperSettings>();
+  dbSettings?.forEach(s => settingsMap.set(s.id, s.settings));
+
   // Run all scrapers concurrently; individual failures do not abort others
   const settled = await Promise.allSettled(
     SCRAPERS.map(async ([source, fn]) => {
-      const events = await fn();
+      const sourceSettings = settingsMap.get(source) || {};
+      const events = await fn(sourceSettings);
       return { source, events };
     }),
   );
@@ -281,6 +298,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
       event_url:   row.event_url,
       genres:      row.genres,
       price:       row.price,
+      ticket_url:  row.ticket_url,
       city:        row.city,
       updated_at:  new Date().toISOString(),
     }));
@@ -315,21 +333,28 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   if (venueMap.size > 0) {
     const venueRows = Array.from(venueMap.entries()).map(([name, data]) => ({
       name,
-      // VenuesPage queries with 'Constanta' (no diacritic) — match that
       city:    data.city,
       genres:  Array.from(data.genres),
       address: '',
     }));
 
-    // Split by city to isolate errors
+    // Insert new venues discovered from events; ignoreDuplicates: true ensures we never overwrite old ones
+    console.log(`[orchestrator] found ${venueRows.length} potential venues to sync`);
+    
     for (const cityGroup of ['Bucharest', 'Constanta']) {
       const batch = venueRows.filter(v => v.city === cityGroup);
       if (batch.length === 0) continue;
-      const { error: ve } = await supabase
+      
+      const { data: newVenues, error: ve } = await supabase
         .from('venues')
-        .upsert(batch, { onConflict: 'name', ignoreDuplicates: true });
-      if (ve) console.warn(`[orchestrator] venue sync error (${cityGroup}): ${ve.message}`);
-      else console.log(`[orchestrator] synced ${batch.length} ${cityGroup} venues`);
+        .upsert(batch, { onConflict: 'name', ignoreDuplicates: true })
+        .select('name');
+        
+      if (ve) {
+        console.warn(`[orchestrator] venue sync error (${cityGroup}): ${ve.message}`);
+      } else if (newVenues && newVenues.length > 0) {
+        console.log(`[orchestrator] added ${newVenues.length} new ${cityGroup} venues`);
+      }
     }
   }
 

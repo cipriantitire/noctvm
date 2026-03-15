@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, clean, guessGenres, splitTitleVenue } from './utils';
+import { parseDate, clean, guessGenres, splitTitleVenue, batchFetch } from './utils';
 
 const RA_GRAPHQL = 'https://ra.co/graphql';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
@@ -75,18 +75,7 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
       const res = await fetch(RA_GRAPHQL, {
         method: 'POST',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
-          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          'Accept-Language': 'ro,en;q=0.9,en-US;q=0.8',
-          'Cache-Control': 'max-age=0',
-          'Sec-Ch-Ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-          'Sec-Ch-Ua-Mobile': '?0',
-          'Sec-Ch-Ua-Platform': '"Windows"',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate',
-          'Sec-Fetch-Site': 'none',
-          'Sec-Fetch-User': '?1',
-          'Upgrade-Insecure-Requests': '1',
+          'User-Agent': USER_AGENT,
           'Content-Type': 'application/json',
           'Referer': 'https://ra.co/',
         },
@@ -106,32 +95,16 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
       const json = await res.json();
       const listings = json.data?.eventListings?.data ?? [];
 
-      return listings.map((l: any) => {
-        const ev = l.event;
-        const { title: rawTitle, venueHint } = splitTitleVenue(clean(ev.title));
-        // Pass venue name as a genre hint — RA titles are cryptic (e.g. "GH 14.03 - Cap, Christian AB")
-        // so venue names like "Control Club", "Club Guesthouse" carry the genre signal.
-        const raVenueName = clean(ev.venue?.name || '');
-        const genres = guessGenres(rawTitle, raVenueName || venueHint || 'electronic club party');
-        if (!genres) return null;
+      const urls = listings
+        .map((l: any) => l.event?.contentUrl ? `https://ra.co${l.event.contentUrl}` : null)
+        .filter(Boolean) as string[];
 
-        const date = parseDate(ev.date) || today;
-        const img = ev.images?.find((i: any) => i.type === 'landscape') || ev.images?.[0];
-        const image_url = img?.filename ? (img.filename.startsWith('http') ? img.filename : `https://img.ra.co/events/${img.filename}`) : '';
-
-        return {
-          title: rawTitle,
-          venue: raVenueName || venueHint || 'Venue TBC',
-          date,
-          time: null,
-          description: null,
-          image_url,
-          event_url: `https://ra.co${ev.contentUrl}`,
-          genres,
-          price: null,
-          city: cityLabel
-        };
-      }).filter(Boolean) as ScrapedEvent[];
+      // Deep-fetch RA detail pages to get descriptions, ticket links, and prices
+      // RA detail pages often have better info than the GraphQL summary
+      const events = await batchFetch(urls, cityLabel, { limit: 50, batchSize: 5 });
+      
+      console.log(`[ra] ${cityLabel}: Deep-fetched ${events.length} events from detail pages`);
+      return events;
     } catch (e) {
       console.warn(`[ra] failed for ${cityLabel}:`, e);
       return [];
@@ -140,10 +113,15 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
 
   const [bucharest, romania] = await Promise.all([
     fetchForArea(BUCHAREST_AREA_ID, 'Bucharest'),
-    fetchForArea(ROMANIA_AREA_ID, 'Constanta') // We'll label all non-Bucharest RA events as Constanta for now if found under general Romania, or filter them
+    fetchForArea(ROMANIA_AREA_ID, 'Constanta')
   ]);
 
-  // Filter romania events for only those that mention Constanta in venue or description if needed, 
-  // but for now let's just combine. Actually, Sunwaves is on RA.
-  return [...bucharest, ...romania.filter(e => e.venue.toLowerCase().includes('constanta') || e.venue.toLowerCase().includes('mamaia'))];
+  // Filter romania events for only those that mention Constanta in venue or description
+  const combined = [...bucharest, ...romania.filter(e => 
+    e.venue.toLowerCase().includes('constanta') || 
+    e.venue.toLowerCase().includes('mamaia') ||
+    (e.description?.toLowerCase().includes('constanta') || false)
+  )];
+
+  return combined;
 }

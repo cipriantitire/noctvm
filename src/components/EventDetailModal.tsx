@@ -205,7 +205,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
           {(hasPrice || isFree) && (
             <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
               <a
-                href={event.event_url}
+                href={event.ticket_url || event.event_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
@@ -311,7 +311,7 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
           <a
-            href={event.event_url}
+            href={event.ticket_url || event.event_url}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}

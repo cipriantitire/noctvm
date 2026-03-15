@@ -100,21 +100,6 @@ export default function ScraperManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
-        <div className="flex-1">
-          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Scraper Management</h2>
-          <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Automated discovery & data sync</p>
-        </div>
-        <button
-          onClick={runAllScrapers}
-          disabled={loading || !!runningSource}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-noctvm-violet text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95 disabled:opacity-50 w-full sm:w-auto"
-        >
-          <PlayIcon className="w-3.5 h-3.5" />
-          {loading ? 'Processing...' : 'Full System Scrape'}
-        </button>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { label: 'Status', value: loading || runningSource ? 'Active' : 'Ready', color: loading || runningSource ? 'noctvm-gold' : 'noctvm-emerald' },
@@ -129,6 +114,17 @@ export default function ScraperManager() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="px-2">
+        <button
+          onClick={runAllScrapers}
+          disabled={loading || !!runningSource}
+          className="flex items-center justify-center gap-2 px-6 py-4 bg-noctvm-violet text-white rounded-2xl text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/10 active:scale-95 disabled:opacity-50 w-full"
+        >
+          <PlayIcon className="w-4 h-4" />
+          {loading ? 'Processing...' : 'Full System Scrape'}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">

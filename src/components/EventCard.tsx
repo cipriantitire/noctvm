@@ -138,7 +138,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
 
     return (
       <a
-        href={event.event_url}
+        href={event.ticket_url || event.event_url}
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}

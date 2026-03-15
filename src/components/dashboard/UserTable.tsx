@@ -7,8 +7,11 @@ import VerifiedBadge from '@/components/VerifiedBadge';
 
 import UserEditModal from './UserEditModal';
 
+import { useDashboard } from '@/contexts/DashboardContext';
+
 export default function UserTable() {
   const { profile: adminProfile, refreshProfile } = useAuth();
+  const { headerHidden } = useDashboard();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,16 +93,10 @@ export default function UserTable() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 px-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Users</h2>
-            <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage authorized accounts</p>
-          </div>
-        </div>
-      </div>
+      {/* Title removed per request */}
 
-      <div className="sticky top-0 lg:top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2">
+
+      <div className={`sticky top-0 lg:top-0 z-30 lg:mt-0 mt-4 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
         <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
           <input 
@@ -115,7 +112,7 @@ export default function UserTable() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 px-2 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20 px-2 mt-12">
         {filteredUsers.map((user) => (
           <div 
             key={user.id} 

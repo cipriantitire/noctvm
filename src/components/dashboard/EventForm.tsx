@@ -35,7 +35,9 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
         ...formData,
         id: initialData?.id || undefined,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'title, venue, date, source' } as any);
+      }, { 
+        onConflict: initialData?.id ? 'id' : 'title, venue, date, source' 
+      } as any);
 
     if (!error) onSuccess();
     else alert(error.message);

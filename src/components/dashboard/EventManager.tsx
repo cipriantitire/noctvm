@@ -6,10 +6,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { NoctEvent, Venue } from '@/lib/types';
 import EventForm from './EventForm';
 import Image from 'next/image';
-import { CheckIcon, XIcon, PlusIcon, EditIcon, SearchIcon, GridIcon, MapPinIcon, CalendarIcon, UsersIcon } from '@/components/icons';
+import { CheckIcon, XIcon, PlusIcon, EditIcon, SearchIcon, GridIcon, MapPinIcon, CalendarIcon, UsersIcon, TrashIcon } from '@/components/icons';
+
+import { useDashboard } from '@/contexts/DashboardContext';
 
 export default function EventManager() {
   const { profile, isAdmin } = useAuth();
+  const { headerHidden } = useDashboard();
   const [events, setEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,16 +91,10 @@ export default function EventManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 px-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Events</h2>
-            <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your nightlife listings</p>
-          </div>
-        </div>
-      </div>
+      {/* Title removed per request */}
 
-      <div className="sticky top-0 lg:top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2">
+
+      <div className={`sticky top-[-4px] lg:top-0 z-30 lg:mt-0 mt-2 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
         <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
           <input 
@@ -155,9 +152,9 @@ export default function EventManager() {
         </div>
       )}
 
-      <div className={`mt-4 pb-20 px-2 ${
+      <div className={`mt-12 pb-20 px-2 min-h-screen ${
         viewMode === 'grid' 
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
+          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
           : 'flex flex-col gap-3'
       }`}>
         {filteredEvents.map((event, index) => (
@@ -191,56 +188,67 @@ export default function EventManager() {
               )}
             </div>
 
-            <div className="flex-1 min-w-0 flex flex-col h-full">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className={`font-bold text-white tracking-tight group-hover:text-noctvm-violet transition-colors truncate ${
-                  viewMode === 'grid' ? 'text-base line-clamp-2 leading-tight' : 'text-sm'
-                }`}>
-                  {event.title}
-                </h3>
-
-              </div>
-
-              <div className={`flex flex-wrap gap-x-4 gap-y-2 ${viewMode === 'grid' ? 'mb-6' : 'mb-3'}`}>
-                <div className="flex items-center gap-2">
-                  <MapPinIcon className="w-3.5 h-3.5 text-noctvm-violet/60" />
-                  <span className="text-[11px] font-bold text-white/70 truncate">@{event.venue}</span>
+            <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
+              <div className={`flex ${viewMode === 'grid' ? 'flex-col h-full' : 'flex-row items-center justify-between gap-4'}`}>
+                <div className="min-w-0 flex-1">
+                  <h3 className={`font-bold text-white tracking-tight group-hover:text-noctvm-violet transition-colors truncate ${
+                    viewMode === 'grid' ? 'text-base line-clamp-2 leading-tight mb-1' : 'text-sm mb-0.5'
+                  }`}>
+                    {event.title}
+                  </h3>
+                  
+                  <div className={`flex flex-wrap gap-x-4 gap-y-1 ${viewMode === 'grid' ? 'mb-6' : ''}`}>
+                    <div className="flex items-center gap-1.5">
+                      <MapPinIcon className="w-3 h-3 text-noctvm-violet/60" />
+                      <span className="text-[10px] font-bold text-white/70 truncate">@{event.venue}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CalendarIcon className="w-3 h-3 text-noctvm-emerald/60" />
+                      <span className="text-[10px] font-mono text-noctvm-silver tracking-tight">{event.date}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="w-3.5 h-3.5 text-noctvm-emerald/60" />
-                  <span className="text-[11px] font-mono text-noctvm-silver tracking-tight">{event.date}</span>
-                </div>
-              </div>
 
-              <div className={`flex items-center justify-between gap-3 mt-auto ${viewMode === 'grid' ? 'pt-4 border-t border-white/5' : ''}`}>
-                 <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5 opacity-40 group-hover:opacity-100 transition-opacity">
+                <div className={`flex items-center gap-2 ${viewMode === 'grid' ? 'mt-auto pt-4 border-t border-white/5 justify-between' : ''}`}>
+                  <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5 opacity-40 group-hover:opacity-100 transition-opacity">
                     <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse"></span>
-                    <span className="text-[7px] font-mono text-noctvm-silver uppercase tracking-widest">Active</span>
-                 </div>
+                    <span className="text-[7px] font-mono text-noctvm-silver uppercase tracking-widest hidden sm:inline">Active</span>
+                  </div>
 
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => handlePromote(event.id, !!event.is_promoted)}
-                    className={`p-2 rounded-xl transition-all ${
-                      event.is_promoted 
-                        ? 'text-noctvm-emerald bg-noctvm-emerald/10 border border-noctvm-emerald/20 shadow-glow-sm' 
-                        : 'text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5'
-                    }`}
-                    title={event.is_promoted ? "Stop Promoting" : "Promote Event"}
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </button>
-                  {(viewMode === 'grid' || viewMode === 'list') && (
+                  <div className="flex gap-1.5">
                     <button 
-                      onClick={() => setEditingEvent(event)}
-                      className="p-2 rounded-xl text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
+                      onClick={(e) => { e.stopPropagation(); handlePromote(event.id, !!event.is_promoted); }}
+                      className={`p-2 rounded-lg transition-all ${
+                        event.is_promoted 
+                          ? 'text-noctvm-emerald bg-noctvm-emerald/10 border border-noctvm-emerald/20 shadow-glow-sm' 
+                          : 'text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5'
+                      }`}
+                      title={event.is_promoted ? "Stop Promoting" : "Promote Event"}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setEditingEvent(event); }}
+                      className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
                       title="Edit Event"
                     >
                       <EditIcon className="w-3.5 h-3.5" />
                     </button>
-                  )}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this event?')) {
+                          supabase.from('events').delete().eq('id', event.id).then(() => refreshData());
+                        }
+                      }}
+                      className="p-2 rounded-lg text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 border border-white/5 transition-all"
+                      title="Delete Event"
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

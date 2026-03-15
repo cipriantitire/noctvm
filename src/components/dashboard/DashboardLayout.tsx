@@ -5,8 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { profile, signOut, isAdmin } = useAuth();
+import { DashboardProvider, useDashboard } from '@/contexts/DashboardContext';
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
+  const { profile, isAdmin } = useAuth();
+  const { headerHidden, scrollRef } = useDashboard();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -31,8 +34,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-noctvm-emerald/10 blur-[120px] rounded-full animate-pulse-slow [animation-delay:2s]"></div>
       </div>
 
-      {/* Mobile Top Header - Matching Webapp Style */}
-      <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
+      {/* Mobile Top Header - Always Sticky */}
+      <header className="lg:hidden sticky top-0 z-50 glass border-b border-noctvm-border px-4 py-3 shadow-lg">
         <div className="grid grid-cols-3 items-center">
           <div className="flex items-center gap-2" onClick={() => router.push('/dashboard')}>
             <MoonIcon className="w-6 h-6 text-noctvm-violet" />
@@ -156,7 +159,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative no-scrollbar pb-24 lg:pb-0">
+      <main ref={scrollRef} className="flex-1 overflow-y-auto relative no-scrollbar pb-24 lg:pb-0">
         {/* Subtle Content Grid Overlay */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none"></div>
         
@@ -165,5 +168,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <DashboardProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </DashboardProvider>
   );
 }

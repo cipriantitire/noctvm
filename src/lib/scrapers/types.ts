@@ -8,5 +8,6 @@ export interface ScrapedEvent {
   event_url:   string;
   genres:      string[];
   price:       string | null;
+  ticket_url?:  string | null;
   city?:        string;
 }

@@ -146,11 +146,19 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
         : '';
       const event_url = resolveUrl(item);
 
-      const priceNum = parseFloat(String(item.price_min ?? ''));
-      const price =
-        item.price_min == null ? null
-        : priceNum === 0 ? 'Free'
-        : `${priceNum} ${item.currency?.symbol ?? 'RON'}`;
+      const priceMin = parseFloat(String(item.price_min ?? ''));
+      const priceMax = parseFloat(String((item as any).price_max ?? ''));
+      
+      let price: string | null = null;
+      if (!isNaN(priceMin)) {
+        if (priceMin === 0 && (isNaN(priceMax) || priceMax === 0)) {
+          price = 'Free';
+        } else if (!isNaN(priceMax) && priceMax > priceMin) {
+          price = `${priceMin} - ${priceMax} ${item.currency?.symbol ?? 'RON'}`;
+        } else {
+          price = `${priceMin} ${item.currency?.symbol ?? 'RON'}`;
+        }
+      }
 
       const genres = guessGenres(title, description ?? '');
       if (!genres) continue;

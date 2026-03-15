@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboard } from '@/contexts/DashboardContext';
 import { Venue } from '@/lib/types';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import VenueForm from './VenueForm';
@@ -26,6 +27,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function VenueManager() {
   const { profile, isAdmin } = useAuth();
+  const { headerHidden } = useDashboard();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [followCounts, setFollowCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -38,10 +40,11 @@ export default function VenueManager() {
   const fetchVenues = useCallback(async () => {
     setLoading(true);
     
-    // Fetch venues
+    // 1. Fetch all venues
     const { data: venuesData } = await supabase.from('venues').select('*').order('name');
-    
-    // Fetch follow counts
+    if (!venuesData) { setLoading(false); return; }
+
+    // 2. Fetch ALL follows for venues to calculate follower counts
     const { data: followsData } = await supabase
       .from('follows')
       .select('target_id')
@@ -51,8 +54,28 @@ export default function VenueManager() {
     followsData?.forEach(f => {
       counts[f.target_id] = (counts[f.target_id] || 0) + 1;
     });
+
+    // 3. Fetch review statistics from venue_reviews table
+    const { data: reviewsData } = await supabase
+      .from('venue_reviews')
+      .select('venue_name, rating');
     
-    if (venuesData) setVenues(venuesData as Venue[]);
+    const stats: Record<string, { sum: number; count: number }> = {};
+    reviewsData?.forEach(r => {
+      if (!stats[r.venue_name]) stats[r.venue_name] = { sum: 0, count: 0 };
+      stats[r.venue_name].sum += r.rating;
+      stats[r.venue_name].count++;
+    });
+
+    // 4. Map everything together
+    const enrichedVenues = (venuesData as Venue[]).map(v => ({
+      ...v,
+      followers: counts[v.name] || 0,
+      rating: stats[v.name] ? stats[v.name].sum / stats[v.name].count : (v.rating || 0),
+      review_count: stats[v.name] ? stats[v.name].count : (v.review_count || 0)
+    }));
+    
+    setVenues(enrichedVenues);
     setFollowCounts(counts);
     setLoading(false);
   }, []);
@@ -84,16 +107,10 @@ export default function VenueManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 px-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white uppercase">Venues</h2>
-            <p className="text-noctvm-silver text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-1 opacity-60">Manage your partner locations</p>
-          </div>
-        </div>
-      </div>
+      {/* Title removed per request */}
 
-      <div className="sticky top-0 lg:top-0 z-30 frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2">
+
+      <div className={`sticky top-0 lg:top-0 z-30 lg:mt-0 mt-4 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
         <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
           <input 
@@ -158,7 +175,7 @@ export default function VenueManager() {
         />
       )}
 
-      <div className={`mt-4 pb-20 px-2 ${
+      <div className={`mt-12 pb-20 px-2 min-h-screen ${
         viewMode === 'grid' 
           ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' 
           : 'flex flex-col gap-3'
@@ -170,8 +187,8 @@ export default function VenueManager() {
           return (
             <div 
               key={venue.id} 
-              className={`group relative bg-white/5 border border-white/10 frosted-noise hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-xl overflow-hidden ${
-                viewMode === 'grid' ? 'rounded-[2rem] p-5' : 'rounded-2xl p-4 flex items-center gap-4'
+              className={`group relative bg-white/5 border border-white/10 frosted-noise hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-xl overflow-hidden flex ${
+                viewMode === 'grid' ? 'flex-col rounded-[2rem] p-5 h-full' : 'flex-row items-center gap-4 rounded-2xl p-4'
               }`}
             >
               <div className={`absolute top-0 right-0 bg-noctvm-violet/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-noctvm-violet/10 transition-colors duration-700 ${

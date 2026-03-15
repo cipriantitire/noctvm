@@ -394,19 +394,33 @@ export async function fetchHtml(url: string, timeoutMs = 10_000): Promise<string
 
 // ── Price extraction ──────────────────────────────────────────────────────────
 
-/** Try to extract a price from Schema.org offers block (single or array). */
+/** Try to extract a price from Schema.org offers block (single or array). Returns a range or single value. */
 export function extractPriceFromOffers(offers: unknown): string | null {
   if (!offers) return null;
   const offerList = Array.isArray(offers) ? offers : [offers];
-  let min = Infinity;
+  let prices: number[] = [];
+  let currency = 'RON';
+
   for (const o of offerList as Record<string, unknown>[]) {
-    const p = parseFloat(String(o.price ?? o.lowPrice ?? ''));
-    if (!isNaN(p) && p < min) min = p;
+    const p = parseFloat(String(o.price ?? o.lowPrice ?? o.highPrice ?? ''));
+    if (!isNaN(p)) prices.push(p);
+    if (o.priceCurrency) currency = String(o.priceCurrency);
   }
-  if (min === Infinity) return null;
-  if (min === 0) return 'Free';
-  const currency = (offerList[0] as Record<string, unknown>).priceCurrency ?? 'RON';
-  return `${min} ${currency}`;
+
+  if (prices.length === 0) return null;
+  
+  prices = Array.from(new Set(prices)).sort((a, b) => a - b);
+  
+  if (prices.length === 1) {
+    return prices[0] === 0 ? 'Free' : `${prices[0]} ${currency}`;
+  }
+  
+  const min = prices[0];
+  const max = prices[prices.length - 1];
+  
+  if (min === 0 && max === 0) return 'Free';
+  if (min === 0) return `Free - ${max} ${currency}`;
+  return `${min} - ${max} ${currency}`;
 }
 
 /**
@@ -470,12 +484,47 @@ function extractVenueFromHtml(html: string): string {
   return 'Venue TBC';
 }
 
-/** Scrape a price from raw HTML text as a last resort. */
+/** Scrape a price from raw HTML text as a last resort. Supports ranges and "Free". */
 function extractPriceFromHtml(html: string): string | null {
-  const match = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|ron)\b/i);
-  if (match) return `${match[1].replace(',', '.')} RON`;
-  if (/\bfree\b|\bgratuit/i.test(html)) return 'Free';
+  // Check for explicit "Free" mentions
+  if (/\b(?:free entry|intrare libera|intrare liberă|gratuit|entree gratuite)\b/i.test(html)) {
+    return 'Free';
+  }
+
+  // Regex to find all numbers followed by currency or currency symbols
+  // Support variants like "20.00 lei", "20 lei", "€20", "Tickets from 20 RON", "Cost 20 lei"
+  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret)\s*)?(?:(?:\d+(?:[.,]\d+)?)\s*(?:RON|lei|ron|EUR|€|USD|\$|GBP|£)\b)|(?:(?:RON|lei|ron|EUR|€|USD|\$|GBP|£)\s*(?:\d+(?:[.,]\d+)?))/gi));
+  
+  const prices = priceMatches
+    .map(m => {
+      const numMatch = m[0].match(/\d+(?:[.,]\d+)?/);
+      return numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
+    })
+    .filter((p): p is number => p !== null && !isNaN(p) && p > 0);
+
+  if (prices.length > 0) {
+    const sorted = Array.from(new Set(prices)).sort((a, b) => a - b);
+    if (sorted.length === 1) return `${sorted[0]} RON`;
+    return `${sorted[0]} - ${sorted[sorted.length - 1]} RON`;
+  }
+
   return null;
+}
+
+/** Extract registration/ticket links from HTML if JSON-LD is missing them. */
+export function extractTicketsFromHtml(html: string): string | null {
+  // Search for buttons or links with ticket keywords
+  const re = /href=["']([^"']*(?:iabilet|livetickets|eventbook|ambilet|entertix|bilete\.ro|entree|tickets?|booking)[^"']*)["']/gi;
+  const matches = Array.from(html.matchAll(re));
+  
+  // Prioritize external ticketing providers over internal page links
+  const providers = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix', 'bilete.ro'];
+  for (const p of providers) {
+    const found = matches.find(m => m[1].includes(p));
+    if (found) return found[1];
+  }
+  
+  return matches.length > 0 ? matches[0][1] : null;
 }
 
 // ── Deep-fetch core ───────────────────────────────────────────────────────────
@@ -558,21 +607,58 @@ export async function parseDetailPage(
       : String((rawImg as Record<string, unknown>)?.url ?? '');
     if (!image_url) image_url = og['og:image'] ?? '';
 
-    // Price: JSON-LD offers > raw HTML
-    const price = extractPriceFromOffers(b.offers) ?? extractPriceFromHtml(html);
+    // Price: JSON-LD offers > raw HTML. 
+    // Fallback to HTML even if JSON-LD says "Free" if we find price-like strings in HTML,
+    // as some sites (onevent, ambilet) often have incorrect 0 values in JSON-LD.
+    let price = extractPriceFromOffers(b.offers);
+    if (!price || price === 'Free') {
+      const htmlPrice = extractPriceFromHtml(html);
+      // If HTML gives a non-Free price, prefer it over the suspicious JSON-LD "Free"
+      if (htmlPrice && htmlPrice !== 'Free') {
+        price = htmlPrice;
+      } else if (!price) {
+        // Only if we still have no price, check RA specific cost field
+        const raCostMatch = html.match(/Cost\s*<\/div>\s*<div[^>]*>([^<]+)</i);
+        if (raCostMatch) price = raCostMatch[1].trim();
+        else price = htmlPrice;
+      }
+    }
+
+    // Ticket link: JSON-LD url > HTML ticket providers
+    // Priority for ticket_url: External provider (iabilet, etc)
+    // event_url is the primary source page (e.g. RA detail page)
+    const externalTicketLink = extractTicketsFromHtml(html);
+    const source = url.includes('ra.com') || url.includes('residentadvisor.net') ? 'ra'
+      : url.includes('onevent.ro') ? 'onevent'
+      : url.includes('iabilet.ro') ? 'iabilet'
+      : url.includes('livetickets.ro') ? 'livetickets'
+      : url.includes('eventbook.ro') ? 'eventbook'
+      : url.includes('ambilet.ro') ? 'ambilet'
+      : 'manual';
+
+    let event_url = b.url ? String(b.url) : url;
+    let ticket_url: string | null = null;
+
+    if (source === 'ra') {
+      event_url = url; 
+      ticket_url = externalTicketLink;
+    } else if (externalTicketLink) {
+      event_url = externalTicketLink;
+    }
 
     // Genre filter
     const genres = guessGenres(title, description ?? '');
-    if (!genres) return null;
+    if (!genres) continue;
 
     return {
       title,
       venue,
       date,
-      time: extractTime(startDate),
+      time: extractTime(startDate) || null,
       description,
       image_url,
-      event_url: url,
+      event_url,
+      ticket_url,
       genres,
       price,
       city,
@@ -631,7 +717,7 @@ export async function parseDetailPage(
     time: sdRaw ? extractTime(sdRaw) : null,
     description: ogDesc,
     image_url: og['og:image'] ?? '',
-    event_url: url,
+    event_url: extractTicketsFromHtml(html) || url,
     genres,
     price: extractPriceFromHtml(html),
     city,
