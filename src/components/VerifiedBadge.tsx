@@ -26,18 +26,18 @@ export default function VerifiedBadge({ type, size = 'md', className = '' }: Ver
 
   const isGold = type === 'gold';
   
-  // Color palette derived from the new images
+  // Color palette derived from the project's design system (tailwind.config.ts)
   const colors = {
-    user: { // Purple
-      inner: '#995BFF',
+    user: { // Violet
+      inner: '#7C3AED', // noctvm-violet
       margin: '#FFFFFF', // White wavy inner margin
-      check: '#5EFFA1', // Green Tick
-      border: '#7C3AED', // Purple border
+      check: '#10B981', // noctvm-emerald (Green Tick)
+      border: '#6D28D9', // Slightly darker violet for the border
     },
-    venue: { // Green
-      inner: '#5EFFA1',
-      check: '#FFD700', // Gold Tick
-      border: '#065F46', // Dark Green Border
+    venue: { // Emerald
+      inner: '#10B981', // noctvm-emerald
+      check: '#D4A843', // noctvm-gold (Gold Tick)
+      border: '#065F46', // Darker emerald for the border
     }
   };
 
