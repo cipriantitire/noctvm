@@ -298,11 +298,16 @@ export default function Home() {
             {/* ── Events Tab ──────────────────────────────────── */}
             {activeTab === 'events' && (
               <div className="tab-content">
-                <MobileTopSection onVenueClick={handleVenueClick} activeCity={activeCity} />
+                <MobileTopSection 
+                  onVenueClick={handleVenueClick} 
+                  activeCity={activeCity} 
+                  activeGenres={activeGenres}
+                  activeTab={activeTab}
+                />
 
                 {/* Sticky auto-hide header */}
-                <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[140%]' : 'translate-y-0'}`}>
-                  <div className="bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
+                <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[200%]' : ''}`}>
+                  <div className="frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
                     {/* Desktop: Title + city */}
                     <div className="hidden lg:flex items-center justify-between mb-4">
                       <div>

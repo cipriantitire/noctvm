@@ -89,7 +89,14 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick }
   });
 
   return (
-    <div className="w-full h-full relative group">
+    <div className="w-full h-full relative group overflow-hidden">
+      {/* Radar Effect Overlays */}
+      <div className="absolute inset-0 z-[401] pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] radar-sweep opacity-30" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-noctvm-violet/20 radar-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border border-noctvm-violet/10 radar-pulse stagger-2" />
+      </div>
+
       <MapContainer 
         center={center} 
         zoom={12} 

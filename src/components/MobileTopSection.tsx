@@ -1,18 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { supabase } from '@/lib/supabase';
-import { NoctEvent } from '@/lib/types';
+import { NoctEvent, Venue } from '@/lib/types';
+import VenueMap from './VenueMap';
 
 interface MobileTopSectionProps {
   onVenueClick: (venueName: string) => void;
   activeCity?: 'bucuresti' | 'constanta';
+  activeGenres?: string[];
+  activeTab?: string;
 }
 
-export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti' }: MobileTopSectionProps) {
+export default function MobileTopSection({ 
+  onVenueClick, 
+  activeCity = 'bucuresti',
+  activeGenres = ['All'],
+  activeTab = 'events'
+}: MobileTopSectionProps) {
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
+  const [venues, setVenues] = useState<Venue[]>([]);
   const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
   const today = new Date().toISOString().split('T')[0];
 
@@ -30,7 +39,16 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
         if (data) setDbEvents(data as NoctEvent[]);
       });
 
-    // Trending venues now means "Venues with the most upcoming events"
+    // Fetch venues for map
+    supabase
+      .from('venues')
+      .select('*')
+      .eq('city', cityLabel)
+      .then(({ data }) => {
+        if (data) setVenues(data as Venue[]);
+      });
+
+    // Trending venues
     supabase
       .from('events')
       .select('venue')
@@ -59,20 +77,33 @@ export default function MobileTopSection({ onVenueClick, activeCity = 'bucuresti
         return matchesCity && e.date === today;
       });
 
+  // Filter venues for map based on genres and events
+  const mapVenues = useMemo(() => {
+    let filtered = venues;
+    
+    // Apply genre filter if not 'All'
+    if (activeGenres && !activeGenres.includes('All')) {
+      filtered = venues.filter(v => 
+        v.genres.some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
+      );
+    }
+
+    // On Events tab mobile, show venues that have events tonight
+    const activeVenueNames = new Set(tonightEvents.map(e => e.venue));
+    return filtered.filter(v => activeVenueNames.has(v.name));
+  }, [venues, activeGenres, tonightEvents]);
+
   return (
     <div className="lg:hidden space-y-2 mb-3 animate-fade-in">
       {/* Map - wide landscape */}
       <div className="rounded-xl overflow-hidden border border-white/5 bg-noctvm-midnight/30 backdrop-blur-sm animate-fade-in-up">
-        <div className="aspect-[21/7] flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-10 h-10 rounded-full bg-noctvm-violet/10 flex items-center justify-center mx-auto mb-1.5 border border-noctvm-violet/20">
-              <svg className="w-5 h-5 text-noctvm-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-              </svg>
-            </div>
-            <p className="text-noctvm-silver text-[10px] font-mono tracking-tight">Map coming soon</p>
-          </div>
+        <div className="aspect-[21/9] flex items-center justify-center relative">
+          <VenueMap 
+            venues={mapVenues}
+            activeCity={activeCity}
+            activeTab={activeTab as any}
+            onVenueClick={onVenueClick}
+          />
         </div>
       </div>
 

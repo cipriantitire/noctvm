@@ -3,21 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { Venue } from '@/lib/types';
+import VenueMap from './VenueMap';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
-
-interface Venue {
-  id: string;
-  name: string;
-  address: string;
-  genres: string[];
-  capacity: number;
-  rating: number;
-  review_count: number;
-  description: string;
-  followers: number;
-  city: 'Bucharest' | 'Constanta';
-}
 
 interface VenueReview {
   id: string;
@@ -82,6 +71,7 @@ export default function VenuesPage({
   const [loadedReviews, setLoadedReviews] = useState<Record<string, VenueReview[]>>({});
   const [loadingReviews, setLoadingReviews] = useState<Set<string>>(new Set());
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [preloadedStats, setPreloadedStats] = useState<Record<string, { avg: number; count: number }>>({});
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
   const genreDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -109,6 +99,29 @@ export default function VenuesPage({
         setLoadingVenues(false);
       });
   }, [cityToQuery]);
+
+  // Preload review stats (avg + count) for all venues so toggle shows real data immediately
+  useEffect(() => {
+    if (venues.length === 0) return;
+    supabase
+      .from('venue_reviews')
+      .select('venue_name, rating')
+      .in('venue_name', venues.map(v => v.name))
+      .then(({ data }) => {
+        const acc: Record<string, { sum: number; count: number }> = {};
+        (data || []).forEach((r: { venue_name: string; rating: number }) => {
+          if (!acc[r.venue_name]) acc[r.venue_name] = { sum: 0, count: 0 };
+          acc[r.venue_name].sum += r.rating;
+          acc[r.venue_name].count++;
+        });
+        const stats: Record<string, { avg: number; count: number }> = {};
+        venues.forEach(v => {
+          const r = acc[v.name];
+          stats[v.name] = r ? { avg: r.sum / r.count, count: r.count } : { avg: 0, count: 0 };
+        });
+        setPreloadedStats(stats);
+      });
+  }, [venues]);
 
   // Load current user's venue follows
   useEffect(() => {
@@ -213,9 +226,21 @@ export default function VenuesPage({
 
   return (
     <div className="tab-content">
+      {/* Mobile Map - wide landscape (Top of Venues Page) */}
+      <div className="lg:hidden mb-4 rounded-xl overflow-hidden border border-white/5 bg-noctvm-midnight/30 backdrop-blur-sm animate-fade-in-up">
+        <div className="aspect-[21/9] flex items-center justify-center relative">
+          <VenueMap 
+            venues={filteredVenues}
+            activeCity={activeCityProp || 'bucuresti'}
+            activeTab="venues"
+            onVenueClick={onVenueClick}
+          />
+        </div>
+      </div>
+
       {/* Sticky auto-hide header */}
-      <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[140%]' : 'translate-y-0'}`}>
-        <div className="bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
+      <div className={`sticky top-12 lg:top-0 z-20 transition-transform duration-300 ease-in-out mb-5 ${headerHidden ? '-translate-y-[200%]' : ''}`}>
+        <div className="frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
           {/* Desktop: Title + city */}
           <div className="hidden lg:flex items-center justify-between mb-4">
             <div>
@@ -393,14 +418,15 @@ export default function VenuesPage({
           ) : (
             <div
               key={venue.name}
-              className="bg-noctvm-surface rounded-2xl border border-noctvm-border transition-all duration-300 overflow-hidden animate-fade-in-up"
+              onClick={() => onVenueClick(venue.name)}
+              className="bg-noctvm-surface rounded-2xl border border-noctvm-border transition-all duration-300 overflow-hidden animate-fade-in-up cursor-pointer hover:border-noctvm-violet/30 hover:shadow-[0_4px_24px_rgba(124,58,237,0.08)]"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
-              {/* Venue header row — click name/logo to open venue page */}
+              {/* Venue header row */}
               <div className="flex items-center gap-3 p-4">
-                {/* Logo — clickable → venue page */}
+                {/* Logo */}
                 <button
-                  onClick={() => onVenueClick(venue.name)}
+                  onClick={(e) => { e.stopPropagation(); onVenueClick(venue.name); }}
                   className="w-14 h-14 rounded-2xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 hover:border-noctvm-violet/40 transition-colors"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -422,22 +448,14 @@ export default function VenuesPage({
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <button
-                      onClick={() => onVenueClick(venue.name)}
-                      className="font-heading font-semibold text-white text-sm hover:text-noctvm-violet transition-colors truncate text-left"
-                    >
-                      {venue.name}
-                    </button>
+                    <span className="font-heading font-semibold text-white text-sm truncate">{venue.name}</span>
                     {isFollowed && (
                       <span className="px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet text-[9px] font-semibold flex-shrink-0">Following</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <StarRating rating={avgRating} />
-                    <span className="text-[10px] text-noctvm-silver/60">
-                      {avgRating > 0 ? avgRating.toFixed(1) : '—'}{loadedReviews[venue.name] !== undefined ? ` · ${reviews.length} review${reviews.length !== 1 ? 's' : ''}` : ''}
-                    </span>
-                  </div>
+                  {venue.followers > 0 && (
+                    <p className="text-[10px] text-noctvm-silver/40 mb-0.5">{venue.followers.toLocaleString()} followers</p>
+                  )}
                   <p className="text-[10px] text-noctvm-silver/50 truncate">{venue.address}</p>
                 </div>
 
@@ -455,45 +473,52 @@ export default function VenuesPage({
                 </button>
               </div>
 
-              {/* Genres + capacity */}
-              <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+              {/* Genres + capacity inline */}
+              <div className="flex flex-wrap items-center gap-1.5 px-4 pb-3">
                 {venue.genres.map(g => (
                   <span key={g} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-noctvm-violet/8 text-noctvm-violet/70 border border-noctvm-violet/10">
                     {g}
                   </span>
                 ))}
                 {venue.capacity > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-noctvm-surface text-noctvm-silver/40 border border-noctvm-border ml-auto">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-noctvm-surface text-noctvm-silver/40 border border-noctvm-border">
                     Cap. {venue.capacity}
                   </span>
                 )}
               </div>
 
-              {/* Description — click to open venue page */}
+              {/* Description — card click handles navigation */}
               {venue.description && (
-                <button
-                  onClick={() => onVenueClick(venue.name)}
-                  className="w-full px-4 pb-3 text-left"
-                >
-                  <p className="text-xs text-noctvm-silver/70 leading-relaxed hover:text-noctvm-silver transition-colors">{venue.description}</p>
-                </button>
+                <div className="w-full px-4 pb-3">
+                  <p className="text-xs text-noctvm-silver/70 leading-relaxed">{venue.description}</p>
+                </div>
               )}
 
-              {/* Reviews toggle row */}
+              {/* Reviews toggle row — stops card click from propagating */}
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   const next = isExpanded ? null : venue.name;
                   setExpandedVenue(next);
                   if (next) fetchReviews(next);
                 }}
                 className="w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors"
               >
-                <span>
-                  {loadedReviews[venue.name] !== undefined
-                    ? (reviews.length > 0 ? `${reviews.length} review${reviews.length !== 1 ? 's' : ''}` : 'No reviews yet')
-                    : 'Reviews'}
-                  {venue.followers > 0 && ` · ${venue.followers.toLocaleString()} followers`}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {(() => {
+                    const stat = loadedReviews[venue.name] !== undefined
+                      ? { avg: reviews.length > 0 ? avgRating : 0, count: reviews.length }
+                      : (preloadedStats[venue.name] ?? { avg: 0, count: 0 });
+                    return (
+                      <>
+                        <StarRating rating={stat.avg} />
+                        <span className="text-[10px] text-noctvm-silver/60">
+                          {stat.avg > 0 ? stat.avg.toFixed(1) : 'N/A'} · {stat.count} Reviews
+                        </span>
+                      </>
+                    );
+                  })()}
+                </div>
                 <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 9l-7 7-7-7" /></svg>
               </button>
 
