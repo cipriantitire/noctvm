@@ -94,6 +94,7 @@ export default function RightPanel({
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-hidden">
       <div className="flex items-center justify-end gap-2 mb-5 px-1">
+        <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
         <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">
           {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'}
         </span>
