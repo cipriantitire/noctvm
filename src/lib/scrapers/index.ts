@@ -219,12 +219,17 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
     const best: DedupeRow = { ...group[0] };
     
-    // Merge ticket_url from any other source in the group if the best one doesn't have it
-    // or if the best one is RA (which uses ticket_url for external providers anyway)
+    // Merge data from any other source in the group if the best one is missing it
     for (let i = 1; i < group.length; i++) {
       const other = group[i];
       if (!best.ticket_url && other.ticket_url) {
         best.ticket_url = other.ticket_url;
+      }
+      if (!best.image_url && other.image_url) {
+        best.image_url = other.image_url;
+      }
+      if (!best.description && other.description) {
+        best.description = other.description;
       }
       // If we have an RA event and a LiveTickets event, ensure the LiveTickets link
       // ends up in ticket_url if it's not already there.
@@ -509,6 +514,14 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
           // Merge valuable data if winner is missing it
           if (!winner.ticket_url && loser.ticket_url) {
             winner.ticket_url = loser.ticket_url;
+            updatedWinner = true;
+          }
+          if (!winner.image_url && loser.image_url) {
+            winner.image_url = loser.image_url;
+            updatedWinner = true;
+          }
+          if (!winner.description && loser.description) {
+            winner.description = loser.description;
             updatedWinner = true;
           }
           if (!winner.time && loser.time) {
