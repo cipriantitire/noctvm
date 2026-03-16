@@ -364,8 +364,8 @@ export default function UserTable() {
                </div>
 
                <div className="flex gap-1.5 ml-auto pl-4 border-l border-white/5">
-                 <button onClick={() => setEditingUser(user)} className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/10 transition-all">
-                   <MapPinIcon className="w-3.5 h-3.5" />
+                 <button onClick={() => setEditingUser(user)} className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/10 transition-all" title="Manage User Venues">
+                   <VenuesIcon className="w-3.5 h-3.5" />
                  </button>
                  <button 
                   onClick={async () => {
