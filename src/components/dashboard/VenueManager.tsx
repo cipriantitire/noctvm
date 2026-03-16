@@ -8,7 +8,8 @@ import { Venue } from '@/lib/types';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import VenueForm from './VenueForm';
 import ClaimModal from './ClaimModal';
-import { PlusIcon, EditIcon, CheckIcon, SearchIcon, GridIcon, UsersIcon } from '@/components/icons';
+import { TrashIcon, PlusIcon, EditIcon, CheckIcon, SearchIcon, GridIcon, UsersIcon } from '@/components/icons';
+import { logActivity } from '@/lib/activity';
 import Image from 'next/image';
 import { getVenueLogo } from '@/lib/venue-logos';
 
@@ -97,6 +98,29 @@ export default function VenueManager() {
     }
     return a.name.localeCompare(b.name);
   });
+
+  const handleDelete = async (venue: Venue) => {
+    if (!window.confirm(`Are you absolutely sure you want to delete "${venue.name}"? This will remove all associated data and cannot be undone.`)) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('venues')
+      .delete()
+      .eq('id', venue.id);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      await logActivity({
+        type: 'venue_delete',
+        message: `Deleted venue: ${venue.name}`,
+        entity_name: venue.name,
+        user_name: profile?.display_name || 'Admin'
+      });
+      fetchVenues();
+    }
+  };
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
@@ -230,6 +254,15 @@ export default function VenueManager() {
                   {viewMode === 'list' && (
                     <div className="flex gap-2">
                        <button onClick={() => setEditingVenue(venue)} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/40 hover:text-white transition-all" title="Edit Venue"><EditIcon className="w-4 h-4" /></button>
+                       {(isAdmin || isOwned) && (
+                         <button 
+                           onClick={() => handleDelete(venue)} 
+                           className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 transition-all" 
+                           title="Delete Venue"
+                         >
+                           <TrashIcon className="w-4 h-4" />
+                         </button>
+                       )}
                     </div>
                   )}
                 </div>
@@ -270,12 +303,23 @@ export default function VenueManager() {
                       </button>
                     )}
                     {viewMode === 'grid' && (
-                      <button 
-                        onClick={() => setEditingVenue(venue)}
-                        className={`flex-1 px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20`}
-                       >
-                        Edit Venue
-                      </button>
+                      <div className="flex-1 flex gap-2">
+                        <button 
+                          onClick={() => setEditingVenue(venue)}
+                          className={`flex-1 px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20`}
+                        >
+                          Edit
+                        </button>
+                        {(isAdmin || isOwned) && (
+                          <button 
+                            onClick={() => handleDelete(venue)}
+                            className="p-2 px-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 transition-all"
+                            title="Delete Venue"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
