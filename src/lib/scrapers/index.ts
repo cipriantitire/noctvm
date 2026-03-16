@@ -52,6 +52,8 @@ const VENUE_ALIASES: Record<string, string> = {
   'restaurant dorna mamaia &bull; zile și nopți': 'Restaurant Dorna Mamaia',
   'restaurant dorna mamaia • zile și nopți':      'Restaurant Dorna Mamaia',
   'restaurant dorna mamaia • zile si nopti':      'Restaurant Dorna Mamaia',
+  // Forge aliases
+  'forge bucharest': 'Forge',
 };
 
 // Event-title–aware overrides: if (title pattern) + wrong venue → correct venue.
