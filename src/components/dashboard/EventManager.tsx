@@ -194,72 +194,96 @@ export default function EventManager() {
                 <CogIcon className="w-5 h-5" />
               </button>
               
-              {showSettings && (
-                <div className="absolute right-0 top-[calc(100%+8px)] w-72 bg-noctvm-black/95 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl z-[100] frosted-noise animate-in fade-in zoom-in duration-200 origin-top-right">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">Global Fallback</span>
-                      <button title="Close Settings" onClick={() => setShowSettings(false)} className="text-noctvm-silver/40 hover:text-white transition-colors p-1"><XIcon className="w-3.5 h-3.5" /></button>
+          {isAdmin && showSettings && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <div 
+                className="absolute inset-0 bg-noctvm-black/80 backdrop-blur-md animate-in fade-in duration-300"
+                onClick={() => setShowSettings(false)}
+              />
+              
+              {/* Modal Container */}
+              <div className="relative w-full max-w-sm bg-noctvm-black/90 border border-white/10 rounded-[32px] p-6 shadow-2xl backdrop-blur-3xl frosted-noise animate-in fade-in zoom-in duration-300">
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Global Fallback</h3>
+                      <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Asset Management</p>
                     </div>
-                    
-                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-white/5 group shadow-inner">
-                      <Image 
-                        src={fallbackImage} 
-                        alt="Fallback Preview" 
-                        fill
-                        className="object-cover opacity-60"
-                        unoptimized
-                      />
-                      <button 
-                        disabled={uploadingFallback}
-                        onClick={() => fallbackFileRef.current?.click()}
-                        className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-noctvm-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        {uploadingFallback ? (
-                          <div className="w-5 h-5 border-2 border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <UploadIcon className="w-5 h-5 text-white" />
-                            <span className="text-[8px] font-black uppercase tracking-widest text-white">Change Image</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-[8px] leading-relaxed text-noctvm-silver/40 font-medium">Used when an event has no flyer or a broken image link. Branding included.</p>
-                      <button 
-                        onClick={() => fallbackFileRef.current?.click()}
-                        className="w-full py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-noctvm-silver hover:text-white hover:bg-white/10 transition-all"
-                      >
-                        {uploadingFallback ? 'Uploading...' : 'Upload New Image'}
-                      </button>
-                    </div>
-                    
-                    <input 
-                      title="Upload Fallback Image File"
-                      type="file" 
-                      ref={fallbackFileRef} 
-                      className="hidden" 
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setUploadingFallback(true);
-                        try {
-                          const url = await uploadOptimizedImage(file, 'app-assets', 'event-fallback.png');
-                          if (url) {
-                            const { error } = await supabase.from('app_settings').upsert({ key: 'event_fallback_image', value: url });
-                            if (!error) setFallbackImage(url);
-                          }
-                        } finally {
-                          setUploadingFallback(false);
-                        }
-                      }}
-                    />
+                    <button 
+                      title="Close Settings" 
+                      onClick={() => setShowSettings(false)} 
+                      className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white transition-all hover:rotate-90"
+                    >
+                      <XIcon className="w-4 h-4" />
+                    </button>
                   </div>
+                  
+                  <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 bg-white/5 group shadow-inner">
+                    <Image 
+                      src={fallbackImage} 
+                      alt="Fallback Preview" 
+                      fill
+                      className="object-cover opacity-80"
+                      unoptimized
+                    />
+                    <button 
+                      disabled={uploadingFallback}
+                      onClick={() => fallbackFileRef.current?.click()}
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-noctvm-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    >
+                      {uploadingFallback ? (
+                        <div className="w-6 h-6 border-2 border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <div className="w-10 h-10 rounded-full bg-noctvm-violet flex items-center justify-center shadow-lg shadow-noctvm-violet/40">
+                            <UploadIcon className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-[9px] font-black uppercase tracking-widest text-white">Update Image</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <p className="text-[9px] leading-relaxed text-noctvm-silver/50 font-medium text-center px-2 italic">
+                      &ldquo;Seen when an event lacks a poster or has a dead link. Keep it branded.&rdquo;
+                    </p>
+                    
+                    <button 
+                      onClick={() => fallbackFileRef.current?.click()}
+                      disabled={uploadingFallback}
+                      className="w-full py-3.5 rounded-xl bg-noctvm-violet text-white text-[10px] font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 disabled:opacity-50"
+                    >
+                      {uploadingFallback ? 'Uploading...' : 'Upload New Design'}
+                    </button>
+                  </div>
+                  
+                  <input 
+                    title="Upload Fallback Image File"
+                    type="file" 
+                    ref={fallbackFileRef} 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploadingFallback(true);
+                      try {
+                        const url = await uploadOptimizedImage(file, 'app-assets', 'event-fallback.png');
+                        if (url) {
+                          const { error } = await supabase.from('app_settings').upsert({ key: 'event_fallback_image', value: url });
+                          if (!error) setFallbackImage(`${url}?t=${Date.now()}`);
+                        }
+                      } finally {
+                        setUploadingFallback(false);
+                      }
+                    }}
+                  />
                 </div>
-              )}
+              </div>
+            </div>
+          )}
             </div>
           )}
         </div>
