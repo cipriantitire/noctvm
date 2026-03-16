@@ -275,3 +275,13 @@ export function LayoutListIcon({ className = "w-5 h-5" }: { className?: string }
     </svg>
   );
 }
+
+export function ClaimIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 0 1-3.15 0v2.25m3.15-2.25.075 2.775m-3.225 0c0 4.464 3.536 8.086 7.912 8.125a9.903 9.903 0 0 1 6.388-2.15l-.075-8a1.575 1.575 0 0 1 3.15 0v3.525m-15.75-3.525a1.575 1.575 0 0 1 3.15 0v2.25" />
+    </svg>
+  );
+}
+
+
