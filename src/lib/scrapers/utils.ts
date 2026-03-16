@@ -178,7 +178,7 @@ const HARD_BLOCK_TERMS = [
   'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi',
   'copii', 'marionete', 'papusi', 'copilasi', 'bebelusi', 'parinti', 'mamici',
   'educativ', 'educational', 'clasa a', 'cambridge', 'scoala', 'gradinita',
-  'balet', 'ballet', 'lectii', 'lectii',
+  'balet', 'ballet', 'lectii',
   'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'palatul sutu',
   'expozitia', 'vernisaj', 'show de comedie', 'show comedie', 'comedie pentru', 'comedie corporatisti',
   'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
@@ -218,19 +218,19 @@ const STRONG_MUSIC_TERMS = [
 
 /** Returns genre array if music event, null if definitively non-music. */
 export function guessGenres(title: string, desc: string): string[] | null {
-  const normalizeForFilter = (s: string) => (s || '')
+  const normalize = (s: string) => (s || '')
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-  const t = normalizeForFilter(title) + ' ' + normalizeForFilter(desc);
+  const t = normalize(title) + ' ' + normalize(desc);
 
-  // Hard blocks: normalized matching
-  if (HARD_BLOCK_TERMS.some(term => t.includes(normalizeForFilter(term)))) return null;
+  // Hard blocks: use the normalized helper to match both ways
+  if (HARD_BLOCK_TERMS.some(term => t.includes(normalize(term)))) return null;
 
-  // Soft blocks: pass only if a strong music-specific term is also present
-  const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalizeForFilter(term)));
-  const isStrongMusic  = STRONG_MUSIC_TERMS.some(sm => t.includes(normalizeForFilter(sm)));
+  // Soft blocks
+  const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalize(term)));
+  const isStrongMusic  = STRONG_MUSIC_TERMS.some(sm => t.includes(normalize(sm)));
 
   if (isSoftBlocked && !isStrongMusic) return null;
 

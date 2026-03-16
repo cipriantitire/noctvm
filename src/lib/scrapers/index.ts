@@ -349,7 +349,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     const { error } = await supabase
       .from('events')
       .upsert(chunk, {
-        onConflict: 'title,venue,date',
+        onConflict: 'title,venue,date,source',
         ignoreDuplicates: false, // update existing rows (image/price may change)
       });
 
