@@ -148,11 +148,11 @@ export default function EventDetailModal({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={event.image_url || '/images/event-fallback.webp'}
+          src={event.image_url || '/images/event-fallback.png'}
           alt={event.title}
           className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
           onClick={e => e.stopPropagation()}
-          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
         />
         <button
           onClick={() => setLightboxOpen(false)}
@@ -181,11 +181,11 @@ export default function EventDetailModal({
         <div className="relative flex-shrink-0 h-[260px] sm:h-[300px] bg-noctvm-black overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={event.image_url || '/images/event-fallback.webp'}
+            src={event.image_url || '/images/event-fallback.png'}
             alt={event.title}
             className="w-full h-full object-cover cursor-zoom-in"
             onClick={() => (event.image_url || true) && setLightboxOpen(true)}
-            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
           />
           {/* Close button */}
           <button

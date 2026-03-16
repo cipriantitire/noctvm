@@ -176,11 +176,11 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
         <div className="relative w-[180px] sm:w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={event.image_url || '/images/event-fallback.webp'}
+            src={event.image_url || '/images/event-fallback.png'}
             alt={event.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {/* Source badge — links to ticket platform */}
@@ -232,11 +232,11 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
       <div className="relative h-[160px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={event.image_url || '/images/event-fallback.webp'}
+          src={event.image_url || '/images/event-fallback.png'}
           alt={event.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           loading="lazy"
-          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {/* Source badge — links to ticket platform */}

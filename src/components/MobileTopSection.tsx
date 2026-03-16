@@ -132,11 +132,11 @@ export default function MobileTopSection({
               >
                 <div className="aspect-[3/2] bg-noctvm-midnight relative overflow-hidden">
                   <img 
-                    src={event.image_url || '/images/event-fallback.webp'} 
+                    src={event.image_url || '/images/event-fallback.png'} 
                     alt={event.title} 
                     className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500" 
                     loading="lazy" 
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>

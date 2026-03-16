@@ -213,7 +213,7 @@ export default function EventManager() {
                   alt={event.title} 
                   className="w-full h-full object-cover"
                   loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
                 />
               ) : (
                 <img 
