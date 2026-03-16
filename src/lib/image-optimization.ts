@@ -51,12 +51,16 @@ export async function uploadOptimizedImage(
         upsert: true
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Supabase storage upload error:', uploadError);
+      throw uploadError;
+    }
 
     const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    console.log('Upload success, public URL:', data.publicUrl);
     return data.publicUrl;
   } catch (error) {
-    console.error('Upload failed:', error);
+    console.error('Upload failed with error details:', error);
     return null;
   }
 }

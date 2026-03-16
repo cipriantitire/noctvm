@@ -185,7 +185,7 @@ export default function EventManager() {
           </button>
 
           {isAdmin && (
-            <div className="relative">
+            <div className="relative h-[42px]">
               <button
                 onClick={() => setShowSettings(!showSettings)}
                 className={`p-2.5 bg-white/5 border border-white/10 rounded-xl transition-all h-[42px] flex items-center justify-center min-w-[42px] ${showSettings ? 'text-noctvm-violet bg-noctvm-violet/5 border-noctvm-violet/30' : 'text-noctvm-silver hover:text-white'}`}
@@ -195,19 +195,20 @@ export default function EventManager() {
               </button>
               
               {showSettings && (
-                <div className="absolute right-0 mt-3 w-64 bg-noctvm-black/95 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl z-50 frosted-noise">
+                <div className="absolute right-0 top-full mt-3 w-64 bg-noctvm-black/95 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl z-[100] frosted-noise animate-fade-in origin-top-right">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">Global Fallback</span>
-                      <button title="Close Settings" onClick={() => setShowSettings(false)} className="text-noctvm-silver/40 hover:text-white"><XIcon className="w-3.5 h-3.5" /></button>
+                      <button title="Close Settings" onClick={() => setShowSettings(false)} className="text-noctvm-silver/40 hover:text-white transition-colors p-1"><XIcon className="w-3.5 h-3.5" /></button>
                     </div>
                     
-                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-white/5 group">
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-white/5 group shadow-inner">
                       <Image 
                         src={fallbackImage} 
                         alt="Fallback Preview" 
                         fill
                         className="object-cover opacity-60"
+                        unoptimized
                       />
                       <button 
                         disabled={uploadingFallback}
@@ -225,7 +226,15 @@ export default function EventManager() {
                       </button>
                     </div>
 
-                    <p className="text-[8px] leading-relaxed text-noctvm-silver/40 font-medium">Used when an event has no flyer or a broken image link. Branding included.</p>
+                    <div className="space-y-2">
+                      <p className="text-[8px] leading-relaxed text-noctvm-silver/40 font-medium">Used when an event has no flyer or a broken image link. Branding included.</p>
+                      <button 
+                        onClick={() => fallbackFileRef.current?.click()}
+                        className="w-full py-2 rounded-lg bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-noctvm-silver hover:text-white hover:bg-white/10 transition-all"
+                      >
+                        {uploadingFallback ? 'Uploading...' : 'Upload New Image'}
+                      </button>
+                    </div>
                     
                     <input 
                       title="Upload Fallback Image File"
@@ -237,12 +246,15 @@ export default function EventManager() {
                         const file = e.target.files?.[0];
                         if (!file) return;
                         setUploadingFallback(true);
-                        const url = await uploadOptimizedImage(file, 'app-assets', 'event-fallback.png');
-                        if (url) {
-                          const { error } = await supabase.from('app_settings').upsert({ key: 'event_fallback_image', value: url });
-                          if (!error) setFallbackImage(url);
+                        try {
+                          const url = await uploadOptimizedImage(file, 'app-assets', 'event-fallback.png');
+                          if (url) {
+                            const { error } = await supabase.from('app_settings').upsert({ key: 'event_fallback_image', value: url });
+                            if (!error) setFallbackImage(url);
+                          }
+                        } finally {
+                          setUploadingFallback(false);
                         }
-                        setUploadingFallback(false);
                       }}
                     />
                   </div>
@@ -288,11 +300,9 @@ export default function EventManager() {
                 fill
                 className="object-cover transition-opacity duration-300"
                 sizes={viewMode === 'grid' ? '(max-width: 768px) 100vw, 33vw' : '80px'}
+                unoptimized
                 onError={() => {
                   // If fallback image itself fails, try the local one
-                  if (event.image_url !== fallbackImage) {
-                    // Try setting to fallbackImage
-                  }
                 }}
               />
               {event.is_promoted && (

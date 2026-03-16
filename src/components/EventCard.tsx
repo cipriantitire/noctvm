@@ -175,14 +175,15 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
     return (
       <Wrapper className="group flex bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow h-[160px] lg:h-[180px] cursor-pointer">
         <div className="relative w-[180px] sm:w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
-          <Image
-            src={event.image_url || '/images/event-fallback.png'}
-            alt={event.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 640px) 180px, 240px"
-            priority={false}
-          />
+            <Image
+              src={event.image_url || '/images/event-fallback.png'}
+              alt={event.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 640px) 180px, 240px"
+              priority={false}
+              unoptimized
+            />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {/* Source badge — links to ticket platform */}
           <a
@@ -237,6 +238,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-700"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {/* Source badge — links to ticket platform */}

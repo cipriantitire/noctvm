@@ -625,7 +625,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                     <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
                       <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
                         {myEntry.avatarUrl ? (
-                          <Image src={myEntry.avatarUrl} alt="" fill className="object-cover" />
+                          <Image src={myEntry.avatarUrl} alt="" fill className="object-cover" unoptimized />
                         ) : (
                           <span className="text-white font-bold text-lg">{myEntry.avatar}</span>
                         )}
@@ -668,7 +668,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-noctvm-surface border border-noctvm-border flex items-center justify-center">
                   {profile?.avatar_url ? (
-                    <Image src={profile.avatar_url} alt="" fill className="object-cover" />
+                    <Image src={profile.avatar_url} alt="" fill className="object-cover" unoptimized />
                   ) : (
                     <span className="text-white font-bold text-lg">{userInitial}</span>
                   )}
@@ -689,7 +689,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                 <div className={`w-16 h-16 rounded-full p-[2px] ${su.hasNew ? 'bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500' : 'bg-noctvm-border'}`}>
                   <div className={`w-full h-full rounded-full bg-gradient-to-br ${su.color} flex items-center justify-center ring-2 ring-noctvm-black overflow-hidden`}>
                     {su.avatarUrl
-                      ? <Image src={su.avatarUrl} alt="" fill className="object-cover" />
+                      ? <Image src={su.avatarUrl} alt="" fill className="object-cover" unoptimized />
                       : <span className="text-sm font-bold text-white">{su.avatar}</span>}
                   </div>
                 </div>
@@ -720,7 +720,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
               <div className="flex items-center gap-3 p-3">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                   {post.user.avatarUrl ? (
-                    <Image src={post.user.avatarUrl} alt="" fill className="object-cover" />
+                    <Image src={post.user.avatarUrl} alt="" fill className="object-cover" unoptimized />
                   ) : (
                     <span className="text-xs font-bold text-white">{post.user.avatar}</span>
                   )}
@@ -766,7 +766,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
               {/* ── Post image ─────────────────────────────────── */}
               <div className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden`}>
                 {post.imageUrl ? (
-                  <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} />
+                  <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} unoptimized />
                 ) : (
                   <>
                     <div className="absolute inset-0">

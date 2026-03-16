@@ -136,6 +136,7 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
             alt={venueName}
             fill
             className="object-cover"
+            unoptimized
             onError={(e) => {
               const el = (e.target as any).parentElement;
               el.querySelector('.fallback')?.classList.remove('hidden');

@@ -424,6 +424,7 @@ export default function VenuesPage({
                     alt={venue.name}
                     fill
                     className="object-cover"
+                    unoptimized
                     onError={(e) => {
                       const el = (e.target as any).parentElement;
                       el.querySelector('.fallback')?.classList.remove('hidden');
@@ -480,6 +481,7 @@ export default function VenuesPage({
                     alt={venue.name}
                     fill
                     className="object-cover"
+                    unoptimized
                     onError={(e) => {
                       const el = (e.target as any).parentElement;
                       el.querySelector('.fallback')?.classList.remove('hidden');
@@ -586,7 +588,7 @@ export default function VenuesPage({
                           <div key={review.id} className="flex gap-3">
                             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet/40 to-purple-500/40 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                               {review.profiles?.avatar_url ? (
-                                <Image src={review.profiles.avatar_url} alt="" fill className="object-cover" />
+                                <Image src={review.profiles.avatar_url} alt="" fill className="object-cover" unoptimized />
                               ) : (
                                 <span className="text-[10px] font-bold text-white">{initial}</span>
                               )}

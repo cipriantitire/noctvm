@@ -146,7 +146,7 @@ export default function StoriesViewerModal({
             loop
           />
         ) : (
-          <Image src={story.image_url} alt="" fill className="object-contain bg-black" priority />
+          <Image src={story.image_url} alt="" fill className="object-contain bg-black" priority unoptimized />
         )
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color}`} />
@@ -154,7 +154,7 @@ export default function StoriesViewerModal({
       <div className="absolute inset-0 bg-black/40" />
 
       {/* Progress bars */}
-      <div className="absolute top-2 left-3 right-3 flex gap-1 z-20" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <div className="absolute top-2 left-3 right-3 flex gap-1 z-20 pt-[env(safe-area-inset-top)]">
         {stories.map((_, i) => (
           <div key={i} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
             <div className="h-full bg-white rounded-full" style={{ width: i < storyIndex ? '100%' : i === storyIndex ? `${progress}%` : '0%' }} />
@@ -169,7 +169,7 @@ export default function StoriesViewerModal({
         <div className="flex items-center gap-2.5">
           <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-white text-sm font-bold border-2 border-white/40 shadow-lg overflow-hidden relative`}>
             {currentUser.avatarUrl
-              ? <Image src={currentUser.avatarUrl} alt="" fill className="object-cover" />
+              ? <Image src={currentUser.avatarUrl} alt="" fill className="object-cover" unoptimized />
               : currentUser.avatar}
           </div>
           <div>
@@ -222,14 +222,14 @@ export default function StoriesViewerModal({
 
       {/* Story caption */}
       {story.caption && (
-        <div className="absolute bottom-0 left-0 right-0 px-6 z-20 pointer-events-none" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom))' }}>
+        <div className="absolute bottom-0 left-0 right-0 px-6 z-20 pointer-events-none pb-[max(3rem,env(safe-area-inset-bottom))]">
           <p className="text-white text-sm text-center drop-shadow-lg">{story.caption}</p>
           {story.venue_name && <p className="text-white/60 text-xs text-center mt-1">📍 {story.venue_name}</p>}
         </div>
       )}
 
       {/* Tap zones */}
-      <div className="absolute inset-0 flex z-10" style={{ top: '80px' }}>
+      <div className="absolute inset-0 flex z-10 top-[80px]">
         <div className="flex-1 h-full cursor-pointer select-none" onClick={goBack} />
         <div className="flex-1 h-full cursor-pointer select-none" onClick={advanceStory} />
       </div>
