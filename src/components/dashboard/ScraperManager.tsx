@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PlayIcon, AggregatorIcon, RefreshIcon, CheckIcon, XIcon, EyeIcon } from '@/components/icons';
+import { PlayIcon, HubIcon, RefreshIcon, CheckIcon, XIcon, EyeIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logActivity } from '@/lib/activity';
@@ -196,7 +196,7 @@ export default function ScraperManager() {
                     className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-white transition-all bg-white/5 border border-white/10"
                     title="Settings"
                   >
-                    <AggregatorIcon className="w-4 h-4" />
+                    <HubIcon className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}

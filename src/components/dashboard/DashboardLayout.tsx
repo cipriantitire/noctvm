@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { MoonIcon, UserIcon, CogIcon, GridIcon, SearchIcon, HubIcon, VenuesIcon, EventsIcon } from '@/components/icons';
+import { MoonIcon, UserIcon, CogIcon, GridIcon, SearchIcon, AggregatorIcon, VenuesIcon, EventsIcon } from '@/components/icons';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   if (isAdmin) {
     navItems.push(
       { label: 'Users', href: '/dashboard/users', icon: <UserIcon className="w-5 h-5" /> },
-      { label: 'Scrapers', href: '/dashboard/scrapers', icon: <HubIcon className="w-5 h-5" /> }
+      { label: 'Scrapers', href: '/dashboard/scrapers', icon: <AggregatorIcon className="w-5 h-5" /> }
     );
   }
 
