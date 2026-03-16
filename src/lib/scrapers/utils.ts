@@ -494,7 +494,7 @@ function extractVenueFromHtml(html: string): string {
 }
 
 /** Scrape a price from raw HTML text as a last resort. Supports ranges and "Free". */
-function extractPriceFromHtml(html: string): string | null {
+export function extractPriceFromHtml(html: string): string | null {
   // Check for explicit "Free" mentions
   if (/\b(?:free entry|intrare libera|intrare liberă|gratuit|entree gratuite)\b/i.test(html)) {
     return 'Free';

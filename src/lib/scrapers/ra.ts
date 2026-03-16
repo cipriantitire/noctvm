@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml } from './utils';
+import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml, extractPriceFromHtml } from './utils';
 
 const RA_GRAPHQL = 'https://ra.co/graphql';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
@@ -47,6 +47,7 @@ const QUERY = `
             live
             __typename
           }
+          cost
           __typename
         }
         __typename
@@ -102,6 +103,12 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     const descMatch = html.match(/"description"\s*:\s*"([^"]+)"/);
     const description = clean(descMatch?.[1] || '');
 
+    // CHECK FOR SOLD OUT
+    let isSoldOut = false;
+    if (rawTitle.toUpperCase().includes('SOLD OUT') || description.toUpperCase().includes('SOLD OUT')) {
+      isSoldOut = true;
+    }
+
     // 2. Ticket Link Extraction (Promotional Links)
     let ticket_url: string | null = null;
     // Look for links or spans with href containing "Tickets" text
@@ -123,16 +130,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     // 3. Price Extraction
     let price: string | null = null;
     
-    // Pattern A: "Cost" label followed by a value
-    // Example: <span ...>Cost</span></div><span ...>90</span>
-    const costRegex = /Cost<\/span><\/div><span[^>]*>(\d+(?:[.,]\d+)?)<\/span>/i;
-    const costMatch = html.match(costRegex);
-    if (costMatch) {
-      const val = parseFloat(costMatch[1].replace(',', '.'));
-      price = isNaN(val) ? costMatch[1] : `${Math.round(val)} RON`;
-    }
-
-    // Pattern B: Internal RA Tickets (Iframe)
+    // Pattern A: Internal RA Tickets (Iframe) - HIGHEST PRIORITY
     // Example: <iframe ... src="/widget/event/2337785/embedtickets?..." ...></iframe>
     const iframeRegex = /<iframe[^>]+src=["'](\/widget\/event\/\d+\/embedtickets[^"']+)["']/i;
     const iframeMatch = html.match(iframeRegex);
@@ -140,8 +138,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
       const iframeSrc = `https://ra.co${iframeMatch[1]}`;
       try {
         const iframeHtml = await fetchHtml(iframeSrc);
-        // Parse prices from the iframe
-        // <div class="type-price">101,70 lei</div>
+        // Parse prices from the iframe: <div class="type-price">101,70 lei</div>
         const priceMatches = Array.from(iframeHtml.matchAll(/<div class="type-price">([\d.,]+)\s*(?:lei|RON|EUR|€)<\/div>/gi));
         if (priceMatches.length > 0) {
           const numericPrices = priceMatches
@@ -165,11 +162,54 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
       }
     }
 
-    // Fallback price from generic pattern if nothing found
-    if (!price) {
-      const genericPriceMatch = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)/i);
-      if (genericPriceMatch) price = `${Math.round(parseFloat(genericPriceMatch[1].replace(',', '.')))} RON`;
+    // Pattern B: Description Parsing (e.g., "50 lei • door deal")
+    if (!price && !isSoldOut) {
+      const descPriceRegex = /(\d+(?:[.,]\d+)?)\s*(?:lei|RON|EUR|€)/i;
+      const descMatch = description.match(descPriceRegex);
+      if (descMatch) {
+        const val = parseFloat(descMatch[1].replace(',', '.'));
+        price = `${Math.round(val)} RON`;
+        if (description.toLowerCase().includes('euro') || description.includes('€')) {
+          price = `${Math.round(val)} EUR`;
+        }
+      }
     }
+
+    // Pattern C: External Scraping (Eventbook/Livetickets)
+    if (!price && !isSoldOut && ticket_url) {
+      if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro')) {
+        try {
+          const extHtml = await fetchHtml(ticket_url);
+          const extPrice = extractPriceFromHtml(extHtml);
+          if (extPrice && extPrice !== 'FREE') {
+            price = extPrice;
+          }
+        } catch (e) {
+          // Ignore external fetch errors
+        }
+      }
+    }
+
+    // Pattern D: "Cost" label followed by a value
+    if (!price && !isSoldOut) {
+      // Example: <span ...>Cost</span></div><span ...>90</span>
+      const costRegex = /Cost<\/span><\/div><span[^>]*>(\d+(?:[.,]\d+)?)<\/span>/i;
+      const costMatch = html.match(costRegex);
+      if (costMatch) {
+        const val = parseFloat(costMatch[1].replace(',', '.'));
+        price = isNaN(val) ? costMatch[1] : `${Math.round(val)} RON`;
+      }
+    }
+
+    // Pattern E: Fallback price from generic pattern
+    if (!price && !isSoldOut) {
+      const genericPriceMatch = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)/i);
+      if (genericPriceMatch) {
+        price = `${Math.round(parseFloat(genericPriceMatch[1].replace(',', '.')))} RON`;
+      }
+    }
+
+    if (isSoldOut) price = 'SOLD OUT';
 
     const genres = guessGenres(title, description);
     
@@ -199,14 +239,11 @@ async function batchFetchRA(urls: string[], city: string, limit = 100, batchSize
   const results: ScrapedEvent[] = [];
   const capped = urls.slice(0, limit);
 
-  for (let i = 0; i < capped.length; i += batchSize) {
-    const chunk = capped.slice(i, i + batchSize);
-    const settled = await Promise.allSettled(
-      chunk.map(url => parseRADetailPage(url, city))
-    );
-    for (const r of settled) {
-      if (r.status === 'fulfilled' && r.value) results.push(r.value);
-    }
+  for (const url of capped) {
+    // Add a small delay between requests to avoid bot detection
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+    const result = await parseRADetailPage(url, city);
+    if (result) results.push(result);
   }
   return results;
 }
@@ -275,6 +312,17 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
             genres = ['Electronic'];
           }
 
+          let price: string | null = null;
+          if (title.toUpperCase().includes('SOLD OUT')) {
+            price = 'SOLD OUT';
+          } else if (e.cost) {
+            const numeric = parseFloat(e.cost.replace(',', '.'));
+            price = isNaN(numeric) ? e.cost : `${Math.round(numeric)} RON`;
+            if (e.cost.toLowerCase().includes('euro') || e.cost.includes('€')) {
+              price = `${Math.round(numeric)} EUR`;
+            }
+          }
+
           return {
             title,
             venue: clean(e.venue?.name || 'Venue TBC'),
@@ -283,9 +331,9 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
             description,
             image_url: e.images?.[0]?.filename || e.flyerFront || '',
             event_url: `https://ra.co${e.contentUrl}`,
-            ticket_url: null, // Hard to get from GraphQL without detail fetch
+            ticket_url: `https://ra.co${e.contentUrl}`, // Default to event page for tickets
             genres,
-            price: null,
+            price,
             city: cityLabel,
           };
         })
