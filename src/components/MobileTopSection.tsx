@@ -131,7 +131,13 @@ export default function MobileTopSection({
                 className="flex-shrink-0 w-[140px] rounded-lg overflow-hidden border border-white/5 bg-black/20 hover:border-noctvm-violet/40 transition-all active:scale-95 text-left group/card"
               >
                 <div className="aspect-[3/2] bg-noctvm-midnight relative overflow-hidden">
-                  <img src={event.image_url} alt={event.title} className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500" loading="lazy" />
+                  <img 
+                    src={event.image_url || '/images/event-fallback.webp'} 
+                    alt={event.title} 
+                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500" 
+                    loading="lazy" 
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
                 <div className="p-1.5">

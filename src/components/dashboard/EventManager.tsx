@@ -213,9 +213,15 @@ export default function EventManager() {
                   alt={event.title} 
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
                 />
               ) : (
-                <div className="w-full h-full bg-white/5 flex items-center justify-center text-3xl">📷</div>
+                <img 
+                  src="/images/event-fallback.webp" 
+                  alt="No image" 
+                  className="w-full h-full object-cover opacity-50"
+                  loading="lazy"
+                />
               )}
               {event.is_promoted && (
                 <div className={`absolute top-2 right-2 bg-noctvm-emerald/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-glow-sm ${

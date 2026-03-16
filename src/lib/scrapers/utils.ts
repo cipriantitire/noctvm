@@ -530,21 +530,48 @@ export function extractTicketsFromHtml(html: string): string | null {
   const re = /href=["']([^"']*(?:iabilet|livetickets|eventbook|ambilet|entertix|bilete\.ro|entree|tickets?|booking)[^"']*)["']/gi;
   const matches = Array.from(html.matchAll(re));
   
-  const ignoredExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.pdf'];
+  const ignoredExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.pdf', '.php', '.xml', '.ico'];
   
   const validMatches = matches.map(m => m[1]).filter(link => {
     const lower = link.toLowerCase();
-    // Exclude common assets
-    if (ignoredExtensions.some(ext => lower.split('?')[0].endsWith(ext))) return false;
-    // Exclude anything that looks like a static asset directory
-    if (lower.includes('/assets/') || lower.includes('/css/') || lower.includes('/js/') || lower.includes('/img/')) return false;
-    // Exclude social media links that might contain 'ticket' in name/bio but aren't ticket links
-    if (lower.includes('facebook.com') || lower.includes('instagram.com') || lower.includes('twitter.com')) return false;
+    const urlWithoutQuery = lower.split('?')[0];
+    
+    // 1. Exclude common assets and system files
+    if (ignoredExtensions.some(ext => urlWithoutQuery.endsWith(ext))) return false;
+    
+    // 2. Exclude anything that looks like a static asset or system directory
+    if (lower.includes('/assets/') || lower.includes('/css/') || lower.includes('/js/') || lower.includes('/img/') || 
+        lower.includes('/wp-includes/') || lower.includes('/wp-content/themes/') || lower.includes('xmlrpc.php')) return false;
+    
+    // 3. Exclude social media links that might contain keywords in text/params but aren't ticket links
+    if (lower.includes('facebook.com') || lower.includes('instagram.com') || 
+        lower.includes('twitter.com') || lower.includes('x.com') || 
+        lower.includes('linkedin.com') || lower.includes('pinterest.com') ||
+        lower.includes('whatsapp.com')) return false;
+
+    // 4. Verify the keyword isn't just in a UTM or referral query parameter
+    // If 'tickets' or 'booking' is ONLY found after the '?' and it's part of a UTM, skip it
+    const searchPart = lower.includes('?') ? lower.split('?')[1] : '';
+    const mainPart   = lower.split('?')[0];
+    
+    if (!mainPart.includes('ticket') && !mainPart.includes('booking') && !mainPart.includes('billet') && !mainPart.includes('bilete')) {
+      // It matched because of something in the query string
+      // If it's a UTM param or similar noise, ignore it
+      if (searchPart.includes('utm_') || searchPart.includes('ref=')) {
+        // Double check if it's a known provider though
+        const isKnownProvider = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix', 'bilete.ro'].some(p => mainPart.includes(p));
+        if (!isKnownProvider) return false;
+      }
+    }
+
     return true;
   });
 
   // Prioritize external ticketing providers over internal page links
-  const providers = ['iabilet.ro/bilete-', 'livetickets.ro/bilete/', 'eventbook.ro/event/', 'ambilet.ro/eveniment/', 'entertix.ro/'];
+  const providers = [
+    'iabilet.ro/bilete-', 'iabilet.ro/go/', 'livetickets.ro/bilete/', 
+    'eventbook.ro/event/', 'ambilet.ro/eveniment/', 'entertix.ro/', 'bilete.ro/'
+  ];
   for (const p of providers) {
     const found = validMatches.find(link => link.toLowerCase().includes(p.toLowerCase()));
     if (found) return found;

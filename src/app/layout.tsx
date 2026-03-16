@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "NOCTVM - The Living Memory of the Night",
-  description: "Discover Bucharest's nightlife. Events, venues, and the pulse of the city after dark.",
+  description: "Bucharest's premier nightlife platform. Curated events, underground venues, and the pure pulse of the city after dark.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -37,7 +37,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NOCTVM",
     description: "The Living Memory of the Night",
-    type: "website",
+    url: 'https://noctvm.com',
+    siteName: 'NOCTVM',
+    images: [
+      {
+        url: '/images/og-preview.png',
+        width: 1200,
+        height: 630,
+        alt: 'NOCTVM - The Living Memory of the Night',
+      },
+    ],
+    locale: 'ro_RO',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NOCTVM',
+    description: "The Living Memory of the Night",
+    images: ['/images/og-preview.png'],
   },
 };
 

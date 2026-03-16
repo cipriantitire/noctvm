@@ -3,6 +3,9 @@ export function MoonIcon({ className = "w-6 h-6" }: { className?: string }) {
     <svg className={className} viewBox="0 0 120 120" fill="currentColor">
       <path d="M70 14C49.5 14 32 28 27 47C31.5 45.5 36.3 44.7 41.3 44.7C62.5 44.7 79.7 61.9 79.7 83.1C79.7 86.3 79.3 89.4 78.5 92.3C93.8 86.5 105 71.7 105 54.3C105 32 89.5 14 70 14Z" opacity="0.95" />
       <line x1="12" y1="86" x2="108" y2="86" stroke="currentColor" strokeWidth="2" opacity="0.5" />
+      <path d="M70 112C78 112 85 109 90 104C87.5 105 84.5 105.5 81.5 105.5C72 105.5 64 99 62 90C61.5 92 61 94 61 96C61 104 65 112 70 112Z" opacity="0.12" />
+      <line x1="30" y1="94" x2="90" y2="94" stroke="currentColor" strokeWidth="0.75" opacity="0.15" />
+      <line x1="40" y1="100" x2="80" y2="100" stroke="currentColor" strokeWidth="0.5" opacity="0.08" />
     </svg>
   );
 }

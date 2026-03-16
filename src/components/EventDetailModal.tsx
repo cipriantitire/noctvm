@@ -148,10 +148,11 @@ export default function EventDetailModal({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={event.image_url}
+          src={event.image_url || '/images/event-fallback.webp'}
           alt={event.title}
           className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
           onClick={e => e.stopPropagation()}
+          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
         />
         <button
           onClick={() => setLightboxOpen(false)}
@@ -180,11 +181,11 @@ export default function EventDetailModal({
         <div className="relative flex-shrink-0 h-[260px] sm:h-[300px] bg-noctvm-black overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={event.image_url}
+            src={event.image_url || '/images/event-fallback.webp'}
             alt={event.title}
             className="w-full h-full object-cover cursor-zoom-in"
-            onClick={() => event.image_url && setLightboxOpen(true)}
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onClick={() => (event.image_url || true) && setLightboxOpen(true)}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
           />
           {/* Close button */}
           <button
@@ -214,7 +215,7 @@ export default function EventDetailModal({
           {(hasPrice || isFree) && (
             <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
               <a
-                href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') ? event.ticket_url : event.event_url}
+                href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc') ? event.ticket_url : event.event_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
@@ -320,7 +321,7 @@ export default function EventDetailModal({
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
           <a
-            href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') ? event.ticket_url : event.event_url}
+            href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc') ? event.ticket_url : event.event_url}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}

@@ -1,1 +1,8 @@
-PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMwRDBEMEQiLz4KICA8IS0tIE1vb246IHZpb2xldCBjaXJjbGUgY2xpcHBlZCBieSBhbiBvZmZzZXQgYmxhY2sgY2lyY2xlIHRvIGZvcm0gd2FuaW5nIGNyZXNjZW50IChmYWNpbmcgcmlnaHQpIC0tPgogIDxkZWZzPgogICAgPG1hc2sgaWQ9ImNyZXNjZW50Ij4KICAgICAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9ImJsYWNrIi8+CiAgICAgIDxjaXJjbGUgY3g9IjI1NiIgY3k9IjIxMCIgcj0iMTMwIiBmaWxsPSJ3aGl0ZSIvPgogICAgICA8Y2lyY2xlIGN4PSIzMTYiIGN5PSIxOTUiIHI9IjExNSIgZmlsbD0iYmxhY2siLz4KICAgIDwvbWFzaz4KICA8L2RlZnM+CiAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjEwIiByPSIxMzAiIGZpbGw9IiM3QzNBRUQiIG1hc2s9InVybCgjY3Jlc2NlbnQpIi8+CiAgPCEtLSBIb3Jpem9uIGxpbmUgLS0+CiAgPGxpbmUgeDE9Ijk2IiB5MT0iMzg1IiB4Mj0iNDE2IiB5Mj0iMzg1IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPg==
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <rect width="120" height="120" fill="#050505"/>
+  <path d="M70 14C49.5 14 32 28 27 47C31.5 45.5 36.3 44.7 41.3 44.7C62.5 44.7 79.7 61.9 79.7 83.1C79.7 86.3 79.3 89.4 78.5 92.3C93.8 86.5 105 71.7 105 54.3C105 32 89.5 14 70 14Z" fill="#FFFFFF" opacity="0.95" />
+  <line x1="12" y1="86" x2="108" y2="86" stroke="#FFFFFF" stroke-width="2" opacity="0.5" />
+  <path d="M70 112C78 112 85 109 90 104C87.5 105 84.5 105.5 81.5 105.5C72 105.5 64 99 62 90C61.5 92 61 94 61 96C61 104 65 112 70 112Z" fill="#FFFFFF" opacity="0.12" />
+  <line x1="30" y1="94" x2="90" y2="94" stroke="#FFFFFF" stroke-width="0.75" opacity="0.15" />
+  <line x1="40" y1="100" x2="80" y2="100" stroke="#FFFFFF" stroke-width="0.5" opacity="0.08" />
+</svg>

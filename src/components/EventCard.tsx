@@ -138,7 +138,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
 
     return (
       <a
-        href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') ? event.ticket_url : event.event_url}
+        href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc') ? event.ticket_url : event.event_url}
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}
@@ -176,11 +176,11 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
         <div className="relative w-[180px] sm:w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={event.image_url}
+            src={event.image_url || '/images/event-fallback.webp'}
             alt={event.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {/* Source badge — links to ticket platform */}
@@ -232,11 +232,11 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
       <div className="relative h-[160px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={event.image_url}
+          src={event.image_url || '/images/event-fallback.webp'}
           alt={event.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           loading="lazy"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.webp'; }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {/* Source badge — links to ticket platform */}

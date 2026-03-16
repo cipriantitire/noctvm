@@ -38,8 +38,8 @@ function extractEventUrls(html: string): string[] {
   let m;
   while ((m = re.exec(html)) !== null) {
     const [, fullUrl, slug] = m;
-    // Skip very short slugs (category roots like /bilete/)
-    if (!slug || slug.length < 5) continue;
+    // Skip very short slugs (category roots like /bilete/) or system files
+    if (!slug || slug.length < 5 || slug.includes('.php') || slug.includes('.xml')) continue;
     // Skip known non-music slugs
     if (SLUG_BLOCK.some(term => slug.includes(term))) continue;
 
