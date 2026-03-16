@@ -353,7 +353,7 @@ export default function VenueManager() {
                         </h3>
                         {venue.is_verified && <VerifiedBadge type={venue.badge} size="xs" />}
                       </div>
-                      {viewMode === 'list' && venue.address && (
+                      {venue.address && (
                         <p className="text-[10px] text-noctvm-silver/50 truncate -mt-0.5 mb-1.5">{venue.address}</p>
                       )}
                     </div>
@@ -387,8 +387,7 @@ export default function VenueManager() {
                     </div>
                   </div>
 
-                  {viewMode === 'list' && (
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
                           <span className="text-[9px] font-black text-white">{followCounts[venue.name] || 0}</span>
                           <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Followers</span>
@@ -403,7 +402,6 @@ export default function VenueManager() {
                           <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50 ml-1">Upcoming</span>
                        </div>
                     </div>
-                  )}
 
                   <div className={`flex flex-wrap gap-1.5 ${viewMode === 'grid' ? 'mb-5' : ''}`}>
                     {venue.genres.slice(0, 3).map((g: string) => (
@@ -420,7 +418,6 @@ export default function VenueManager() {
                 </div>
               </div>
 
-              {viewMode === 'list' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -428,7 +425,7 @@ export default function VenueManager() {
                     setExpandedVenue(next);
                     if (next) fetchReviews(next);
                   }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 border-t border-white/5 text-[10px] text-noctvm-silver hover:text-white transition-colors uppercase font-mono tracking-widest"
+                  className="w-full flex items-center justify-between px-4 py-2.5 border-t border-white/5 text-[10px] text-noctvm-silver hover:text-white transition-colors uppercase font-mono tracking-widest mt-auto"
                 >
                   <div className="flex items-center gap-2">
                     <StarRating rating={venue.rating || 0} />
@@ -440,10 +437,9 @@ export default function VenueManager() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-              )}
 
-              {viewMode === 'list' && expandedVenue === venue.name && (
-                <div className="border-t border-white/5 bg-black/20 animate-fade-in">
+              {expandedVenue === venue.name && (
+                <div className="border-t border-white/5 bg-black/20 animate-fade-in max-h-[300px] overflow-y-auto no-scrollbar">
                   {loadingReviews.has(venue.name) ? (
                     <div className="flex items-center justify-center py-8">
                        <div className="w-5 h-5 border-2 border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
@@ -532,37 +528,6 @@ export default function VenueManager() {
                 </div>
               )}
 
-              {viewMode === 'grid' && (
-                <div className="flex items-center justify-between gap-2 mt-auto pt-4 border-t border-white/5 relative z-10">
-                  <div className="flex gap-2 w-full">
-                    {!venue.owner_id && (
-                      <button 
-                        onClick={() => setClaimingVenue(venue)}
-                        className="flex-1 px-4 py-2 bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/40 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet hover:text-white transition-all shadow-glow-sm"
-                      >
-                        Claim
-                      </button>
-                    )}
-                    <div className="flex-1 flex gap-2">
-                      <button 
-                        onClick={() => setEditingVenue(venue)}
-                        className={`flex-1 px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-gold hover:text-white hover:border-noctvm-gold transition-all shadow-lg shadow-noctvm-violet/20`}
-                      >
-                        Edit
-                      </button>
-                      {(isAdmin || isOwned) && (
-                        <button 
-                          onClick={() => handleDelete(venue)} 
-                          className="p-2 px-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver/40 hover:text-red-500 hover:bg-red-500/5 transition-all"
-                          title="Delete Venue"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
