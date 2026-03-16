@@ -19,9 +19,19 @@ interface ScrapeResult {
   error?: string;
 }
 
+interface ScraperLog {
+  id: string;
+  run_date: string;
+  source: string;
+  total_upserted: number;
+  results: ScrapeResult[];
+  skipped_venues: string[];
+}
+
 interface Summary {
-  total: number;
+  total?: number;
   upserted: number;
+  total_upserted?: number; // compat for logs
   results: ScrapeResult[];
   skipped_venues: string[];
 }
@@ -43,6 +53,26 @@ export default function ScraperManager() {
   const [lastRun, setLastRun] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<ScraperSource | null>(null);
   const [settingSource, setSettingSource] = useState<ScraperSource | null>(null);
+  const [logs, setLogs] = useState<ScraperLog[]>([]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const fetchLogs = async () => {
+    const { data, error } = await supabase
+      .from('scraper_logs')
+      .select('*')
+      .order('run_date', { ascending: false })
+      .limit(10);
+    
+    if (data) {
+      setLogs(data);
+      if (data.length > 0) {
+        setLastRun(new Date(data[0].run_date).toLocaleString());
+      }
+    }
+  };
 
   const runAllScrapers = async () => {
     if (!window.confirm('Start full system scrape? This will scan all sources and update the database.')) return;
@@ -61,6 +91,7 @@ export default function ScraperManager() {
       if (res.ok) {
         setSummary(data);
         setLastRun(new Date().toLocaleString());
+        fetchLogs();
       } else {
         alert(data.error || 'Failed to run scrapers');
       }
@@ -88,6 +119,7 @@ export default function ScraperManager() {
       if (res.ok) {
         setSummary(data);
         setLastRun(new Date().toLocaleString());
+        fetchLogs();
       } else {
         alert(data.error || `Failed to run ${sourceId} scraper`);
       }
@@ -212,6 +244,68 @@ export default function ScraperManager() {
               </p>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden frosted-noise shadow-xl">
+        <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+          <h3 className="text-[10px] font-bold uppercase tracking-widest text-noctvm-silver font-mono">Run History Log</h3>
+          <button onClick={fetchLogs} className="p-2 hover:bg-white/10 rounded-lg text-noctvm-silver/40 hover:text-white transition-all" title="Refresh Logs">
+            <RefreshIcon className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="overflow-x-auto no-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/5 bg-white/[0.02]">
+                <th className="px-6 py-3 text-[9px] text-noctvm-silver/40 uppercase font-mono">Date</th>
+                <th className="px-6 py-3 text-[9px] text-noctvm-silver/40 uppercase font-mono">Source</th>
+                <th className="px-6 py-3 text-[9px] text-noctvm-silver/40 uppercase font-mono text-center">Upserted</th>
+                <th className="px-6 py-3 text-[9px] text-noctvm-silver/40 uppercase font-mono text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {logs.length > 0 ? (
+                logs.map((log) => (
+                  <tr key={log.id} className="group hover:bg-white/[0.01] transition-all">
+                    <td className="px-6 py-4">
+                      <p className="text-xs text-white font-medium">{new Date(log.run_date).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-noctvm-silver/40 font-mono italic">{new Date(log.run_date).toLocaleTimeString()}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-tighter ${
+                        log.source === 'all' ? 'bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20' : 'bg-white/5 text-noctvm-silver border border-white/10'
+                      }`}>
+                        {log.source === 'all' ? 'Full System' : log.source}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-xs font-bold text-noctvm-emerald">{log.total_upserted}</span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => setSummary({ 
+                          upserted: log.total_upserted, 
+                          results: log.results, 
+                          skipped_venues: log.skipped_venues || [] 
+                        })}
+                        className="p-1.5 hover:bg-white/10 rounded-lg text-noctvm-silver/40 hover:text-white transition-all inline-flex items-center gap-1.5 text-[10px] uppercase font-bold"
+                      >
+                        <EyeIcon className="w-3.5 h-3.5" />
+                        Analysis
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-6 py-12 text-center text-noctvm-silver/20 text-[10px] font-mono uppercase tracking-widest italic">
+                    No run logs found in secure storage
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 

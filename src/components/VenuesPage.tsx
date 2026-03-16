@@ -255,6 +255,7 @@ export default function VenuesPage({
         <div className="aspect-[21/9] flex items-center justify-center relative">
           <VenueMap 
             venues={filteredVenues}
+            eventCounts={eventCounts}
             activeCity={activeCityProp || 'bucuresti'}
             activeTab="venues"
             onVenueClick={onVenueClick}

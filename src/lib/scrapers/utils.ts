@@ -500,21 +500,25 @@ function extractPriceFromHtml(html: string): string | null {
   }
 
   // Regex to find all numbers followed by currency or currency symbols
-  // Support variants like "20.00 lei", "20 lei", "€20", "Tickets from 20 RON", "Cost 20 lei", "de la 60 RON"
-  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț)\s*)?(?:(?:\d+(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$|GBP|£)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$|GBP|£)\s*(?:\d+(?:[.,]\d+)?))/gi));
+  // Stricter price regex: prioritize prefix or common price patterns
+  // Avoid large 4-digit numbers unless clearly prefixed (to avoid postcodes/years)
+  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț|Bilete)\s*)?(?:(?:\d{1,3}(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$)\s*(?:\d{1,3}(?:[.,]\d+)?))/gi));
   
   const prices = priceMatches
     .map(m => {
       const numMatch = m[0].match(/\d+(?:[.,]\d+)?/);
       return numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
     })
-    .filter((p): p is number => p !== null && !isNaN(p) && p > 0);
+    .filter((p): p is number => p !== null && !isNaN(p) && p > 0 && p < 1000); // Sanity check < 1000 RON
 
   if (prices.length > 0) {
     const sorted = Array.from(new Set(prices)).sort((a, b) => a - b);
     if (sorted.length === 1) return `${sorted[0]} RON`;
     return `${sorted[0]} - ${sorted[sorted.length - 1]} RON`;
   }
+
+  // Explicit check for "Free" or "Graduit" in text if no numbers found
+  if (/\b(free|gratuit|intrare libera|liberă)\b/i.test(html)) return 'Free';
 
   return null;
 }
@@ -646,15 +650,8 @@ export async function parseDetailPage(
       : url.includes('ambilet.ro') ? 'ambilet'
       : 'manual';
 
-    let event_url = b.url ? String(b.url) : url;
-    let ticket_url: string | null = null;
-
-    if (source === 'ra') {
-      event_url = url; 
-      ticket_url = externalTicketLink;
-    } else if (externalTicketLink) {
-      event_url = externalTicketLink;
-    }
+    const event_url = url; 
+    const ticket_url: string | null = externalTicketLink;
 
     // Genre filter
     const genres = guessGenres(title, description ?? '');
@@ -727,7 +724,8 @@ export async function parseDetailPage(
     time: sdRaw ? extractTime(sdRaw) : null,
     description: ogDesc,
     image_url: og['og:image'] ?? '',
-    event_url: extractTicketsFromHtml(html) || url,
+    event_url: url,
+    ticket_url: extractTicketsFromHtml(html),
     genres,
     price: extractPriceFromHtml(html),
     city,

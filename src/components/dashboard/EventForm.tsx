@@ -29,15 +29,16 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase
-      .from('events')
-      .upsert({
-        ...formData,
-        id: initialData?.id || undefined,
-        updated_at: new Date().toISOString()
-      }, { 
-        onConflict: initialData?.id ? 'id' : 'title, venue, date, source' 
-      } as any);
+      const { error } = await supabase
+        .from('events')
+        .upsert({
+          ...formData,
+          id: initialData?.id || undefined,
+          source: 'manual', // Force source to manual to protect from scraper overwrites
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: initialData?.id ? 'id' : 'title, venue, date, source' 
+        } as any);
 
     if (!error) onSuccess();
     else alert(error.message);

@@ -24,6 +24,7 @@ export default function RightPanel({
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const cityLabel = activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta';
@@ -49,7 +50,7 @@ export default function RightPanel({
         if (data) setVenues(data as Venue[]);
       });
 
-    // Trending venues
+    // Trending venues and event counts
     supabase
       .from('events')
       .select('venue')
@@ -62,6 +63,9 @@ export default function RightPanel({
             if (!ev.venue || ev.venue === 'Venue TBC') return;
             counts[ev.venue] = (counts[ev.venue] || 0) + 1;
           });
+          
+          setEventCounts(counts);
+
           const sorted = Object.entries(counts)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
@@ -103,9 +107,12 @@ export default function RightPanel({
       <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border h-[200px]">
         <VenueMap 
           venues={mapVenues} 
+          events={dbEvents}
+          eventCounts={eventCounts}
           activeCity={activeCity!} 
           activeTab={activeTab as any}
           onVenueClick={onVenueClick}
+          onEventClick={onEventClick}
         />
       </div>
 

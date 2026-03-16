@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
-import { Venue } from '@/lib/types';
+import { Venue, NoctEvent } from '@/lib/types';
 
 // Coordinates for center positioning
 const CITY_CENTERS = {
@@ -13,9 +13,12 @@ const CITY_CENTERS = {
 
 interface MapProps {
   venues: Venue[];
+  events?: NoctEvent[];
+  eventCounts?: Record<string, number>;
   activeCity: 'bucuresti' | 'constanta';
-  activeTab: 'feed' | 'venues' | 'explore' | 'profile' | 'messages' | 'notifications';
+  activeTab: 'events' | 'feed' | 'venues' | 'explore' | 'profile' | 'messages' | 'notifications';
   onVenueClick?: (venueName: string) => void;
+  onEventClick?: (event: NoctEvent) => void;
   headerHidden?: boolean;
 }
 
@@ -59,7 +62,16 @@ const MapController = ({ center }: { center: [number, number] }) => {
   return useMapHook ? <MapViewUpdater center={center} useMap={useMapHook} /> : null;
 };
 
-export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, headerHidden = false }: MapProps) {
+export default function VenueMap({ 
+  venues, 
+  events = [],
+  eventCounts = {},
+  activeCity, 
+  activeTab, 
+  onVenueClick, 
+  onEventClick,
+  headerHidden = false 
+}: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [L, setL] = useState<any>(null);
 
@@ -80,6 +92,7 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, 
   }
 
   const center = CITY_CENTERS[activeCity] || CITY_CENTERS.bucuresti;
+  const isEventsMode = activeTab === 'events' || activeTab === 'feed';
   
   const customIcon = L.divIcon({
     className: 'custom-div-icon',
@@ -110,8 +123,11 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, 
 
         <MapController center={center} />
 
-        {venues.map((venue) => (
-          venue.lat && venue.lng ? (
+        {venues.map((venue) => {
+          const tonightEvent = isEventsMode ? events.find(e => e.venue === venue.name) : null;
+          const count = eventCounts[venue.name] || 0;
+          
+          return venue.lat && venue.lng ? (
             <Marker 
               key={venue.id || venue.name} 
               position={[venue.lat, venue.lng]} 
@@ -119,19 +135,42 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, 
             >
               <Popup className="noctvm-popup">
                 <div 
-                  onClick={() => onVenueClick?.(venue.name)}
+                  onClick={() => {
+                    if (isEventsMode && tonightEvent && onEventClick) {
+                      onEventClick(tonightEvent);
+                    } else {
+                      onVenueClick?.(venue.name);
+                    }
+                  }}
                   className="bg-noctvm-black/95 text-white p-3.5 rounded-[24px] border border-white/10 min-w-[170px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
-                  <p className="text-sm font-bold text-noctvm-violet truncate mb-0.5">{venue.name}</p>
+                  <p className="text-sm font-bold text-white truncate mb-0.5">{venue.name}</p>
                   <p className="text-[11px] text-noctvm-silver/40 truncate mb-2">{venue.address}</p>
                   
-                  <div className="flex gap-1 overflow-hidden mb-2.5">
-                    {venue.genres?.slice(0, 2).map((g, i) => (
-                      <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
-                        {g}
-                      </span>
-                    ))}
-                  </div>
+                  {isEventsMode && tonightEvent ? (
+                    <>
+                      <div className="mb-2 p-2 rounded-xl bg-noctvm-violet/5 border border-noctvm-violet/10">
+                        <p className="text-[10px] text-noctvm-violet font-mono uppercase tracking-wider mb-1">Tonight</p>
+                        <p className="text-[11px] font-semibold text-white truncate">{tonightEvent.title}</p>
+                        <p className="text-[9px] text-noctvm-silver/60">
+                          {tonightEvent.genres.slice(0, 1).join(', ')}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {count > 0 && (
+                        <p className="text-[10px] text-noctvm-emerald font-mono mb-1.5">{count} upcoming events</p>
+                      )}
+                      <div className="flex gap-1 overflow-hidden mb-2.5">
+                        {venue.genres?.slice(0, 2).map((g, i) => (
+                          <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex items-center justify-end">
                     <div className="w-6 h-6 rounded-lg bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all shadow-md">
@@ -141,8 +180,8 @@ export default function VenueMap({ venues, activeCity, activeTab, onVenueClick, 
                 </div>
               </Popup>
             </Marker>
-          ) : null
-        ))}
+          ) : null;
+        })}
       </MapContainer>
     </div>
   );

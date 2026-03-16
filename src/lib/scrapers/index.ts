@@ -46,6 +46,8 @@ const VENUE_ALIASES: Record<string, string> = {
   'club phoenix, constanta': 'Club Phoenix',
   'phoenix':                 'Club Phoenix',
   'nuba club':               'Nuba Beach Club',
+  'platforma wolff':         'Platforma Wolff',
+  'wolff':                   'Platforma Wolff',
   // Restaurant Dorna — strip HTML entities / bullet variants
   'restaurant dorna mamaia &bull; zile și nopți': 'Restaurant Dorna Mamaia',
   'restaurant dorna mamaia • zile și nopți':      'Restaurant Dorna Mamaia',
@@ -58,7 +60,8 @@ const VENUE_TITLE_OVERRIDES: Array<{ titlePattern: RegExp; wrongVenue: RegExp; c
   // Blaze (Japonia) and similar Japanese/Asian acts are at Encore Club, not Control Club
   { titlePattern: /japonia|japan|encore/i,  wrongVenue: /sala luceafarul|control club/i, correctVenue: 'Encore Club' },
   // "ctrl LIVE: ..." series events are at Control Club
-  { titlePattern: /^ctrl\s+live/i, wrongVenue: /venue tbc/i, correctVenue: 'Control Club' },
+  { titlePattern: /^ctrl\s+live/i, wrongVenue: /venue tbc|club control/i, correctVenue: 'Control Club' },
+  { titlePattern: /echtzeit/i, wrongVenue: /venue tbc/i, correctVenue: 'Control Club' },
 ];
 
 /** Normalise a scraped venue name to its canonical form. */
@@ -99,7 +102,7 @@ const SCRAPERS: [Source, (settings?: ScraperSettings) => Promise<ScrapedEvent[]>
   ['eventbook',   scrapeEventbook],
 ];
 
-export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
+export async function fetchAndUpsertEvents(targetSource?: string): Promise<FetchSummary> {
   // Service-role client bypasses RLS for upserts
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -118,9 +121,13 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   const settingsMap = new Map<string, ScraperSettings>();
   dbSettings?.forEach(s => settingsMap.set(s.id, s.settings));
 
-  // Run all scrapers concurrently; individual failures do not abort others
+  // Run all scrapers or just one; individual failures do not abort others
+  const scrapersToRun = targetSource 
+    ? SCRAPERS.filter(([s]) => s === targetSource)
+    : SCRAPERS;
+
   const settled = await Promise.allSettled(
-    SCRAPERS.map(async ([source, fn]) => {
+    scrapersToRun.map(async ([source, fn]) => {
       const sourceSettings = settingsMap.get(source) || {};
       const events = await fn(sourceSettings);
       return { source, events };
@@ -132,7 +139,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
 
   for (let i = 0; i < settled.length; i++) {
     const outcome = settled[i];
-    const source = SCRAPERS[i][0]; // use index to correctly map source even on failure
+    const source = scrapersToRun[i][0]; // use index to correctly map source even on failure
 
     if (outcome.status === 'rejected') {
       console.error(`[orchestrator] ${source} failed:`, outcome.reason);
@@ -143,6 +150,22 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     const { events } = outcome.value;
     results.push({ source, count: events.length });
     allRows.push(...events.map(e => ({ ...e, source, city: e.city || 'Bucharest' })));
+  }
+
+  // ── Protection for Manual Edits ───────────────────────────────────────────
+  // Fetch all events flagged as 'manual' to prevent scrapers from re-adding them
+  const { data: manualEvents } = await supabase
+    .from('events')
+    .select('title, venue, date')
+    .eq('source', 'manual')
+    .gte('date', today);
+
+  const manualKeys = new Set(
+    (manualEvents || []).map(e => `${normalizeForDedupe(e.title)}|${normalizeForDedupe(e.venue)}|${e.date}`)
+  );
+  
+  if (manualKeys.size > 0) {
+    console.log(`[orchestrator] protecting ${manualKeys.size} manually edited events from overwrite`);
   }
 
   // ── Apply venue normalisation before deduplication ───────────────────────
@@ -166,6 +189,13 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   const groups = new Map<string, DedupeRow[]>();
   for (const row of allRows) {
     const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
+    
+    // Skip if a manual version already exists in the DB to protect edits
+    if (manualKeys.has(key)) {
+      console.log(`[orchestrator] skipping "${row.title}" - protected by manual edit`);
+      continue;
+    }
+
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(row);
   }
@@ -422,6 +452,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
       if (group.length <= 1) continue;
 
       const priority = (s: string) => {
+        if (s === 'manual') return 100; // Manual edits ALWAYS win
         if (s === 'livetickets') return 10;
         if (s === 'ra') return 9;
         if (s === 'iabilet') return 8;
@@ -434,16 +465,29 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
       const winner = group[0];
       const losers = group.slice(1);
 
-      // Merge valuable links into winner if winner is missing them
+      // Merge valuable links into winner ONLY if titles are actually related
+      // This prevents merging "Deki Alem" into "Echtzeit" just because they share venue/date
       let updatedWinner = false;
       for (const loser of losers) {
-        if (!winner.ticket_url && loser.ticket_url) {
-          winner.ticket_url = loser.ticket_url;
-          updatedWinner = true;
+        const titleA = normalizeForDedupe(winner.title);
+        const titleB = normalizeForDedupe(loser.title);
+        
+        // Stricter fuzzy: only merge if one is a substring of the other AND they are long enough
+        // Or if they are nearly identical. Remove the "first 10 chars" rule - it breaks series.
+        const isRelated = titleA === titleB || 
+                         (titleA.length > 15 && titleA.includes(titleB)) || 
+                         (titleB.length > 15 && titleB.includes(titleA));
+        
+        if (isRelated) {
+          if (!winner.ticket_url && loser.ticket_url) {
+            winner.ticket_url = loser.ticket_url;
+            updatedWinner = true;
+          }
+          idsToDelete.push(loser.id);
+        } else {
+          // Different events at same venue/date. KEEP BOTH.
+          console.log(`[orchestrator] sweeper: distinct events preserved: "${winner.title}" vs "${loser.title}"`);
         }
-        // If loser has a better source (e.g. RA) but winner is already RA, no need.
-        // But if winner is Iabilet and loser is RA, they should have been swapped by sort.
-        idsToDelete.push(loser.id);
       }
 
       if (updatedWinner) {
@@ -482,10 +526,21 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   if (activeCount > 0) console.log(`[orchestrator] stale GC: cleaned events from ${activeCount} active source(s)`);
 
   const total = unique.length;
-  console.log(`[orchestrator] done — ${total} unique events, ${upserted} upserted`);
-  results.forEach(r =>
-    console.log(`  ${r.source}: ${r.count} events${r.error ? ` (ERROR: ${r.error})` : ''}`),
-  );
+  const summary = { total, upserted, skipped_venues, results };
 
-  return { total, upserted, skipped_venues, results };
+  // ── Persist run results to history ──────────────────────────────────────────
+  try {
+    await supabase.from('scraper_logs').insert({
+      source: targetSource || 'all',
+      total_upserted: upserted,
+      results: results,
+      skipped_venues: skipped_venues,
+      run_date: new Date().toISOString()
+    });
+    console.log('[orchestrator] persisted run results to scraper_logs');
+  } catch (logErr) {
+    console.warn('[orchestrator] failed to persist scraper log (table might not exist yet):', logErr);
+  }
+
+  return summary;
 }

@@ -326,6 +326,7 @@ export default function Home() {
               <div className="tab-content">
                 <MobileTopSection 
                   onVenueClick={handleVenueClick} 
+                  onEventClick={(e: NoctEvent) => setSelectedEvent(e)}
                   activeCity={activeCity} 
                   activeGenres={activeGenres}
                   activeTab={activeTab}

@@ -35,7 +35,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const summary = await fetchAndUpsertEvents();
+    const body = await req.json().catch(() => ({}));
+    const targetSource = body.source;
+    const summary = await fetchAndUpsertEvents(targetSource);
     return NextResponse.json(summary);
   } catch (err: any) {
     console.error('Scraper error:', err);

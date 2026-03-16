@@ -9,6 +9,7 @@ import VenueMap from './VenueMap';
 
 interface MobileTopSectionProps {
   onVenueClick: (venueName: string) => void;
+  onEventClick?: (event: NoctEvent) => void;
   activeCity?: 'bucuresti' | 'constanta';
   activeGenres?: string[];
   activeTab?: string;
@@ -17,6 +18,7 @@ interface MobileTopSectionProps {
 
 export default function MobileTopSection({ 
   onVenueClick, 
+  onEventClick,
   activeCity = 'bucuresti',
   activeGenres = ['All'],
   activeTab = 'events',
@@ -102,9 +104,11 @@ export default function MobileTopSection({
         <div className="aspect-[21/9] flex items-center justify-center relative">
           <VenueMap 
             venues={mapVenues}
+            events={tonightEvents}
             activeCity={activeCity}
             activeTab={activeTab as any}
             onVenueClick={onVenueClick}
+            onEventClick={onEventClick}
             headerHidden={headerHidden}
           />
         </div>

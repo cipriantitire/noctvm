@@ -23,7 +23,7 @@ export interface Venue {
 
 export interface NoctEvent {
   id: string;
-  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere' | 'onevent' | 'ambilet' | 'manual';
+  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere' | 'onevent' | 'ambilet' | 'eventbook' | 'manual';
   title: string;
   venue: string;
   date: string;
