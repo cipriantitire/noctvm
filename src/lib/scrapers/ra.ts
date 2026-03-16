@@ -103,9 +103,9 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     const descMatch = html.match(/"description"\s*:\s*"([^"]+)"/);
     const description = clean(descMatch?.[1] || '');
 
-    // CHECK FOR SOLD OUT
+    // CHECK FOR SOLD OUT - Strict word boundary check
     let isSoldOut = false;
-    if (rawTitle.toUpperCase().includes('SOLD OUT') || description.toUpperCase().includes('SOLD OUT')) {
+    if (/\bSOLD OUT\b/i.test(rawTitle) || /\bSOLD OUT\b/gi.test(description)) {
       isSoldOut = true;
     }
 
@@ -292,8 +292,28 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
         .filter(Boolean) as string[];
 
       // Deep-fetch RA detail pages to get descriptions, ticket links, and prices
-      // RA detail pages often have better info than the GraphQL summary
       const detailedEvents = await batchFetchRA(urls, cityLabel, 100, 5);
+      
+      // ENRICHMENT: If deep-fetch failed to find a price (e.g. 403), use the 'cost' from the main listing
+      const urlToListing = new Map(listings.map((l: any) => [`https://ra.co${l.event?.contentUrl}`, l.event]));
+      
+      for (const dev of detailedEvents) {
+        if (!dev.price || dev.price === 'FREE') { // Only override if no specific price was found
+          const lEvent = urlToListing.get(dev.event_url) as any;
+          if (lEvent?.cost) {
+            const numeric = parseFloat(lEvent.cost.replace(',', '.'));
+            let fallbackPrice = isNaN(numeric) ? lEvent.cost : `${Math.round(numeric)} RON`;
+            if (lEvent.cost.toLowerCase().includes('euro') || lEvent.cost.includes('€')) {
+              fallbackPrice = `${Math.round(numeric)} EUR`;
+            }
+            dev.price = fallbackPrice;
+          }
+        }
+        // Also ensure SOLD OUT status from title is preserved
+        if (!dev.price && dev.title.toUpperCase().includes('SOLD OUT')) {
+          dev.price = 'SOLD OUT';
+        }
+      }
       
       console.log(`[ra] ${cityLabel}: Deep-fetched ${detailedEvents.length} events from detail pages`);
 
