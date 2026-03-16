@@ -210,6 +210,7 @@ export default function Home() {
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
       {/* ── Event Detail Modal ──────────────────────────────────── */}
+      {/* Note: Injected at root, uses z-[200] in component to sit above Venue Overlay z-[100] */}
       <EventDetailModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}

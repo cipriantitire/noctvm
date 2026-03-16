@@ -161,9 +161,9 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={handleClose} />
 
-      {/* Modal */}
+      {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
       <div
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] bg-noctvm-midnight/80 sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 liquid-glass frosted-noise`}
+        className={`relative z-[200] w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] bg-noctvm-midnight/80 sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 liquid-glass frosted-noise`}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
       >

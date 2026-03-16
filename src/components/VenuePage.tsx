@@ -70,16 +70,47 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
 
   const venueEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    // Merge sample and DB events
-    const sample = SAMPLE_EVENTS.filter(e => e.venue === venueName);
-    const combined = [...dbEvents];
-    // Add samples if not already in DB (by title+date)
-    sample.forEach(se => {
-       if (!combined.some(ce => ce.title === se.title && ce.date === se.date)) {
-         combined.push(se);
-       }
+    
+    // Normalize venue name for matching
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const targetNorm = norm(venueName);
+
+    // Initial filtering
+    const dbRaw = dbEvents.filter(e => {
+      const vNorm = norm(e.venue);
+      return vNorm.includes(targetNorm) || targetNorm.includes(vNorm);
     });
-    return combined.sort((a,b) => a.date.localeCompare(b.date));
+    
+    const sampleRaw = SAMPLE_EVENTS.filter(e => {
+      const vNorm = norm(e.venue);
+      return (vNorm.includes(targetNorm) || targetNorm.includes(vNorm)) && e.date >= today;
+    });
+
+    // Deduplicate and Prioritize:
+    // Key: title + date
+    const groups = new Map<string, NoctEvent[]>();
+    [...dbRaw, ...sampleRaw].forEach(e => {
+      const key = `${e.title.toLowerCase()}|${e.date}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(e);
+    });
+
+    const unique: NoctEvent[] = [];
+    for (const group of Array.from(groups.values())) {
+      // Priority: livetickets > ra > others > sample
+      const best = group.sort((a, b) => {
+        const score = (ev: NoctEvent) => {
+          if (ev.source === 'livetickets') return 10;
+          if (ev.source === 'ra') return 8;
+          if (ev.id.startsWith('evt-')) return 0; // Sample events have lowest priority
+          return 5;
+        };
+        return score(b) - score(a);
+      })[0];
+      unique.push(best);
+    }
+
+    return unique.sort((a, b) => a.date.localeCompare(b.date));
   }, [venueName, dbEvents]);
 
   const today = new Date().toISOString().split('T')[0];
