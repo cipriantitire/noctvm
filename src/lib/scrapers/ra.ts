@@ -31,6 +31,10 @@ const QUERY = `
           contentUrl
           flyerFront
           lineup
+          images {
+            filename
+            type
+          }
           promotionalLinks {
             title
             url
@@ -103,7 +107,10 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
 
     // Image
     const imageMatch = html.match(/"image"\s*:\s*\{[^}]*"url"\s*:\s*"([^"]+)"/) || html.match(/"image"\s*:\s*"([^"]+)"/);
-    const image_url = imageMatch?.[1] || '';
+    let image_url = imageMatch?.[1] || '';
+    if (image_url) {
+      image_url = image_url.replace(/\\u002F/g, '/').replace(/\\/g, '');
+    }
 
     // Description
     const descMatch = html.match(/"description"\s*:\s*"([^"]+)"/);
@@ -453,6 +460,13 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
         // 6. SOLD OUT check
         if (dev.title.toUpperCase().includes('SOLD OUT')) {
           dev.price = 'SOLD OUT';
+        }
+
+        // 7. Image enrichment - Prioritize GraphQL images for reliability
+        if (lEvent.images && lEvent.images.length > 0) {
+          dev.image_url = lEvent.images[0].filename;
+        } else if (!dev.image_url && lEvent.flyerFront) {
+          dev.image_url = lEvent.flyerFront;
         }
       }
       
