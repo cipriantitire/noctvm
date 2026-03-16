@@ -370,7 +370,7 @@ export default function VenueManager() {
                       )}
                       <button 
                         onClick={() => setEditingVenue(venue)} 
-                        className="p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/40 hover:text-white transition-all" 
+                        className="p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/40 hover:text-noctvm-gold hover:bg-noctvm-gold/5 transition-all" 
                         title="Edit Venue"
                       >
                         <EditIcon className="w-4 h-4" />
@@ -378,7 +378,7 @@ export default function VenueManager() {
                       {(isAdmin || isOwned) && (
                         <button 
                           onClick={() => handleDelete(venue)} 
-                          className="p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 transition-all" 
+                          className="p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/40 hover:text-red-500 hover:bg-red-500/5 transition-all" 
                           title="Delete Venue"
                         >
                           <TrashIcon className="w-4 h-4" />
@@ -546,14 +546,14 @@ export default function VenueManager() {
                     <div className="flex-1 flex gap-2">
                       <button 
                         onClick={() => setEditingVenue(venue)}
-                        className={`flex-1 px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20`}
+                        className={`flex-1 px-4 py-2 bg-noctvm-violet text-white border border-noctvm-violet/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-noctvm-gold hover:text-white hover:border-noctvm-gold transition-all shadow-lg shadow-noctvm-violet/20`}
                       >
                         Edit
                       </button>
                       {(isAdmin || isOwned) && (
                         <button 
                           onClick={() => handleDelete(venue)} 
-                          className="p-2 px-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 transition-all"
+                          className="p-2 px-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver/40 hover:text-red-500 hover:bg-red-500/5 transition-all"
                           title="Delete Venue"
                         >
                           <TrashIcon className="w-4 h-4" />
