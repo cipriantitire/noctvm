@@ -175,10 +175,12 @@ export function clean(text: string | null | undefined): string {
  * "Concert pentru copii" IS still a children's event, not nightlife.
  */
 const HARD_BLOCK_TERMS = [
-  'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii',
+  'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi', 'purceluși',
   'copii', 'marionete', 'papusi', 'păpuși', 'copilași', 'bebeluși', 'părinți', 'mămici',
   'educativ', 'educational', 'clasa a', 'cambridge', 'școală', 'gradiniță', 'grădiniță',
   'balet', 'ballet', 'lectii', 'lecții',
+  'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'ceramică',
+  'palatul sutu', 'expozitia', 'vernisaj', 'show de comedie', 'show comedie', 'comedie pentru',
   'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
   'teatru de vara', 'teatrul de vara', 'teatru vara', 'teatru aer liber',
   'piesa de teatru', 'teatru cu', 'joc de rol', 'magie pentru',
@@ -191,7 +193,7 @@ const SOFT_BLOCK_TERMS = [
   'teatru', 'theatre', 'piesa de teatru', 'spectacol de teatru',
   'actori:', 'regia:', 'distributia:', 'reprezentatie',
   'opera ', 'operă', 'simfon', 'filarmon', 'orchester', 'cor ', 'fanfara',
-  'stand-up', 'standup', 'stand up', 'comedy show', 'improv',
+  'stand-up', 'standup', 'stand up', 'comedy show', 'improv', 'comedie pentru', 'show de comedie',
   'targ', 'târg', 'expo ', 'expozitie', 'expozitia', 'expoziție', 'vernisaj', 'vernissage', 'bazar',
   'sport', 'atletism', 'maraton', 'match', 'meci', 'fotbal', 'tenis',
   'cinema', 'film ', ' film', 'movie', 'proiectie',
@@ -201,14 +203,15 @@ const SOFT_BLOCK_TERMS = [
   'circ', 'circus', 'magie', 'magic show', 'lectura', 'simulare',
   'training', 'curs', 'cursuri', 'workshop', 'seminar', 'atelier',
   'prezentare', 'lansare carte', 'book launch', 'dezvoltare',
+  'vernisaj', 'muzeul', 'palatul sutu', 'expozitia',
   // Automotive / off-road events (not music)
   'off-road', 'offroad', '4x4', 'automobilism', 'rally', 'curse auto', 'motorsport',
 ];
 
 const STRONG_MUSIC_TERMS = [
   'festival', 'live set', 'dj set', 'rave', 'club night',
-  'techno', 'house', 'trance', 'drum and bass', 'dnb', 'edm', 'electronic',
-  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock ', 'metal', 'punk',
+  'techno', 'house', 'trance', 'drum and bass', 'dnb', 'edm', 'electronic', 'underground',
+  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock ', 'metal', 'punk', 'alternativ',
   'disco', 'funk', 'soul', 'reggae', 'clubbing', 'dancefloor',
   'manele', 'manea',
 ];
@@ -252,8 +255,9 @@ export function guessGenres(title: string, desc: string): string[] | null {
   }
 
   if (found.size === 0) {
-    // Use word boundaries so "Clubul Țăranului" doesn't match "club", etc.
-    if (/\b(party|club|night|rave|dancefloor|discoteca|clubbing|afterparty|nightlife)\b/.test(t)) {
+    // Only match as Electronic if it's clearly a party term, NOT just the word "club" 
+    // which appears in many venue names (Doors Club, booking, etc)
+    if (/\b(party|night|rave|dancefloor|discoteca|clubbing|afterparty|nightlife)\b/.test(t)) {
       found.add('Electronic');
     } else if (isStrongMusic) {
       found.add('Live Music');
@@ -492,8 +496,8 @@ function extractPriceFromHtml(html: string): string | null {
   }
 
   // Regex to find all numbers followed by currency or currency symbols
-  // Support variants like "20.00 lei", "20 lei", "€20", "Tickets from 20 RON", "Cost 20 lei"
-  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret)\s*)?(?:(?:\d+(?:[.,]\d+)?)\s*(?:RON|lei|ron|EUR|€|USD|\$|GBP|£)\b)|(?:(?:RON|lei|ron|EUR|€|USD|\$|GBP|£)\s*(?:\d+(?:[.,]\d+)?))/gi));
+  // Support variants like "20.00 lei", "20 lei", "€20", "Tickets from 20 RON", "Cost 20 lei", "de la 60 RON"
+  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț)\s*)?(?:(?:\d+(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$|GBP|£)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$|GBP|£)\s*(?:\d+(?:[.,]\d+)?))/gi));
   
   const prices = priceMatches
     .map(m => {
@@ -518,7 +522,7 @@ export function extractTicketsFromHtml(html: string): string | null {
   const matches = Array.from(html.matchAll(re));
   
   // Prioritize external ticketing providers over internal page links
-  const providers = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix', 'bilete.ro'];
+  const providers = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix'];
   for (const p of providers) {
     const found = matches.find(m => m[1].includes(p));
     if (found) return found[1];

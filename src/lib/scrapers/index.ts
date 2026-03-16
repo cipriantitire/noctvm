@@ -108,6 +108,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
 
   // Capture run timestamp BEFORE upserts — used to purge stale events afterwards
   const runStart = new Date().toISOString();
+  const today = runStart.split('T')[0];
 
   // Fetch scraper settings from the DB
   const { data: dbSettings } = await supabase
@@ -149,14 +150,58 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     row.venue = normalizeVenue(row.venue, row.title);
   }
 
-  // Deduplicate within the batch by (title, venue, date, source)
-  const seen = new Set<string>();
-  const unique = allRows.filter(row => {
-    const key = `${row.title}|${row.venue}|${row.date}|${row.source}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  function normalizeForDedupe(s: string): string {
+    return s.toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\b\d{1,2}[\/\-\.]\d{1,2}([\/\-\.]\d{2,4})?\b/g, ' ') // strip dates like 21.03, 21-03, 21/03
+      .replace(/[|:;,\-.@()[\]{}/\\_]/g, ' ') // More aggressive punctuation stripping
+      .replace(/\b(gh|pw|platforma wolff|control|quantic|expro|expanse)\b/g, '') // strip common venue prefix shortcuts from comparison
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  type DedupeRow = ScrapedEvent & { source: Source; city: string };
+
+  // Deduplicate within the batch by fuzzy (title, venue, date)
+  // Logic: Group by fuzzy key, then pick the best one and merge ticket_url
+  const groups = new Map<string, DedupeRow[]>();
+  for (const row of allRows) {
+    const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(row);
+  }
+
+  const unique: DedupeRow[] = [];
+  for (const group of Array.from(groups.values())) {
+    // Sort by source priority (ra is best, then iabilet, livetickets, onevent, etc)
+    const priority = (s: string) => {
+      if (s === 'ra') return 10;
+      if (s === 'iabilet') return 8;
+      if (s === 'livetickets') return 7;
+      if (s === 'eventbook') return 6;
+      if (s === 'ambilet') return 5;
+      return 1;
+    };
+    group.sort((a: DedupeRow, b: DedupeRow) => priority(b.source) - priority(a.source));
+
+    const best: DedupeRow = { ...group[0] };
+    
+    // Merge ticket_url from any other source in the group if the best one doesn't have it
+    // or if the best one is RA (which uses ticket_url for external providers anyway)
+    for (let i = 1; i < group.length; i++) {
+      const other = group[i];
+      if (!best.ticket_url && other.ticket_url) {
+        best.ticket_url = other.ticket_url;
+      }
+      // If we have an RA event and a LiveTickets event, ensure the LiveTickets link
+      // ends up in ticket_url if it's not already there.
+      if (best.source === 'ra' && other.source !== 'ra' && !best.ticket_url) {
+        best.ticket_url = other.event_url;
+      }
+    }
+    unique.push(best);
+  }
 
   // Track venues returned as "Venue TBC" so callers can flag them for manual review
   const skipped_venues: string[] = unique
@@ -306,7 +351,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     const { error } = await supabase
       .from('events')
       .upsert(chunk, {
-        onConflict: 'title,venue,date,source',
+        onConflict: 'title,venue,date',
         ignoreDuplicates: false, // update existing rows (image/price may change)
       });
 
@@ -358,11 +403,73 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     }
   }
 
+  // ── Global duplicate sweeper ───────────────────────────────────────────────
+  // Fetch all upcoming events and manually prune duplicates that survived upsert
+  // (e.g. because (title,venue,date,source) is the existing unique constraint)
+  const { data: allUpcoming } = await supabase
+    .from('events')
+    .select('id, title, venue, date, source, ticket_url, event_url')
+    .gte('date', today);
+
+  if (allUpcoming && allUpcoming.length > 0) {
+    const sweepGroups = new Map<string, any[]>();
+    for (const row of allUpcoming) {
+      const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
+      if (!sweepGroups.has(key)) sweepGroups.set(key, []);
+      sweepGroups.get(key)!.push(row);
+    }
+
+    const idsToDelete: string[] = [];
+    for (const group of Array.from(sweepGroups.values())) {
+      if (group.length <= 1) continue;
+
+      const priority = (s: string) => {
+        if (s === 'ra') return 10;
+        if (s === 'iabilet') return 8;
+        if (s === 'livetickets') return 7;
+        if (s === 'eventbook') return 6;
+        if (s === 'ambilet') return 5;
+        return 1;
+      };
+      group.sort((a, b) => priority(b.source) - priority(a.source));
+
+      const winner = group[0];
+      const losers = group.slice(1);
+
+      // Merge valuable links into winner if winner is missing them
+      let updatedWinner = false;
+      for (const loser of losers) {
+        if (!winner.ticket_url && loser.ticket_url) {
+          winner.ticket_url = loser.ticket_url;
+          updatedWinner = true;
+        }
+        // If loser has a better source (e.g. RA) but winner is already RA, no need.
+        // But if winner is Iabilet and loser is RA, they should have been swapped by sort.
+        idsToDelete.push(loser.id);
+      }
+
+      if (updatedWinner) {
+        console.log(`[orchestrator] updated winner ${winner.id} withmerged ticket_url`);
+        await supabase.from('events').update({ 
+          ticket_url: winner.ticket_url,
+          updated_at: new Date().toISOString()
+        }).eq('id', winner.id);
+      }
+    }
+
+    if (idsToDelete.length > 0) {
+      console.log(`[orchestrator] duplicate sweeper: removing ${idsToDelete.length} stale twins`);
+      // Delete in batches to avoid URL length limits
+      for (let i = 0; i < idsToDelete.length; i += 20) {
+        const batch = idsToDelete.slice(i, i + 20);
+        const { error: sweepErr } = await supabase.from('events').delete().in('id', batch);
+        if (sweepErr) console.error('[orchestrator] sweep delete error:', sweepErr.message);
+      }
+    }
+  }
+
   // ── Stale-source garbage collection ──────────────────────────────────────────
   // Delete events from active sources whose updated_at predates this run.
-  // These are events that: (a) no longer appear on listing pages, (b) are now
-  // past-dated, or (c) failed the genre filter on re-scrape. This prevents stale
-  // non-music events (like "Dumbo cel Istet") from persisting after filter fixes.
   const activeSourcesWithEvents = results.filter(r => r.count > 0).map(r => r.source);
   for (const src of activeSourcesWithEvents) {
     const { error: staleErr } = await supabase
