@@ -119,7 +119,7 @@ export default function EventManager() {
 
   return (
     <div className="space-y-6">
-      <div className={`sticky top-[-4px] lg:top-0 z-30 lg:mt-0 mt-2 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
+      <div className={`sticky top-0 z-30 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-2 shadow-xl flex flex-col sm:flex-row items-center gap-2 mx-2 mt-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
         <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
           <input 
@@ -127,7 +127,7 @@ export default function EventManager() {
             placeholder="Search events..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
+            className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 h-[42px] text-xs focus:border-noctvm-violet/50 outline-none transition-all w-full font-mono uppercase tracking-widest"
           />
         </div>
         
@@ -195,7 +195,7 @@ export default function EventManager() {
               </button>
               
               {showSettings && (
-                <div className="absolute right-0 top-full mt-3 w-64 bg-noctvm-black/95 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl z-[100] frosted-noise animate-fade-in origin-top-right">
+                <div className="absolute right-0 top-[calc(100%+8px)] w-72 bg-noctvm-black/95 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl z-[100] frosted-noise animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">Global Fallback</span>
