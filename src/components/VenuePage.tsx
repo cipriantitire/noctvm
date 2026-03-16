@@ -75,42 +75,26 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const targetNorm = norm(venueName);
 
-    // Initial filtering
+    // Filter DB events for this venue
     const dbRaw = dbEvents.filter(e => {
       const vNorm = norm(e.venue);
-      return vNorm.includes(targetNorm) || targetNorm.includes(vNorm);
-    });
-    
-    const sampleRaw = SAMPLE_EVENTS.filter(e => {
-      const vNorm = norm(e.venue);
-      return (vNorm.includes(targetNorm) || targetNorm.includes(vNorm)) && e.date >= today;
+      return vNorm === targetNorm || vNorm.includes(targetNorm) || targetNorm.includes(vNorm);
     });
 
-    // Deduplicate and Prioritize:
-    // Key: title + date
-    const groups = new Map<string, NoctEvent[]>();
-    [...dbRaw, ...sampleRaw].forEach(e => {
-      const key = `${e.title.toLowerCase()}|${e.date}`;
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(e);
-    });
-
-    const unique: NoctEvent[] = [];
-    for (const group of Array.from(groups.values())) {
-      // Priority: livetickets > ra > others > sample
-      const best = group.sort((a, b) => {
-        const score = (ev: NoctEvent) => {
-          if (ev.source === 'livetickets') return 10;
-          if (ev.source === 'ra') return 8;
-          if (ev.id.startsWith('evt-')) return 0; // Sample events have lowest priority
-          return 5;
-        };
-        return score(b) - score(a);
-      })[0];
-      unique.push(best);
+    // Determine if we should show samples.
+    // Logic: If there are ANY events in the DB for this venue, ONLY show DB events.
+    // This allows user to delete duplicates in Manager and have them actually disappear.
+    if (dbRaw.length > 0) {
+      return dbRaw.sort((a, b) => a.date.localeCompare(b.date));
     }
 
-    return unique.sort((a, b) => a.date.localeCompare(b.date));
+    // Fallback to samples ONLY if DB is empty for this venue
+    const sampleRaw = SAMPLE_EVENTS.filter(e => {
+      const vNorm = norm(e.venue);
+      return (vNorm === targetNorm || vNorm.includes(targetNorm) || targetNorm.includes(vNorm)) && e.date >= today;
+    });
+
+    return sampleRaw.sort((a, b) => a.date.localeCompare(b.date));
   }, [venueName, dbEvents]);
 
   const today = new Date().toISOString().split('T')[0];

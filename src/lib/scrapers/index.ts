@@ -174,11 +174,13 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   }
 
   function normalizeForDedupe(s: string): string {
+    if (!s) return '';
     return s.toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[|:;,.@()[\]{}/\\_•*–—-]/g, ' ') // Strip almost all punctuation inclusive hyphen for dedupe
-      .replace(/\s+/g, ' ')
+      .replace(/^(pw|ctrl|control|extra|live|concert|party|alt jazz)\s*[-•x]*\s*/i, '') // Strip common prefixes
+      .replace(/[|:;,.@()[\]{}/\\_•*–—-]/g, ' ')
+      .replace(/\s+/g, '') // Strip all spaces for strict core match
       .trim();
   }
 
@@ -440,63 +442,87 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     .gte('date', today);
 
   if (allUpcoming && allUpcoming.length > 0) {
-    const sweepGroups = new Map<string, any[]>();
+    // Group by VENUE + DATE first (broad filter)
+    const venueDateGroups = new Map<string, any[]>();
     for (const row of allUpcoming) {
-      const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
-      if (!sweepGroups.has(key)) sweepGroups.set(key, []);
-      sweepGroups.get(key)!.push(row);
+      // Use normalizeVenue to ensure different aliases of same venue end up in same bucket
+      const vNorm = normalizeVenue(row.venue, row.title);
+      const key = `${vNorm}|${row.date}`;
+      if (!venueDateGroups.has(key)) venueDateGroups.set(key, []);
+      venueDateGroups.get(key)!.push(row);
     }
 
     const idsToDelete: string[] = [];
-    for (const group of Array.from(sweepGroups.values())) {
-      if (group.length <= 1) continue;
+    
+    for (const [key, eventsAtVenueDate] of Array.from(venueDateGroups.entries())) {
+      if (eventsAtVenueDate.length <= 1) continue;
 
+      // Clustering algorithm: group events that are "related" by title
+      const clusters: any[][] = [];
       const priority = (s: string) => {
-        if (s === 'manual') return 100; // Manual edits ALWAYS win
+        if (s === 'manual') return 100;
         if (s === 'livetickets') return 10;
         if (s === 'ra') return 9;
-        if (s === 'iabilet') return 8;
-        if (s === 'eventbook') return 7;
-        if (s === 'ambilet') return 6;
+        if (s === 'eventbook') return 8;
+        if (s === 'iabilet') return 7;
         return 1;
       };
-      group.sort((a, b) => priority(b.source) - priority(a.source));
 
-      const winner = group[0];
-      const losers = group.slice(1);
+      for (const event of eventsAtVenueDate) {
+        let addedToCluster = false;
+        const normTitle = normalizeForDedupe(event.title);
 
-      // Merge valuable links into winner ONLY if titles are actually related
-      // This prevents merging "Deki Alem" into "Echtzeit" just because they share venue/date
-      let updatedWinner = false;
-      for (const loser of losers) {
-        const titleA = normalizeForDedupe(winner.title);
-        const titleB = normalizeForDedupe(loser.title);
-        
-        // Stricter fuzzy: only merge if one is a substring of the other AND they are long enough
-        // Or if they are nearly identical. Remove the "first 10 chars" rule - it breaks series.
-        const isRelated = titleA === titleB || 
-                         (titleA.length > 15 && titleA.includes(titleB)) || 
-                         (titleB.length > 15 && titleB.includes(titleA));
-        
-        if (isRelated) {
+        for (const cluster of clusters) {
+          const leader = cluster[0];
+          const leaderTitle = normalizeForDedupe(leader.title);
+          
+          // Fuzzy match: if titles are nearly identical or one is a significant substring of the other
+          // We use 8 chars as a minimum for substring matching to avoid "Club" matching "Club"
+          const isRelated = normTitle === leaderTitle || 
+                           (normTitle.length > 8 && leaderTitle.includes(normTitle)) ||
+                           (leaderTitle.length > 8 && normTitle.includes(leaderTitle));
+
+          if (isRelated) {
+            cluster.push(event);
+            addedToCluster = true;
+            break;
+          }
+        }
+        if (!addedToCluster) {
+          clusters.push([event]);
+        }
+      }
+
+      // Inside each cluster, pick a winner and delete others
+      for (const cluster of clusters) {
+        if (cluster.length <= 1) continue;
+
+        cluster.sort((a, b) => priority(b.source) - priority(a.source));
+        const winner = cluster[0];
+        const losers = cluster.slice(1);
+
+        let updatedWinner = false;
+        for (const loser of losers) {
+          // Merge valuable data if winner is missing it
           if (!winner.ticket_url && loser.ticket_url) {
             winner.ticket_url = loser.ticket_url;
             updatedWinner = true;
           }
+          if (!winner.time && loser.time) {
+            winner.time = loser.time;
+            updatedWinner = true;
+          }
           idsToDelete.push(loser.id);
-        } else {
-          // Different events at same venue/date. KEEP BOTH.
-          console.log(`[orchestrator] sweeper: distinct events preserved: "${winner.title}" vs "${loser.title}"`);
         }
-      }
 
-      if (updatedWinner) {
-        console.log(`[orchestrator] updated winner ${winner.id} with merged data`);
-        await supabase.from('events').update({ 
-          ticket_url: winner.ticket_url,
-          time: winner.time || losers.find(l => l.time)?.time || null,
-          updated_at: new Date().toISOString()
-        }).eq('id', winner.id);
+        if (updatedWinner) {
+          console.log(`[orchestrator] sweeper: update winner "${winner.title}" (${winner.id})`);
+          await supabase.from('events').update({ 
+            ticket_url: winner.ticket_url,
+            time: winner.time,
+            updated_at: new Date().toISOString()
+          }).eq('id', winner.id);
+        }
       }
     }
 
