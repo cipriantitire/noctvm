@@ -385,6 +385,7 @@ export async function fetchHtml(url: string, timeoutMs = 10_000): Promise<string
   try {
     const res = await fetch(url, {
       signal: controller.signal,
+      cache: 'no-store',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -529,14 +530,28 @@ export function extractTicketsFromHtml(html: string): string | null {
   const re = /href=["']([^"']*(?:iabilet|livetickets|eventbook|ambilet|entertix|bilete\.ro|entree|tickets?|booking)[^"']*)["']/gi;
   const matches = Array.from(html.matchAll(re));
   
+  const ignoredExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.pdf'];
+  
+  const validMatches = matches.map(m => m[1]).filter(link => {
+    const lower = link.toLowerCase();
+    // Exclude common assets
+    if (ignoredExtensions.some(ext => lower.split('?')[0].endsWith(ext))) return false;
+    // Exclude anything that looks like a static asset directory
+    if (lower.includes('/assets/') || lower.includes('/css/') || lower.includes('/js/') || lower.includes('/img/')) return false;
+    // Exclude social media links that might contain 'ticket' in name/bio but aren't ticket links
+    if (lower.includes('facebook.com') || lower.includes('instagram.com') || lower.includes('twitter.com')) return false;
+    return true;
+  });
+
   // Prioritize external ticketing providers over internal page links
-  const providers = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix'];
+  const providers = ['iabilet.ro/bilete-', 'livetickets.ro/bilete/', 'eventbook.ro/event/', 'ambilet.ro/eveniment/', 'entertix.ro/'];
   for (const p of providers) {
-    const found = matches.find(m => m[1].includes(p));
-    if (found) return found[1];
+    const found = validMatches.find(link => link.toLowerCase().includes(p.toLowerCase()));
+    if (found) return found;
   }
   
-  return matches.length > 0 ? matches[0][1] : null;
+  // Fallback to any valid match that isn't just the homepage
+  return validMatches.find(m => m.length > 25) ?? (validMatches.length > 0 ? validMatches[0] : null);
 }
 
 // ── Deep-fetch core ───────────────────────────────────────────────────────────

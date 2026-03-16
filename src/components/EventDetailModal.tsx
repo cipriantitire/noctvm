@@ -214,7 +214,7 @@ export default function EventDetailModal({
           {(hasPrice || isFree) && (
             <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
               <a
-                href={event.ticket_url || event.event_url}
+                href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') ? event.ticket_url : event.event_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
@@ -320,7 +320,7 @@ export default function EventDetailModal({
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
           <a
-            href={event.ticket_url || event.event_url}
+            href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') ? event.ticket_url : event.event_url}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}

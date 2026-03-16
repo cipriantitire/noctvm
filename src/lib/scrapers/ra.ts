@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, clean, guessGenres, splitTitleVenue, batchFetch } from './utils';
+import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml } from './utils';
 
 const RA_GRAPHQL = 'https://ra.co/graphql';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36';
@@ -66,14 +66,161 @@ interface RAEvent {
   cost?: string;
 }
 
+/**
+ * Specialized parser for RA detail pages.
+ * Handles promotional links, cost labels, and internal RA ticket iframes.
+ */
+export async function parseRADetailPage(url: string, city: string): Promise<ScrapedEvent | null> {
+  try {
+    const html = await fetchHtml(url);
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. Basic Metadata (Title, Date, Venue)
+    // RA detail pages often have JSON-LD or we can extract from HTML
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+    const rawTitle = clean(titleMatch?.[1] || '');
+    if (!rawTitle) return null;
+    
+    const { title, venueHint } = splitTitleVenue(rawTitle);
+
+    // Date/Time
+    const dateMatch = html.match(/"startDate"\s*:\s*"([^"]+)"/);
+    const startDate = dateMatch?.[1] || '';
+    const date = parseDate(startDate);
+    if (!date || date < today) return null;
+    const time = startDate.includes('T') ? startDate.split('T')[1].slice(0, 5) : null;
+
+    // Venue
+    const venueMatch = html.match(/"location"\s*:\s*\{[^}]*"name"\s*:\s*"([^"]+)"/);
+    const venue = clean(venueMatch?.[1] || venueHint || 'Venue TBC');
+
+    // Image
+    const imageMatch = html.match(/"image"\s*:\s*\{[^}]*"url"\s*:\s*"([^"]+)"/) || html.match(/"image"\s*:\s*"([^"]+)"/);
+    const image_url = imageMatch?.[1] || '';
+
+    // Description
+    const descMatch = html.match(/"description"\s*:\s*"([^"]+)"/);
+    const description = clean(descMatch?.[1] || '');
+
+    // 2. Ticket Link Extraction (Promotional Links)
+    let ticket_url: string | null = null;
+    // Look for links or spans with href containing "Tickets" text
+    // Example: <span href="..." ...>Tickets</span>
+    // Example: <a href="..." ...>Tickets</a>
+    const promoTicketRegex = /<(?:a|span)[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>Tickets<\/(?:a|span)>/i;
+    const promoMatch = html.match(promoTicketRegex);
+    if (promoMatch) {
+      ticket_url = promoMatch[1];
+    } else {
+      // Sometimes it's nested: <a href="..."><span ...>Tickets</span></a>
+      const nestedPromoRegex = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>[\s\S]*?Tickets[\s\S]*?<\/a>/i;
+      const nestedMatch = html.match(nestedPromoRegex);
+      if (nestedMatch) {
+        ticket_url = nestedMatch[1];
+      }
+    }
+
+    // 3. Price Extraction
+    let price: string | null = null;
+    
+    // Pattern A: "Cost" label followed by a value
+    // Example: <span ...>Cost</span></div><span ...>90</span>
+    const costRegex = /Cost<\/span><\/div><span[^>]*>(\d+(?:[.,]\d+)?)<\/span>/i;
+    const costMatch = html.match(costRegex);
+    if (costMatch) {
+      const val = parseFloat(costMatch[1].replace(',', '.'));
+      price = isNaN(val) ? costMatch[1] : `${Math.round(val)} RON`;
+    }
+
+    // Pattern B: Internal RA Tickets (Iframe)
+    // Example: <iframe ... src="/widget/event/2337785/embedtickets?..." ...></iframe>
+    const iframeRegex = /<iframe[^>]+src=["'](\/widget\/event\/\d+\/embedtickets[^"']+)["']/i;
+    const iframeMatch = html.match(iframeRegex);
+    if (iframeMatch) {
+      const iframeSrc = `https://ra.co${iframeMatch[1]}`;
+      try {
+        const iframeHtml = await fetchHtml(iframeSrc);
+        // Parse prices from the iframe
+        // <div class="type-price">101,70 lei</div>
+        const priceMatches = Array.from(iframeHtml.matchAll(/<div class="type-price">([\d.,]+)\s*(?:lei|RON|EUR|€)<\/div>/gi));
+        if (priceMatches.length > 0) {
+          const numericPrices = priceMatches
+            .map(m => parseFloat(m[1].replace(',', '.')))
+            .filter(n => !isNaN(n))
+            .sort((a, b) => a - b);
+
+          if (numericPrices.length > 0) {
+            const min = Math.round(numericPrices[0]);
+            const max = Math.round(numericPrices[numericPrices.length - 1]);
+            price = min === max ? `${min} RON` : `${min} - ${max} RON`;
+          }
+        }
+        
+        // If internal tickets are on sale, the ticket_url should be the event page itself (where the iframe is)
+        if (!ticket_url && iframeHtml.includes('class="onsale')) {
+          ticket_url = url;
+        }
+      } catch (err) {
+        console.warn(`[ra] Failed to fetch tickets iframe for ${url}`, err);
+      }
+    }
+
+    // Fallback price from generic pattern if nothing found
+    if (!price) {
+      const genericPriceMatch = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)/i);
+      if (genericPriceMatch) price = `${Math.round(parseFloat(genericPriceMatch[1].replace(',', '.')))} RON`;
+    }
+
+    const genres = guessGenres(title, description);
+    
+    return {
+      title,
+      venue,
+      date: date,
+      time,
+      description,
+      image_url,
+      event_url: url,
+      ticket_url,
+      genres: genres || ['Electronic'],
+      price,
+      city,
+    };
+  } catch (e) {
+    console.warn(`[ra] failed to parse detail page ${url}:`, e);
+    return null;
+  }
+}
+
+/**
+ * Custom batch fetcher for RA to avoid dependency on utils.ts's hardcoded parseDetailPage
+ */
+async function batchFetchRA(urls: string[], city: string, limit = 100, batchSize = 5): Promise<ScrapedEvent[]> {
+  const results: ScrapedEvent[] = [];
+  const capped = urls.slice(0, limit);
+
+  for (let i = 0; i < capped.length; i += batchSize) {
+    const chunk = capped.slice(i, i + batchSize);
+    const settled = await Promise.allSettled(
+      chunk.map(url => parseRADetailPage(url, city))
+    );
+    for (const r of settled) {
+      if (r.status === 'fulfilled' && r.value) results.push(r.value);
+    }
+  }
+  return results;
+}
+
 export async function scrapeRA(): Promise<ScrapedEvent[]> {
   const today = new Date().toISOString().split('T')[0];
-  const oneMonthFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const threeMonthsFromNow = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const fetchForArea = async (areaId: number, cityLabel: string): Promise<ScrapedEvent[]> => {
+    console.log(`[ra] [DEBUG V2] fetchForArea starting for ${cityLabel} (area: ${areaId})`);
     try {
       const res = await fetch(RA_GRAPHQL, {
         method: 'POST',
+        cache: 'no-store', // Disable Next.js fetch cache
         headers: {
           'User-Agent': USER_AGENT,
           'Content-Type': 'application/json',
@@ -84,16 +231,24 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
           variables: {
             filters: {
               areas: { eq: areaId },
-              listingDate: { gte: today, lte: oneMonthFromNow },
+              listingDate: { gte: today, lte: threeMonthsFromNow },
             },
-            pageSize: 50,
+            pageSize: 100,
           },
         }),
       });
 
-      if (!res.ok) return [];
+      if (!res.ok) {
+        console.warn(`[ra] ${cityLabel} fetch failed with status: ${res.status}`);
+        return [];
+      }
       const json = await res.json();
       const listings = json.data?.eventListings?.data ?? [];
+      console.log(`[ra] [DEBUG V2] ${cityLabel} decoded JSON, found ${listings.length} listings`);
+
+      if (listings.length > 0) {
+        console.log(`[ra] [DEBUG V2] First listing ID: ${listings[0].event?.id}, Date: ${listings[0].event?.date}`);
+      }
 
       const urls = listings
         .map((l: any) => l.event?.contentUrl ? `https://ra.co${l.event.contentUrl}` : null)
@@ -101,10 +256,44 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
 
       // Deep-fetch RA detail pages to get descriptions, ticket links, and prices
       // RA detail pages often have better info than the GraphQL summary
-      const events = await batchFetch(urls, cityLabel, { limit: 50, batchSize: 5 });
+      const detailedEvents = await batchFetchRA(urls, cityLabel, 100, 5);
       
-      console.log(`[ra] ${cityLabel}: Deep-fetched ${events.length} events from detail pages`);
-      return events;
+      console.log(`[ra] ${cityLabel}: Deep-fetched ${detailedEvents.length} events from detail pages`);
+
+      // Fallback: If deep-fetch returned fewer events than listings, fill in from listings
+      const detailedUrls = new Set(detailedEvents.map(e => e.event_url));
+      const fallbackEvents: ScrapedEvent[] = listings
+        .filter((l: any) => l.event?.contentUrl && !detailedUrls.has(`https://ra.co${l.event.contentUrl}`))
+        .map((l: any) => {
+          const e = l.event;
+          const title = clean(e.title);
+          const description = ""; // GraphQL doesn't have description easily
+          let genres = guessGenres(title, description);
+          
+          // RA events are almost certainly electronic music; if we can't guess from title, default to Electronic
+          if (!genres || genres.length === 0) {
+            genres = ['Electronic'];
+          }
+
+          return {
+            title,
+            venue: clean(e.venue?.name || 'Venue TBC'),
+            date: e.date.split('T')[0],
+            time: e.date.includes('T') ? e.date.split('T')[1].slice(0, 5) : null,
+            description,
+            image_url: e.images?.[0]?.filename || e.flyerFront || '',
+            event_url: `https://ra.co${e.contentUrl}`,
+            ticket_url: null, // Hard to get from GraphQL without detail fetch
+            genres,
+            price: null,
+            city: cityLabel,
+          };
+        })
+        .filter(Boolean) as ScrapedEvent[];
+
+      const combinedResults = [...detailedEvents, ...fallbackEvents];
+      console.log(`[ra] ${cityLabel}: Total events (detailed + fallback): ${combinedResults.length}`);
+      return combinedResults;
     } catch (e) {
       console.warn(`[ra] failed for ${cityLabel}:`, e);
       return [];

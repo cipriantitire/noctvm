@@ -138,7 +138,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
 
     return (
       <a
-        href={event.ticket_url || event.event_url}
+        href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') ? event.ticket_url : event.event_url}
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}

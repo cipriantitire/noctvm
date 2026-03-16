@@ -202,6 +202,8 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     groups.get(key)!.push(row);
   }
 
+  console.log(`[orchestrator] batch size after inter-batch dedupe: ${groups.size} (from ${allRows.length} raw rows)`);
+
   const unique: DedupeRow[] = [];
   for (const group of Array.from(groups.values())) {
     // Sort by source priority (ra is best, then iabilet, livetickets, onevent, etc)
@@ -503,6 +505,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
         let updatedWinner = false;
         for (const loser of losers) {
+          console.log(`[orchestrator] sweeper: marking duplicate for deletion: "${loser.title}" (${loser.source}) -> keeping: "${winner.title}" (${winner.source})`);
           // Merge valuable data if winner is missing it
           if (!winner.ticket_url && loser.ticket_url) {
             winner.ticket_url = loser.ticket_url;
