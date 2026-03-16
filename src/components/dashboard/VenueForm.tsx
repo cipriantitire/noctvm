@@ -33,10 +33,13 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
     e.preventDefault();
     setLoading(true);
 
+    // Filter out UI-only fields that don't exist in the database schema
+    const { upcoming_events, followers, review_count, rating, ...cleanData } = formData as any;
+
     const { error } = await supabase
       .from('venues')
       .upsert({
-        ...formData,
+        ...cleanData,
         id: initialData?.id || undefined,
         owner_id: initialData?.owner_id || (initialData?.id ? undefined : profile?.id)
       });
