@@ -169,12 +169,12 @@ export default function EventManager() {
               viewMode === 'grid' ? 'w-full aspect-square rounded-[1.5rem] mb-5' : 'w-20 h-20 rounded-xl'
             }`}>
               {event.image_url ? (
-                <Image 
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img 
                   src={event.image_url} 
                   alt={event.title} 
-                  fill 
-                  className="object-cover"
-                  sizes={viewMode === 'grid' ? "(max-width: 1200px) 50vw, 25vw" : "80px"}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="w-full h-full bg-white/5 flex items-center justify-center text-3xl">📷</div>

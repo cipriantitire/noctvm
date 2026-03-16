@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { XIcon, CogIcon, CheckIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabase';
+import { logActivity } from '@/lib/activity';
 
 interface ScraperSettingsModalProps {
   source: { id: string, name: string };
@@ -18,7 +19,9 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
     categories: ['techno', 'house', 'experimental'],
     autoUpdate: true,
     priority: 5,
-    cityFilter: ['Bucharest', 'Constanta']
+    cityFilter: ['Bucharest', 'Constanta'],
+    includeKeywords: [] as string[],
+    excludeKeywords: ['festival', 'workshop', 'theater'] as string[]
   });
 
   useEffect(() => {
@@ -57,6 +60,12 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
         });
 
       if (error) throw error;
+      await logActivity({
+        type: 'event_edit', // generic config change
+        message: `Updated scraper settings for ${source.name}`,
+        entity_name: source.name,
+        user_name: 'Admin'
+      });
       onClose();
     } catch (err) {
       alert('Failed to save settings');
@@ -168,6 +177,28 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                   {city}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-white/5">
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Include Keywords (Comma separated)</label>
+              <textarea 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-[11px] text-white focus:border-noctvm-violet/50 outline-none transition-all resize-none h-20"
+                placeholder="e.g. techno, house, dj set..."
+                value={settings.includeKeywords?.join(', ') || ''}
+                onChange={(e) => setSettings({...settings, includeKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)})}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Exclude Keywords (Filter out)</label>
+              <textarea 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-[11px] text-noctvm-silver focus:border-noctvm-rose/50 outline-none transition-all resize-none h-20"
+                placeholder="e.g. festival, workshop..."
+                value={settings.excludeKeywords?.join(', ') || ''}
+                onChange={(e) => setSettings({...settings, excludeKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)})}
+              />
             </div>
           </div>
 

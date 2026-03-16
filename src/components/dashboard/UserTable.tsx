@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserIcon, ShieldCheckIcon, SearchIcon, EditIcon, TrashIcon, CheckIcon, XIcon } from '@/components/icons';
 import Image from 'next/image';
 import VerifiedBadge from '@/components/VerifiedBadge';
+import { logActivity } from '@/lib/activity';
 
 import UserEditModal from './UserEditModal';
 
@@ -41,6 +42,12 @@ export default function UserTable() {
       .eq('id', userId);
     
     if (!error) {
+      await logActivity({
+        type: 'user_edit',
+        message: `Updated role for ${userId} to ${role}`,
+        entity_id: userId,
+        user_name: 'Admin'
+      });
       setUsers(users.map(u => u.id === userId ? { ...u, role } : u));
     }
     setUpdatingId(null);
@@ -54,6 +61,12 @@ export default function UserTable() {
       .eq('id', userId);
     
     if (!error) {
+      await logActivity({
+        type: !currentStatus ? 'user_verify' : 'user_unverify',
+        message: `${!currentStatus ? 'Verified' : 'Unverified'} user ${userId}`,
+        entity_id: userId,
+        user_name: 'Admin'
+      });
       setUsers(users.map(u => u.id === userId ? { ...u, is_verified: !currentStatus } : u));
       if (userId === adminProfile?.id) refreshProfile();
     }
@@ -224,11 +237,27 @@ export default function UserTable() {
                     <EditIcon className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={() => {
-                      if (window.confirm('Delete this user?')) { /* handle delete */ }
+                    onClick={async () => {
+                      if (window.confirm('Are you absolutely sure you want to delete this user? This cannot be undone.')) {
+                        setUpdatingId(user.id);
+                        const { error } = await supabase.from('profiles').delete().eq('id', user.id);
+                        if (!error) {
+                          await logActivity({
+                            type: 'user_delete',
+                            message: `Deleted user: ${user.display_name || user.username}`,
+                            entity_id: user.id,
+                            user_name: 'Admin'
+                          });
+                          fetchUsers();
+                        } else {
+                          alert(error.message);
+                        }
+                        setUpdatingId(null);
+                      }
                     }}
                     title="Delete User"
-                    className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 border border-white/5 transition-all"
+                    disabled={updatingId === user.id}
+                    className="p-2.5 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 border border-white/5 transition-all disabled:opacity-30"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>

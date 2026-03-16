@@ -14,6 +14,7 @@ interface VenuePageProps {
   onBack: () => void;
   onClose?: () => void;
   onEventClick?: (event: NoctEvent) => void;
+  zIndex?: number;
 }
 
 const VENUE_INFO: Record<string, { description: string; address: string; capacity: string; genres: string[] }> = {

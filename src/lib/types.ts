@@ -43,4 +43,5 @@ export interface NoctEvent {
   is_promoted?: boolean;
   view_count?: number;
   save_count?: number;
+  ticket_provider?: 'livetickets' | 'iabilet' | 'eventbook' | 'ambilet' | 'fever' | 'ra' | 'none';
 }

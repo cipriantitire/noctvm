@@ -137,6 +137,29 @@ export default function Home() {
     if (tab === 'profile') setProfileView('profile');
   }, []);
 
+  // Modal Z-Index Management (whichever open last on top)
+  const [eventZIndex, setEventZIndex] = useState(200);
+  const [venueZIndex, setVenueZIndex] = useState(100);
+  const [maxZIndex, setMaxZIndex] = useState(200);
+
+  const openVenue = useCallback((venue: string | null) => {
+    if (venue) {
+      const newZ = maxZIndex + 1;
+      setVenueZIndex(newZ);
+      setMaxZIndex(newZ);
+    }
+    setSelectedVenue(venue);
+  }, [maxZIndex]);
+
+  const openEvent = useCallback((event: NoctEvent | null) => {
+    if (event) {
+      const newZ = maxZIndex + 1;
+      setEventZIndex(newZ);
+      setMaxZIndex(newZ);
+    }
+    setSelectedEvent(event);
+  }, [maxZIndex]);
+
   const filteredEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const isBuc = activeCity === 'bucuresti';
@@ -170,7 +193,7 @@ export default function Home() {
     return events;
   }, [dbEvents, activeGenres, searchQuery, selectedDate, activeCity]);
 
-  const handleVenueClick = useCallback((name: string) => setSelectedVenue(name), []);
+  const handleVenueClick = useCallback((name: string) => openVenue(name), [openVenue]);
   const handleCloseVenue = useCallback(() => setVenueClosing(true), []);
 
   // ── Account menu icons ────────────────────────────────────────────────────
@@ -213,9 +236,10 @@ export default function Home() {
       {/* Note: Injected at root, uses z-[200] in component to sit above Venue Overlay z-[100] */}
       <EventDetailModal
         event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        onVenueClick={(venueName) => { setSelectedEvent(null); handleVenueClick(venueName); }}
+        onClose={() => openEvent(null)}
+        onVenueClick={(venueName) => { openEvent(null); openVenue(venueName); }}
         onOpenAuth={() => setShowAuthModal(true)}
+        zIndex={eventZIndex}
       />
 
       {/* ── Create Post Modal ───────────────────────────────────── */}
@@ -248,7 +272,10 @@ export default function Home() {
 
       {/* ── Venue Overlay ───────────────────────────────────────── */}
       {(selectedVenue || venueClosing) && (
-        <div className="fixed inset-0 z-[100] flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8">
+        <div 
+          className="fixed inset-0 flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8"
+          style={{ zIndex: venueZIndex }}
+        >
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
             className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl bg-noctvm-midnight/80 overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
@@ -258,9 +285,10 @@ export default function Home() {
           >
             <VenuePage
               venueName={selectedVenue!}
-              onBack={handleCloseVenue}
-              onClose={handleCloseVenue}
-              onEventClick={(e) => setSelectedEvent(e)}
+              onBack={() => openVenue(null)}
+              onClose={() => openVenue(null)}
+              onEventClick={(e) => openEvent(e)}
+              zIndex={venueZIndex}
             />
           </div>
         </div>
@@ -326,8 +354,8 @@ export default function Home() {
             {activeTab === 'events' && (
               <div className="tab-content">
                 <MobileTopSection 
-                  onVenueClick={handleVenueClick} 
-                  onEventClick={(e: NoctEvent) => setSelectedEvent(e)}
+                  onVenueClick={openVenue} 
+                  onEventClick={openEvent}
                   activeCity={activeCity} 
                   activeGenres={activeGenres}
                   activeTab={activeTab}
@@ -394,7 +422,7 @@ export default function Home() {
                             <EventCard 
                               event={event} 
                               variant={viewMode} 
-                              onClick={(e: NoctEvent) => setSelectedEvent(e)} 
+                              onClick={openEvent} 
                               onSaveRequireAuth={() => setShowAuthModal(true)} 
                             />
                           </div>
@@ -622,8 +650,8 @@ export default function Home() {
         {/* Right panel */}
         {(activeTab === 'events' || activeTab === 'feed' || activeTab === 'venues') && (
           <RightPanel 
-            onVenueClick={handleVenueClick} 
-            onEventClick={(e: NoctEvent) => setSelectedEvent(e)} 
+            onVenueClick={openVenue} 
+            onEventClick={openEvent} 
             activeCity={activeCity}
             activeTab={activeTab}
             activeGenres={activeTab === 'venues' ? [activeGenreVenues] : activeGenres}

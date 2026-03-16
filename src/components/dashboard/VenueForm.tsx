@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Venue } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { logActivity } from '@/lib/activity';
 
 interface VenueFormProps {
   onSuccess: () => void;
@@ -35,8 +36,17 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
         owner_id: initialData?.owner_id || (initialData?.id ? undefined : profile?.id)
       });
 
-    if (!error) onSuccess();
-    else alert(error.message);
+    if (!error) {
+      await logActivity({
+        type: initialData?.id ? 'venue_edit' : 'venue_add',
+        message: `${initialData?.id ? 'Updated' : 'Created'} venue: ${formData.name}`,
+        entity_name: formData.name,
+        user_name: profile?.display_name || 'Admin'
+      });
+      onSuccess();
+    } else {
+      alert(error.message);
+    }
     setLoading(false);
   };
 

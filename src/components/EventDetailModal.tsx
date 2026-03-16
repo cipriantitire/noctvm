@@ -12,6 +12,7 @@ interface EventDetailModalProps {
   onClose: () => void;
   onVenueClick?: (venueName: string) => void;
   onOpenAuth: () => void;
+  zIndex?: number;
 }
 
 function formatDate(dateStr: string): string {
@@ -41,7 +42,13 @@ function getSourceBadge(source: string) {
   }
 }
 
-export default function EventDetailModal({ event, onClose, onVenueClick, onOpenAuth }: EventDetailModalProps) {
+export default function EventDetailModal({ 
+  event, 
+  onClose, 
+  onVenueClick, 
+  onOpenAuth,
+  zIndex = 200
+}: EventDetailModalProps) {
   const { user } = useAuth();
   const [descExpanded, setDescExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -156,14 +163,16 @@ export default function EventDetailModal({ event, onClose, onVenueClick, onOpenA
     )}
 
     <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
+      className={`fixed inset-0 flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
+      style={{ zIndex }}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={handleClose} />
 
       {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
       <div
-        className={`relative z-[200] w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] bg-noctvm-midnight/80 sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 liquid-glass frosted-noise`}
+        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] bg-noctvm-midnight/80 sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 liquid-glass frosted-noise`}
+        style={{ zIndex: (zIndex || 200) + 1 }}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
       >

@@ -27,19 +27,15 @@ function DashboardPage() {
     const { data: venuesData } = await venueQuery;
     if (venuesData) setOwnedVenues(venuesData);
 
-    // Fetch recent activity
+    // Fetch recent activity from the dedicated activity table
     const { data: activityData } = await supabase
-      .from('events')
-      .select('title, venue:venues(name), created_at')
+      .from('dashboard_activity')
+      .select('*')
       .order('created_at', { ascending: false })
-      .limit(5);
+      .limit(8);
     
     if (activityData) {
-      setRecentActivity(activityData.map((d: any) => ({
-        title: d.title,
-        venue: d.venue?.name || 'Unknown',
-        created_at: d.created_at
-      })));
+      setRecentActivity(activityData);
     }
   }, [profile, isAdmin]);
 
@@ -132,27 +128,53 @@ function DashboardPage() {
             </div>
             <div className="bg-white/5 border border-white/10 rounded-3xl p-3 frosted-noise divide-y divide-white/5 shadow-2xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-gradient-to-b from-noctvm-violet/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-              {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
-                <div key={i} className="flex items-center gap-5 p-5 hover:bg-white/5 transition-all duration-300 relative z-10">
-                  <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-noctvm-violet shadow-[0_0_8px_rgba(139,92,246,0.8)]' : 'bg-white/10'}`}></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate group-hover/item:text-noctvm-violet transition-colors">
-                      {activity.title}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[9px] text-noctvm-silver uppercase font-mono tracking-widest px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
-                        {activity.venue}
+              {recentActivity.length > 0 ? recentActivity.map((activity, i) => {
+                const colors: Record<string, string> = {
+                  event_add: 'bg-noctvm-violet',
+                  event_edit: 'bg-blue-400',
+                  event_delete: 'bg-noctvm-rose',
+                  scrape_run: 'bg-noctvm-emerald',
+                  user_signup: 'bg-noctvm-gold',
+                  user_edit: 'bg-amber-400',
+                  user_delete: 'bg-noctvm-rose',
+                  venue_claim: 'bg-purple-400',
+                  owner_claim: 'bg-noctvm-rose',
+                  user_verify: 'bg-noctvm-emerald',
+                  user_unverify: 'bg-noctvm-silver',
+                  venue_add: 'bg-noctvm-violet',
+                  venue_edit: 'bg-blue-400',
+                  venue_delete: 'bg-noctvm-rose',
+                };
+                const color = colors[activity.type] || 'bg-white/10';
+                const typeLabel = activity.type.split('_').join(' ').toUpperCase();
+                
+                return (
+                  <div key={activity.id || i} className="flex items-center gap-5 p-5 hover:bg-white/5 transition-all duration-300 relative z-10 group/item">
+                    <div className={`w-2 h-2 rounded-full ${color} ${i === 0 ? 'shadow-[0_0_8px_rgba(139,92,246,0.8)]' : ''}`}></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate group-hover/item:text-noctvm-violet transition-colors">
+                        {activity.message}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[7px] font-black text-noctvm-silver/40 uppercase tracking-tighter">
+                          {typeLabel}
+                        </span>
+                        <span className="text-[9px] text-noctvm-silver uppercase font-mono tracking-widest px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
+                          {activity.entity_name || activity.user_name || 'System'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-1">
+                      <span className="text-[10px] text-white/40 font-mono">
+                        {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono tracking-tighter">
+                        {activity.type.replace('_', ' ')}
                       </span>
                     </div>
                   </div>
-                  <div className="text-right flex flex-col items-end gap-1">
-                    <span className="text-[10px] text-white/40 font-mono">
-                      {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono tracking-tighter">Event Created</span>
-                  </div>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div className="p-20 text-center text-noctvm-silver/40 italic text-sm font-mono uppercase tracking-widest">
                   No recent activity
                 </div>

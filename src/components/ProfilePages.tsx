@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { logActivity } from '@/lib/activity';
 
 // Shared back button
 function BackButton({ onBack }: { onBack: () => void; label?: string }) {
@@ -118,6 +119,12 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
     if (updateError) {
       setError(updateError.message);
     } else {
+      await logActivity({
+        type: 'user_edit',
+        message: `Updated profile: @${username}`,
+        entity_id: profile.id,
+        user_name: displayName || username
+      });
       await refreshProfile();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -189,6 +196,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
 
 // ==================== ADD LOCATION ====================
 export function AddLocationPage({ onBack }: { onBack: () => void }) {
+  const { profile } = useAuth();
   const [venueName, setVenueName] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('Bucharest');
@@ -259,7 +267,17 @@ export function AddLocationPage({ onBack }: { onBack: () => void }) {
         </div>
 
         <button
-          onClick={() => venueName && address ? setSubmitted(true) : null}
+          onClick={async () => {
+            if (venueName && address) {
+              await logActivity({
+                type: 'venue_add',
+                message: `Submitted new location: ${venueName}`,
+                entity_name: venueName,
+                user_name: profile?.display_name || 'User'
+              });
+              setSubmitted(true);
+            }
+          }}
           className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${
             venueName && address
               ? 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
@@ -366,7 +384,17 @@ export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
           </div>
 
           <button
-            onClick={() => fullName && contactEmail ? setSubmitted(true) : null}
+            onClick={async () => {
+              if (fullName && contactEmail) {
+                await logActivity({
+                  type: role === 'owner' ? 'owner_claim' : 'venue_claim',
+                  message: `Claimed ${selectedVenue} as ${role}`,
+                  entity_name: selectedVenue,
+                  user_name: fullName
+                });
+                setSubmitted(true);
+              }
+            }}
             className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${
               fullName && contactEmail
                 ? 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
