@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Venue } from '@/lib/types';
+import Image from 'next/image';
 import VenueMap from './VenueMap';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
@@ -417,19 +418,18 @@ export default function VenuesPage({
             >
               {/* Venue color header */}
               <div className={`h-[100px] bg-gradient-to-br ${getVenueColor(venue.name)} relative flex items-center justify-center flex-shrink-0 overflow-hidden`}>
-                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-black/20">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={getVenueLogo(venue.name)}
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-black/20 relative">
+                  <Image
+                    src={getVenueLogo(venue.name, venue.logo_url)}
                     alt={venue.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                     onError={(e) => {
-                      const el = e.target as HTMLImageElement;
-                      el.style.display = 'none';
-                      el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+                      const el = (e.target as any).parentElement;
+                      el.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-2xl font-bold text-white`}>{venue.name[0]}</span>
+                  <span className={`fallback hidden text-2xl font-bold text-white absolute inset-0 flex items-center justify-center`}>{venue.name[0]}</span>
                 </div>
                 {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/80 text-white text-[9px] font-semibold">Following</span>}
               </div>
@@ -473,20 +473,19 @@ export default function VenuesPage({
                 <button
                   onClick={(e) => { e.stopPropagation(); onVenueClick(venue.name); }}
                   title="View venue details"
-                  className="w-14 h-14 rounded-2xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 hover:border-noctvm-violet/40 transition-colors"
+                  className="w-14 h-14 rounded-2xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 hover:border-noctvm-violet/40 transition-colors relative"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={getVenueLogo(venue.name)}
+                  <Image
+                    src={getVenueLogo(venue.name, venue.logo_url)}
                     alt={venue.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                     onError={(e) => {
-                      const el = e.target as HTMLImageElement;
-                      el.style.display = 'none';
-                      el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+                      const el = (e.target as any).parentElement;
+                      el.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-lg font-bold bg-gradient-to-br ${getVenueColor(venue.name)} bg-clip-text text-transparent`}>
+                  <span className={`fallback hidden text-lg font-bold bg-gradient-to-br ${getVenueColor(venue.name)} bg-clip-text text-transparent absolute inset-0 flex items-center justify-center`}>
                     {venue.name[0]}
                   </span>
                 </button>
@@ -585,10 +584,9 @@ export default function VenuesPage({
                         const initial = (review.profiles?.display_name || review.profiles?.username || '?')[0].toUpperCase();
                         return (
                           <div key={review.id} className="flex gap-3">
-                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet/40 to-purple-500/40 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet/40 to-purple-500/40 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                               {review.profiles?.avatar_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={review.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                <Image src={review.profiles.avatar_url} alt="" fill className="object-cover" />
                               ) : (
                                 <span className="text-[10px] font-bold text-white">{initial}</span>
                               )}

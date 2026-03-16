@@ -15,6 +15,7 @@ export interface Venue {
   lng: number | null;
   owner_id?: string;
   badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
+  logo_url?: string;
   is_verified: boolean;
   featured: boolean;
   view_count: number;

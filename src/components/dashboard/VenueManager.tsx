@@ -314,7 +314,7 @@ export default function VenueManager() {
       }`}>
         {filteredAndSortedVenues.map((venue) => {
           const isOwned = profile?.id && venue.owner_id === profile.id;
-          const venueLogo = getVenueLogo(venue.name);
+          const venueLogo = getVenueLogo(venue.name, venue.logo_url);
           return (
             <div 
               key={venue.id} 

@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { Venue } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { logActivity } from '@/lib/activity';
+import { uploadOptimizedImage } from '@/lib/image-optimization';
+import { UploadIcon } from '@/components/icons';
 
 interface VenueFormProps {
   onSuccess: () => void;
@@ -20,9 +22,12 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
     city: 'Bucharest',
     description: '',
     genres: [],
+    logo_url: '',
     ...initialData
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +62,20 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
     } else {
       setFormData({ ...formData, genres: [...currentGenres, genre] });
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const url = await uploadOptimizedImage(file, 'venue-logos');
+    if (url) {
+      setFormData(prev => ({ ...prev, logo_url: url }));
+    } else {
+      alert('Upload failed. Please try again.');
+    }
+    setUploading(false);
   };
 
   return (
@@ -94,6 +113,42 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
         </div>
+        <div className="space-y-1.5 relative">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue Logo (URL)</label>
+          <div className="relative group/upload">
+            <input
+              title="Venue Logo URL"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-[35%] py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+              placeholder="https://..."
+              value={formData.logo_url || ''}
+              onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+            />
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute right-1 top-1 bottom-1 w-[32%] bg-noctvm-violet/20 hover:bg-noctvm-violet/40 border border-noctvm-violet/30 rounded-lg text-[8px] font-black uppercase tracking-widest text-noctvm-violet transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+            >
+              {uploading ? (
+                <div className="w-2 h-2 border border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
+              ) : (
+                <UploadIcon className="w-2.5 h-2.5" />
+              )}
+              {uploading ? '...' : 'Upload'}
+            </button>
+            <input 
+              title="Upload Venue Logo"
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
         <div className="space-y-1.5">
           <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">City</label>
           <div className="relative">
@@ -110,19 +165,6 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Address</label>
-          <input
-            required
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-medium text-white/90 placeholder:text-white/10 frosted-noise text-xs"
-            placeholder="Street address..."
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          />
         </div>
         <div className="space-y-1.5">
           <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Capacity</label>

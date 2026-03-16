@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
+import Image from 'next/image';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -145,8 +146,7 @@ export default function StoriesViewerModal({
             loop
           />
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={story.image_url} alt="" className="absolute inset-0 w-full h-full object-contain bg-black" />
+          <Image src={story.image_url} alt="" fill className="object-contain bg-black" priority />
         )
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color}`} />
@@ -167,10 +167,9 @@ export default function StoriesViewerModal({
       {/* Header */}
       <div className="absolute top-7 left-0 right-0 flex items-center justify-between px-4 z-20">
         <div className="flex items-center gap-2.5">
-          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-white text-sm font-bold border-2 border-white/40 shadow-lg overflow-hidden`}>
+          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-white text-sm font-bold border-2 border-white/40 shadow-lg overflow-hidden relative`}>
             {currentUser.avatarUrl
-              // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ? <Image src={currentUser.avatarUrl} alt="" fill className="object-cover" />
               : currentUser.avatar}
           </div>
           <div>
@@ -237,13 +236,13 @@ export default function StoriesViewerModal({
 
       {/* User nav arrows */}
       {userIndex > 0 && (
-        <button onClick={e => { e.stopPropagation(); setUserIndex(u => u - 1); setStoryIndex(0); resetProgress(); }}
+        <button title="Previous Story" onClick={e => { e.stopPropagation(); setUserIndex(u => u - 1); setStoryIndex(0); resetProgress(); }}
           className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
       )}
       {userIndex < users.length - 1 && (
-        <button onClick={e => { e.stopPropagation(); setUserIndex(u => u + 1); setStoryIndex(0); resetProgress(); }}
+        <button title="Next Story" onClick={e => { e.stopPropagation(); setUserIndex(u => u + 1); setStoryIndex(0); resetProgress(); }}
           className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
         </button>

@@ -6,6 +6,7 @@ import { HeartIcon, ChatIcon, ShareIcon } from './icons';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 import PostOptionsMenu from './PostOptionsMenu';
 import ShareSheet from './ShareSheet';
 import LikesModal from './LikesModal';
@@ -120,6 +121,22 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   const [sharePostId, setSharePostId] = useState<string | null>(null);
   const [showLikesModal, setShowLikesModal] = useState(false);
   const [modalPostId, setModalPostId] = useState<string | null>(null);
+  const [venueLogosMap, setVenueLogosMap] = useState<Record<string, string>>({});
+
+  // Fetch venue logos for the city
+  useEffect(() => {
+    const fetchLogos = async () => {
+      const { data } = await supabase.from('venues').select('name, logo_url');
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach(v => {
+          if (v.logo_url) map[v.name] = v.logo_url;
+        });
+        setVenueLogosMap(map);
+      }
+    };
+    fetchLogos();
+  }, []);
 
   // ── Load active stories ──────────────────────────────────────────────────
 
@@ -608,8 +625,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                     <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
                       <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
                         {myEntry.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={myEntry.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          <Image src={myEntry.avatarUrl} alt="" fill className="object-cover" />
                         ) : (
                           <span className="text-white font-bold text-lg">{myEntry.avatar}</span>
                         )}
@@ -652,8 +668,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-noctvm-surface border border-noctvm-border flex items-center justify-center">
                   {profile?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                    <Image src={profile.avatar_url} alt="" fill className="object-cover" />
                   ) : (
                     <span className="text-white font-bold text-lg">{userInitial}</span>
                   )}
@@ -674,8 +689,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                 <div className={`w-16 h-16 rounded-full p-[2px] ${su.hasNew ? 'bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500' : 'bg-noctvm-border'}`}>
                   <div className={`w-full h-full rounded-full bg-gradient-to-br ${su.color} flex items-center justify-center ring-2 ring-noctvm-black overflow-hidden`}>
                     {su.avatarUrl
-                      // eslint-disable-next-line @next/next/no-img-element
-                      ? <img src={su.avatarUrl} alt="" className="w-full h-full object-cover" />
+                      ? <Image src={su.avatarUrl} alt="" fill className="object-cover" />
                       : <span className="text-sm font-bold text-white">{su.avatar}</span>}
                   </div>
                 </div>
@@ -704,10 +718,9 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
               {/* ── Post header ────────────────────────────────── */}
               <div className="flex items-center gap-3 p-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                   {post.user.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={post.user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                    <Image src={post.user.avatarUrl} alt="" fill className="object-cover" />
                   ) : (
                     <span className="text-xs font-bold text-white">{post.user.avatar}</span>
                   )}
@@ -753,8 +766,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
               {/* ── Post image ─────────────────────────────────── */}
               <div className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden`}>
                 {post.imageUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={post.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} />
                 ) : (
                   <>
                     <div className="absolute inset-0">
@@ -776,12 +788,15 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
                     onClick={() => onVenueClick(post.venue.name)}
                     className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all group hover:bg-black/80"
                   >
-                    <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={getVenueLogo(post.venue.name)} alt="" className="w-full h-full object-cover"
-                        onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.querySelector('.fallback')?.classList.remove('hidden'); }}
+                    <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
+                      <Image 
+                        src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} 
+                        alt="" 
+                        fill
+                        className="object-cover"
+                        onError={(e) => { const el = (e.target as any).parentElement; el.querySelector('.fallback')?.classList.remove('hidden'); }}
                       />
-                      <span className={`fallback hidden text-[8px] font-bold bg-gradient-to-br ${getVenueColor(post.venue.name)} bg-clip-text text-transparent`}>{post.venue.name[0]}</span>
+                      <span className={`fallback hidden text-[8px] font-bold bg-gradient-to-br ${getVenueColor(post.venue.name)} bg-clip-text text-transparent absolute inset-0 flex items-center justify-center`}>{post.venue.name[0]}</span>
                     </div>
                     <span className="text-[10px] font-medium text-white group-hover:text-noctvm-violet transition-colors">{post.venue.name}</span>
                   </button>

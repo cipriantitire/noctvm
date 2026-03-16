@@ -6,8 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { NoctEvent, Venue } from '@/lib/types';
 import EventForm from './EventForm';
 import Image from 'next/image';
-import { CheckIcon, XIcon, PlusIcon, EditIcon, SearchIcon, GridIcon, MapPinIcon, CalendarIcon, UsersIcon, TrashIcon } from '@/components/icons';
+import { CheckIcon, XIcon, PlusIcon, EditIcon, SearchIcon, GridIcon, MapPinIcon, CalendarIcon, UsersIcon, TrashIcon, CogIcon, UploadIcon } from '@/components/icons';
 import { logActivity } from '@/lib/activity';
+import { uploadOptimizedImage } from '@/lib/image-optimization';
 
 import { useDashboard } from '@/contexts/DashboardContext';
 
@@ -19,6 +20,10 @@ export default function EventManager() {
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<NoctEvent | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [fallbackImage, setFallbackImage] = useState('/images/event-fallback.png');
+  const [showSettings, setShowSettings] = useState(false);
+  const [uploadingFallback, setUploadingFallback] = useState(false);
+  const fallbackFileRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -47,6 +52,10 @@ export default function EventManager() {
       const { data: eventData } = await eventQuery.order('is_promoted', { ascending: false }).order('date', { ascending: false });
       if (eventData) setEvents(eventData as any[]);
       
+      // Fetch Fallback Image Setting
+      const { data: settings } = await supabase.from('app_settings').select('value').eq('key', 'event_fallback_image').single();
+      if (settings?.value) setFallbackImage(settings.value);
+
       setLoading(false);
     };
 
@@ -174,6 +183,73 @@ export default function EventManager() {
             <PlusIcon className="w-3.5 h-3.5" />
             Create
           </button>
+
+          {isAdmin && (
+            <div className="relative">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className={`p-2.5 bg-white/5 border border-white/10 rounded-xl transition-all h-[42px] flex items-center justify-center min-w-[42px] ${showSettings ? 'text-noctvm-violet bg-noctvm-violet/5 border-noctvm-violet/30' : 'text-noctvm-silver hover:text-white'}`}
+                title="Event Settings"
+              >
+                <CogIcon className="w-5 h-5" />
+              </button>
+              
+              {showSettings && (
+                <div className="absolute right-0 mt-3 w-64 bg-noctvm-black/95 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl z-50 frosted-noise">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">Global Fallback</span>
+                      <button title="Close Settings" onClick={() => setShowSettings(false)} className="text-noctvm-silver/40 hover:text-white"><XIcon className="w-3.5 h-3.5" /></button>
+                    </div>
+                    
+                    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-white/5 group">
+                      <Image 
+                        src={fallbackImage} 
+                        alt="Fallback Preview" 
+                        fill
+                        className="object-cover opacity-60"
+                      />
+                      <button 
+                        disabled={uploadingFallback}
+                        onClick={() => fallbackFileRef.current?.click()}
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-noctvm-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        {uploadingFallback ? (
+                          <div className="w-5 h-5 border-2 border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <UploadIcon className="w-5 h-5 text-white" />
+                            <span className="text-[8px] font-black uppercase tracking-widest text-white">Change Image</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-[8px] leading-relaxed text-noctvm-silver/40 font-medium">Used when an event has no flyer or a broken image link. Branding included.</p>
+                    
+                    <input 
+                      title="Upload Fallback Image File"
+                      type="file" 
+                      ref={fallbackFileRef} 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingFallback(true);
+                        const url = await uploadOptimizedImage(file, 'app-assets', 'event-fallback.png');
+                        if (url) {
+                          const { error } = await supabase.from('app_settings').upsert({ key: 'event_fallback_image', value: url });
+                          if (!error) setFallbackImage(url);
+                        }
+                        setUploadingFallback(false);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -206,23 +282,19 @@ export default function EventManager() {
             <div className={`relative flex-shrink-0 overflow-hidden border border-white/10 shadow-2xl group-hover:scale-[1.02] transition-transform duration-500 bg-noctvm-midnight ${
               viewMode === 'grid' ? 'w-full aspect-square rounded-[1.5rem] mb-5' : 'w-20 h-20 rounded-xl'
             }`}>
-              {event.image_url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img 
-                  src={event.image_url} 
-                  alt={event.title} 
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
-                />
-              ) : (
-                <img 
-                  src="/images/event-fallback.webp" 
-                  alt="No image" 
-                  className="w-full h-full object-cover opacity-50"
-                  loading="lazy"
-                />
-              )}
+              <Image 
+                src={event.image_url || fallbackImage} 
+                alt={event.title} 
+                fill
+                className="object-cover transition-opacity duration-300"
+                sizes={viewMode === 'grid' ? '(max-width: 768px) 100vw, 33vw' : '80px'}
+                onError={() => {
+                  // If fallback image itself fails, try the local one
+                  if (event.image_url !== fallbackImage) {
+                    // Try setting to fallbackImage
+                  }
+                }}
+              />
               {event.is_promoted && (
                 <div className={`absolute top-2 right-2 bg-noctvm-emerald/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-glow-sm ${
                   viewMode === 'grid' ? 'text-[9px]' : 'text-[7px]'

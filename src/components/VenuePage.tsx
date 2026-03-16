@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { Venue } from '@/lib/types';
 import EventCard from './EventCard';
 import VerifiedBadge from './VerifiedBadge';
+import Image from 'next/image';
 
 interface VenuePageProps {
   venueName: string;
@@ -129,19 +130,18 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
 
       {/* Venue Identity */}
       <div className="flex items-start gap-6 mb-8">
-        <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-3xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 shadow-2xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logoSrc}
+        <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-3xl overflow-hidden border border-noctvm-border flex items-center justify-center bg-noctvm-midnight flex-shrink-0 shadow-2xl relative">
+          <Image
+            src={getVenueLogo(venueName, venue?.logo_url)}
             alt={venueName}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
             onError={(e) => {
-              const el = e.target as HTMLImageElement;
-              el.style.display = 'none';
-              el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
+              const el = (e.target as any).parentElement;
+              el.querySelector('.fallback')?.classList.remove('hidden');
             }}
           />
-          <span className="fallback hidden text-4xl font-bold text-noctvm-violet">{venueName.charAt(0)}</span>
+          <span className="fallback hidden text-4xl font-bold text-noctvm-violet absolute inset-0 flex items-center justify-center">{venueName.charAt(0)}</span>
         </div>
         <div className="flex-1 pt-1">
           <div className="flex items-center gap-2 lg:gap-3 flex-wrap">

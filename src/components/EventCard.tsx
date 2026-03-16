@@ -3,6 +3,7 @@ import { NoctEvent } from '@/lib/types';
 import { CalendarIcon, StarIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
@@ -174,13 +175,13 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
     return (
       <Wrapper className="group flex bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow h-[160px] lg:h-[180px] cursor-pointer">
         <div className="relative w-[180px] sm:w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={event.image_url || '/images/event-fallback.png'}
             alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 180px, 240px"
+            priority={false}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {/* Source badge — links to ticket platform */}
@@ -230,13 +231,12 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
     <Wrapper className="group flex flex-col bg-noctvm-surface/40 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-noctvm-violet/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] cursor-pointer h-full relative">
       {/* Fixed-height image — no aspect-ratio so content area stays consistent */}
       <div className="relative h-[160px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={event.image_url || '/images/event-fallback.png'}
           alt={event.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          loading="lazy"
-          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
+          fill
+          className="object-cover group-hover:scale-110 transition-transform duration-700"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {/* Source badge — links to ticket platform */}

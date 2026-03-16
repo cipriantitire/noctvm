@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { NoctEvent, Venue } from '@/lib/types';
 import { logActivity } from '@/lib/activity';
-import { TicketIcon, LinkIcon } from '@/components/icons';
+import { TicketIcon, LinkIcon, UploadIcon } from '@/components/icons';
+import { uploadOptimizedImage } from '@/lib/image-optimization';
 
 interface EventFormProps {
   venues: Venue[];
@@ -29,6 +30,8 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
     ...initialData
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +64,20 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
     }
     else alert(error.message);
     setLoading(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const url = await uploadOptimizedImage(file, 'post-media');
+    if (url) {
+      setFormData(prev => ({ ...prev, image_url: url }));
+    } else {
+      alert('Upload failed. Please try again.');
+    }
+    setUploading(false);
   };
 
   const handleGenreChange = (genre: string) => {
@@ -133,14 +150,38 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
             title="Set Date"
           />
         </div>
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Poster URL</label>
-          <input
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
-            placeholder="https://..."
-            value={formData.image_url}
-            onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-          />
+        <div className="space-y-1.5 relative">
+          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Poster (URL)</label>
+          <div className="relative group/upload">
+            <input
+              title="Poster Image URL"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-[35%] py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+              placeholder="https://..."
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+            />
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute right-1 top-1 bottom-1 w-[32%] bg-noctvm-violet/20 hover:bg-noctvm-violet/40 border border-noctvm-violet/30 rounded-lg text-[8px] font-black uppercase tracking-widest text-noctvm-violet transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+            >
+              {uploading ? (
+                <div className="w-2 h-2 border border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
+              ) : (
+                <UploadIcon className="w-2.5 h-2.5" />
+              )}
+              {uploading ? '...' : 'Upload'}
+            </button>
+            <input 
+              title="Upload Poster File"
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
+          </div>
         </div>
       </div>
 

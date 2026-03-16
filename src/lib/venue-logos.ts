@@ -70,8 +70,11 @@ const LOOKUP_ENTRIES = Object.entries(ALL_LOGOS).map(
  *   getVenueLogo('control club')   -> '/venues/control.jpg'
  *   getVenueLogo('Expirat')        -> SVG data URI for Expirat
  *   getVenueLogo('Unknown Venue')  -> SVG data URI with "Un"
+ * If providedUrl is present, it takes absolute priority (user-uploaded logo).
  */
-export function getVenueLogo(venueName: string): string {
+export function getVenueLogo(venueName: string, providedUrl?: string | null): string {
+  if (providedUrl) return providedUrl;
+
   // 1. Exact match (case-insensitive)
   const lower = venueName.toLowerCase();
   for (const [key, url] of LOOKUP_ENTRIES) {
