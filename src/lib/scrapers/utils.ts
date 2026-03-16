@@ -178,7 +178,7 @@ const HARD_BLOCK_TERMS = [
   'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi',
   'copii', 'marionete', 'papusi', 'copilasi', 'bebelusi', 'parinti', 'mamici',
   'educativ', 'educational', 'clasa a', 'cambridge', 'scoala', 'gradinita',
-  'balet', 'ballet', 'lectii',
+  'balet', 'ballet', 'lectii', 'festival',
   'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'palatul sutu',
   'expozitia', 'vernisaj', 'show de comedie', 'show comedie', 'comedie pentru', 'comedie corporatisti',
   'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
@@ -209,7 +209,7 @@ const SOFT_BLOCK_TERMS = [
 ];
 
 const STRONG_MUSIC_TERMS = [
-  'festival', 'live set', 'dj set', 'rave', 'club night',
+  'live set', 'dj set', 'rave', 'club night',
   'techno', 'house', 'trance', 'drum and bass', 'dnb', 'edm', 'electronic', 'underground',
   'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock ', 'metal', 'punk', 'alternativ',
   'disco', 'funk', 'soul', 'reggae', 'clubbing', 'dancefloor',
@@ -251,7 +251,7 @@ export function guessGenres(title: string, desc: string): string[] | null {
     'Trance':       ['trance', 'psytrance', 'psy trance', 'goa'],
     'Reggae':       ['reggae', 'dancehall', 'ska', 'dub'],
     'Party':        ['party', 'clubbing', 'nightlife', 'dancing', 'club night', 'dj performance'],
-    'Festival':     ['festival'],
+    // Festival removed intentionally — handled separately
   };
 
   for (const [genre, keywords] of Object.entries(mapping)) {
@@ -624,11 +624,13 @@ export async function parseDetailPage(
       // If HTML gives a non-Free price, prefer it over the suspicious JSON-LD "Free"
       if (htmlPrice && htmlPrice !== 'Free') {
         price = htmlPrice;
-      } else if (!price) {
-        // Only if we still have no price, check RA specific cost field
-        const raCostMatch = html.match(/Cost\s*<\/div>\s*<div[^>]*>([^<]+)</i);
-        if (raCostMatch) price = raCostMatch[1].trim();
-        else price = htmlPrice;
+      } else {
+        // Detailed fallback for RA/Eventbook/Livetickets price widgets
+        const raPattern = html.match(/(?:Tickets from|Cost|Pret|Preț|Prices?)\s*(?:<\/div>|:|\s)*\s*(?:RON|lei|LEI)?\s*(\d+(?:[.,]\d+)?)/i);
+        const genericPattern = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)/i);
+        if (raPattern) price = `${raPattern[1]} RON`;
+        else if (genericPattern) price = `${genericPattern[1]} RON`;
+        else price = htmlPrice || price;
       }
     }
 

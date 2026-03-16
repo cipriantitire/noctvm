@@ -154,7 +154,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     return s.toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[|:;,.@()[\]{}/\\_]/g, ' ') // Keep hyphen for compound names, strip others
+      .replace(/[|:;,.@()[\]{}/\\_•*–—-]/g, ' ') // Strip almost all punctuation inclusive hyphen for dedupe
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -165,7 +165,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   // Logic: Group by fuzzy key, then pick the best one and merge ticket_url
   const groups = new Map<string, DedupeRow[]>();
   for (const row of allRows) {
-    const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}|${row.time || ''}`;
+    const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(row);
   }
@@ -174,11 +174,11 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   for (const group of Array.from(groups.values())) {
     // Sort by source priority (ra is best, then iabilet, livetickets, onevent, etc)
     const priority = (s: string) => {
-      if (s === 'ra') return 10;
+      if (s === 'livetickets') return 10;
+      if (s === 'ra') return 9;
       if (s === 'iabilet') return 8;
-      if (s === 'livetickets') return 7;
-      if (s === 'eventbook') return 6;
-      if (s === 'ambilet') return 5;
+      if (s === 'eventbook') return 7;
+      if (s === 'ambilet') return 6;
       return 1;
     };
     group.sort((a: DedupeRow, b: DedupeRow) => priority(b.source) - priority(a.source));
@@ -412,7 +412,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   if (allUpcoming && allUpcoming.length > 0) {
     const sweepGroups = new Map<string, any[]>();
     for (const row of allUpcoming) {
-      const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}|${row.time || ''}`;
+      const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
       if (!sweepGroups.has(key)) sweepGroups.set(key, []);
       sweepGroups.get(key)!.push(row);
     }
@@ -422,11 +422,11 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
       if (group.length <= 1) continue;
 
       const priority = (s: string) => {
-        if (s === 'ra') return 10;
+        if (s === 'livetickets') return 10;
+        if (s === 'ra') return 9;
         if (s === 'iabilet') return 8;
-        if (s === 'livetickets') return 7;
-        if (s === 'eventbook') return 6;
-        if (s === 'ambilet') return 5;
+        if (s === 'eventbook') return 7;
+        if (s === 'ambilet') return 6;
         return 1;
       };
       group.sort((a, b) => priority(b.source) - priority(a.source));
@@ -447,9 +447,10 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
       }
 
       if (updatedWinner) {
-        console.log(`[orchestrator] updated winner ${winner.id} withmerged ticket_url`);
+        console.log(`[orchestrator] updated winner ${winner.id} with merged data`);
         await supabase.from('events').update({ 
           ticket_url: winner.ticket_url,
+          time: winner.time || losers.find(l => l.time)?.time || null,
           updated_at: new Date().toISOString()
         }).eq('id', winner.id);
       }
