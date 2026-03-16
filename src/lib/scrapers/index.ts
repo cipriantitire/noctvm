@@ -154,9 +154,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
     return s.toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\b\d{1,2}[\/\-\.]\d{1,2}([\/\-\.]\d{2,4})?\b/g, ' ') // strip dates like 21.03, 21-03, 21/03
-      .replace(/[|:;,\-.@()[\]{}/\\_]/g, ' ') // More aggressive punctuation stripping
-      .replace(/\b(gh|pw|platforma wolff|control|quantic|expro|expanse)\b/g, '') // strip common venue prefix shortcuts from comparison
+      .replace(/[|:;,.@()[\]{}/\\_]/g, ' ') // Keep hyphen for compound names, strip others
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -167,7 +165,7 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   // Logic: Group by fuzzy key, then pick the best one and merge ticket_url
   const groups = new Map<string, DedupeRow[]>();
   for (const row of allRows) {
-    const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
+    const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}|${row.time || ''}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(row);
   }
@@ -408,13 +406,13 @@ export async function fetchAndUpsertEvents(): Promise<FetchSummary> {
   // (e.g. because (title,venue,date,source) is the existing unique constraint)
   const { data: allUpcoming } = await supabase
     .from('events')
-    .select('id, title, venue, date, source, ticket_url, event_url')
+    .select('id, title, venue, date, time, source, ticket_url, event_url')
     .gte('date', today);
 
   if (allUpcoming && allUpcoming.length > 0) {
     const sweepGroups = new Map<string, any[]>();
     for (const row of allUpcoming) {
-      const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}`;
+      const key = `${normalizeForDedupe(row.title)}|${normalizeForDedupe(row.venue)}|${row.date}|${row.time || ''}`;
       if (!sweepGroups.has(key)) sweepGroups.set(key, []);
       sweepGroups.get(key)!.push(row);
     }

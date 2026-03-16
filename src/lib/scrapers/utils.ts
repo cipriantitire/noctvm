@@ -175,12 +175,12 @@ export function clean(text: string | null | undefined): string {
  * "Concert pentru copii" IS still a children's event, not nightlife.
  */
 const HARD_BLOCK_TERMS = [
-  'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi', 'purceluși',
-  'copii', 'marionete', 'papusi', 'păpuși', 'copilași', 'bebeluși', 'părinți', 'mămici',
-  'educativ', 'educational', 'clasa a', 'cambridge', 'școală', 'gradiniță', 'grădiniță',
-  'balet', 'ballet', 'lectii', 'lecții',
-  'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'ceramică',
-  'palatul sutu', 'expozitia', 'vernisaj', 'show de comedie', 'show comedie', 'comedie pentru',
+  'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi',
+  'copii', 'marionete', 'papusi', 'copilasi', 'bebelusi', 'parinti', 'mamici',
+  'educativ', 'educational', 'clasa a', 'cambridge', 'scoala', 'gradinita',
+  'balet', 'ballet', 'lectii', 'lectii',
+  'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'palatul sutu',
+  'expozitia', 'vernisaj', 'show de comedie', 'show comedie', 'comedie pentru', 'comedie corporatisti',
   'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
   'teatru de vara', 'teatrul de vara', 'teatru vara', 'teatru aer liber',
   'piesa de teatru', 'teatru cu', 'joc de rol', 'magie pentru',
@@ -218,15 +218,19 @@ const STRONG_MUSIC_TERMS = [
 
 /** Returns genre array if music event, null if definitively non-music. */
 export function guessGenres(title: string, desc: string): string[] | null {
-  const normTitle = (title || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
-  const t = (normTitle + ' ' + (desc || '')).toLowerCase();
+  const normalizeForFilter = (s: string) => (s || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 
-  // Hard blocks: no exceptions, regardless of any music term
-  if (HARD_BLOCK_TERMS.some(term => t.includes(term))) return null;
+  const t = normalizeForFilter(title) + ' ' + normalizeForFilter(desc);
+
+  // Hard blocks: normalized matching
+  if (HARD_BLOCK_TERMS.some(term => t.includes(normalizeForFilter(term)))) return null;
 
   // Soft blocks: pass only if a strong music-specific term is also present
-  const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(term));
-  const isStrongMusic  = STRONG_MUSIC_TERMS.some(sm => t.includes(sm));
+  const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalizeForFilter(term)));
+  const isStrongMusic  = STRONG_MUSIC_TERMS.some(sm => t.includes(normalizeForFilter(sm)));
 
   if (isSoftBlocked && !isStrongMusic) return null;
 
@@ -242,11 +246,11 @@ export function guessGenres(title: string, desc: string): string[] | null {
     'Rock':         ['rock ', ' rock', 'alternative', 'indie', 'punk', 'grunge'],
     'Metal':        ['metal', 'hardcore', 'doom', 'sludge', 'deathcore'],
     'Drum & Bass':  ['dnb', 'drum and bass', 'drum & bass', 'jungle', 'liquid'],
-    'Live Music':   ['live band', 'concert', 'live music', 'lansare album'],
+    'Live Music':   ['live band', 'concert', 'live music', 'lansare album', 'recital', 'eveniment muzical', 'live act'],
     'Disco':        ['disco', 'nu-disco', '80s', '90s', 'retro'],
     'Trance':       ['trance', 'psytrance', 'psy trance', 'goa'],
     'Reggae':       ['reggae', 'dancehall', 'ska', 'dub'],
-    'Party':        ['party', 'clubbing', 'nightlife', 'dancing', 'club night'],
+    'Party':        ['party', 'clubbing', 'nightlife', 'dancing', 'club night', 'dj performance'],
     'Festival':     ['festival'],
   };
 
