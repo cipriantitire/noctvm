@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logActivity } from '@/lib/activity';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -44,6 +45,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (signUpError) {
         setError(signUpError.message);
       } else {
+        await logActivity({
+          type: 'user_edit', // or signup if we add it
+          message: `New user signup: ${displayName || email}`,
+          user_name: displayName || email
+        });
         setCheckEmail(true);
       }
     } else {
@@ -106,6 +112,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-noctvm-surface/80 border border-noctvm-border flex items-center justify-center text-noctvm-silver hover:text-white transition-all"
+          title="Close Modal"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>

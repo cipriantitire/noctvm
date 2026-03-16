@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PlayIcon, CogIcon, RefreshIcon, CheckIcon, XIcon, EyeIcon } from '@/components/icons';
+import { PlayIcon, AggregatorIcon, RefreshIcon, CheckIcon, XIcon, EyeIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { logActivity } from '@/lib/activity';
 import ScraperSettingsModal from './ScraperSettingsModal';
 
 interface ScraperSource {
@@ -91,6 +92,11 @@ export default function ScraperManager() {
       if (res.ok) {
         setSummary(data);
         setLastRun(new Date().toLocaleString());
+        await logActivity({
+          type: 'scrape_run',
+          message: `Full system scrape completed. ${data.upserted} events updated.`,
+          user_name: 'Admin'
+        });
         fetchLogs();
       } else {
         alert(data.error || 'Failed to run scrapers');
@@ -119,6 +125,12 @@ export default function ScraperManager() {
       if (res.ok) {
         setSummary(data);
         setLastRun(new Date().toLocaleString());
+        await logActivity({
+          type: 'scrape_run',
+          message: `Manual scrape run: ${sourceId} (${data.upserted} updates)`,
+          entity_name: sourceId,
+          user_name: 'Admin'
+        });
         fetchLogs();
       } else {
         alert(data.error || `Failed to run ${sourceId} scraper`);
@@ -184,7 +196,7 @@ export default function ScraperManager() {
                     className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-white transition-all bg-white/5 border border-white/10"
                     title="Settings"
                   >
-                    <CogIcon className="w-4 h-4" />
+                    <AggregatorIcon className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}

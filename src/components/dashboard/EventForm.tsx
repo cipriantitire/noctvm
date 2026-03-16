@@ -197,7 +197,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
         <div className="space-y-1.5">
           <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Price Label</label>
           <input
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise text-sm tracking-tighter italic"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise text-sm"
             placeholder="e.g. 50 RON or Free"
             value={formData.price || ''}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}

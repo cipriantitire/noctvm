@@ -156,11 +156,14 @@ function DashboardPage() {
                         {activity.message}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[7px] font-black text-noctvm-silver/40 uppercase tracking-tighter">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-noctvm-violet/10 border border-noctvm-violet/20 rounded-full">
+                          <span className="w-1 h-1 rounded-full bg-noctvm-violet animate-pulse"></span>
+                          <span className="text-[8px] font-bold text-noctvm-violet uppercase tracking-widest whitespace-nowrap">
+                            {activity.user_name || 'System'}
+                          </span>
+                        </div>
+                        <span className="text-[7px] font-black text-noctvm-silver/40 uppercase tracking-tighter ml-1">
                           {typeLabel}
-                        </span>
-                        <span className="text-[9px] text-noctvm-silver uppercase font-mono tracking-widest px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
-                          {activity.entity_name || activity.user_name || 'System'}
                         </span>
                       </div>
                     </div>
@@ -169,7 +172,7 @@ function DashboardPage() {
                         {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono tracking-tighter">
-                        {activity.type.replace('_', ' ')}
+                        {new Date(activity.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

@@ -173,7 +173,9 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
           <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Capacity</p>
         </div>
         <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
-          <p className="text-xl font-bold text-noctvm-gold font-mono">4.5</p>
+          <p className="text-xl font-bold text-noctvm-gold font-mono">
+            {venue?.rating ? venue.rating.toFixed(1) : '0.0'}
+          </p>
           <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Rating</p>
         </div>
       </div>

@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { NoctEvent, Venue } from '@/lib/types';
 import EventForm from './EventForm';
 import Image from 'next/image';
 import { CheckIcon, XIcon, PlusIcon, EditIcon, SearchIcon, GridIcon, MapPinIcon, CalendarIcon, UsersIcon, TrashIcon } from '@/components/icons';
+import { logActivity } from '@/lib/activity';
 
 import { useDashboard } from '@/contexts/DashboardContext';
 
@@ -76,11 +77,29 @@ export default function EventManager() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [sortBy, setSortBy] = useState<'title' | 'venue' | 'date' | 'city' | 'genres' | 'ticket_provider'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const filteredEvents = events.filter(event => 
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.venue.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAndSortedEvents = useMemo(() => {
+    let result = events.filter(event => 
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.venue.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    result.sort((a, b) => {
+      let valA = (a as any)[sortBy] || '';
+      let valB = (b as any)[sortBy] || '';
+      
+      if (Array.isArray(valA)) valA = valA.join(', ');
+      if (Array.isArray(valB)) valB = valB.join(', ');
+
+      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [events, searchTerm, sortBy, sortOrder]);
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
@@ -91,9 +110,6 @@ export default function EventManager() {
 
   return (
     <div className="space-y-6">
-      {/* Title removed per request */}
-
-
       <div className={`sticky top-[-4px] lg:top-0 z-30 lg:mt-0 mt-2 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
         <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
@@ -107,7 +123,28 @@ export default function EventManager() {
         </div>
         
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          {/* Layout Toggle */}
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all"
+            title="Sort By"
+          >
+            <option value="date">Date</option>
+            <option value="title">Name</option>
+            <option value="venue">Venue</option>
+            <option value="ticket_provider">Seller</option>
+            <option value="city">City</option>
+            <option value="genres">Genres</option>
+          </select>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-white transition-all h-[42px] flex items-center justify-center min-w-[42px]"
+            title="Toggle Sort Order"
+          >
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </button>
+
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 h-[42px]">
             <button
               onClick={() => setViewMode('grid')}
@@ -132,9 +169,10 @@ export default function EventManager() {
           <button 
             onClick={() => { setEditingEvent(null); setShowForm(true); }}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-[10px] font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+            title="Create Event"
           >
             <PlusIcon className="w-3.5 h-3.5" />
-            Create Event
+            Create
           </button>
         </div>
       </div>
@@ -157,7 +195,7 @@ export default function EventManager() {
           ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
           : 'flex flex-col gap-3'
       }`}>
-        {filteredEvents.map((event, index) => (
+        {filteredAndSortedEvents.map((event, index) => (
           <div 
             key={event.id || index} 
             className={`group relative bg-white/5 border border-white/10 frosted-noise hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-xl overflow-hidden flex ${
@@ -237,10 +275,19 @@ export default function EventManager() {
                       <EditIcon className="w-3.5 h-3.5" />
                     </button>
                     <button 
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         if (confirm('Delete this event?')) {
-                          supabase.from('events').delete().eq('id', event.id).then(() => refreshData());
+                          const { error } = await supabase.from('events').delete().eq('id', event.id);
+                          if (!error) {
+                            await logActivity({
+                              type: 'event_delete',
+                              message: `Deleted event: ${event.title}`,
+                              entity_name: event.title,
+                              user_name: profile?.display_name || 'Admin'
+                            });
+                            refreshData();
+                          }
                         }
                       }}
                       className="p-2 rounded-lg text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 border border-white/5 transition-all"
@@ -254,7 +301,7 @@ export default function EventManager() {
             </div>
           </div>
         ))}
-        {filteredEvents.length === 0 && (
+        {filteredAndSortedEvents.length === 0 && (
           <div className="col-span-full py-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
             <p className="text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">No active events found</p>
           </div>

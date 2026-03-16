@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Venue } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { XIcon } from '@/components/icons';
+import { logActivity } from '@/lib/activity';
 
 interface ClaimModalProps {
   venue: Venue;
@@ -33,6 +34,12 @@ export default function ClaimModal({ venue, onSuccess, onCancel }: ClaimModalPro
       });
 
     if (!error) {
+      await logActivity({
+        type: 'venue_edit', // or a new type if we want
+        message: `New claim request for venue: ${venue.name}`,
+        entity_name: venue.name,
+        user_name: profile?.display_name || 'Anonymous'
+      });
       onSuccess();
     } else {
       alert(error.message);

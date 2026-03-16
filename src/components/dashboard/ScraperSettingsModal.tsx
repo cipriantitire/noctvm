@@ -21,7 +21,10 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
     priority: 5,
     cityFilter: ['Bucharest', 'Constanta'],
     includeKeywords: [] as string[],
-    excludeKeywords: ['festival', 'workshop', 'theater'] as string[]
+    excludeKeywords: ['festival', 'workshop', 'theater'] as string[],
+    venueMappingWords: ['club', 'garden', 'space', 'hall', 'terrace', 'arena'] as string[],
+    priceKeywords: ['ron', 'lei', 'free', 'gratis', 'bilete', 'tickets'] as string[],
+    locationKeywords: ['strada', 'nr.', 'sector', 'bucuresti', 'constanta'] as string[]
   });
 
   useEffect(() => {
@@ -180,24 +183,63 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-4 pt-4 border-t border-white/5 max-h-[40vh] overflow-y-auto pr-2 no-scrollbar">
             <div className="space-y-1.5">
-              <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Include Keywords (Comma separated)</label>
+              <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Include Keywords</label>
               <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-[11px] text-white focus:border-noctvm-violet/50 outline-none transition-all resize-none h-20"
-                placeholder="e.g. techno, house, dj set..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white focus:border-noctvm-violet/50 outline-none transition-all resize-none h-16"
+                placeholder="e.g. techno, house..."
                 value={settings.includeKeywords?.join(', ') || ''}
                 onChange={(e) => setSettings({...settings, includeKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)})}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Exclude Keywords (Filter out)</label>
+              <label className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Exclude Keywords</label>
               <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-[11px] text-noctvm-silver focus:border-noctvm-rose/50 outline-none transition-all resize-none h-20"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-noctvm-silver focus:border-noctvm-rose/50 outline-none transition-all resize-none h-16"
                 placeholder="e.g. festival, workshop..."
                 value={settings.excludeKeywords?.join(', ') || ''}
                 onChange={(e) => setSettings({...settings, excludeKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)})}
+              />
+            </div>
+
+            <div className="space-y-1.5 border-t border-white/5 pt-4">
+              <label className="text-[10px] text-noctvm-violet font-mono uppercase tracking-widest ml-1 flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-noctvm-violet"></span>
+                Venue Mapping Words
+              </label>
+              <textarea 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white focus:border-noctvm-violet/50 outline-none transition-all resize-none h-16"
+                placeholder="e.g. club, garden, space..."
+                value={(settings as any).venueMappingWords?.join(', ') || ''}
+                onChange={(e) => setSettings({...settings, venueMappingWords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)} as any)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-noctvm-emerald font-mono uppercase tracking-widest ml-1 flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-noctvm-emerald"></span>
+                Price Detection Keywords
+              </label>
+              <textarea 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white focus:border-noctvm-emerald/50 outline-none transition-all resize-none h-16"
+                placeholder="e.g. ron, free, gratis..."
+                value={(settings as any).priceKeywords?.join(', ') || ''}
+                onChange={(e) => setSettings({...settings, priceKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)} as any)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-noctvm-gold font-mono uppercase tracking-widest ml-1 flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-noctvm-gold"></span>
+                Location Detection Words
+              </label>
+              <textarea 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-white focus:border-noctvm-gold/50 outline-none transition-all resize-none h-16"
+                placeholder="e.g. strada, nr, sector..."
+                value={(settings as any).locationKeywords?.join(', ') || ''}
+                onChange={(e) => setSettings({...settings, locationKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)} as any)}
               />
             </div>
           </div>

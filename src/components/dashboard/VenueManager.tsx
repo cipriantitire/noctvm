@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/contexts/DashboardContext';
@@ -8,7 +8,7 @@ import { Venue } from '@/lib/types';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import VenueForm from './VenueForm';
 import ClaimModal from './ClaimModal';
-import { TrashIcon, PlusIcon, EditIcon, CheckIcon, SearchIcon, GridIcon, UsersIcon } from '@/components/icons';
+import { TrashIcon, PlusIcon, EditIcon, CheckIcon, SearchIcon, GridIcon, UsersIcon, LayoutListIcon } from '@/components/icons';
 import { logActivity } from '@/lib/activity';
 import Image from 'next/image';
 import { getVenueLogo } from '@/lib/venue-logos';
@@ -29,7 +29,7 @@ function StarRating({ rating }: { rating: number }) {
 export default function VenueManager() {
   const { profile, isAdmin } = useAuth();
   const { headerHidden } = useDashboard();
-  const [venues, setVenues] = useState<Venue[]>([]);
+  const [venues, setVenues] = useState<(Venue & { upcoming_events: number })[]>([]);
   const [followCounts, setFollowCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
@@ -37,15 +37,17 @@ export default function VenueManager() {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [sortBy, setSortBy] = useState<'name' | 'city' | 'genres' | 'upcoming_events' | 'followers'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const fetchVenues = useCallback(async () => {
     setLoading(true);
     
     // 1. Fetch all venues
-    const { data: venuesData } = await supabase.from('venues').select('*').order('name');
+    const { data: venuesData } = await supabase.from('venues').select('*');
     if (!venuesData) { setLoading(false); return; }
 
-    // 2. Fetch ALL follows for venues to calculate follower counts
+    // 2. Fetch follower counts
     const { data: followsData } = await supabase
       .from('follows')
       .select('target_id')
@@ -56,7 +58,7 @@ export default function VenueManager() {
       counts[f.target_id] = (counts[f.target_id] || 0) + 1;
     });
 
-    // 3. Fetch review statistics from venue_reviews table
+    // 3. Fetch review statistics
     const { data: reviewsData } = await supabase
       .from('venue_reviews')
       .select('venue_name, rating');
@@ -68,15 +70,28 @@ export default function VenueManager() {
       stats[r.venue_name].count++;
     });
 
-    // 4. Map everything together
+    // 4. Fetch upcoming events count
+    const now = new Date().toISOString().split('T')[0];
+    const { data: eventsData } = await supabase
+      .from('events')
+      .select('venue')
+      .gte('date', now);
+    
+    const eventCounts: Record<string, number> = {};
+    eventsData?.forEach(e => {
+      eventCounts[e.venue] = (eventCounts[e.venue] || 0) + 1;
+    });
+
+    // 5. Map everything together
     const enrichedVenues = (venuesData as Venue[]).map(v => ({
       ...v,
       followers: counts[v.name] || 0,
       rating: stats[v.name] ? stats[v.name].sum / stats[v.name].count : (v.rating || 0),
-      review_count: stats[v.name] ? stats[v.name].count : (v.review_count || 0)
+      review_count: stats[v.name] ? stats[v.name].count : (v.review_count || 0),
+      upcoming_events: eventCounts[v.name] || 0
     }));
     
-    setVenues(enrichedVenues);
+    setVenues(enrichedVenues as any);
     setFollowCounts(counts);
     setLoading(false);
   }, []);
@@ -85,19 +100,29 @@ export default function VenueManager() {
     fetchVenues();
   }, [fetchVenues]);
 
-  const filteredVenues = venues.filter(venue => 
-    venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    venue.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAndSortedVenues = useMemo(() => {
+    let result = venues.filter(venue => 
+      venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      venue.city.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  const sortedVenues = [...filteredVenues].sort((a, b) => {
-    if (profile?.id) {
-      const aOwned = a.owner_id === profile.id ? 1 : 0;
-      const bOwned = b.owner_id === profile.id ? 1 : 0;
-      if (aOwned !== bOwned) return bOwned - aOwned;
-    }
-    return a.name.localeCompare(b.name);
-  });
+    result.sort((a, b) => {
+      let valA = (a as any)[sortBy] || '';
+      let valB = (b as any)[sortBy] || '';
+      
+      if (Array.isArray(valA)) valA = valA.join(', ');
+      if (Array.isArray(valB)) valB = valB.join(', ');
+
+      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    // Keep owned venues at the very top regardless of primary sort, but only if they are tied? 
+    // Actually user asked for specific sorting, let's respect it but maybe highlight owned ones.
+    
+    return result;
+  }, [venues, searchTerm, sortBy, sortOrder]);
 
   const handleDelete = async (venue: Venue) => {
     if (!window.confirm(`Are you absolutely sure you want to delete "${venue.name}"? This will remove all associated data and cannot be undone.`)) {
@@ -131,9 +156,6 @@ export default function VenueManager() {
 
   return (
     <div className="space-y-6">
-      {/* Title removed per request */}
-
-
       <div className={`sticky top-0 lg:top-0 z-30 lg:mt-0 mt-4 transition-transform duration-300 ease-in-out frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 mx-2 ${headerHidden ? '-translate-y-[210%]' : 'translate-y-0'}`}>
         <div className="relative flex-1 w-full">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40" />
@@ -147,7 +169,27 @@ export default function VenueManager() {
         </div>
         
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          {/* Layout Toggle */}
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all font-bold"
+            title="Sort By"
+          >
+            <option value="name">Name</option>
+            <option value="city">City</option>
+            <option value="genres">Genres</option>
+            <option value="upcoming_events">Upcoming Events</option>
+            <option value="followers">Popularity</option>
+          </select>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-white transition-all h-[42px] flex items-center justify-center min-w-[42px]"
+            title="Toggle Sort Order"
+          >
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </button>
+
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 h-[42px]">
             <button
               onClick={() => setViewMode('grid')}
@@ -161,20 +203,17 @@ export default function VenueManager() {
               className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="List View"
             >
-              <div className="w-4 h-4 flex flex-col justify-between py-0.5 px-0.5">
-                <div className="h-[2px] w-full bg-current rounded-full"></div>
-                <div className="h-[2px] w-full bg-current rounded-full"></div>
-                <div className="h-[2px] w-full bg-current rounded-full"></div>
-              </div>
+              <LayoutListIcon className="w-4 h-4" />
             </button>
           </div>
 
           <button 
             onClick={() => { setEditingVenue(null); setShowForm(true); }}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-[10px] font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+            title="Add Venue"
           >
             <PlusIcon className="w-3.5 h-3.5" />
-            Add Venue
+            Add
           </button>
         </div>
       </div>
@@ -198,13 +237,12 @@ export default function VenueManager() {
           onCancel={() => setClaimingVenue(null)}
         />
       )}
-
-      <div className={`mt-12 pb-20 px-2 min-h-screen ${
+            <div className={`mt-12 pb-20 px-2 min-h-screen ${
         viewMode === 'grid' 
           ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' 
           : 'flex flex-col gap-3'
       }`}>
-        {sortedVenues.map((venue) => {
+        {filteredAndSortedVenues.map((venue) => {
           const isOwned = profile?.id && venue.owner_id === profile.id;
           const venueLogo = getVenueLogo(venue.name);
           
@@ -277,10 +315,14 @@ export default function VenueManager() {
                       <span className="text-[9px] font-black text-white">{venue.capacity || 'N/A'}</span>
                       <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Capacity</span>
                    </div>
+                   <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20">
+                      <span className="text-[9px] font-black text-noctvm-violet">{venue.upcoming_events}</span>
+                      <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-violet/60 ml-1">Upcoming</span>
+                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 mb-5">
-                  {venue.genres.slice(0, 3).map(g => (
+                  {venue.genres.slice(0, 3).map((g: string) => (
                     <span key={g} className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20 flex items-center gap-1">
                       {g}
                     </span>
@@ -312,7 +354,7 @@ export default function VenueManager() {
                         </button>
                         {(isAdmin || isOwned) && (
                           <button 
-                            onClick={() => handleDelete(venue)}
+                            onClick={() => handleDelete(venue)} 
                             className="p-2 px-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver/40 hover:text-noctvm-rose hover:bg-noctvm-rose/5 transition-all"
                             title="Delete Venue"
                           >
@@ -327,7 +369,7 @@ export default function VenueManager() {
             </div>
           );
         })}
-        {filteredVenues.length === 0 && (
+        {filteredAndSortedVenues.length === 0 && (
           <div className="col-span-full py-20 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
             <p className="text-noctvm-silver/40 italic font-mono uppercase tracking-widest text-xs">No venues found</p>
           </div>
