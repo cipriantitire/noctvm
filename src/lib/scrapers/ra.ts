@@ -30,29 +30,30 @@ const QUERY = `
           date
           contentUrl
           flyerFront
-          queueItEnabled
-          newEventForm
-          images {
-            id
-            filename
-            alt
-            type
-            crop
-            __typename
+          lineup
+          promotionalLinks {
+            title
+            url
+          }
+          ticketing {
+            ticketListingItems {
+              ... on Ticketing_TicketTierV2 {
+                title
+                ticketCost {
+                  displayPrice
+                }
+              }
+            }
           }
           venue {
             id
             name
             contentUrl
             live
-            __typename
           }
           cost
-          __typename
         }
-        __typename
       }
-      __typename
     }
   }
 `;
@@ -62,9 +63,14 @@ interface RAEvent {
   title: string;
   date: string;
   contentUrl: string;
-  images: { filename: string; type: string }[];
+  flyerFront?: string;
+  images?: { filename: string; type: string }[];
   venue: { name: string; contentUrl: string } | null;
   cost?: string;
+  promotionalLinks?: { title: string; url: string }[];
+  ticketing?: {
+    ticketListingItems?: any[];
+  } | null;
 }
 
 /**
@@ -291,30 +297,10 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
         .map((l: any) => l.event?.contentUrl ? `https://ra.co${l.event.contentUrl}` : null)
         .filter(Boolean) as string[];
 
-      // Deep-fetch RA detail pages to get descriptions, ticket links, and prices
+      // Deep-fetch RA detail pages to get descriptions
       const detailedEvents = await batchFetchRA(urls, cityLabel, 100, 5);
-      
-      // ENRICHMENT: If deep-fetch failed to find a price (e.g. 403), use the 'cost' from the main listing
+
       const urlToListing = new Map(listings.map((l: any) => [`https://ra.co${l.event?.contentUrl}`, l.event]));
-      
-      for (const dev of detailedEvents) {
-        if (!dev.price || dev.price === 'FREE') { // Only override if no specific price was found
-          const lEvent = urlToListing.get(dev.event_url) as any;
-          if (lEvent?.cost) {
-            const numeric = parseFloat(lEvent.cost.replace(',', '.'));
-            let fallbackPrice = isNaN(numeric) ? lEvent.cost : `${Math.round(numeric)} RON`;
-            if (lEvent.cost.toLowerCase().includes('euro') || lEvent.cost.includes('€')) {
-              fallbackPrice = `${Math.round(numeric)} EUR`;
-            }
-            dev.price = fallbackPrice;
-          }
-        }
-        // Also ensure SOLD OUT status from title is preserved
-        if (!dev.price && dev.title.toUpperCase().includes('SOLD OUT')) {
-          dev.price = 'SOLD OUT';
-        }
-      }
-      
       console.log(`[ra] ${cityLabel}: Deep-fetched ${detailedEvents.length} events from detail pages`);
 
       // Fallback: If deep-fetch returned fewer events than listings, fill in from listings
@@ -322,25 +308,51 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
       const fallbackEvents: ScrapedEvent[] = listings
         .filter((l: any) => l.event?.contentUrl && !detailedUrls.has(`https://ra.co${l.event.contentUrl}`))
         .map((l: any) => {
-          const e = l.event;
+          const e = l.event as RAEvent;
           const title = clean(e.title);
-          const description = ""; // GraphQL doesn't have description easily
+          const description = ""; 
           let genres = guessGenres(title, description);
           
-          // RA events are almost certainly electronic music; if we can't guess from title, default to Electronic
           if (!genres || genres.length === 0) {
             genres = ['Electronic'];
           }
 
           let price: string | null = null;
-          if (title.toUpperCase().includes('SOLD OUT')) {
-            price = 'SOLD OUT';
-          } else if (e.cost) {
+          let ticket_url: string = `https://ra.co${e.contentUrl}`;
+
+          // Resolve Ticket Link
+          const gqlTicketLink = e.promotionalLinks?.find(pl => 
+            pl.title.toLowerCase().includes('ticket') || 
+            pl.url.toLowerCase().includes('iabilet.ro') ||
+            pl.url.toLowerCase().includes('eventbook.ro') ||
+            pl.url.toLowerCase().includes('livetickets.ro')
+          );
+          if (gqlTicketLink) ticket_url = gqlTicketLink.url;
+
+          // Resolve Price
+          const tiers = e.ticketing?.ticketListingItems || [];
+          if (tiers.length > 0) {
+            const prices = tiers
+              .map(t => t.ticketCost?.displayPrice)
+              .filter(p => typeof p === 'number')
+              .sort((a, b) => a - b);
+            if (prices.length > 0) {
+              const min = Math.round(prices[0]);
+              const max = Math.round(prices[prices.length - 1]);
+              price = min === max ? `${min} RON` : `${min} - ${max} RON`;
+            }
+          }
+
+          if (!price && e.cost) {
             const numeric = parseFloat(e.cost.replace(',', '.'));
             price = isNaN(numeric) ? e.cost : `${Math.round(numeric)} RON`;
             if (e.cost.toLowerCase().includes('euro') || e.cost.includes('€')) {
-              price = `${Math.round(numeric)} EUR`;
+              price = isNaN(numeric) ? e.cost : `${Math.round(numeric)} EUR`;
             }
+          }
+
+          if (title.toUpperCase().includes('SOLD OUT')) {
+            price = 'SOLD OUT';
           }
 
           return {
@@ -351,17 +363,101 @@ export async function scrapeRA(): Promise<ScrapedEvent[]> {
             description,
             image_url: e.images?.[0]?.filename || e.flyerFront || '',
             event_url: `https://ra.co${e.contentUrl}`,
-            ticket_url: `https://ra.co${e.contentUrl}`, // Default to event page for tickets
+            ticket_url,
             genres,
             price,
             city: cityLabel,
           };
-        })
-        .filter(Boolean) as ScrapedEvent[];
+        });
 
-      const combinedResults = [...detailedEvents, ...fallbackEvents];
-      console.log(`[ra] ${cityLabel}: Total events (detailed + fallback): ${combinedResults.length}`);
-      return combinedResults;
+      const allEvents = [...detailedEvents, ...fallbackEvents];
+      
+      // ENRICHMENT: Map GraphQL data to results
+      for (const dev of allEvents) {
+        const lEvent = urlToListing.get(dev.event_url) as RAEvent;
+        if (!lEvent) continue;
+
+        // 1. External Ticket Links from GraphQL (Highly Reliable)
+        const gqlTicketLink = lEvent.promotionalLinks?.find(pl => 
+          pl.title.toLowerCase().includes('ticket') || 
+          pl.url.toLowerCase().includes('iabilet.ro') ||
+          pl.url.toLowerCase().includes('eventbook.ro') ||
+          pl.url.toLowerCase().includes('livetickets.ro') ||
+          pl.url.toLowerCase().includes('entertix.ro')
+        );
+        if (gqlTicketLink) {
+          dev.ticket_url = gqlTicketLink.url;
+        }
+
+        // 2. Price Ranges from GraphQL Tiers (Internal RA)
+        const tiers = lEvent.ticketing?.ticketListingItems || [];
+        if (tiers.length > 0) {
+          const prices = tiers
+            .map(t => t.ticketCost?.displayPrice)
+            .filter(p => typeof p === 'number')
+            .sort((a, b) => a - b);
+          
+          if (prices.length > 0) {
+            const min = Math.round(prices[0]);
+            const max = Math.round(prices[prices.length - 1]);
+            dev.price = min === max ? `${min} RON` : `${min} - ${max} RON`;
+          }
+        }
+
+        // 3. Fallback to Listing Cost
+        if ((!dev.price || dev.price === 'FREE') && lEvent.cost) {
+          const numeric = parseFloat(lEvent.cost.replace(',', '.'));
+          let fallbackPrice = isNaN(numeric) ? lEvent.cost : `${Math.round(numeric)} RON`;
+          if (lEvent.cost.toLowerCase().includes('euro') || lEvent.cost.includes('€')) {
+            fallbackPrice = isNaN(numeric) ? lEvent.cost : `${Math.round(numeric)} EUR`;
+          }
+          dev.price = fallbackPrice;
+        }
+
+        // 4. PROACTIVE WIDGET FETCHING (If internal and price is still simple or missing)
+        if ((!dev.price || dev.price.split(' ').length === 2) && dev.ticket_url?.includes('ra.co/events/')) {
+          const eventId = dev.event_url.split('/').pop();
+          if (eventId) {
+            const widgetUrl = `https://ra.co/widget/event/${eventId}/embedtickets`;
+            try {
+              const widgetHtml = await fetchHtml(widgetUrl);
+              const priceMatches = Array.from(widgetHtml.matchAll(/<div class="type-price">([\d.,]+)\s*(?:lei|RON|EUR|€)<\/div>/gi));
+              if (priceMatches.length > 0) {
+                const numericPrices = priceMatches
+                  .map(m => parseFloat(m[1].replace(',', '.')))
+                  .filter(n => !isNaN(n))
+                  .sort((a, b) => a - b);
+                if (numericPrices.length > 0) {
+                  const min = Math.round(numericPrices[0]);
+                  const max = Math.round(numericPrices[numericPrices.length - 1]);
+                  dev.price = min === max ? `${min} RON` : `${min} - ${max} RON`;
+                }
+              }
+            } catch (e) { /* ignore */ }
+          }
+        }
+
+        // 5. PROACTIVE EXTERNAL SCRAPING (If price is still missing)
+        if (!dev.price && dev.ticket_url) {
+          if (dev.ticket_url.includes('eventbook.ro') || dev.ticket_url.includes('livetickets.ro')) {
+            try {
+              const extHtml = await fetchHtml(dev.ticket_url);
+              const extPrice = extractPriceFromHtml(extHtml);
+              if (extPrice && extPrice !== 'FREE') {
+                dev.price = extPrice;
+              }
+            } catch (e) { /* ignore */ }
+          }
+        }
+
+        // 6. SOLD OUT check
+        if (dev.title.toUpperCase().includes('SOLD OUT')) {
+          dev.price = 'SOLD OUT';
+        }
+      }
+      
+      console.log(`[ra] ${cityLabel}: Enriched ${allEvents.length} events`);
+      return allEvents;
     } catch (e) {
       console.warn(`[ra] failed for ${cityLabel}:`, e);
       return [];
