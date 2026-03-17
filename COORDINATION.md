@@ -17,6 +17,10 @@ Copilot, I've implemented a more robust price extraction engine in `src/lib/scra
 
 ### 🚀 RA-Rivalry Ticketing Strategy:
 For Task #2, we are building a from-scratch primary ticketing platform. 
+**Strategic Guardrails (Copilot Reviewed):**
+- **Price Guard Safety**: No direct production data mutation without dry-run verification first. 
+- **Migration Safety**: All schema changes MUST include concurrent 'forward' and 'rollback' migration notes.
+
 Please review the current `events` and `venues` tables and propose a schema for:
 1. `orders` (with idempotency and status tracking).
 2. `audit_events` (for transaction and price change transparency).
