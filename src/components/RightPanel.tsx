@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { NoctEvent, Venue } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
-import VenueMap from './VenueMap';
+import SidebarMap from './SidebarMap';
 
 interface RightPanelProps {
   onVenueClick?: (venueName: string) => void;
@@ -105,7 +105,7 @@ export default function RightPanel({
       </div>
 
       <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border h-[200px]">
-        <VenueMap 
+        <SidebarMap 
           venues={mapVenues} 
           events={dbEvents}
           eventCounts={eventCounts}

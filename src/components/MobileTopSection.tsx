@@ -5,7 +5,7 @@ import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { supabase } from '@/lib/supabase';
 import { NoctEvent, Venue } from '@/lib/types';
-import VenueMap from './VenueMap';
+import SidebarMap from './SidebarMap';
 
 interface MobileTopSectionProps {
   onVenueClick: (venueName: string) => void;
@@ -102,7 +102,7 @@ export default function MobileTopSection({
       {/* Map - wide landscape */}
       <div className="rounded-xl overflow-hidden border border-white/5 bg-noctvm-midnight/30 backdrop-blur-sm animate-fade-in-up">
         <div className="aspect-[21/9] flex items-center justify-center relative">
-          <VenueMap 
+          <SidebarMap 
             venues={mapVenues}
             events={tonightEvents}
             activeCity={activeCity}

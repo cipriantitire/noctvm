@@ -62,7 +62,7 @@ const MapController = ({ center }: { center: [number, number] }) => {
   return useMapHook ? <MapViewUpdater center={center} useMap={useMapHook} /> : null;
 };
 
-export default function VenueMap({ 
+export default function SidebarMap({ 
   venues, 
   events = [],
   eventCounts = {},
@@ -144,8 +144,8 @@ export default function VenueMap({
                   }}
                   className="bg-noctvm-black/95 text-white p-2 rounded-xl border border-white/10 min-w-0 w-[120px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
-                  <p className="text-[11px] font-bold text-white truncate mb-0">{venue.name}</p>
-                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-1.5">{venue.address}</p>
+                  <p className="text-[11px] font-bold text-white truncate mb-0 leading-tight">{venue.name}</p>
+                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-1">{venue.address}</p>
                   
                   {isEventsMode && tonightEvent ? (
                     <>

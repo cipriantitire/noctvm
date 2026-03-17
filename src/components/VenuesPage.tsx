@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Venue } from '@/lib/types';
 import Image from 'next/image';
-import VenueMap from './VenueMap';
+import SidebarMap from './SidebarMap';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
 import VerifiedBadge from './VerifiedBadge';
@@ -254,7 +254,7 @@ export default function VenuesPage({
       {/* Mobile Map - wide landscape (Top of Venues Page) */}
       <div className="lg:hidden mb-4 rounded-xl overflow-hidden border border-white/5 bg-noctvm-midnight/30 backdrop-blur-sm animate-fade-in-up">
         <div className="aspect-[21/9] flex items-center justify-center relative">
-          <VenueMap 
+          <SidebarMap 
             venues={filteredVenues}
             eventCounts={eventCounts}
             activeCity={activeCityProp || 'bucuresti'}

@@ -49,15 +49,21 @@ export function useFeedData(user: any, activeCity: string) {
       const fofIds = Array.from(new Set((fofRes || []).map(f => f.following_id).filter(id => id !== user.id && !followingIds.includes(id))));
 
       // 2. PARALLEL POST FETCHING
-      const followingFilter = `user_id.in.(${[user.id, ...followingIds].join(',')})${followedVenueNames.length ? `,venue_name.in.(${followedVenueNames.map(v => `"${v}"`).join(',')})` : ''}`;
+      // Construct a clean OR filter for following
+      const orParts = [];
+      orParts.push(`user_id.eq.${user.id}`); // Always include my own posts
+      if (followingIds.length > 0) orParts.push(`user_id.in.(${followingIds.join(',')})`);
+      if (followedVenueNames.length > 0) orParts.push(`venue_name.in.(${followedVenueNames.map(v => `"${v}"`).join(',')})`);
+      
+      const followingFilter = orParts.join(',');
 
       const [followingRes, exploreRes, friendsRes] = await Promise.all([
-        // FOLLOWING: People you follow OR posts tagging venues you follow
+        // FOLLOWING: My posts + People I follow + venues I follow
         supabase.from('posts').select('*, profiles(display_name, username, avatar_url, is_verified, badge)')
           .or(followingFilter)
-          .eq('city', cityLabel).order('created_at', { ascending: false }).limit(40),
+          .order('created_at', { ascending: false }).limit(40),
         
-        // EXPLORE: Not followed + city tagged + fof
+        // EXPLORE: Not followed + filtered by current city
         supabase.from('posts').select('*, profiles(display_name, username, avatar_url, is_verified, badge)')
           .not('user_id', 'in', `(${[user.id, ...followingIds].join(',')})`)
           .eq('city', cityLabel).order('created_at', { ascending: false }).limit(40),
@@ -65,7 +71,7 @@ export function useFeedData(user: any, activeCity: string) {
         // FRIENDS: Mutual follows
         friendIds.length > 0 
           ? supabase.from('posts').select('*, profiles(display_name, username, avatar_url, is_verified, badge)')
-              .in('user_id', friendIds).eq('city', cityLabel).order('created_at', { ascending: false }).limit(40)
+              .in('user_id', friendIds).order('created_at', { ascending: false }).limit(40)
           : Promise.resolve({ data: [] })
       ]);
 

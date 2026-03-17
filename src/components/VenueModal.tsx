@@ -10,7 +10,7 @@ import EventCard from './EventCard';
 import VerifiedBadge from './VerifiedBadge';
 import Image from 'next/image';
 
-interface VenuePageProps {
+interface VenueModalProps {
   venueName: string;
   onBack: () => void;
   onClose?: () => void;
@@ -41,7 +41,7 @@ const GALLERY_THEMES = [
   { gradient: 'from-sky-900/60 via-noctvm-midnight to-blue-900/40', label: 'VIP', icon: 'V' },
 ];
 
-export default function VenuePage({ venueName, onBack, onClose, onEventClick }: VenuePageProps) {
+export default function VenueModal({ venueName, onBack, onClose, onEventClick }: VenueModalProps) {
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
@@ -116,7 +116,7 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
   };
 
   return (
-    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0 overscroll-contain">
+    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0 overscroll-contain frosted-glass">
       {/* Header */}
       <button
         onClick={onBack}

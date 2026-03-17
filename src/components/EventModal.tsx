@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import VerifiedBadge from './VerifiedBadge';
 
-interface EventDetailModalProps {
+interface EventModalProps {
   event: NoctEvent | null;
   onClose: () => void;
   onVenueClick?: (venueName: string) => void;
@@ -42,13 +42,13 @@ function getSourceBadge(source: string) {
   }
 }
 
-export default function EventDetailModal({ 
+export default function EventModal({ 
   event, 
   onClose, 
   onVenueClick, 
   onOpenAuth,
   zIndex = 200
-}: EventDetailModalProps) {
+}: EventModalProps) {
   const { user } = useAuth();
   const [descExpanded, setDescExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -172,7 +172,7 @@ export default function EventDetailModal({
 
       {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
       <div
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 frosted-glass-modal frosted-noise`}
+        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 frosted-glass frosted-noise`}
         style={{ zIndex: (zIndex || 200) + 1 }}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}

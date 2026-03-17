@@ -38,7 +38,7 @@ export function FeedItem({
   return (
     <article className="bg-noctvm-surface rounded-xl border border-noctvm-border overflow-hidden animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms` }}>
       <div className="flex items-center gap-3 p-3">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+        <div className="w-9 h-9 rounded-full border border-noctvm-border flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-noctvm-midnight">
           {post.user.avatarUrl ? (
             <Image src={post.user.avatarUrl} alt="" fill className="object-cover" unoptimized />
           ) : (

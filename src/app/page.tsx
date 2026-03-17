@@ -7,14 +7,14 @@ import FilterBar from '@/components/FilterBar';
 import Link from 'next/link';
 import EventCard from '@/components/EventCard';
 import RightPanel from '@/components/RightPanel';
-import VenuePage from '@/components/VenuePage';
+import VenueModal from '@/components/VenueModal';
 import VenuesPage from '@/components/VenuesPage';
 import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
 import UserProfilePage from '@/components/UserProfilePage';
 import { ManageAccountPage, AddLocationPage, ClaimLocationPage, SettingsPage } from '@/components/ProfilePages';
 import AuthModal from '@/components/AuthModal';
-import EventDetailModal from '@/components/EventDetailModal';
+import EventModal from '@/components/EventModal';
 import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
 import type { StoryUser } from '@/components/StoriesViewerModal';
@@ -234,7 +234,7 @@ export default function Home() {
 
       {/* ── Event Detail Modal ──────────────────────────────────── */}
       {/* Note: Injected at root, uses z-[200] in component to sit above Venue Overlay z-[100] */}
-      <EventDetailModal
+      <EventModal
         event={selectedEvent}
         onClose={() => openEvent(null)}
         onVenueClick={(venueName) => { openEvent(null); openVenue(venueName); }}
@@ -283,7 +283,7 @@ export default function Home() {
             } border-0 sm:border border-white/10 frosted-glass-modal frosted-noise`}
             onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
           >
-            <VenuePage
+            <VenueModal
               venueName={selectedVenue!}
               onBack={() => openVenue(null)}
               onClose={() => openVenue(null)}
