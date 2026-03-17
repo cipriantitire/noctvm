@@ -12,6 +12,7 @@ import VenuesPage from '@/components/VenuesPage';
 import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
 import UserProfilePage from '@/components/UserProfilePage';
+import SearchBar from '@/components/SearchBar';
 import { ManageAccountPage, AddLocationPage, ClaimLocationPage, SettingsPage } from '@/components/ProfilePages';
 import AuthModal from '@/components/AuthModal';
 import EventModal from '@/components/EventModal';
@@ -363,44 +364,21 @@ export default function Home() {
                 />
 
                 {/* Sticky auto-hide header */}
-                <div className={`sticky top-0 z-20 transition-transform duration-300 ease-in-out mb-2 ${headerHidden ? '-translate-y-[210%]' : ''}`}>
-                  <div className="frosted-noise frosted-glass-header rounded-2xl p-4 shadow-xl">
-                    {/* Desktop: Title + city */}
-                    <div className="hidden lg:flex items-center justify-between mb-4">
-                      <div>
-                        {/* Title removed per request */}
-
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-noctvm-silver">Nightlife in</span>
-                          <div className="relative">
-                            <select
-                              value={activeCity}
-                              onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
-                              className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
-                            >
-                              <option value="bucuresti">București</option>
-                              <option value="constanta">Constanța</option>
-                            </select>
-                            <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <FilterBar
-                      activeGenres={activeGenres}
-                      onGenreChange={setActiveGenres}
-                      searchQuery={searchQuery}
-                      onSearchChange={setSearchQuery}
-                      viewMode={viewMode}
-                      onViewModeChange={setViewMode}
-                      selectedDate={selectedDate}
-                      onDateChange={setSelectedDate}
-                    />
-                    <div className="flex items-center mt-1">
-                      <span className="text-xs text-noctvm-silver font-mono">{filteredEvents.length} events</span>
-                    </div>
-                  </div>
-                </div>
+                <SearchBar
+                  type="events"
+                  activeCity={activeCity}
+                  onCityChange={setActiveCity}
+                  headerHidden={headerHidden}
+                  activeGenres={activeGenres}
+                  onGenresChange={setActiveGenres}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  eventsCount={filteredEvents.length}
+                />
 
                 <>
                     <div
