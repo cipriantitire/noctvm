@@ -274,7 +274,7 @@ export default function PostViewerModal({
       </div>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-5xl h-full md:h-[90vh] bg-noctvm-black md:rounded-xl overflow-hidden shadow-2xl z-[105] flex flex-col md:flex-row transition-transform animate-scale-in md:mx-0">
+      <div className="relative w-full max-w-5xl h-full md:h-[90vh] frosted-glass-modal frosted-noise md:rounded-xl overflow-hidden shadow-2xl z-[105] flex flex-col md:flex-row transition-transform animate-scale-in md:mx-0">
         
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
