@@ -122,7 +122,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.frosted-glass::before {
+.frosted-glass::before,
+.frosted-glass-modal::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -135,6 +136,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   opacity: 0;
   animation: frostSheen 5s ease-in-out infinite;
   pointer-events: none;
+  z-index: 0;
 }
 
 /* Subtle variant for cards */
