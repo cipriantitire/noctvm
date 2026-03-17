@@ -78,7 +78,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${isClosing ? 'animate-fade-out' : ''}`}>
         <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={handleClose} />
         <div
-          className={`relative w-full max-w-md liquid-glass rounded-2xl p-8 shadow-2xl shadow-black/50 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
+          className={`relative w-full max-w-md frosted-glass rounded-2xl p-8 shadow-2xl shadow-black/50 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
           onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
         >
           <div className="text-center">
@@ -107,7 +107,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md liquid-glass rounded-2xl p-8 shadow-2xl shadow-black/50 animate-scale-in">
+      <div className="relative w-full max-w-md frosted-glass rounded-2xl p-8 shadow-2xl shadow-black/50 animate-scale-in">
         {/* Close button */}
         <button
           onClick={onClose}

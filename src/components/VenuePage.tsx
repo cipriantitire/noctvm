@@ -165,15 +165,15 @@ export default function VenuePage({ venueName, onBack, onClose, onEventClick }: 
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-10">
-        <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
+        <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-white">{venueEvents.length}</p>
           <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Events</p>
         </div>
-        <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
+        <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-white">{info.capacity}</p>
           <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Capacity</p>
         </div>
-        <div className="text-center p-4 rounded-2xl liquid-glass-subtle">
+        <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-noctvm-gold font-mono">
             {venue?.rating ? venue.rating.toFixed(1) : '0.0'}
           </p>

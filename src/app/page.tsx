@@ -23,7 +23,7 @@ import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon, CogIcon, GridIcon
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
-import { useLiquidGlass } from '@/hooks/useLiquidGlass';
+import { useFrostedGlass } from '@/hooks/useFrostedGlass';
 import { useAuth } from '@/contexts/AuthContext';
 
 type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
@@ -73,7 +73,7 @@ export default function Home() {
     setShowStories(true);
   }, []);
 
-  useLiquidGlass();
+  useFrostedGlass();
 
   useEffect(() => {
     if (window.innerWidth >= 1024) setViewMode('portrait');
@@ -280,7 +280,7 @@ export default function Home() {
           <div
             className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl bg-noctvm-midnight/80 overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
               venueClosing ? 'animate-scale-out' : 'animate-scale-in'
-            } border-0 sm:border border-white/10 liquid-glass frosted-noise`}
+            } border-0 sm:border border-white/10 frosted-glass frosted-noise`}
             onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
           >
             <VenuePage

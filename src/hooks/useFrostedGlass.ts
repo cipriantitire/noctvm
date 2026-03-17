@@ -3,26 +3,26 @@
 import { useEffect } from 'react';
 
 /**
- * useLiquidGlass — Desktop mouse-reactive shimmer for .liquid-glass elements.
+ * useFrostedGlass — Desktop mouse-reactive shimmer for .frosted-glass elements.
  *
- * Tracks mouse position over any element with class "liquid-glass" and sets
+ * Tracks mouse position over any element with class "frosted-glass" and sets
  * CSS custom properties --mouse-x and --mouse-y (0-100 range) so the
  * radial-gradient highlight follows the cursor like tilting a glass pane.
  *
  * On mobile (no hover capability), the default CSS animation plays instead.
- * The hook adds the "lg-mouse" class on desktop to activate the override.
+ * The hook adds the "fg-mouse" class on desktop to activate the override.
  */
-export function useLiquidGlass() {
+export function useFrostedGlass() {
   useEffect(() => {
     // Only activate on devices with a fine pointer (desktop/laptop)
     const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isDesktop) return;
 
-    const elements = document.querySelectorAll<HTMLElement>('.liquid-glass');
+    const elements = document.querySelectorAll<HTMLElement>('.frosted-glass');
     if (elements.length === 0) return;
 
-    // Add the lg-mouse class so CSS knows to swap animation for mouse-driven gradient
-    elements.forEach(el => el.classList.add('lg-mouse'));
+    // Add the fg-mouse class so CSS knows to swap animation for mouse-driven gradient
+    elements.forEach(el => el.classList.add('fg-mouse'));
 
     const handlers = new Map<HTMLElement, {
       move: (e: MouseEvent) => void;
@@ -53,7 +53,7 @@ export function useLiquidGlass() {
       handlers.forEach(({ move, leave }, el) => {
         el.removeEventListener('mousemove', move);
         el.removeEventListener('mouseleave', leave);
-        el.classList.remove('lg-mouse');
+        el.classList.remove('fg-mouse');
       });
     };
   }, []);

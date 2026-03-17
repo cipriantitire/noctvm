@@ -73,51 +73,59 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.frosted-glass {
+  background: hsla(0, 0%, 100%, 0.1); /* Adjusted for dark mode default */
+  backdrop-filter: url(#displace) blur(12px) saturate(1.8);
+  -webkit-backdrop-filter: blur(12px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 
+   Radius Rule: 
+   Outer radius = inner radius + padding. 
+   Apply this to nested containers for perfect curvature.
+*/
+
 /* ========================= */
-/* LIQUID GLASS              */
+/* FROSTED GLASS             */
 /* ========================= */
-.liquid-glass {
-  background: linear-gradient(
-    135deg,
-    rgba(124, 58, 237, 0.08) 0%,
-    rgba(255, 255, 255, 0.03) 40%,
-    rgba(124, 58, 237, 0.05) 100%
-  );
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid rgba(124, 58, 237, 0.15);
+.frosted-glass {
+  background: hsla(0, 0%, 100%, 0.1);
+  backdrop-filter: url(#displace) blur(12px) saturate(1.8);
+  -webkit-backdrop-filter: blur(12px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 60px rgba(124, 58, 237, 0.06);
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(124, 58, 237, 0.08);
   position: relative;
   overflow: hidden;
 }
 
-.liquid-glass::before {
+.frosted-glass::before {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     120deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.05) 50%,
     transparent 70%
   );
   opacity: 0;
-  animation: liquidSheen 5s ease-in-out infinite;
+  animation: frostSheen 5s ease-in-out infinite;
   pointer-events: none;
 }
 
 /* Subtle variant for cards */
-.liquid-glass-subtle {
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.frosted-glass-subtle {
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-    0 4px 24px rgba(0, 0, 0, 0.3);
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* ========================= */
@@ -140,8 +148,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   50% { opacity: 0.5; }
 }
 
-/* Liquid glass refraction sheen */
-@keyframes liquidSheen {
+/* Frosted glass refraction sheen */
+@keyframes frostSheen {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
@@ -362,8 +370,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* ========================= */
 /* FROSTED GLASS PRICE BADGE  */
 /* ========================= */
-.liquid-glass-price {
-  background: rgba(16, 185, 129, 0.12);
+.frosted-glass-price {
+  background: rgba(16, 185, 129, 0.15);
   backdrop-filter: blur(25px) saturate(2);
   -webkit-backdrop-filter: blur(25px) saturate(2);
   border: 1px solid rgba(52, 211, 153, 0.45);
@@ -381,7 +389,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   justify-content: center;
   min-width: 60px;
 }
-.liquid-glass-price:hover {
+.frosted-glass-price:hover {
   background: rgba(16, 185, 129, 0.25);
   border-color: rgba(52, 211, 153, 0.7);
   box-shadow: 
@@ -393,11 +401,11 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 /* ========================= */
-/* LIQUID GLASS MOUSE TRACK  */
+/* FROSTED GLASS MOUSE TRACK  */
 /* ========================= */
 /* Desktop: mouse-reactive shimmer driven by --mouse-x / --mouse-y CSS vars */
 @media (hover: hover) and (pointer: fine) {
-  .liquid-glass.lg-mouse::before {
+  .frosted-glass.fg-mouse::before {
     animation: none !important;
     background: radial-gradient(
       600px circle at calc(var(--mouse-x, 50%) * 1%) calc(var(--mouse-y, 50%) * 1%),

@@ -1,0 +1,43 @@
+{
+  "brand": "NOCTVM",
+  "version": "3.0",
+  "colors": {
+    "void": "#050505",
+    "obsidian": "#0A0A0A",
+    "smoke": "#111111",
+    "ash": "#1A1A1A",
+    "concrete": "#2A2A2A",
+    "steel": "#8A8A8A",
+    "bone": "#E8E4DF",
+    "chalk": "#F5F3F0",
+    "white": "#FFFFFF",
+    "ultraviolet": "#7C3AED",
+    "violet": "#8B5CF6",
+    "orchid": "#A78BFA",
+    "lavender": "#C4B5FD",
+    "magenta": "#DB2777",
+    "fuchsia": "#E879A0",
+    "neon": "#C026D3",
+    "emerald": "#10B981",
+    "signal": "#EF4444"
+  },
+  "typography": {
+    "display": {
+      "family": "Syne",
+      "weights": [400, 500, 600, 700, 800]
+    },
+    "system": {
+      "family": "JetBrains Mono",
+      "weights": [300, 400, 500, 700]
+    },
+    "body": {
+      "family": "DM Sans",
+      "weights": [400, 500, 700]
+    }
+  },
+  "effects": {
+    "glow-violet": "radial-gradient(ellipse at center, rgba(124,58,237,0.15) 0%, transparent 70%)",
+    "glow-gold": "radial-gradient(ellipse at center, rgba(212,168,67,0.1) 0%, transparent 70%)",
+    "shadow-glow": "0 0 20px rgba(124,58,237,0.3)"
+  }
+}

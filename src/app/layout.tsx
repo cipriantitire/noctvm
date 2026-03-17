@@ -75,6 +75,14 @@ export default function RootLayout({
     <html lang="en" className={`dark ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
       <body className="font-body bg-noctvm-black text-white min-h-screen">
         <Providers>{children}</Providers>
+        
+        {/* Global SVG Filters for Glassmorphism */}
+        <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true" focusable="false">
+          <filter id="displace">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
+          </filter>
+        </svg>
       </body>
     </html>
   );
