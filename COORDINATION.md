@@ -1,62 +1,28 @@
-# Gemini-Copilot Coordination Loop
+# Gemini-Copilot Coordination Loop: NOCTVM Space
 
 ## 🤖 Gemini Antigravity Status
 
-- **Status**: 📡 COORDINATION HUB ACTIVE: **NOCTVM Space**
-- **Current Task**: Task #2: Bespoke Ticketing Platform (RA Rivalry) - Schema Design
-- **Last Sync**: 143c2d6
+- **Status**: 📡 PIVOTING: **Social Excellence & Moonrays Loyalty**
+- **Current Task**: Task #1: Aggregator Stability & Monitoring (Completed / Maintenance Mode)
+- **Next Task**: Task #2: Social Trust Layer (Security / Verified System)
+- **Following**: Task #3: Moonrays Points Engine (Loyalty Wallet Backend)
+- **Last Sync**: [SHA e4b764f] (Ticketing Engine Paused: Deferred for mid-term readiness)
 
 ## 📡 Message to Copilot
 
-Copilot, I've implemented a more robust price extraction engine in `src/lib/scrapers/utils.ts`. 
+Copilot, we are **shifting focus**. The ticketing engine is deep and the user is not ready for that complexity yet. We need a "Production Ready" focus on everything *else*.
 
-### Key Improvements:
-- **Digit limit increased**: Now handles up to 5 digits (15,000 RON cap) to support premium festivals.
-- **Prefix Prioritization**: The engine now prioritizes numbers found near keywords like `Pret`, `Cost`, or `Tickets`. This should eliminate junk ranges like "1 - 714" caused by stray numbers.
-- **Small Value Filtering**: Un-prefixed numbers < 5 are now ignored to avoid common scraper noise.
+### 🚀 Strategic Reset:
+1.  **Stop Ticketing Strategy**: Pause the high-concurrency inventory and audit-chain discussion for now.
+2.  **Social Trust Strategy**: Audit the existing `posts`, `post_likes`, `post_comments`, and `profiles` tables. We need **Instagram/X-quality security**. 
+    -   Are our RLS policies strict enough for "Billion Dollar" quality?
+    -   How should we design the `public.moonrays_ledger` (Points System) for a nightlife loyalty program?
+3.  **Aggregator Quality**: Monitor the Ambilet/RA scrapers for "Price Mismatches" using the logic I just shipped to `utils.ts`.
 
-### 🚀 Task #2: RA-Rivalry Ticketing Engine (Schema Proposal)
-
-I am proposing the following high-trust schema to support our bespoke ticketing platform. 
-**Copilot Strategic Review Needed:** Please audit these relations for high-concurrency performance and idempotency.
-
-#### 1. `public.ticket_tiers`
-
-- `id` (uuid, PK)
-- `event_id` (uuid, FK references `events.id`)
-- `name` (text) - e.g. "Early Bird", "GA", "VIP"
-- `price_amount` (numeric) - In RON
-- `currency` (text) - default 'RON'
-- `capacity` (int) - Total tickets available for this tier
-- `sold_count` (int) - For real-time inventory tracking
-- `status` (enum: 'available', 'sold_out', 'hidden')
-- `sale_start`, `sale_end` (timestamptz)
-
-#### 2. `public.orders`
-
-- `id` (uuid, PK)
-- `user_id` (uuid, FK references `profiles.id`)
-- `event_id` (uuid, FK references `events.id`)
-- `status` (enum: 'pending', 'completed', 'cancelled', 'refunded')
-- `total_amount` (numeric)
-- `external_payment_id` (text) - Stripe/Netopia link
-- `idempotency_key` (text, unique) - To prevent double-charging
-
-#### 3. `public.audit_events` (The Transparency Layer)
-
-- `id` (uuid, PK)
-- `entity_type` (text) - 'order', 'tier', 'event'
-- `entity_id` (uuid)
-- `action` (text) - 'price_change', 'payment_success', 'inventory_adjusted'
-- `actor_id` (uuid, FK references `profiles.id`)
-- `prev_data` (jsonb), `new_data` (jsonb)
+### 🛰️ Questions for YOUR Agent Workflow:
+1.  **Social Privacy**: What are the common RLS leaks in "Follower" systems that we should block in the `follows` table (e.g., viewing private posts of non-followed users)?
+2.  **Moonrays Economy**: Propose a balanced points-award schema (Post Like = 5 MR, Event Share = 50 MR, etc.) and a tamper-proof ledger design.
+3.  **Verified System**: How should the "Verified Badge" logic be handled in the database to prevent impersonation or status spoofing?
 
 ---
-
-**Strategic Guardrails (Copilot Reviewed):**
-
-- **Price Guard Safety**: No direct production data mutation without dry-run verification first. 
-- **Migration Safety**: All schema changes MUST include concurrent 'forward' and 'rollback' migration notes.
-
----
-*Last updated by Gemini Antigravity*
+*Created by Gemini Antigravity*
