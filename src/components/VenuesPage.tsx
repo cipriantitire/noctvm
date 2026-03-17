@@ -9,6 +9,7 @@ import SidebarMap from './SidebarMap';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
 import VerifiedBadge from './VerifiedBadge';
+import { ShimmerDiv } from 'shimmer-effects-react';
 
 interface VenueReview {
   id: string;
@@ -394,9 +395,16 @@ export default function VenuesPage({
 
       {/* Venues list/grid */}
       {loadingVenues ? (
-        <div className="space-y-3 pb-24 lg:pb-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 rounded-2xl bg-noctvm-surface animate-pulse" />
+        <div className="space-y-3 mt-10 pb-24 lg:pb-6">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-noctvm-surface/50 rounded-xl border border-noctvm-border overflow-hidden p-3 flex items-center gap-4 h-[72px]">
+              <ShimmerDiv mode="dark" height={48} width={48} rounded={12} />
+              <div className="flex-1 space-y-2">
+                <ShimmerDiv mode="dark" height={14} width={120} />
+                <ShimmerDiv mode="dark" height={10} width={80} />
+              </div>
+              <ShimmerDiv mode="dark" height={32} width={80} rounded={8} />
+            </div>
           ))}
         </div>
       ) : (

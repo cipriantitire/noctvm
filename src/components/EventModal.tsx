@@ -6,6 +6,7 @@ import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import VerifiedBadge from './VerifiedBadge';
+import { ShimmerDiv } from 'shimmer-effects-react';
 
 interface EventModalProps {
   event: NoctEvent | null;
@@ -57,6 +58,7 @@ export default function EventModal({
   const [isSaved,   setIsSaved]       = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [venueBadge, setVenueBadge] = useState<'none' | 'owner' | 'admin' | 'gold' | 'verified'>('none');
+  const [imageLoaded, setImageLoaded] = useState(false);
   const handleClose = useCallback(() => setIsClosing(true), []);
 
   useEffect(() => {
@@ -179,13 +181,19 @@ export default function EventModal({
       >
         {/* Hero image */}
         <div className="relative flex-shrink-0 h-[260px] sm:h-[300px] bg-noctvm-black overflow-hidden">
+          {!imageLoaded && (
+            <div className="absolute inset-0 z-0">
+              <ShimmerDiv mode="dark" height="100%" width="100%" />
+            </div>
+          )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={event.image_url || '/images/event-fallback.png'}
             alt={event.title}
-            className="w-full h-full object-cover cursor-zoom-in"
+            className={`w-full h-full object-cover cursor-zoom-in transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImageLoaded(true)}
             onClick={() => (event.image_url || true) && setLightboxOpen(true)}
-            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; setImageLoaded(true); }}
           />
           {/* Close button */}
           <button

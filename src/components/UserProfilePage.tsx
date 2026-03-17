@@ -10,6 +10,7 @@ import EventCard from './EventCard';
 import type { NoctEvent } from '@/lib/types';
 import PostViewerModal from './PostViewerModal';
 import VerifiedBadge from './VerifiedBadge';
+import { ShimmerDiv } from 'shimmer-effects-react';
 
 // ── Post types ────────────────────────────────────────────────────────────────
 
@@ -466,7 +467,13 @@ export default function UserProfilePage({
         {activeTab === 'posts' && (
           <>
             {loadingPosts ? (
-              <div className="grid grid-cols-3 gap-0.5">{Array.from({length:6}).map((_,i)=><div key={i} className="aspect-square bg-noctvm-surface animate-pulse"/>)}</div>
+              <div className="grid grid-cols-3 gap-0.5">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="aspect-square bg-noctvm-surface overflow-hidden border border-white/5">
+                    <ShimmerDiv mode="dark" height="100%" width="100%" />
+                  </div>
+                ))}
+              </div>
             ) : posts.length > 0 ? (
               <div className="grid grid-cols-3 gap-0.5">
                 {posts.map((post, i) => (

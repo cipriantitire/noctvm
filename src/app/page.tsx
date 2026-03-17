@@ -25,6 +25,7 @@ import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { useFrostedGlass } from '@/hooks/useFrostedGlass';
 import { useAuth } from '@/contexts/AuthContext';
+import { ShimmerDiv } from 'shimmer-effects-react';
 
 type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
 
@@ -412,9 +413,11 @@ export default function Home() {
                       }`}
                     >
                       {dbEvents === null ? (
-                        // Loading State (Skeleton)
-                        Array.from({ length: 8 }).map((_, i) => (
-                          <div key={i} className="bg-noctvm-surface/40 rounded-2xl h-[320px] animate-pulse border border-white/5" />
+                        // Loading State (Shimmer)
+                        Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="bg-noctvm-surface/40 rounded-2xl h-[320px] overflow-hidden border border-white/5">
+                            <ShimmerDiv mode="dark" height="100%" width="100%" />
+                          </div>
                         ))
                       ) : (
                         filteredEvents.map((event, index) => (

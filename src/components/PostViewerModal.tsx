@@ -9,6 +9,7 @@ import PostOptionsMenu from './PostOptionsMenu';
 import LikesModal from './LikesModal';
 
 import VerifiedBadge from './VerifiedBadge';
+import { ShimmerDiv } from 'shimmer-effects-react';
 
 interface ProfilePost {
   id: string;
@@ -64,13 +65,21 @@ export default function PostViewerModal({
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showLikesModal, setShowLikesModal] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const post = posts[index];
 
   // Reset index when modal opens
   useEffect(() => {
-    if (isOpen) setIndex(initialIndex);
+    if (isOpen) {
+      setIndex(initialIndex);
+      setImageLoaded(false);
+    }
   }, [isOpen, initialIndex]);
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [index]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -278,11 +287,18 @@ export default function PostViewerModal({
         
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
+          {!imageLoaded && (
+            <div className="absolute inset-0 z-0">
+              <ShimmerDiv mode="dark" height="100%" width="100%" />
+            </div>
+          )}
           {post.image_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img 
               src={post.image_url} 
               alt="Post media" 
-              className="w-full h-full object-contain"
+              className={`w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setImageLoaded(true)}
             />
           ) : (
              <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/40 p-12 flex items-center justify-center">

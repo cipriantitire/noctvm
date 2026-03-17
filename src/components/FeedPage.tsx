@@ -9,6 +9,7 @@ import { FeedItem } from './Feed/FeedItem';
 import ShareSheet from './ShareSheet';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import type { FeedPost } from '@/types/feed';
+import { ShimmerDiv } from 'shimmer-effects-react';
 
 interface FeedPageProps {
   onVenueClick: (venueName: string) => void;
@@ -89,7 +90,30 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
       />
 
       <div className="space-y-6 max-w-2xl mx-auto pb-20">
-        {loading && <div className="text-center py-8"><div className="w-8 h-8 border-2 border-noctvm-violet border-t-transparent rounded-full animate-spin mx-auto" /></div>}
+        {loading && (
+          <div className="space-y-6">
+            {[1, 2].map(i => (
+              <div key={i} className="bg-noctvm-surface/50 rounded-xl border border-noctvm-border overflow-hidden">
+                <div className="flex items-center gap-3 p-3">
+                  <ShimmerDiv mode="dark" height={36} width={36} rounded={50} />
+                  <div className="flex-1 space-y-2">
+                    <ShimmerDiv mode="dark" height={12} width={100} />
+                    <ShimmerDiv mode="dark" height={8} width={60} />
+                  </div>
+                </div>
+                <ShimmerDiv mode="dark" height={400} width="100%" />
+                <div className="p-3 space-y-2">
+                  <div className="flex gap-4">
+                    <ShimmerDiv mode="dark" height={20} width={20} />
+                    <ShimmerDiv mode="dark" height={20} width={20} />
+                    <ShimmerDiv mode="dark" height={20} width={20} />
+                  </div>
+                  <ShimmerDiv mode="dark" height={12} width="80%" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         
         {activePosts.map((post, idx) => (
           <FeedItem 
