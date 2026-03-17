@@ -105,8 +105,8 @@ export function StoriesRow({
             onClick={() => onOpenStories(liveStoryUsers, liveStoryUsers.indexOf(su))}
             className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer"
           >
-            <div className={`w-16 h-16 rounded-full p-[2px] ${su.hasNew ? 'bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500' : 'bg-noctvm-border'}`}>
-              <div className={`w-full h-full rounded-full bg-gradient-to-br ${su.color} flex items-center justify-center ring-2 ring-noctvm-black overflow-hidden`}>
+            <div className={`w-16 h-16 rounded-full p-[2px] border border-noctvm-border flex items-center justify-center`}>
+              <div className={`w-full h-full rounded-full bg-gradient-to-br ${su.color} flex items-center justify-center overflow-hidden`}>
                 {su.avatarUrl
                   ? <Image src={su.avatarUrl} alt="" fill className="object-cover" unoptimized />
                   : <span className="text-sm font-bold text-white">{su.avatar}</span>}

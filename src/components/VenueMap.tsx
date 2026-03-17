@@ -142,29 +142,26 @@ export default function VenueMap({
                       onVenueClick?.(venue.name);
                     }
                   }}
-                  className="bg-noctvm-black/95 text-white p-2.5 rounded-[20px] border border-white/10 min-w-[140px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
+                  className="bg-noctvm-black/95 text-white p-2 rounded-xl border border-white/10 min-w-0 w-[120px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
-                  <p className="text-sm font-bold text-white truncate mb-0.5">{venue.name}</p>
-                  <p className="text-[11px] text-noctvm-silver/40 truncate mb-2">{venue.address}</p>
+                  <p className="text-[11px] font-bold text-white truncate mb-0">{venue.name}</p>
+                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-1.5">{venue.address}</p>
                   
                   {isEventsMode && tonightEvent ? (
                     <>
-                      <div className="mb-2 p-2 rounded-xl bg-noctvm-violet/5 border border-noctvm-violet/10">
-                        <p className="text-[10px] text-noctvm-violet font-mono uppercase tracking-wider mb-1">Tonight</p>
-                        <p className="text-[11px] font-semibold text-white truncate">{tonightEvent.title}</p>
-                        <p className="text-[9px] text-noctvm-silver/60">
-                          {tonightEvent.genres.slice(0, 1).join(', ')}
-                        </p>
+                      <div className="mb-1.5 p-1.5 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10">
+                        <p className="text-[8px] text-noctvm-violet font-mono uppercase tracking-wider mb-0.5">Tonight</p>
+                        <p className="text-[10px] font-semibold text-white truncate leading-tight">{tonightEvent.title}</p>
                       </div>
                     </>
                   ) : (
                     <>
                       {count > 0 && (
-                        <p className="text-[10px] text-noctvm-emerald font-mono mb-1.5">{count} upcoming events</p>
+                        <p className="text-[9px] text-noctvm-emerald font-mono mb-1">{count} upcoming</p>
                       )}
-                      <div className="flex gap-1 overflow-hidden mb-2.5">
-                        {venue.genres?.slice(0, 2).map((g, i) => (
-                          <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
+                      <div className="flex gap-1 overflow-hidden mb-1.5">
+                        {venue.genres?.slice(0, 1).map((g, i) => (
+                          <span key={i} className="text-[8px] px-1.5 py-0 rounded-full bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
                             {g}
                           </span>
                         ))}
@@ -173,8 +170,8 @@ export default function VenueMap({
                   )}
 
                   <div className="flex items-center justify-end">
-                    <div className="w-6 h-6 rounded-lg bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all shadow-md">
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <div className="w-5 h-5 rounded-md bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                   </div>
                 </div>

@@ -49,10 +49,12 @@ export function useFeedData(user: any, activeCity: string) {
       const fofIds = Array.from(new Set((fofRes || []).map(f => f.following_id).filter(id => id !== user.id && !followingIds.includes(id))));
 
       // 2. PARALLEL POST FETCHING
+      const followingFilter = `user_id.in.(${[user.id, ...followingIds].join(',')})${followedVenueNames.length ? `,venue_name.in.(${followedVenueNames.map(v => `"${v}"`).join(',')})` : ''}`;
+
       const [followingRes, exploreRes, friendsRes] = await Promise.all([
         // FOLLOWING: People you follow OR posts tagging venues you follow
         supabase.from('posts').select('*, profiles(display_name, username, avatar_url, is_verified, badge)')
-          .or(`user_id.in.(${[user.id, ...followingIds].join(',')}),venue_name.in.(${followedVenueNames.length ? followedVenueNames.map(v => `"${v}"`).join(',') : '"_none_"'})`)
+          .or(followingFilter)
           .eq('city', cityLabel).order('created_at', { ascending: false }).limit(40),
         
         // EXPLORE: Not followed + city tagged + fof
