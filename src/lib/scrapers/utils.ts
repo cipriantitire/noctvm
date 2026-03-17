@@ -502,19 +502,44 @@ export function extractPriceFromHtml(html: string): string | null {
 
   // Regex to find all numbers followed by currency or currency symbols
   // Stricter price regex: prioritize prefix or common price patterns
-  // Avoid large 4-digit numbers unless clearly prefixed (to avoid postcodes/years)
-  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț|Bilete)\s*)?(?:(?:\d{1,3}(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$)\s*(?:\d{1,3}(?:[.,]\d+)?))/gi));
+  // Increase digit limit to 1-5 to handle premium/festival tickets
+  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)\s*:?\s*)?(?:(?:\d{1,5}(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$)\s*(?:\d{1,5}(?:[.,]\d+)?))/gi));
   
   const prices = priceMatches
     .map(m => {
-      const numMatch = m[0].match(/\d+(?:[.,]\d+)?/);
-      return numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
+      const matchText = m[0];
+      const hasPrefix = /(Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)/i.test(matchText);
+      const numMatch = matchText.match(/\d+(?:[.,]\d+)?/);
+      const val = numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
+      
+      // If it doesn't have a specific price prefix, be more skeptical of very small numbers (often stray text)
+      if (val !== null && !hasPrefix && val < 5) return null; // Likely a quantity or day, not a price
+      
+      return val;
     })
-    .filter((p): p is number => p !== null && !isNaN(p) && p > 0 && p < 1000); // Sanity check < 1000 RON
+    .filter((p): p is number => p !== null && !isNaN(p) && p > 0 && p < 15000); // 15,000 RON upper bound for festivals
 
   if (prices.length > 0) {
     const sorted = Array.from(new Set(prices)).sort((a, b) => a - b);
     if (sorted.length === 1) return `${sorted[0]} RON`;
+    
+    // If we have multiple matches, prioritize those with explicit price prefixes
+    // to avoid junk ranges from stray numbers (e.g., "1 - 714")
+    const prefixed = priceMatches
+      .filter(m => /(Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)/i.test(m[0]))
+      .map(m => {
+        const numMatch = m[0].match(/\d+(?:[.,]\d+)?/);
+        return numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
+      })
+      .filter((p): p is number => p !== null && !isNaN(p) && p > 0);
+
+    if (prefixed.length > 0) {
+      const sortedPrefixed = Array.from(new Set(prefixed)).sort((a, b) => a - b);
+      if (sortedPrefixed.length === 1) return `${sortedPrefixed[0]} RON`;
+      return `${sortedPrefixed[0]} - ${sortedPrefixed[sortedPrefixed.length - 1]} RON`;
+    }
+
+    // Fallback to the full range if no prefixed prices found, but avoid extreme outliers
     return `${sorted[0]} - ${sorted[sorted.length - 1]} RON`;
   }
 
