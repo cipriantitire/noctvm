@@ -110,8 +110,8 @@ export default function Home() {
       const diff = y - lastY;
       
       // Delay hide until user has scrolled past most of the top section
-      // 450px is ~6 lines (Events), 220px is ~3 lines (Venues)
-      const threshold = activeTab === 'venues' ? 220 : 450;
+      // 600px is ~8 lines (Events), 370px is ~5 lines (Venues)
+      const threshold = activeTab === 'venues' ? 370 : 600;
       
       if (diff > 8 && y > threshold) setHeaderHidden(true);
       else if (diff < -8) setHeaderHidden(false);
