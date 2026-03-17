@@ -267,7 +267,7 @@ export default function VenuesPage({
 
       {/* Sticky auto-hide header */}
       <div className={`sticky top-0 z-20 transition-transform duration-300 ease-in-out mb-6 ${headerHidden ? '-translate-y-[200%]' : ''}`}>
-        <div className="frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
+        <div className="frosted-noise frosted-glass-header rounded-2xl p-4 shadow-xl">
           {/* Desktop: Title + city */}
           <div className="hidden lg:flex items-center justify-between mb-4">
             <div>

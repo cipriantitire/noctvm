@@ -278,9 +278,9 @@ export default function Home() {
         >
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
-            className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl bg-noctvm-midnight/80 overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
+            className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
               venueClosing ? 'animate-scale-out' : 'animate-scale-in'
-            } border-0 sm:border border-white/10 frosted-glass frosted-noise`}
+            } border-0 sm:border border-white/10 frosted-glass-modal frosted-noise`}
             onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
           >
             <VenuePage
@@ -364,7 +364,7 @@ export default function Home() {
 
                 {/* Sticky auto-hide header */}
                 <div className={`sticky top-0 z-20 transition-transform duration-300 ease-in-out mb-2 ${headerHidden ? '-translate-y-[210%]' : ''}`}>
-                  <div className="frosted-noise bg-noctvm-black/70 backdrop-blur-3xl rounded-2xl border border-noctvm-violet/15 p-4 shadow-xl">
+                  <div className="frosted-noise frosted-glass-header rounded-2xl p-4 shadow-xl">
                     {/* Desktop: Title + city */}
                     <div className="hidden lg:flex items-center justify-between mb-4">
                       <div>

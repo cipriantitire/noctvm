@@ -245,7 +245,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
 
           {/* Caption + user */}
           <div className="flex items-start gap-3 px-4 py-4 border-b border-noctvm-border">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-noctvm-surface border border-noctvm-border flex items-center justify-center flex-shrink-0 overflow-hidden">
               {profile?.avatar_url
                 ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={profile.avatar_url} alt="My profile" className="w-full h-full object-cover" />
                 : <span className="text-xs font-bold text-white">{(profile?.display_name || 'N')[0].toUpperCase()}</span>

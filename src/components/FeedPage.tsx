@@ -20,8 +20,8 @@ interface FeedPageProps {
 
 export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories, activeCity = 'bucuresti' }: FeedPageProps) {
   const { user, profile } = useAuth();
-  const [subTab, setSubTab] = useState<'explore' | 'following' | 'friends'>('explore');
-  const { explorePosts, loading, fetchExplorePosts } = useFeedData(user, activeCity);
+  const [subTab, setSubTab] = useState<'explore' | 'following' | 'friends'>('following');
+  const { explorePosts, followingPosts, friendsPosts, loading, fetchExplorePosts } = useFeedData(user, activeCity);
   
   const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
   const [showMyStoryDropdown, setShowMyStoryDropdown] = useState(false);
@@ -52,7 +52,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     setShowMyStoryDropdown(v => !v);
   }, [showMyStoryDropdown]);
 
-  const activePosts = subTab === 'explore' ? explorePosts : []; // Following/Friends logic omitted for brevity in POC
+  const activePosts = subTab === 'explore' ? explorePosts : subTab === 'following' ? followingPosts : subTab === 'friends' ? friendsPosts : [];
 
   return (
     <div className="space-y-0">

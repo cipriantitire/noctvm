@@ -142,7 +142,7 @@ export default function VenueMap({
                       onVenueClick?.(venue.name);
                     }
                   }}
-                  className="bg-noctvm-black/95 text-white p-3.5 rounded-[24px] border border-white/10 min-w-[170px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
+                  className="bg-noctvm-black/95 text-white p-2.5 rounded-[20px] border border-white/10 min-w-[140px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
                 >
                   <p className="text-sm font-bold text-white truncate mb-0.5">{venue.name}</p>
                   <p className="text-[11px] text-noctvm-silver/40 truncate mb-2">{venue.address}</p>

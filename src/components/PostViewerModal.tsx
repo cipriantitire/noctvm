@@ -296,16 +296,12 @@ export default function PostViewerModal({
           
           {/* Header */}
           <div className="p-4 border-b border-noctvm-border flex items-center gap-3 relative">
-             <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet to-purple-500">
-                <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
-                   <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
-                      {profileAvatar ? (
-                        <img src={profileAvatar} alt={profileName || 'Profile'} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-xs font-bold text-white">{profileInitial || 'U'}</span>
-                      )}
-                   </div>
-                </div>
+             <div className="w-10 h-10 rounded-full border border-noctvm-border flex items-center justify-center overflow-hidden flex-shrink-0 bg-noctvm-midnight">
+                {profileAvatar ? (
+                  <img src={profileAvatar} alt={profileName || 'Profile'} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-white">{profileInitial || 'U'}</span>
+                )}
              </div>
               <div className="flex-1 min-w-0">
                  <div className="flex items-center gap-1.5">
