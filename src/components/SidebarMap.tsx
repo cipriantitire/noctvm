@@ -142,38 +142,40 @@ export default function SidebarMap({
                       onVenueClick?.(venue.name);
                     }
                   }}
-                  className="bg-noctvm-black/95 text-white p-2 rounded-xl border border-white/10 min-w-0 w-[120px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col"
+                  className="bg-noctvm-black/98 text-white p-1.5 rounded-xl border border-white/10 min-w-0 w-[115px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col gap-0.5"
                 >
-                  <p className="text-[11px] font-bold text-white truncate mb-0 leading-tight">{venue.name}</p>
-                  <p className="text-[9px] text-noctvm-silver/40 truncate mb-1">{venue.address}</p>
-                  
-                  {isEventsMode && tonightEvent ? (
-                    <>
-                      <div className="mb-1.5 p-1.5 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10">
-                        <p className="text-[8px] text-noctvm-violet font-mono uppercase tracking-wider mb-0.5">Tonight</p>
-                        <p className="text-[10px] font-semibold text-white truncate leading-tight">{tonightEvent.title}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {count > 0 && (
-                        <p className="text-[9px] text-noctvm-emerald font-mono mb-1">{count} upcoming</p>
-                      )}
-                      <div className="flex gap-1 overflow-hidden mb-1.5">
-                        {venue.genres?.slice(0, 1).map((g, i) => (
-                          <span key={i} className="text-[8px] px-1.5 py-0 rounded-full bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
-                            {g}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex items-center justify-end">
-                    <div className="w-5 h-5 rounded-md bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all">
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  <div className="flex items-start justify-between gap-1">
+                    <p className="text-[10px] font-bold text-white truncate leading-tight flex-1">{venue.name}</p>
+                    <div className="w-4 h-4 rounded-md bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all flex-shrink-0">
+                      <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                   </div>
+                  
+                  <p className="text-[8px] text-noctvm-silver/40 truncate leading-none mb-0.5">{venue.address}</p>
+                  
+                  {isEventsMode && tonightEvent ? (
+                    <div className="p-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/15">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <span className="w-1 h-1 rounded-full bg-noctvm-violet animate-pulse" />
+                        <p className="text-[7px] text-noctvm-violet font-mono uppercase tracking-tight">Tonight</p>
+                      </div>
+                      <p className="text-[9px] font-semibold text-white/90 truncate leading-tight">{tonightEvent.title}</p>
+                    </div>
+                  ) : (
+                    <>
+                      {count > 0 ? (
+                        <p className="text-[8px] text-noctvm-emerald font-mono leading-none">{count} events</p>
+                      ) : (
+                        <div className="flex gap-1 overflow-hidden">
+                          {venue.genres?.slice(0, 1).map((g, i) => (
+                            <span key={i} className="text-[7px] px-1 py-0 rounded bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
+                              {g}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </Popup>
             </Marker>

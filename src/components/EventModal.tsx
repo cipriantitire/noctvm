@@ -168,11 +168,11 @@ export default function EventModal({
       style={{ zIndex }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={handleClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={handleClose} />
 
       {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
       <div
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 frosted-glass frosted-noise`}
+        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 frosted-glass-modal frosted-noise`}
         style={{ zIndex: (zIndex || 200) + 1 }}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}

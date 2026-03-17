@@ -105,12 +105,14 @@ export function StoriesRow({
             onClick={() => onOpenStories(liveStoryUsers, liveStoryUsers.indexOf(su))}
             className="flex flex-col items-center gap-1 flex-shrink-0 cursor-pointer"
           >
-            <div className={`w-16 h-16 rounded-full p-[2px] border border-noctvm-border flex items-center justify-center`}>
-              <div className={`w-full h-full rounded-full bg-gradient-to-br ${su.color} flex items-center justify-center overflow-hidden`}>
-                {su.avatarUrl
-                  ? <Image src={su.avatarUrl} alt="" fill className="object-cover" unoptimized />
-                  : <span className="text-sm font-bold text-white">{su.avatar}</span>}
-              </div>
+            <div className="w-16 h-16 rounded-full border border-noctvm-border flex items-center justify-center overflow-hidden bg-noctvm-midnight relative">
+              {su.avatarUrl ? (
+                <Image src={su.avatarUrl} alt="" fill className="object-cover" unoptimized />
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${su.color} flex items-center justify-center`}>
+                  <span className="text-sm font-bold text-white">{su.avatar}</span>
+                </div>
+              )}
             </div>
             <span className="text-[9px] text-noctvm-silver truncate max-w-[64px]">{su.name}</span>
           </div>

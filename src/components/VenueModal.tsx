@@ -116,7 +116,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
   };
 
   return (
-    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0 overscroll-contain frosted-glass">
+    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0 overscroll-contain">
       {/* Header */}
       <button
         onClick={onBack}
