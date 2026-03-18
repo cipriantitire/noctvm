@@ -33,6 +33,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isClosing, setIsClosing] = useState(false);
+  const [eventSearch, setEventSearch] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState<{ id: string; title: string; date: string; venue: string } | null>(null);
+  const [eventResults, setEventResults] = useState<{ id: string; title: string; date: string; venue: string }[]>([]);
+  const [showEventSuggestions, setShowEventSuggestions] = useState(false);
+
   const [peopleSearch, setPeopleSearch] = useState('');
   const [taggedUsers, setTaggedUsers] = useState<string[]>([]);
   const [showPeopleSuggestions, setShowPeopleSuggestions] = useState(false);
@@ -54,6 +59,26 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
       handle: `@${p.username}`,
       name: p.display_name,
     })));
+  };
+
+  const searchEvents = async (q: string) => {
+    if (!q || q.length < 2) { setEventResults([]); return; }
+    try {
+      const { data } = await supabase
+        .from('events')
+        .select('id, title, start_date, venue_name')
+        .ilike('title', `%${q}%`)
+        .order('start_date', { ascending: true })
+        .limit(6);
+      setEventResults((data || []).map((e: any) => ({
+        id: e.id,
+        title: e.title,
+        date: e.start_date ? new Date(e.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '',
+        venue: e.venue_name || '',
+      })));
+    } catch {
+      setEventResults([]);
+    }
   };
 
   const handleFile = (file: File) => {
@@ -113,6 +138,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
           tags: tags.length > 0 ? tags : null,
           tagged_users: taggedUsers.length > 0 ? taggedUsers : null,
           city: activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta',
+          event_id: selectedEvent?.id || null,
+          event_title: selectedEvent?.title || null,
+          event_date: selectedEvent?.date || null,
+          event_venue: selectedEvent?.venue || null,
         });
 
       if (insertError) throw insertError;
@@ -128,6 +157,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
       setTaggedUsers([]);
       setPeopleSearch('');
       setProfileResults([]);
+      setSelectedEvent(null);
+      setEventSearch('');
+      setEventResults([]);
       onPostCreated?.();
       onClose();
     } catch (err: unknown) {
@@ -154,6 +186,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
     setTaggedUsers([]);
     setPeopleSearch('');
     setProfileResults([]);
+    setSelectedEvent(null);
+    setEventSearch('');
+    setEventResults([]);
     setError('');
     setIsClosing(true);
   };
@@ -337,6 +372,61 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
                   >
                     <span className="font-medium">{u.name}</span>
                     <span className="text-noctvm-silver text-xs">{u.handle}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tag an event */}
+          <div className="px-4 py-3 border-b border-noctvm-border relative">
+            <div className="flex items-center gap-2 flex-wrap">
+              <svg className="w-4 h-4 text-noctvm-violet flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <span className="text-sm text-white flex-shrink-0">Event</span>
+              {selectedEvent ? (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-xs border border-noctvm-violet/30">
+                  <span className="font-medium max-w-[180px] truncate">{selectedEvent.title}</span>
+                  {selectedEvent.date && <span className="text-noctvm-silver/70">· {selectedEvent.date}</span>}
+                  <button onClick={() => { setSelectedEvent(null); setEventSearch(''); }}>
+                    <svg className="w-3 h-3 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </span>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="Search events…"
+                  value={eventSearch}
+                  onChange={e => { setEventSearch(e.target.value); searchEvents(e.target.value); setShowEventSuggestions(true); }}
+                  onFocus={() => setShowEventSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowEventSuggestions(false), 150)}
+                  className="flex-1 min-w-[120px] bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none"
+                />
+              )}
+            </div>
+            {showEventSuggestions && eventResults.length > 0 && !selectedEvent && (
+              <div className="absolute left-4 right-4 top-full mt-1 bg-noctvm-midnight border border-noctvm-border rounded-xl overflow-hidden z-10 shadow-xl">
+                {eventResults.map(ev => (
+                  <button
+                    key={ev.id}
+                    onMouseDown={() => {
+                      setSelectedEvent(ev);
+                      setEventSearch('');
+                      setEventResults([]);
+                      setShowEventSuggestions(false);
+                    }}
+                    className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-3.5 h-3.5 text-noctvm-violet flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <div className="min-w-0">
+                      <span className="font-medium block truncate">{ev.title}</span>
+                      {(ev.venue || ev.date) && (
+                        <span className="text-noctvm-silver text-xs">{[ev.venue, ev.date].filter(Boolean).join(' · ')}</span>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>

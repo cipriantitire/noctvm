@@ -48,6 +48,16 @@ export function mapSupabasePost(row: any): FeedPost {
     createdAt: row.created_at as string,
     liked: false,
     saved: false,
+    reposted: false,
+    reposts: (row.reposts_count as number) || 0,
+    event: row.event_id
+      ? {
+          id: row.event_id as string,
+          title: (row.event_title as string) || '',
+          date: (row.event_date as string) || '',
+          venue: (row.event_venue as string) || '',
+        }
+      : null,
     imageUrl: row.image_url,
     imageTheme: { gradient: grad, scene: '' },
   };

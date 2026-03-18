@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { GridIcon, BookmarkIcon, TagIcon, UserIcon } from './icons';
+import { GridIcon, BookmarkIcon, TagIcon, RepostIcon, UserIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
@@ -51,7 +51,7 @@ export default function UserProfilePage({
   onEventClick,
 }: UserProfilePageProps) {
   const { user, profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'tagged'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
   const [highlights, setHighlights] = useState<DbHighlight[]>([]);
@@ -62,6 +62,7 @@ export default function UserProfilePage({
 
   // ── Posts state ───────────────────────────────────────────────────────────
   const [posts, setPosts] = useState<ProfilePost[]>([]);
+  const [repostedPosts, setRepostedPosts] = useState<ProfilePost[]>([]);
   const [savedEvents, setSavedEvents] = useState<NoctEvent[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -136,6 +137,26 @@ export default function UserProfilePage({
     }
   }, [user]);
 
+  const fetchReposts = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data: repostRows } = await supabase
+        .from('reposts')
+        .select('post_id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (!repostRows || repostRows.length === 0) { setRepostedPosts([]); return; }
+      const postIds = repostRows.map((r: any) => r.post_id);
+      const { data } = await supabase
+        .from('posts')
+        .select('id, user_id, image_url, caption, created_at, likes_count')
+        .in('id', postIds);
+      setRepostedPosts((data || []) as any[]);
+    } catch {
+      setRepostedPosts([]);
+    }
+  }, [user]);
+
   const fetchSavedEvents = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
@@ -149,8 +170,9 @@ export default function UserProfilePage({
   useEffect(() => {
     fetchHighlights();
     fetchPosts();
+    fetchReposts();
     fetchSavedEvents();
-  }, [fetchHighlights, fetchPosts, fetchSavedEvents]);
+  }, [fetchHighlights, fetchPosts, fetchReposts, fetchSavedEvents]);
 
   // ── Check for active stories ──────────────────────────────────────────────
 
@@ -292,9 +314,10 @@ export default function UserProfilePage({
   ];
 
   const tabs = [
-    { key: 'posts'  as const, icon: <GridIcon     className="w-5 h-5" /> },
-    { key: 'saved'  as const, icon: <BookmarkIcon className="w-5 h-5" /> },
-    { key: 'tagged' as const, icon: <TagIcon      className="w-5 h-5" /> },
+    { key: 'posts'   as const, icon: <GridIcon     className="w-5 h-5" /> },
+    { key: 'reposts' as const, icon: <RepostIcon   className="w-5 h-5" /> },
+    { key: 'saved'   as const, icon: <BookmarkIcon className="w-5 h-5" /> },
+    { key: 'tagged'  as const, icon: <TagIcon      className="w-5 h-5" /> },
   ];
 
   return (
@@ -502,6 +525,41 @@ export default function UserProfilePage({
                 <h3 className="font-heading text-sm font-bold text-white mb-1">No Posts Yet</h3>
                 <p className="text-xs text-noctvm-silver/60">Share your first nightlife moment</p>
                 <button onClick={onOpenCreatePost} className="mt-4 px-6 py-2 rounded-lg bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet text-xs font-medium hover:bg-noctvm-violet/30 transition-colors">Create Post</button>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'reposts' && (
+          <>
+            {repostedPosts.length > 0 ? (
+              <div className="grid grid-cols-3 gap-0.5">
+                {repostedPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="aspect-square bg-noctvm-surface overflow-hidden relative group"
+                  >
+                    {post.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-emerald-900/20 to-noctvm-midnight flex items-center justify-center">
+                        <span className="text-noctvm-silver/30 text-xs text-center px-2 line-clamp-3">{post.caption}</span>
+                      </div>
+                    )}
+                    <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-emerald-500/80 flex items-center justify-center">
+                      <RepostIcon className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 animate-fade-in">
+                <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-noctvm-border flex items-center justify-center mx-auto mb-4">
+                  <RepostIcon className="w-8 h-8 text-noctvm-silver/40" />
+                </div>
+                <h3 className="font-heading text-sm font-bold text-white mb-1">No Reposts Yet</h3>
+                <p className="text-xs text-noctvm-silver/60">Posts you repost will appear here</p>
               </div>
             )}
           </>

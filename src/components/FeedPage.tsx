@@ -31,6 +31,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   const [activeDotsId, setActiveDotsId] = useState<string | null>(null);
   const [sharePostId, setSharePostId] = useState<string | null>(null);
   const [venueLogosMap, setVenueLogosMap] = useState<Record<string, string>>({});
+  const [repostReward, setRepostReward] = useState(5);
 
   useEffect(() => {
     const fetchLogos = async () => {
@@ -44,6 +45,23 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     fetchLogos();
   }, []);
 
+  // Fetch repost reward value from server-authoritative config
+  useEffect(() => {
+    const fetchRewardConfig = async () => {
+      try {
+        const { data } = await supabase
+          .from('reward_config_public')
+          .select('reward_value')
+          .eq('action', 'repost')
+          .maybeSingle();
+        if (data?.reward_value) setRepostReward(data.reward_value);
+      } catch {
+        // fallback to default (5 MR)
+      }
+    };
+    fetchRewardConfig();
+  }, []);
+
   const toggleMyStoryDropdown = useCallback(() => {
     if (!showMyStoryDropdown && myStoryBtnRef.current) {
       const rect = myStoryBtnRef.current.getBoundingClientRect();
@@ -51,6 +69,22 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     }
     setShowMyStoryDropdown(v => !v);
   }, [showMyStoryDropdown]);
+
+  const handleRepost = useCallback(async (post: FeedPost) => {
+    if (!user) return;
+    // Dry-run: call RPC with dry_run=true first
+    const { data: dryData, error: dryErr } = await supabase.rpc('repost_post', {
+      p_post_id: post.id,
+      p_dry_run: true,
+    });
+    if (dryErr) throw new Error(dryErr.message);
+    // Mutate
+    const { error } = await supabase.rpc('repost_post', {
+      p_post_id: post.id,
+      p_dry_run: false,
+    });
+    if (error) throw new Error(error.message);
+  }, [user]);
 
   const activePosts = subTab === 'explore' ? explorePosts : subTab === 'following' ? followingPosts : subTab === 'friends' ? friendsPosts : [];
 
@@ -105,6 +139,8 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             toggleComments={() => {}}
             onShare={setSharePostId}
             onDelete={() => {}}
+            onRepost={handleRepost}
+            repostReward={repostReward}
             venueLogosMap={venueLogosMap}
           />
         ))}
