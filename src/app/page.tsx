@@ -20,15 +20,16 @@ import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
-import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon, CogIcon, GridIcon } from '@/components/icons';
+import { MoonIcon, UserIcon, TicketIcon, PocketIcon, StarIcon, CogIcon, GridIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { useFrostedGlass } from '@/hooks/useFrostedGlass';
-import WalletPage from '@/components/WalletPage';
+import PocketPage from '@/components/PocketPage';
 import { useAuth } from '@/contexts/AuthContext';
+import ManageVenueModal from '@/components/ManageVenueModal';
 
-type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
+type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
 // Profile views:
 //   'profile'         → Instagram-style public profile page
@@ -66,16 +67,17 @@ export default function Home() {
   const [storyStartIndex, setStoryStartIndex] = useState(0);
   const [storyUsers, setStoryUsers] = useState<StoryUser[]>([]);
   const [dbEvents, setDbEvents] = useState<NoctEvent[] | null>(null);
+  const [managedVenueId, setManagedVenueId] = useState<string | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    // Deep linking support for tabs (e.g. ?tab=wallet)
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab') as TabType;
-    if (tab && ['events', 'feed', 'venues', 'wallet', 'profile'].includes(tab)) {
+    // Deep linking support for tabs (e.g. ?tab=pocket)
+    const searchParams = new URLSearchParams(window.location.search);
+    const tab = searchParams.get('tab') as TabType;
+    if (tab && ['events', 'feed', 'venues', 'pocket', 'profile'].includes(tab)) {
       setActiveTab(tab);
     }
   }, []);
@@ -249,6 +251,13 @@ export default function Home() {
     <>
       {/* ── Auth Modal ──────────────────────────────────────────── */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+      {/* ── Manage Venue Modal ───────────────────────────────────── */}
+      <ManageVenueModal 
+        isOpen={!!managedVenueId} 
+        onClose={() => setManagedVenueId(null)} 
+        venueId={managedVenueId!} 
+      />
 
       {/* ── Event Detail Modal ──────────────────────────────────── */}
       {/* Note: Injected at root, uses z-[200] in component to sit above Venue Overlay z-[100] */}
@@ -464,10 +473,10 @@ export default function Home() {
               </div>
             )}
 
-            {/* ── Wallet / Moonrays Tab ────────────────────────── */}
-            {activeTab === 'wallet' && (
-              <div className="tab-content h-full overflow-y-auto">
-                <WalletPage />
+            {/* ── Pocket / Moonrays Tab ────────────────────────── */}
+            {activeTab === 'pocket' && (
+              <div key="pocket" className="animate-in fade-in duration-500">
+                <PocketPage />
               </div>
             )}
 
@@ -482,6 +491,7 @@ export default function Home() {
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
                     onEventClick={(e) => setSelectedEvent(e)}
+                    onManageVenue={(id) => setManagedVenueId(id)}
                   />
                 )}
 

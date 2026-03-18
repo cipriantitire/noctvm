@@ -13,11 +13,19 @@ export interface FeedPost {
   venue: { name: string; tagged: boolean };
   tags: string[];
   likes: number;
+  reposts: number;
   comments: { user: string; text: string; badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified' }[];
   timeAgo: string;
   createdAt: string;
   liked: boolean;
+  reposted: boolean;
   saved: boolean;
   imageTheme: { gradient: string; scene: string };
   imageUrl: string | null;
+  event?: {
+    id: string;
+    title: string;
+    date: string | null;
+    venue: string | null;
+  };
 }

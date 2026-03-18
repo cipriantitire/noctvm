@@ -74,13 +74,15 @@ export const MOONRAYS_RANKS: Record<MoonraysRank, RankInfo> = {
   }
 };
 
-export interface MoonraysWallet {
+export interface MoonraysPocket {
   id: string;
   user_id: string;
+  status: 'active' | 'locked' | 'suspended';
   balance: number;
   net_earned: number;
   net_burned: number;
-  status: 'active' | 'locked' | 'suspended';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MoonraysAsset {

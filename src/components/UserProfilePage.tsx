@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { GridIcon, BookmarkIcon, TagIcon, UserIcon } from './icons';
+import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
@@ -11,7 +11,7 @@ import type { NoctEvent } from '@/lib/types';
 import PostViewerModal from './PostViewerModal';
 import VerifiedBadge from './VerifiedBadge';
 
-// ── Post types ────────────────────────────────────────────────────────────────
+// ── Types ────────────────────────────────────────────────────────────────────
 
 interface ProfilePost {
   id: string;
@@ -22,8 +22,6 @@ interface ProfilePost {
   likes_count: number;
 }
 
-// ── Highlight types ───────────────────────────────────────────────────────────
-
 interface DbHighlight {
   id: string;
   name: string;
@@ -31,7 +29,16 @@ interface DbHighlight {
   cover_url: string | null;
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+interface VenueManagerRecord {
+  venue_id: string;
+  role: string;
+  venues: {
+    id: string;
+    name: string;
+    image_url: string | null;
+    city: string;
+  };
+}
 
 interface UserProfilePageProps {
   onOpenAuth: () => void;
@@ -39,6 +46,7 @@ interface UserProfilePageProps {
   onOpenCreatePost?: () => void;
   onOpenStories?: (users: StoryUser[], index: number) => void;
   onEventClick: (event: NoctEvent) => void;
+  onManageVenue?: (venueId: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -49,9 +57,10 @@ export default function UserProfilePage({
   onOpenCreatePost,
   onOpenStories,
   onEventClick,
+  onManageVenue,
 }: UserProfilePageProps) {
   const { user, profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'tagged'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
   const [highlights, setHighlights] = useState<DbHighlight[]>([]);
@@ -62,10 +71,16 @@ export default function UserProfilePage({
 
   // ── Posts state ───────────────────────────────────────────────────────────
   const [posts, setPosts] = useState<ProfilePost[]>([]);
+  const [reposts, setReposts] = useState<ProfilePost[]>([]);
+  const [taggedPosts, setTaggedPosts] = useState<ProfilePost[]>([]);
   const [savedEvents, setSavedEvents] = useState<NoctEvent[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [activeViewerPosts, setActiveViewerPosts] = useState<ProfilePost[]>([]);
+
+  // ── Venue Management ──────────────────────────────────────────────────────
+  const [managedVenues, setManagedVenues] = useState<VenueManagerRecord[]>([]);
 
   // ── Stats state ───────────────────────────────────────────────────────────
   const [statsData, setStatsData] = useState({ posts: 0, followers: 0, following: 0 });
@@ -86,7 +101,7 @@ export default function UserProfilePage({
     }
   };
 
-  // ── Fetch highlights ──────────────────────────────────────────────────────
+  // ── Data Fetching ─────────────────────────────────────────────────────────
 
   const fetchHighlights = useCallback(async () => {
     if (!user) return;
@@ -102,39 +117,38 @@ export default function UserProfilePage({
     if (!user) return;
     setLoadingPosts(true);
     try {
-      const { data } = await supabase
+      // 1. Fetch own posts
+      const { data: ownData } = await supabase
         .from('posts')
         .select('id, user_id, image_url, caption, created_at, likes_count')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
-      const postRows = (data || []) as any[];
-      const postIds = postRows.map(p => p.id);
+      // 2. Fetch reposted posts
+      const { data: repostData } = await supabase
+        .from('reposts')
+        .select('post_id, posts(id, user_id, image_url, caption, created_at, likes_count)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      if (postIds.length > 0) {
-        // Fetch actual likes counts to bypass potentially out-of-sync column
-        const { data: likesData } = await supabase
-          .from('post_likes')
-          .select('post_id')
-          .in('post_id', postIds);
-          
-        const counts: Record<string, number> = {};
-        (likesData || []).forEach((l: any) => {
-          counts[l.post_id] = (counts[l.post_id] || 0) + 1;
-        });
-        
-        const finalPosts = postRows.map(p => ({
-          ...p,
-          likes_count: counts[p.id] || 0
-        }));
-        setPosts(finalPosts);
-      } else {
-        setPosts([]);
-      }
+      // 3. Fetch tagged posts (mentions in caption or tagged_users array)
+      const { data: taggedData } = await supabase
+        .from('posts')
+        .select('id, user_id, image_url, caption, created_at, likes_count')
+        .or(`caption.ilike.%@${profile?.username}%,tagged_users.cs.{"@${profile?.username}"}`)
+        .order('created_at', { ascending: false });
+
+      const ownPosts = (ownData || []) as ProfilePost[];
+      const repostedPosts = (repostData || []).map((r: any) => r.posts).filter(Boolean) as ProfilePost[];
+      const tagged = (taggedData || []) as ProfilePost[];
+
+      setPosts(ownPosts);
+      setReposts(repostedPosts);
+      setTaggedPosts(tagged);
     } finally {
       setLoadingPosts(false);
     }
-  }, [user]);
+  }, [user, profile?.username]);
 
   const fetchSavedEvents = useCallback(async () => {
     if (!user) return;
@@ -146,25 +160,23 @@ export default function UserProfilePage({
     setSavedEvents((data ?? []).map((r: any) => r.events).filter(Boolean) as NoctEvent[]);
   }, [user]);
 
+  const fetchManagedVenues = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('venue_managers')
+      .select('venue_id, role, venues(id, name, image_url, city)')
+      .eq('user_id', user.id);
+    if (data) setManagedVenues(data as any[]);
+  }, [user]);
+
   useEffect(() => {
     fetchHighlights();
     fetchPosts();
     fetchSavedEvents();
-  }, [fetchHighlights, fetchPosts, fetchSavedEvents]);
+    fetchManagedVenues();
+  }, [fetchHighlights, fetchPosts, fetchSavedEvents, fetchManagedVenues]);
 
-  // ── Check for active stories ──────────────────────────────────────────────
-
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from('stories')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gt('expires_at', new Date().toISOString())
-      .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
-  }, [user]);
-
-  // ── Fetch real counters ───────────────────────────────────────────────────
+  // ── Stats Real-time ───────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!user) return;
@@ -180,7 +192,7 @@ export default function UserProfilePage({
       });
     });
 
-    // Real-time listener for likes to update the grid
+    // Real-time listener for likes
     const channel = supabase
       .channel('profile_likes_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes' }, async (payload) => {
@@ -194,7 +206,17 @@ export default function UserProfilePage({
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  // ── Fetch and open my stories ─────────────────────────────────────────────
+  // ── Stories Logic ──────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('stories')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gt('expires_at', new Date().toISOString())
+      .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
+  }, [user]);
 
   const fetchAndOpenMyStories = async () => {
     if (!user || !onOpenStories) return;
@@ -205,17 +227,17 @@ export default function UserProfilePage({
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: true });
     if (!data || data.length === 0) return;
-    const name = profile?.display_name || profile?.username || 'Me';
-    const storyUser: import('./StoriesViewerModal').StoryUser = {
+    const initials = (profile?.display_name || profile?.username || 'N')[0].toUpperCase();
+    const storyUser: StoryUser = {
       id: user.id,
-      name,
-      avatar: name[0].toUpperCase(),
+      name: profile?.display_name || profile?.username || 'Me',
+      avatar: initials,
       avatarUrl: profile?.avatar_url ?? null,
       hasNew: true,
       color: 'from-noctvm-violet to-purple-500',
       stories: data.map((s: any) => ({
         id: s.id,
-        user_id: s.user_id,
+        user_id: user.id,
         image_url: s.image_url,
         caption: s.caption,
         venue_name: s.venue_name,
@@ -224,8 +246,6 @@ export default function UserProfilePage({
     };
     onOpenStories([storyUser], 0);
   };
-
-  // ── Open highlight in stories viewer ─────────────────────────────────────
 
   const openHighlight = async (hl: DbHighlight) => {
     const { data } = await supabase
@@ -249,11 +269,8 @@ export default function UserProfilePage({
       color: hl.color,
       stories: realStories,
     };
-
     onOpenStories?.([storyUser], 0);
   };
-
-  // ── Delete highlight ──────────────────────────────────────────────────────
 
   const deleteHighlight = async (hlId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -261,7 +278,8 @@ export default function UserProfilePage({
     setHighlights((prev) => prev.filter((h) => h.id !== hlId));
   };
 
-  // ── Not logged in ─────────────────────────────────────────────────────────
+  // ── Render Helpers ─────────────────────────────────────────────────────────
+
   if (!user) {
     return (
       <div className="max-w-md mx-auto text-center py-16 tab-content animate-fade-in">
@@ -282,27 +300,19 @@ export default function UserProfilePage({
     );
   }
 
-  // ── Logged-in profile ─────────────────────────────────────────────────────
   const initials = (profile?.display_name || profile?.username || 'N')[0].toUpperCase();
-
-  const stats = [
-    { label: 'Posts',     value: statsData.posts },
-    { label: 'Followers', value: statsData.followers },
-    { label: 'Following', value: statsData.following },
-  ];
-
   const tabs = [
-    { key: 'posts'  as const, icon: <GridIcon     className="w-5 h-5" /> },
-    { key: 'saved'  as const, icon: <BookmarkIcon className="w-5 h-5" /> },
-    { key: 'tagged' as const, icon: <TagIcon      className="w-5 h-5" /> },
+    { key: 'posts'   as const, icon: <GridIcon     className="w-5 h-5" /> },
+    { key: 'reposts' as const, icon: <RepostIcon   className="w-5 h-5" /> },
+    { key: 'saved'   as const, icon: <BookmarkIcon className="w-5 h-5" /> },
+    { key: 'tagged'  as const, icon: <TagIcon      className="w-5 h-5" /> },
   ];
 
   return (
     <div className="max-w-xl mx-auto tab-content animate-fade-in">
 
-      {/* ── Profile header ────────────────────────────────────── */}
+      {/* ── Profile Header ────────────────────────────────────── */}
       <div className="px-4 pt-2 pb-4">
-
         {/* Avatar + stats */}
         <div className="flex items-center gap-6 mb-4">
           <div className="relative flex-shrink-0">
@@ -335,7 +345,11 @@ export default function UserProfilePage({
           </div>
 
           <div className="flex-1 flex justify-around">
-            {stats.map((stat) => (
+            {[
+              { label: 'Posts', value: statsData.posts },
+              { label: 'Followers', value: statsData.followers },
+              { label: 'Following', value: statsData.following },
+            ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <span className="block text-base font-bold text-white font-heading">{stat.value}</span>
                 <span className="text-[11px] text-noctvm-silver">{stat.label}</span>
@@ -344,7 +358,7 @@ export default function UserProfilePage({
           </div>
         </div>
 
-        {/* Name, username, bio */}
+        {/* Info */}
         <div className="mb-3 space-y-0.5">
           <div className="flex items-center gap-1.5">
             <p className="text-sm font-semibold text-white leading-tight">
@@ -368,91 +382,99 @@ export default function UserProfilePage({
           )}
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-2">
-          <button
-            onClick={onSettingsClick}
-            className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors"
-          >
-            Edit Profile
-          </button>
-          <button
-            onClick={handleShareProfile}
-            className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors"
-          >
-            {shareToast ? 'Copied!' : 'Share Profile'}
-          </button>
+          <button onClick={onSettingsClick} className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors">Edit Profile</button>
+          <button onClick={handleShareProfile} className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors">{shareToast ? 'Copied!' : 'Share Profile'}</button>
         </div>
       </div>
 
-      {/* ── Story highlights ──────────────────────────────────── */}
+      {/* ── Manage Venue Card ─────────────────────────────────── */}
+      {managedVenues.length > 0 && (
+        <div className="px-4 mb-6">
+          <div className="p-4 rounded-xl bg-gradient-to-br from-noctvm-violet/20 via-noctvm-midnight to-noctvm-midnight border border-noctvm-violet/30 shadow-lg shadow-black/40">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-noctvm-violet">
+                <ShieldIcon className="w-4 h-4" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Venue Management</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-[9px] font-bold uppercase">Authorized</span>
+            </div>
+            
+            <div className="space-y-3">
+              {managedVenues.map((mv) => (
+                <div key={mv.venue_id} className="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-noctvm-border/50 group hover:border-noctvm-violet/40 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-noctvm-surface overflow-hidden">
+                      {mv.venues.image_url ? (
+                        <img src={mv.venues.image_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-noctvm-silver text-xs font-bold">{mv.venues.name[0]}</div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white leading-tight">{mv.venues.name}</p>
+                      <p className="text-[10px] text-noctvm-silver font-medium">{mv.role} • {mv.venues.city}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => onManageVenue?.(mv.venue_id)}
+                    className="p-2 rounded-lg bg-noctvm-violet/10 border border-noctvm-violet/20 text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all"
+                    title="Manage Venue Settings"
+                  >
+                    <SettingsIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Story Highlights ──────────────────────────────────── */}
       <div className="border-t border-noctvm-border px-4 py-4">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pt-1 px-0.5">
-
-          {/* "New" button */}
-          <button
-            onClick={() => setShowCreateHighlight(true)}
-            className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group"
-            aria-label="Create new highlight"
-          >
+          <button onClick={() => setShowCreateHighlight(true)} className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group">
             <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors">
-              <svg className="w-6 h-6 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
+              <svg className="w-6 h-6 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
             </div>
             <span className="text-[9px] text-noctvm-silver">New</span>
           </button>
 
-          {/* Existing highlights */}
           {highlights.map((hl) => (
-            <div
-              key={hl.id}
-              className="flex flex-col items-center gap-1 flex-shrink-0 relative group"
-            >
-              <button
-                onClick={() => openHighlight(hl)}
-                className="focus:outline-none"
-              >
+            <div key={hl.id} className="flex flex-col items-center gap-1 flex-shrink-0 relative group">
+              <button onClick={() => openHighlight(hl)} className="focus:outline-none">
                 <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} p-[2px] transition-all group-hover:p-[1px]`}>
                   <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-black flex items-center justify-center">
                     {hl.cover_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={hl.cover_url} alt={hl.name} className="w-full h-full object-cover" />
+                      <img src={hl.cover_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
                     )}
                   </div>
                 </div>
               </button>
-
-              {/* Delete button — visible on hover */}
-              <button
-                onClick={(e) => deleteHighlight(hl.id, e)}
-                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver hover:text-white hover:bg-red-500/80 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center"
-                aria-label={`Delete ${hl.name}`}
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
+               <button 
+                 onClick={(e) => deleteHighlight(hl.id, e)} 
+                 className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                 title="Delete Highlight"
+               >
+                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 18L18 6M6 6l12 12" /></svg>
+               </button>
               <span className="text-[9px] text-noctvm-silver truncate max-w-[4rem] text-center">{hl.name}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Tab bar ───────────────────────────────────────────── */}
+      {/* ── Tab Bar ───────────────────────────────────────────── */}
       <div className="border-t border-noctvm-border">
         <div className="flex">
           {tabs.map(({ key, icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`flex-1 flex justify-center py-3 border-b-2 transition-colors ${
-                activeTab === key
-                  ? 'border-white text-white'
-                  : 'border-transparent text-noctvm-silver hover:text-white'
+              className={`flex-1 flex justify-center py-3 border-b-2 transition-all ${
+                activeTab === key ? 'border-white text-white' : 'border-transparent text-noctvm-silver'
               }`}
             >
               {icon}
@@ -461,90 +483,96 @@ export default function UserProfilePage({
         </div>
       </div>
 
-      {/* ── Posts grid / empty state ──────────────────────────── */}
-      <div className="pb-24 lg:pb-6">
+      {/* ── Content Grid ──────────────────────────────────────── */}
+      <div className="pb-24">
         {activeTab === 'posts' && (
-          <>
-            {loadingPosts ? (
-              <div className="grid grid-cols-3 gap-0.5">{Array.from({length:6}).map((_,i)=><div key={i} className="aspect-square bg-noctvm-surface animate-pulse"/>)}</div>
-            ) : posts.length > 0 ? (
-              <div className="grid grid-cols-3 gap-0.5">
-                {posts.map((post, i) => (
-                  <button
-                    key={post.id}
-                    onClick={() => { setViewerIndex(i); setViewerOpen(true); }}
-                    className="aspect-square bg-noctvm-surface overflow-hidden relative group cursor-pointer"
-                  >
-                    {post.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/20 flex items-center justify-center">
-                        <span className="text-noctvm-silver/30 text-xs text-center px-2 line-clamp-3">{post.caption}</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <div className="flex items-center gap-1.5 text-white">
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                        </svg>
-                        <span className="text-sm font-bold">{post.likes_count}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16 animate-fade-in">
-                <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-noctvm-border flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-noctvm-silver/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
-                </div>
-                <h3 className="font-heading text-sm font-bold text-white mb-1">No Posts Yet</h3>
-                <p className="text-xs text-noctvm-silver/60">Share your first nightlife moment</p>
-                <button onClick={onOpenCreatePost} className="mt-4 px-6 py-2 rounded-lg bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet text-xs font-medium hover:bg-noctvm-violet/30 transition-colors">Create Post</button>
+          <div className="grid grid-cols-3 gap-0.5">
+            {posts.map((post, i) => (
+              <button key={post.id} onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
+                {post.image_url ? (
+                  <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
+                ) : (
+                  <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
+                )}
+              </button>
+            ))}
+            {!loadingPosts && posts.length === 0 && (
+              <div className="col-span-3 py-16 text-center text-noctvm-silver">
+                <GridIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                <p className="text-sm font-medium">No posts shared yet</p>
+                <button onClick={onOpenCreatePost} className="mt-4 px-4 py-2 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-xs font-bold">Share Your First Post</button>
               </div>
             )}
-          </>
+          </div>
+        )}
+
+        {activeTab === 'reposts' && (
+          <div className="grid grid-cols-3 gap-0.5">
+            {reposts.map((post, i) => (
+              <button key={post.id} onClick={() => { setActiveViewerPosts(reposts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
+                {post.image_url ? (
+                  <img src={post.image_url} alt="" className="w-full h-full object-cover opacity-80" />
+                ) : (
+                  <div className="w-full h-full bg-noctvm-midnight flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-emerald/40 text-center line-clamp-3">{post.caption}</span></div>
+                )}
+                <div className="absolute top-2 right-2 p-1 rounded-full bg-noctvm-emerald/80 backdrop-blur-sm border border-noctvm-emerald/30">
+                  <RepostIcon className="w-3 h-3 text-white" />
+                </div>
+              </button>
+            ))}
+            {!loadingPosts && reposts.length === 0 && (
+              <div className="col-span-3 py-16 text-center text-noctvm-silver">
+                <RepostIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                <p className="text-sm font-medium">No reposts yet</p>
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === 'saved' && (
-          <div className="space-y-3 px-1">
-            {savedEvents.length > 0 ? (
-              savedEvents.map(event => (
-                <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-12 h-12 rounded-full bg-noctvm-surface flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-6 h-6 text-noctvm-violet/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" /></svg>
-                </div>
-                <p className="text-sm text-noctvm-silver">No saved events</p>
-                <p className="text-xs text-noctvm-silver/50 mt-1">Bookmark events to find them here</p>
+          <div className="space-y-3 px-4 py-4">
+            {savedEvents.map(event => (
+              <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />
+            ))}
+            {savedEvents.length === 0 && (
+              <div className="py-12 text-center text-noctvm-silver">
+                <BookmarkIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                <p className="text-sm font-medium">No events bookmarked</p>
               </div>
             )}
           </div>
         )}
 
         {activeTab === 'tagged' && (
-          <div className="text-center py-16 animate-fade-in">
-            <h3 className="font-heading text-sm font-bold text-white mb-1">No Tags Yet</h3>
-            <p className="text-xs text-noctvm-silver/60">Posts where you are tagged appear here</p>
+          <div className="grid grid-cols-3 gap-0.5">
+            {taggedPosts.map((post, i) => (
+              <button key={post.id} onClick={() => { setActiveViewerPosts(taggedPosts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
+                {post.image_url ? (
+                  <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
+                )}
+              </button>
+            ))}
+            {!loadingPosts && taggedPosts.length === 0 && (
+              <div className="col-span-3 py-16 text-center text-noctvm-silver">
+                <TagIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                <p className="text-sm font-medium">No tagged posts</p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* ── Create Highlight Modal ────────────────────────────── */}
+      {/* ── Modals ────────────────────────────────────────────── */}
       <CreateHighlightModal
         isOpen={showCreateHighlight}
         onClose={() => setShowCreateHighlight(false)}
-        onCreated={() => {
-          setShowCreateHighlight(false);
-          fetchHighlights();
-        }}
+        onCreated={() => { setShowCreateHighlight(false); fetchHighlights(); }}
       />
 
       <PostViewerModal
-        posts={posts}
+        posts={activeViewerPosts}
         initialIndex={viewerIndex}
         isOpen={viewerOpen}
         onClose={() => setViewerOpen(false)}

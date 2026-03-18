@@ -20,6 +20,9 @@ export interface Venue {
   featured: boolean;
   view_count: number;
   save_count: number;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
 }
 
 export interface NoctEvent {

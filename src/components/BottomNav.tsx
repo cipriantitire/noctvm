@@ -1,16 +1,17 @@
 'use client';
 
-import { EventsIcon, FeedIcon, WalletIcon, UserIcon, VenuesIcon } from './icons';
+import { EventsIcon, FeedIcon, PocketIcon, UserIcon, VenuesIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
-type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
+type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
-const BASE_NAV: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
-  { icon: EventsIcon, label: 'Events',  tab: 'events' },
-  { icon: VenuesIcon, label: 'Venues',  tab: 'venues' },
-  { icon: FeedIcon,   label: 'Feed',    tab: 'feed' },
-  { icon: WalletIcon, label: 'Wallet',  tab: 'wallet' },
+const ITEMS: { icon: any; label: string; tab: TabType }[] = [
+  { icon: EventsIcon, label: 'Events', tab: 'events' },
+  { icon: FeedIcon, label: 'Feed', tab: 'feed' },
+  { icon: VenuesIcon, label: 'Venues', tab: 'venues' },
+  { icon: PocketIcon, label: 'Pocket',  tab: 'pocket' },
+  { icon: UserIcon, label: 'Profile', tab: 'profile' },
 ];
 
 interface BottomNavProps {
@@ -28,7 +29,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-noctvm-border">
       <div className="flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom)]">
-        {BASE_NAV.map(({ icon: Icon, label, tab }) => (
+        {ITEMS.map(({ icon: Icon, label, tab }) => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}

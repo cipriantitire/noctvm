@@ -43,12 +43,20 @@ export function mapSupabasePost(row: any): FeedPost {
     venue: { name: (row.venue_name as string) || '', tagged: !!row.venue_name },
     tags: (row.tags as string[]) || [],
     likes: (row.likes_count as number) || 0,
+    reposts: (row.reposts_count as number) || 0,
     comments: [],
     timeAgo: timeAgo(row.created_at as string),
     createdAt: row.created_at as string,
     liked: false,
+    reposted: false,
     saved: false,
     imageUrl: row.image_url,
     imageTheme: { gradient: grad, scene: '' },
+    event: row.event_id ? {
+      id: row.event_id,
+      title: row.event_title || 'Untitled Event',
+      date: row.event_date,
+      venue: row.event_venue
+    } : undefined
   };
 }

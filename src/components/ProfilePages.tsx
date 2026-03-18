@@ -437,6 +437,38 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
+        {/* Privacy & Security */}
+        <div className="pt-2 border-t border-noctvm-border">
+          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Privacy & Security</h3>
+          <div className="space-y-2">
+            <ToggleSwitch enabled={friendActivity} onToggle={() => setFriendActivity(!friendActivity)} label="Activity Visibility" desc="Let people see where you are tonight" />
+            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors text-left group">
+              <div>
+                <p className="text-sm font-medium text-white">Blocked Accounts</p>
+                <p className="text-[10px] text-noctvm-silver">Manage restricted profiles</p>
+              </div>
+              <svg className="w-4 h-4 text-noctvm-silver group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors text-left group">
+              <div>
+                <p className="text-sm font-medium text-white">Two-Factor Auth</p>
+                <p className="text-[10px] text-noctvm-emerald font-bold">Recommended</p>
+              </div>
+              <svg className="w-4 h-4 text-noctvm-silver group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Device Permissions */}
+        <div className="pt-2 border-t border-noctvm-border">
+          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Device Permissions</h3>
+          <div className="space-y-2">
+            <ToggleSwitch enabled={true} onToggle={() => {}} label="Location Services" desc="Needed for nearby events & maps" />
+            <ToggleSwitch enabled={false} onToggle={() => {}} label="Camera Access" desc="Needed for stories and posts" />
+            <ToggleSwitch enabled={true} onToggle={() => {}} label="Microphone" desc="Needed for stories with audio" />
+          </div>
+        </div>
+
         {/* Appearance */}
         <div className="pt-2 border-t border-noctvm-border">
           <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Appearance</h3>

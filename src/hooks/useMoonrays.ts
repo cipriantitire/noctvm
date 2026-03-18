@@ -2,78 +2,76 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { MoonraysWallet, MoonraysRank, MOONRAYS_RANKS, RankInfo } from '@/types/moonrays';
+import { MoonraysPocket, MoonraysRank, MOONRAYS_RANKS, RankInfo } from '@/types/moonrays';
 
 export function useMoonrays() {
-  const [wallet, setWallet] = useState<MoonraysWallet | null>(null);
+  const [pocket, setPocket] = useState<MoonraysPocket | null>(null);
   const [rank, setRank] = useState<RankInfo>(MOONRAYS_RANKS['Bronze Voyager']);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const fetchWallet = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      setIsAuthenticated(false);
+  const fetchPocket = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch pocket
+      const { data: pocketData, error } = await supabase
+        .from('moonrays_wallets') // Table name stays same for now (DB sync)
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!error && pocketData) {
+        setPocket(pocketData);
+        
+        const lifetime = pocketData.net_earned || 0;
+        const currentRank = Object.values(MOONRAYS_RANKS)
+          .reverse()
+          .find(r => lifetime >= r.minPoints) || MOONRAYS_RANKS['Bronze Voyager'];
+          
+        setRank(currentRank);
+      }
+    } catch (err) {
+      console.error('Error fetching pocket:', err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setIsAuthenticated(true);
-    const { data: walletData, error } = await supabase
-      .from('moonrays_wallets')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!error && walletData) {
-      setWallet(walletData);
-      
-      const lifetime = walletData.net_earned || 0;
-      let currentRank: MoonraysRank = 'Bronze Voyager';
-      
-      if (lifetime >= 1000000) currentRank = 'MASTERY';
-      else if (lifetime >= 300000) currentRank = 'Diamond Night-Owl';
-      else if (lifetime >= 100000) currentRank = 'Platinum Aura';
-      else if (lifetime >= 25000) currentRank = 'Gold Eclipse';
-      else if (lifetime >= 5000) currentRank = 'Silver Pulse';
-      
-      setRank(MOONRAYS_RANKS[currentRank]);
-    }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchWallet();
+    fetchPocket();
 
-    // Subscribe to ledger changes for real-time updates
+    // Subscribe to pocket updates
     const channel = supabase
-      .channel('wallet_changes')
+      .channel('pocket_changes')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'moonrays_wallets' }, () => {
-        fetchWallet();
+        fetchPocket();
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchWallet]);
+  }, [fetchPocket]);
 
   const progressPercent = useMemo(() => {
-    if (!wallet || !rank.nextRankGoal) return 0;
-    const currentPoints = wallet.net_earned || 0;
-    const prevGoal = rank.minPoints;
-    const nextGoal = rank.nextRankGoal;
+    if (!pocket || !rank.nextRankGoal) return 0;
+    const currentPoints = pocket.net_earned || 0;
+    const prevGoal = Object.values(MOONRAYS_RANKS)
+      .find(r => r.minPoints < currentPoints && r.minPoints > 0)?.minPoints || 0;
     
-    return Math.min(100, Math.max(0, ((currentPoints - prevGoal) / (nextGoal - prevGoal)) * 100));
-  }, [wallet, rank]);
+    return Math.min(100, ((currentPoints - prevGoal) / (rank.nextRankGoal - prevGoal)) * 100);
+  }, [pocket, rank]);
 
   return {
-    wallet,
+    pocket,
     rank,
     progressPercent,
     loading,
-    isAuthenticated,
-    refresh: fetchWallet
+    refresh: fetchPocket,
+    isAuthenticated: !!pocket
   };
 }

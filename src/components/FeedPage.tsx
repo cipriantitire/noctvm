@@ -43,7 +43,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     };
     fetchLogos();
   }, []);
-
+  
   const toggleMyStoryDropdown = useCallback(() => {
     if (!showMyStoryDropdown && myStoryBtnRef.current) {
       const rect = myStoryBtnRef.current.getBoundingClientRect();
@@ -51,6 +51,84 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     }
     setShowMyStoryDropdown(v => !v);
   }, [showMyStoryDropdown]);
+
+  const handleRepost = async (post: FeedPost) => {
+    if (post.reposted) return;
+    
+    try {
+      // 1. Dry run for validation
+      const { data: dryData } = await supabase.rpc('repost_post', { 
+        p_post_id: post.id, 
+        p_dry_run: true 
+      });
+
+      if (dryData && !dryData.success) {
+        alert(dryData.error);
+        return;
+      }
+
+      // 2. Actual Repost
+      const { data, error } = await supabase.rpc('repost_post', { 
+        p_post_id: post.id 
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        // Optimistic update or refetch
+        // For now, simple alert or let real-time handle it (if implemented)
+        console.log('Reposted!', data.reward);
+      }
+    } catch (err) {
+      console.error('Repost failed:', err);
+    }
+  };
+
+  const handleToggleLike = async (post: FeedPost) => {
+    try {
+      const { error } = await supabase
+        .from('post_likes')
+        .insert({ post_id: post.id, user_id: user?.id });
+      
+      if (error && error.code === '23505') { // Unique violation = already liked, so unlike
+        await supabase
+          .from('post_likes')
+          .delete()
+          .match({ post_id: post.id, user_id: user?.id });
+      }
+    } catch (err) {
+      console.error('Toggle like failed:', err);
+    }
+  };
+
+  const handleToggleSave = async (post: FeedPost) => {
+    try {
+      const { error } = await supabase
+        .from('event_saves')
+        .insert({ post_id: post.id, user_id: user?.id });
+        
+      if (error && error.code === '23505') {
+        await supabase
+          .from('event_saves')
+          .delete()
+          .match({ post_id: post.id, user_id: user?.id });
+      }
+    } catch (err) {
+      console.error('Toggle save failed:', err);
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+      if (error) throw error;
+    } catch (err) {
+      console.error('Delete post failed:', err);
+    }
+  };
 
   const activePosts = subTab === 'explore' ? explorePosts : subTab === 'following' ? followingPosts : subTab === 'friends' ? friendsPosts : [];
 
@@ -100,11 +178,12 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             activeDotsId={activeDotsId}
             setActiveDotsId={setActiveDotsId}
             onVenueClick={onVenueClick}
-            toggleLike={() => {}} 
-            toggleSave={() => {}}
-            toggleComments={() => {}}
+            toggleLike={handleToggleLike} 
+            toggleSave={handleToggleSave}
+            toggleComments={(id) => console.log('Open comments', id)}
             onShare={setSharePostId}
-            onDelete={() => {}}
+            onRepost={handleRepost}
+            onDelete={handleDeletePost}
             venueLogosMap={venueLogosMap}
           />
         ))}

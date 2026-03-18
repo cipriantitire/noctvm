@@ -1,16 +1,16 @@
 'use client';
 
-import { MoonIcon, EventsIcon, FeedIcon, WalletIcon, UserIcon, CogIcon, VenuesIcon } from './icons';
+import { MoonIcon, EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
-type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
+type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
 const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: TabType }[] = [
   { icon: EventsIcon, label: 'Events', tab: 'events' },
   { icon: VenuesIcon, label: 'Venues', tab: 'venues' },
   { icon: FeedIcon,   label: 'Feed',   tab: 'feed' },
-  { icon: WalletIcon, label: 'Wallet', tab: 'wallet' },
+  { icon: PocketIcon, label: 'Pocket', tab: 'pocket' },
 ];
 
 interface SidebarProps {

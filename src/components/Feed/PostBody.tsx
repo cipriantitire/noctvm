@@ -36,14 +36,14 @@ export default function PostBody({ text }: PostBodyProps) {
     }
 
     // Add interactive link with premium styling
-    const isWalletLink = href.includes('tab=wallet');
+    const isPocketLink = href.includes('tab=pocket');
     
     parts.push(
       <Link 
         key={startIndex} 
         href={href}
         className={`font-bold transition-all hover:opacity-80 ${
-          isWalletLink 
+          isPocketLink 
             ? 'text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' 
             : 'text-white underline decoration-white/20'
         }`}

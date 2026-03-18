@@ -6,7 +6,7 @@ import { SparklesIcon, MoonIcon, TrendingUpIcon, LockIcon } from 'lucide-react';
 import { PrestigeProgressMotion } from './PrestigeProgressMotion';
 
 export const MoonraysPrestigeCard = () => {
-  const { wallet, rank, progressPercent, loading, isAuthenticated } = useMoonrays();
+  const { pocket, rank, progressPercent, loading, isAuthenticated } = useMoonrays();
 
   // 1. Loading State
   if (loading) return (
@@ -14,7 +14,7 @@ export const MoonraysPrestigeCard = () => {
   );
 
   // 2. Not Logged In State (Fixes the "flashing" issue)
-  if (!isAuthenticated || !wallet) return (
+  if (!isAuthenticated || !pocket) return (
     <div className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-500 hover:scale-[1.01]">
       <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/10 via-black/80 to-purple-900/40 backdrop-blur-[60px] border border-white/5 rounded-2xl shadow-xl" />
       <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-4">
@@ -41,7 +41,10 @@ export const MoonraysPrestigeCard = () => {
       {/* ── Ambient Rank Glow ────────────────────────────── */}
       <div 
         className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-[80px] mix-blend-screen opacity-40 animate-pulse duration-5000"
-        style={{ backgroundColor: rank.glowColor }}
+        style={{ 
+          backgroundColor: 'var(--glow-color)',
+          '--glow-color': rank.glowColor 
+        } as React.CSSProperties}
       />
 
       {/* ── Content ──────────────────────────────────────── */}
@@ -59,7 +62,7 @@ export const MoonraysPrestigeCard = () => {
           <div className="text-right">
             <p className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-[0.2em]">Lifetime Achievement</p>
             <p className="text-lg font-heading font-bold text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]">
-              {wallet.net_earned.toLocaleString()} <span className="text-sm">🌙</span>
+              {pocket.net_earned.toLocaleString()} <span className="text-sm">🌙</span>
             </p>
           </div>
         </div>
@@ -73,7 +76,7 @@ export const MoonraysPrestigeCard = () => {
                 {rank.nextRankName} <span className="text-[10px] text-noctvm-silver/40 px-2 py-0.5 rounded-full bg-white/5 border border-white/5 uppercase font-mono">NEXT</span>
               </p>
               <p className="text-[10px] text-noctvm-silver/60 font-mono tracking-wider italic">
-                {Math.max(0, (rank.nextRankGoal || 0) - wallet.net_earned).toLocaleString()} MR to rank up
+                {Math.max(0, (rank.nextRankGoal || 0) - pocket.net_earned).toLocaleString()} MR to rank up
               </p>
             </div>
 

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { HeartIcon, ChatIcon, ShareIcon } from '../icons';
+import { HeartIcon, ChatIcon, ShareIcon, RepostIcon, CalendarIcon } from '../icons';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { formatFullDate } from '@/lib/feed-utils';
 import type { FeedPost } from '@/types/feed';
@@ -18,6 +18,7 @@ interface FeedItemProps {
   toggleSave: (post: FeedPost) => void;
   toggleComments: (id: string) => void;
   onShare: (id: string) => void;
+  onRepost: (post: FeedPost) => void;
   onDelete: (id: string) => void;
   venueLogosMap: Record<string, string>;
 }
@@ -33,6 +34,7 @@ export function FeedItem({
   toggleSave,
   toggleComments,
   onShare,
+  onRepost,
   onDelete,
   venueLogosMap,
 }: FeedItemProps) {
@@ -92,6 +94,16 @@ export function FeedItem({
             <span className="text-[10px] font-bold text-white pr-1">{post.venue.name}</span>
           </button>
         )}
+
+        {/* Event Badge Overlay */}
+        {post.event && (
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in">
+            <CalendarIcon className="w-3 h-3 text-white" />
+            <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+              {post.event.title}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="px-3 py-3">
@@ -103,6 +115,13 @@ export function FeedItem({
             </button>
             <button onClick={() => toggleComments(post.id)} className="flex items-center gap-1.5 text-noctvm-silver hover:text-white group">
               <ChatIcon className="w-5 h-5 group-hover:scale-110" />
+            </button>
+            <button 
+              onClick={() => onRepost(post)} 
+              className={`flex items-center gap-1.5 group transition-all ${post.reposted ? 'text-noctvm-emerald' : 'text-noctvm-silver hover:text-white'}`}
+            >
+              <RepostIcon className={`w-5 h-5 ${post.reposted ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'group-hover:scale-110'}`} />
+              {post.reposts > 0 && <span className="text-xs font-mono">{post.reposts}</span>}
             </button>
             <button onClick={() => onShare(post.id)} className="flex items-center gap-1.5 text-noctvm-silver hover:text-white group">
               <ShareIcon className="w-5 h-5 group-hover:scale-110" />
@@ -118,6 +137,31 @@ export function FeedItem({
           <span className="font-bold text-white mr-2">{post.user.handle}</span>
           <PostBody text={post.caption || ''} />
         </p>
+
+        {/* Event Detail Block */}
+        {post.event && (
+          <div className="mt-2.5 mb-1.5 p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/[0.05] transition-all">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-noctvm-violet/20 flex items-center justify-center border border-noctvm-violet/20 group-hover:scale-110 transition-transform">
+                <CalendarIcon className="w-4 h-4 text-noctvm-violet" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black text-white uppercase tracking-widest truncate">{post.event.title}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[8px] text-noctvm-silver/50 font-mono italic">{post.event.venue || 'TBA'}</span>
+                  {post.event.date && (
+                    <span className="text-[8px] text-noctvm-violet/60 font-mono">
+                      {new Date(post.event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button className="p-1 px-3 rounded-full bg-white/5 text-[8px] font-black uppercase text-noctvm-silver/40 group-hover:bg-noctvm-violet group-hover:text-white transition-all">
+              Details
+            </button>
+          </div>
+        )}
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
             {post.tags.map(tag => <span key={tag} className="text-[10px] text-noctvm-violet hover:underline cursor-pointer">#{tag}</span>)}

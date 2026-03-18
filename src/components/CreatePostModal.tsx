@@ -24,6 +24,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [caption, setCaption] = useState('');
   const [venueSearch, setVenueSearch] = useState('');
   const [selectedVenue, setSelectedVenue] = useState('');
@@ -32,11 +33,14 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   const [tags, setTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [isClosing, setIsClosing] = useState(false);
   const [peopleSearch, setPeopleSearch] = useState('');
   const [taggedUsers, setTaggedUsers] = useState<string[]>([]);
   const [showPeopleSuggestions, setShowPeopleSuggestions] = useState(false);
   const [profileResults, setProfileResults] = useState<{ id: string; handle: string; name: string }[]>([]);
+  const [eventSearch, setEventSearch] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState<{ id: string; title: string; date: string; venue: string } | null>(null);
+  const [showEventSuggestions, setShowEventSuggestions] = useState(false);
+  const [eventResults, setEventResults] = useState<{ id: string; title: string; date: string; venue: string }[]>([]);
 
   const filteredVenues = BUCHAREST_VENUES.filter(v =>
     v.toLowerCase().includes(venueSearch.toLowerCase()) && venueSearch.length > 0
@@ -49,10 +53,27 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
       .select('id, username, display_name')
       .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
       .limit(8);
-    setProfileResults((data || []).map((p: { id: string; username: string; display_name: string }) => ({
+    setProfileResults((data || []).map((p: any) => ({
       id: p.id,
       handle: `@${p.username}`,
       name: p.display_name,
+    })));
+  };
+
+  const searchEvents = async (q: string) => {
+    if (!q || q.length < 2) { setEventResults([]); return; }
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, start_date, venue_name')
+      .ilike('title', `%${q}%`)
+      .order('start_date', { ascending: false })
+      .limit(8);
+    
+    setEventResults((data || []).map((e: any) => ({
+      id: e.id,
+      title: e.title,
+      date: e.start_date,
+      venue: e.venue_name || 'TBA',
     })));
   };
 
@@ -113,6 +134,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
           tags: tags.length > 0 ? tags : null,
           tagged_users: taggedUsers.length > 0 ? taggedUsers : null,
           city: activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta',
+          event_id: selectedEvent?.id || null,
+          event_title: selectedEvent?.title || null,
+          event_date: selectedEvent?.date || null,
+          event_venue: selectedEvent?.venue || null,
         });
 
       if (insertError) throw insertError;
@@ -154,6 +179,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
     setTaggedUsers([]);
     setPeopleSearch('');
     setProfileResults([]);
+    setEventSearch('');
+    setSelectedEvent(null);
+    setEventResults([]);
     setError('');
     setIsClosing(true);
   };
@@ -286,14 +314,54 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
               </div>
             </div>
             {showVenueSuggestions && filteredVenues.length > 0 && !selectedVenue && (
-              <div className="absolute left-4 right-4 top-full mt-1 bg-noctvm-midnight border border-noctvm-border rounded-xl overflow-hidden z-10 shadow-xl">
+              <div className="absolute left-4 right-4 top-full mt-1 bg-noctvm-midnight/95 backdrop-blur-xl border border-noctvm-border rounded-xl shadow-2xl z-20">
                 {filteredVenues.map(venue => (
                   <button
                     key={venue}
-                    onClick={() => { setSelectedVenue(venue); setVenueSearch(''); setShowVenueSuggestions(false); }}
+                    onMouseDown={() => { setSelectedVenue(venue); setVenueSearch(''); setShowVenueSuggestions(false); }}
                     className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors"
                   >
                     {venue}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tag event */}
+          <div className="px-4 py-3 border-b border-noctvm-border relative">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-white">Tag Event</span>
+              <div className="flex-1 ml-4">
+                {selectedEvent ? (
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-sm text-noctvm-emerald">{selectedEvent.title}</span>
+                    <button onClick={() => { setSelectedEvent(null); setEventSearch(''); }} className="text-noctvm-silver hover:text-white">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="Search events..."
+                    value={eventSearch}
+                    onChange={e => { setEventSearch(e.target.value); searchEvents(e.target.value); setShowEventSuggestions(true); }}
+                    onFocus={() => setShowEventSuggestions(true)}
+                    className="w-full bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none text-right"
+                  />
+                )}
+              </div>
+            </div>
+            {showEventSuggestions && eventResults.length > 0 && !selectedEvent && (
+              <div className="absolute left-4 right-4 top-full mt-1 bg-noctvm-midnight/95 backdrop-blur-xl border border-noctvm-border rounded-xl shadow-2xl z-20">
+                {eventResults.map(e => (
+                  <button
+                    key={e.id}
+                    onMouseDown={() => { setSelectedEvent(e); setEventSearch(''); setShowEventSuggestions(false); }}
+                    className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex flex-col"
+                  >
+                    <span className="font-medium">{e.title}</span>
+                    <span className="text-[10px] text-noctvm-silver">{new Date(e.date).toLocaleDateString()} • {e.venue}</span>
                   </button>
                 ))}
               </div>
