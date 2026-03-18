@@ -50,14 +50,17 @@ create policy "reward_config_authenticated_read"
   using (auth.uid() is not null and is_active = true);
 
 -- Seed canonical reward tiers (idempotent via ON CONFLICT DO NOTHING)
+-- Amounts and caps are the initial economy baseline; adjust via UPDATE on reward_config.
+-- daily_cap = null means uncapped for that action.
+-- sort_order controls display order in the Pocket UI.
 insert into public.reward_config
   (action_key, label, description, icon, amount, daily_cap, sort_order)
 values
-  ('post_story',  'Socialite',  'Post stories & feed updates',     '🎭', 15,  50,  1),
-  ('referral',    'Connector',  'Build your referral network',      '🤝', 100, null, 2),
-  ('venue_review','Taster',     'Review & rate locations',          '⭐', 25,  75,  3),
-  ('event_scan',  'Explorer',   'Scan tickets at events',           '🎫', 50,  100, 4),
-  ('repost',      'Amplifier',  'Repost content to your followers', '🔁', 5,   25,  5)
+  ('post_story',  'Socialite',  'Post stories & feed updates',     '🎭', 15,  50,  1), -- 15 MR, max 50/day
+  ('referral',    'Connector',  'Build your referral network',      '🤝', 100, null, 2), -- 100 MR, uncapped
+  ('venue_review','Taster',     'Review & rate locations',          '⭐', 25,  75,  3), -- 25 MR, max 75/day
+  ('event_scan',  'Explorer',   'Scan tickets at events',           '🎫', 50,  100, 4), -- 50 MR, max 100/day
+  ('repost',      'Amplifier',  'Repost content to your followers', '🔁', 5,   25,  5)  -- 5 MR, max 25/day (anti-spam)
 on conflict (action_key) do nothing;
 
 -- ────────────────────────────────────────────────────────────────────────────
@@ -289,10 +292,11 @@ create policy "reposts_delete_own"
 -- ────────────────────────────────────────────────────────────────────────────
 
 create or replace function public.get_feed_posts_v5(
-  p_mode      text    default 'following',
-  p_city      text    default null,
-  p_limit     integer default 40,
-  p_before_id uuid    default null
+  p_mode              text        default 'following',
+  p_city              text        default null,
+  p_limit             integer     default 40,
+  p_before_id         uuid        default null,
+  p_before_created_at timestamptz default null
 )
 returns table (
   id          uuid,
@@ -314,7 +318,8 @@ security invoker
 set search_path = public
 as $$
 declare
-  v_caller uuid := auth.uid();
+  v_caller          uuid        := auth.uid();
+  v_before_ts       timestamptz := p_before_created_at;
 begin
   if v_caller is null then
     raise exception 'Authentication required';
@@ -322,6 +327,13 @@ begin
 
   if p_mode not in ('friends', 'following', 'explore') then
     raise exception 'Invalid mode: %', p_mode;
+  end if;
+
+  -- Resolve cursor timestamp once if only id was supplied
+  if p_before_id is not null and v_before_ts is null then
+    select created_at into v_before_ts
+    from public.posts
+    where id = p_before_id;
   end if;
 
   return query
@@ -343,8 +355,8 @@ begin
   where
     -- City filter (optional)
     (p_city is null or p.city = p_city)
-    -- Cursor-based pagination
-    and (p_before_id is null or p.created_at < (select created_at from public.posts where id = p_before_id))
+    -- Cursor-based pagination (resolved once above)
+    and (v_before_ts is null or p.created_at < v_before_ts)
     -- Mode-specific author filter
     and (
       case p_mode
@@ -389,8 +401,8 @@ begin
 end;
 $$;
 
-revoke all on function public.get_feed_posts_v5(text, text, integer, uuid) from public;
-grant execute on function public.get_feed_posts_v5(text, text, integer, uuid) to authenticated;
+revoke all on function public.get_feed_posts_v5(text, text, integer, uuid, timestamptz) from public;
+grant execute on function public.get_feed_posts_v5(text, text, integer, uuid, timestamptz) to authenticated;
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 8. Re-harden RLS on event_saves and post_likes (idempotent)
@@ -443,23 +455,19 @@ begin
     drop policy if exists "post_likes_delete_own"               on public.post_likes;
 
     -- Own likes + likes from followed users
-    execute format(
-      $pol$
-      create policy "post_likes_select_following_or_self"
-        on public.post_likes
-        for select
-        using (
-          auth.uid() = user_id
-          or exists (
-            select 1
-            from public.follows f
-            where f.follower_id = auth.uid()
-              and f.following_id = post_likes.user_id
-              and f.target_type = 'user'
-          )
+    create policy "post_likes_select_following_or_self"
+      on public.post_likes
+      for select
+      using (
+        auth.uid() = user_id
+        or exists (
+          select 1
+          from public.follows f
+          where f.follower_id = auth.uid()
+            and f.following_id = post_likes.user_id
+            and f.target_type = 'user'
         )
-      $pol$
-    );
+      );
 
     create policy "post_likes_insert_own"
       on public.post_likes
@@ -482,7 +490,7 @@ commit;
 --
 -- drop trigger  if exists trg_follows_sync_mutuals           on public.follows;
 -- drop function if exists public.fn_follows_sync_mutuals();
--- drop function if exists public.get_feed_posts_v5(text, text, integer, uuid);
+-- drop function if exists public.get_feed_posts_v5(text, text, integer, uuid, timestamptz);
 --
 -- drop view     if exists public.reward_config_public;
 -- drop table    if exists public.reposts;
