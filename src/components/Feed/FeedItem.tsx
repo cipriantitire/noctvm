@@ -8,6 +8,9 @@ import VerifiedBadge from '../VerifiedBadge';
 import PostOptionsMenu from '../PostOptionsMenu';
 import PostBody from './PostBody';
 
+const REPOST_COOLDOWN_MS = 5_000;
+const REPOST_ANIM_MS = 1_800; // must match .animate-bounce-up duration in globals.css
+
 interface FeedItemProps {
   post: FeedPost;
   idx: number;
@@ -56,10 +59,10 @@ export function FeedItem({
       setLocalReposts(n => n + 1);
       if (repostReward > 0) {
         setShowRewardAnim(true);
-        setTimeout(() => setShowRewardAnim(false), 1800);
+        setTimeout(() => setShowRewardAnim(false), REPOST_ANIM_MS);
       }
       setRepostCooldown(true);
-      setTimeout(() => setRepostCooldown(false), 5000);
+      setTimeout(() => setRepostCooldown(false), REPOST_COOLDOWN_MS);
     } catch {
       // silently fail; parent may show toast
     } finally {

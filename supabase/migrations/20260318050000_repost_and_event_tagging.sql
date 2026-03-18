@@ -23,6 +23,7 @@ begin
       select 1 from information_schema.columns
       where table_schema = 'public' and table_name = 'posts' and column_name = 'event_date'
     ) then
+      -- Stored as text snapshot for resilience (display-only, no date arithmetic needed)
       alter table public.posts add column event_date text;
     end if;
     if not exists (
