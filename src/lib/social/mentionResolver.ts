@@ -13,8 +13,8 @@ const WALLET_RE = /(^|\s)@wallet\b/gi;
 export function resolveSpecialMentions(text: string): string {
   if (!text) return text;
   
-  // 1. Process @wallet -> /wallet
-  return text.replace(WALLET_RE, '$1[@wallet](/wallet)');
+  // 1. Process @wallet -> /?tab=wallet
+  return text.replace(WALLET_RE, '$1[@wallet](/?tab=wallet)');
 }
 
 /**
@@ -24,7 +24,7 @@ export function resolveSpecialMentions(text: string): string {
 export const SPECIAL_MENTIONS_CONFIG = {
   wallet: {
     handle: '@wallet',
-    href: '/wallet',
+    href: '/?tab=wallet',
     color: 'text-noctvm-violet',
     glow: 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]'
   }

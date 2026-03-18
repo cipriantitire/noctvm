@@ -29,29 +29,16 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-noctvm-border">
       <div className="flex items-center justify-around py-2 pb-[env(safe-area-inset-bottom)]">
         {BASE_NAV.map(({ icon: Icon, label, tab }) => (
-          tab === 'wallet' ? (
-            <Link
-              key={tab}
-              href="/wallet"
-              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
-                activeTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
-              }`}
-            >
-              <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
-              <span className={`text-[10px] font-medium ${activeTab === tab ? 'text-white' : ''}`}>{label}</span>
-            </Link>
-          ) : (
-            <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
-                activeTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
-              }`}
-            >
-              <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
-              <span className={`text-[10px] font-medium ${activeTab === tab ? 'text-white' : ''}`}>{label}</span>
-            </button>
-          )
+          <button
+            key={tab}
+            onClick={() => onTabChange(tab)}
+            className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
+              activeTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
+            }`}
+          >
+            <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
+            <span className={`text-[10px] font-medium ${activeTab === tab ? 'text-white' : ''}`}>{label}</span>
+          </button>
         ))}
 
         {/* Profile tab */}

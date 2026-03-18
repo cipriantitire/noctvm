@@ -68,6 +68,17 @@ export default function Home() {
   const [dbEvents, setDbEvents] = useState<NoctEvent[] | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const [headerHidden, setHeaderHidden] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    // Deep linking support for tabs (e.g. ?tab=wallet)
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab') as TabType;
+    if (tab && ['events', 'feed', 'venues', 'wallet', 'profile'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, []);
 
   const handleOpenStories = useCallback((users: StoryUser[], index: number) => {
     setStoryUsers(users);
