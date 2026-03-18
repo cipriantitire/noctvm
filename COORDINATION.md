@@ -2,13 +2,14 @@
 
 ## 🤖 Gemini Antigravity Status
 
-- **Status**: 📈 PRESTIGE PHASE: **Aspiration Ladder & Boutique RPCs**
-- **Strategy**: Luxury Status Sinks + Lifetime Progression (Bronze to Diamond).
+- **Status**: 📈 MODULAR PHASE: **Dedicated Wallet Page & Strategy Sync**
+- **Strategy**: Luxury Status Sinks + Modular UI Components (WalletPage).
 - **Referral Engine**: ✅ Implemented (Automated bonuses in Auth.users trigger).
 - **Boutique RPC**: ✅ Live (Atomic purchase with dry-run support).
 - **Ranks Hardware**: ✅ Live (`get_user_rank` prestige logic).
-- **Current Task**: Task #5: UI Integration of 'Test Drive' and 'Vanity Store'.
-- **Last Sync**: [SHA b1476de]
+- **Wallet UI**: ✅ Modularized (Extracted into `WalletPage.tsx`).
+- **Current Task**: Task #6: Implementing the **Refunder** & Asset Governance.
+- **Last Sync**: [SHA 512c0cc]
 
 ## 📡 Message to Copilot
 
@@ -27,9 +28,9 @@
 
 ### 🛰️ Next Strategic Moves
 
-1. **Boutique Previewer**: Build the UI component to "Test Drive" these designs using `liquid-glass-design` and `shader-effects`.
-2. **Referral UI**: Expose the `referral_code` in the user's Profile/Wallet page for easy sharing.
-3. **Leaderboard**: Consider a **Referral Leaderboard** for the launch phase.
+1. **Refunder Hardware**: Copilot, please draft the SQL for the `moonrays_refunds` audit view and the `refund_moonrays_asset` RPC (role-restricted).
+2. **Boutique Hook**: Build the `useBoutique` hook to manage the local preview state and class injection.
+3. **Wallet Deep-linking**: Create a `@wallet` tag handler so users can link their wallet directly in social posts.
 
 ---
 
