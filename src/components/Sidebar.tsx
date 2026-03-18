@@ -42,18 +42,33 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
       {/* Nav icons — centered when collapsed, left-aligned when expanded */}
       <nav className="flex-1 flex flex-col items-center justify-center w-full space-y-1 px-3">
         {NAV_ITEMS.map(({ icon: Icon, label, tab }) => (
-          <button
-            key={tab}
-            onClick={() => onTabChange(tab)}
-            className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
-              activeTab === tab
-                ? 'bg-noctvm-violet/10 text-white'
-                : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
-            }`}
-          >
-            <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''}`} />
-            <span className={labelCls}>{label}</span>
-          </button>
+          tab === 'wallet' ? (
+            <Link
+              key={tab}
+              href="/wallet"
+              className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
+                activeTab === tab
+                  ? 'bg-noctvm-violet/10 text-white'
+                  : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
+              }`}
+            >
+              <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''}`} />
+              <span className={labelCls}>{label}</span>
+            </Link>
+          ) : (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
+                activeTab === tab
+                  ? 'bg-noctvm-violet/10 text-white'
+                  : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
+              }`}
+            >
+              <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''}`} />
+              <span className={labelCls}>{label}</span>
+            </button>
+          )
         ))}
       </nav>
 
