@@ -108,6 +108,17 @@ export function ShareIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+export function RepostIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 3l4 4-4 4" />
+      <path d="M20 7H7a3 3 0 00-3 3v1" />
+      <path d="M8 21l-4-4 4-4" />
+      <path d="M4 17h13a3 3 0 003-3v-1" />
+    </svg>
+  );
+}
+
 export function BookmarkIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

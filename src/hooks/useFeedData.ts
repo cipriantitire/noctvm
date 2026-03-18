@@ -80,23 +80,27 @@ export function useFeedData(user: any, activeCity: string) {
 
       let likedSet = new Set<string>();
       let savedSet = new Set<string>();
+      let repostedSet = new Set<string>();
       let likeCounts: Record<string, number> = {};
 
       if (allPostIds.length > 0) {
-        const [allLikesRes, userLikesRes, userSavesRes] = await Promise.all([
+        const [allLikesRes, userLikesRes, userSavesRes, userRepostsRes] = await Promise.all([
           supabase.from('post_likes').select('post_id').in('post_id', allPostIds),
           supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', allPostIds),
           supabase.from('post_saves').select('post_id').eq('user_id', user.id).in('post_id', allPostIds),
+          supabase.from('reposts').select('post_id').eq('user_id', user.id).in('post_id', allPostIds),
         ]);
         (allLikesRes.data || []).forEach((l: any) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
         likedSet = new Set((userLikesRes.data || []).map(l => l.post_id));
         savedSet = new Set((userSavesRes.data || []).map(s => s.post_id));
+        repostedSet = new Set((userRepostsRes.data || []).map(r => r.post_id));
       }
 
       setFollowingPosts((followingRes.data || []).map(row => ({
         ...mapSupabasePost(row),
         liked: likedSet.has(row.id),
         saved: savedSet.has(row.id),
+        reposted: repostedSet.has(row.id),
         likes: likeCounts[row.id] || 0
       })));
 
@@ -104,6 +108,7 @@ export function useFeedData(user: any, activeCity: string) {
         ...mapSupabasePost(row),
         liked: likedSet.has(row.id),
         saved: savedSet.has(row.id),
+        reposted: repostedSet.has(row.id),
         likes: likeCounts[row.id] || 0
       })));
 
@@ -111,6 +116,7 @@ export function useFeedData(user: any, activeCity: string) {
         ...mapSupabasePost(row),
         liked: likedSet.has(row.id),
         saved: savedSet.has(row.id),
+        reposted: repostedSet.has(row.id),
         likes: likeCounts[row.id] || 0
       })));
 

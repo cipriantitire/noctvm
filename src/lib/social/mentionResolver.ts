@@ -1,9 +1,9 @@
 /**
  * NOCTVM: Social Mention Resolver
- * Detects and converts tokens like @wallet to interactive links.
+ * Detects and converts tokens like @pocket to interactive links.
  */
 
-const WALLET_RE = /(^|\s)@wallet\b/gi;
+const POCKET_RE = /(^|\s)@pocket\b/gi;
 
 /**
  * Resolves special mentions in raw text and returns Markdown-style links
@@ -12,9 +12,9 @@ const WALLET_RE = /(^|\s)@wallet\b/gi;
  */
 export function resolveSpecialMentions(text: string): string {
   if (!text) return text;
-  
-  // 1. Process @wallet -> /?tab=wallet
-  return text.replace(WALLET_RE, '$1[@wallet](/?tab=wallet)');
+
+  // Process @pocket -> /?tab=pocket
+  return text.replace(POCKET_RE, '$1[@pocket](/?tab=pocket)');
 }
 
 /**
@@ -22,9 +22,9 @@ export function resolveSpecialMentions(text: string): string {
  * This could be used by a custom markdown renderer or a simple text component.
  */
 export const SPECIAL_MENTIONS_CONFIG = {
-  wallet: {
-    handle: '@wallet',
-    href: '/?tab=wallet',
+  pocket: {
+    handle: '@pocket',
+    href: '/?tab=pocket',
     color: 'text-noctvm-violet',
     glow: 'drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]'
   }

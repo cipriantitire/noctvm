@@ -18,6 +18,9 @@ export interface FeedPost {
   createdAt: string;
   liked: boolean;
   saved: boolean;
+  reposted: boolean;
+  reposts: number;
+  event: { id: string; title: string; date: string; venue: string } | null;
   imageTheme: { gradient: string; scene: string };
   imageUrl: string | null;
 }

@@ -273,6 +273,16 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   pointer-events: none;
 }
 
+@keyframes bounceUp {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(-18px); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-28px); }
+}
+
+.animate-bounce-up {
+  animation: bounceUp 1.8s ease-out both;
+}
+
 .animate-fade-out {
   animation: fadeOut 0.18s ease-in both;
   pointer-events: none;
