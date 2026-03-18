@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { MoonraysWallet, MoonraysRank, MOONRAYS_RANKS, RankInfo } from '@/types/moonrays';
 
@@ -8,14 +8,18 @@ export function useMoonrays() {
   const [wallet, setWallet] = useState<MoonraysWallet | null>(null);
   const [rank, setRank] = useState<RankInfo>(MOONRAYS_RANKS['Bronze Voyager']);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const fetchWallet = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
+      setIsAuthenticated(false);
       setLoading(false);
       return;
     }
 
+    setIsAuthenticated(true);
     const { data: walletData, error } = await supabase
       .from('moonrays_wallets')
       .select('*')
@@ -25,7 +29,6 @@ export function useMoonrays() {
     if (!error && walletData) {
       setWallet(walletData);
       
-      // Calculate rank locally from lifetime earned
       const lifetime = walletData.net_earned || 0;
       let currentRank: MoonraysRank = 'Bronze Voyager';
       
@@ -42,6 +45,18 @@ export function useMoonrays() {
 
   useEffect(() => {
     fetchWallet();
+
+    // Subscribe to ledger changes for real-time updates
+    const channel = supabase
+      .channel('wallet_changes')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'moonrays_wallets' }, () => {
+        fetchWallet();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchWallet]);
 
   const progressPercent = useMemo(() => {
@@ -58,8 +73,7 @@ export function useMoonrays() {
     rank,
     progressPercent,
     loading,
+    isAuthenticated,
     refresh: fetchWallet
   };
 }
-
-import { useMemo } from 'react';

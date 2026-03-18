@@ -2,16 +2,34 @@
 
 import React from 'react';
 import { useMoonrays } from '@/hooks/useMoonrays';
-import { SparklesIcon, MoonIcon, TrendingUpIcon } from 'lucide-react';
+import { SparklesIcon, MoonIcon, TrendingUpIcon, LockIcon } from 'lucide-react';
 import { PrestigeProgressMotion } from './PrestigeProgressMotion';
 
 export const MoonraysPrestigeCard = () => {
-  const { wallet, rank, progressPercent, loading } = useMoonrays();
+  const { wallet, rank, progressPercent, loading, isAuthenticated } = useMoonrays();
 
-  if (loading || !wallet) return (
+  // 1. Loading State
+  if (loading) return (
     <div className="bg-noctvm-surface/40 rounded-2xl h-[180px] animate-pulse border border-white/5" />
   );
 
+  // 2. Not Logged In State (Fixes the "flashing" issue)
+  if (!isAuthenticated || !wallet) return (
+    <div className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-500 hover:scale-[1.01]">
+      <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/10 via-black/80 to-purple-900/40 backdrop-blur-[60px] border border-white/5 rounded-2xl shadow-xl" />
+      <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
+          <LockIcon className="w-8 h-8 text-noctvm-silver/40" />
+        </div>
+        <div>
+          <h3 className="text-lg font-heading font-bold text-white">Your Nightly Status</h3>
+          <p className="text-xs text-noctvm-silver/60 mt-1 max-w-[200px]">Unlock ranks, perks, and premium cosmetics by logging in.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // 3. Authenticated Card
   return (
     <div className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-500 hover:scale-[1.01] active:scale-[0.98]">
       {/* ── Liquid Glass Layer (Refracted) ────────────────── */}
@@ -23,7 +41,7 @@ export const MoonraysPrestigeCard = () => {
       {/* ── Ambient Rank Glow ────────────────────────────── */}
       <div 
         className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-[80px] mix-blend-screen opacity-40 animate-pulse duration-5000"
-        style={{ background: rank.glowColor } as React.CSSProperties}
+        style={{ backgroundColor: rank.glowColor }}
       />
 
       {/* ── Content ──────────────────────────────────────── */}
