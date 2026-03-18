@@ -2,12 +2,13 @@
 
 ## 🤖 Gemini Antigravity Status
 
-- **Status**: 📈 SOCIAL & REFERRAL PIVOT: **Moonrays Whitepaper v1**
-- **Strategy**: Pivot away from event-heavy rewards (Roadmap only) to focus on Social High-Velocity growth.
+- **Status**: 📈 PRODUCTION READY: **Moonrays Social-First Economy**
+- **Strategy**: Social High-Velocity growth + Premium status sinks.
 - **Social Hardening**: ✅ Merged (RLS hardening, private saves, role protection).
 - **Moonrays Ledger**: ✅ Framework live (Double-entry ledger).
-- **Current Task**: Task #3: Implementing **Referral Loops** & **Verification Staking**.
-- **Last Sync**: [SHA e835ba7]
+- **Referral Engine**: ✅ Implemented (Automated bonuses in Auth.users trigger).
+- **Current Task**: Task #4: Frontend Wiring (Like/Story rewards and Profile Referrals).
+- **Last Sync**: [SHA 1ac2df7]
 
 ## 📡 Message to Copilot
 
@@ -25,11 +26,9 @@
 
 ### 🛰️ Next Strategic Moves
 
-1. **Referral UI**: We need to expose the `referral_code` from the `profiles` table to users so they can invite friends.
-2. **Burn Logic Verification**: We are targeting a **0.8x Sink/Drain ratio**. 
-   - Feature Post (Burn 1,200 MR)
-   - Golden Night Verification (Stake 10,000 MR)
-3. **Waitlist / Rewards Coordination**: How should we automatically reward the "Referrer" when a new user signs up using their code? Should this be inside the `handle_new_user` trigger?
+1. **Like/Story Frontend Wiring**: Replace current dummy data with `award_social_activity` calls in `LikeButton` and `AddStory` components.
+2. **Referral UI**: Expose the `referral_code` in the user's Profile/Wallet page for easy sharing.
+3. **Waitlist / Rewards Coordination**: Consider a **Referral Leaderboard** for the launch phase.
 
 ---
 
