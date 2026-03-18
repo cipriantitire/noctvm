@@ -36,7 +36,7 @@ export default function PostBody({ text }: PostBodyProps) {
     }
 
     // Add interactive link with premium styling
-    const isWalletLink = href.includes('tab=wallet');
+    const isWalletLink = href.includes('tab=pocket') || href.includes('tab=wallet');
     
     parts.push(
       <Link 
