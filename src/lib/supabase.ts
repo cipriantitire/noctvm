@@ -16,6 +16,7 @@ export type Profile = {
   role: 'admin' | 'owner' | 'user';
   badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
   is_verified: boolean;
+  referral_code: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -25,6 +25,7 @@ import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { useFrostedGlass } from '@/hooks/useFrostedGlass';
+import WalletPage from '@/components/WalletPage';
 import { useAuth } from '@/contexts/AuthContext';
 
 type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
@@ -454,84 +455,8 @@ export default function Home() {
 
             {/* ── Wallet / Moonrays Tab ────────────────────────── */}
             {activeTab === 'wallet' && (
-              <div className="space-y-6 max-w-2xl mx-auto tab-content">
-                <div className="text-center py-4 animate-fade-in-up">
-                  <h2 className="font-heading text-xl font-bold text-white">Moonrays</h2>
-                  <p className="text-sm text-noctvm-silver mt-1">Your nightlife loyalty points</p>
-                </div>
-
-                {/* Balance card */}
-                <div className="bg-gradient-to-br from-noctvm-violet/30 via-noctvm-midnight to-purple-900/30 rounded-2xl p-6 border border-noctvm-violet/40 animate-fade-in-up stagger-2 relative overflow-hidden">
-                  <div className="absolute -top-4 -right-4 text-8xl opacity-5 select-none pointer-events-none">🌙</div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs text-noctvm-silver font-mono uppercase tracking-wider">Total Moonrays</span>
-                    <span className="px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-[10px] font-medium border border-noctvm-violet/30">
-                      {user ? 'Active' : 'Sign in to earn'}
-                    </span>
-                  </div>
-                  <div className="flex items-end gap-2 mb-1">
-                    <span className="text-4xl font-heading font-bold text-white">{user ? '500' : '0'}</span>
-                    <span className="text-2xl mb-0.5">🌙</span>
-                  </div>
-                  <p className="text-xs text-noctvm-silver/60">{user ? 'Welcome bonus applied ✨' : 'Create an account to start earning'}</p>
-                </div>
-
-                {/* How to earn */}
-                <div className="bg-noctvm-surface rounded-xl border border-noctvm-border p-5 animate-fade-in-up stagger-3">
-                  <h3 className="font-heading text-sm font-semibold text-white mb-4">How to Earn Moonrays</h3>
-                  <div className="space-y-3">
-                    {[
-                      { icon: '🌙', action: 'Create your account',  points: '+500', desc: 'Welcome bonus, one-time' },
-                      { icon: '📸', action: 'Share a post',         points: '+10',  desc: 'Per post published' },
-                      { icon: '🎭', action: 'Add a story',          points: '+5',   desc: 'Per 24h story' },
-                      { icon: '💬', action: 'Leave a comment',      points: '+2',   desc: 'Per comment' },
-                      { icon: '⭐', action: 'Review a venue',       points: '+25',  desc: 'Per verified review' },
-                      { icon: '🎟️', action: 'Attend an event',     points: '+50',  desc: 'Scan ticket at the door' },
-                      { icon: '👥', action: 'Invite a friend',      points: '+100', desc: 'When they sign up' },
-                    ].map(item => (
-                      <div key={item.action} className="flex items-center gap-3">
-                        <span className="text-lg w-8 text-center flex-shrink-0">{item.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white font-medium leading-tight">{item.action}</p>
-                          <p className="text-[10px] text-noctvm-silver/60">{item.desc}</p>
-                        </div>
-                        <span className="text-sm font-bold text-noctvm-violet font-mono flex-shrink-0">{item.points}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Recent activity (logged in only) */}
-                {user && (
-                  <div className="bg-noctvm-surface rounded-xl border border-noctvm-border p-5 animate-fade-in-up stagger-4">
-                    <h3 className="font-heading text-sm font-semibold text-white mb-4">Recent Activity</h3>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-noctvm-violet/20 flex items-center justify-center text-base flex-shrink-0">🌙</div>
-                      <div className="flex-1">
-                        <p className="text-xs text-white">Welcome bonus</p>
-                        <p className="text-[10px] text-noctvm-silver/50">Account created</p>
-                      </div>
-                      <span className="text-sm font-bold text-noctvm-violet font-mono">+500</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Coming-soon redemption cards */}
-                <div className="grid grid-cols-2 gap-3 animate-fade-in-up stagger-5">
-                  {[
-                    { icon: <TicketIcon className="w-5 h-5 text-noctvm-violet" />, title: 'Redeem Tickets',  desc: 'Use Moonrays for event entry' },
-                    { icon: <StarIcon   className="w-5 h-5 text-noctvm-gold"   />, title: 'VIP Perks',       desc: 'Unlock exclusive venue benefits' },
-                  ].map(item => (
-                    <div key={item.title} className="bg-noctvm-surface rounded-xl p-4 border border-noctvm-border relative overflow-hidden">
-                      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20">
-                        <span className="text-[8px] font-mono text-noctvm-violet uppercase tracking-wider">Soon</span>
-                      </div>
-                      <div className="w-9 h-9 rounded-lg bg-noctvm-midnight flex items-center justify-center mb-2">{item.icon}</div>
-                      <h3 className="font-heading text-xs font-semibold text-white mb-0.5">{item.title}</h3>
-                      <p className="text-[10px] text-noctvm-silver/70">{item.desc}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="tab-content h-full overflow-y-auto">
+                <WalletPage />
               </div>
             )}
 
