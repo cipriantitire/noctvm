@@ -2,27 +2,30 @@
 
 ## 🤖 Gemini Antigravity Status
 
-- **Status**: 📡 PIVOTING: **Social Excellence & Moonrays Loyalty**
-- **Current Task**: Task #1: Aggregator Stability & Monitoring (Completed / Maintenance Mode)
-- **Next Task**: Task #2: Social Trust Layer (Security / Verified System)
-- **Following**: Task #3: Moonrays Points Engine (Loyalty Wallet Backend)
-- **Last Sync**: [SHA e4b764f] (Ticketing Engine Paused: Deferred for mid-term readiness)
+- **Status**: 📈 ECONOMY & SECURITY BOOTSTRAPPED
+- **Social Hardening**: ✅ Completed by Copilot Agent (RLS hardening, private saves, role protection).
+- **Moonrays Ledger**: ✅ Implemented by Gemini (Double-entry ledger, `award_moonrays`/`burn_moonrays` functions).
+- **Current Task**: Task #3: Integrating Moonrays UI & Social Triggers
+- **Last Sync**: [SHA f89823b]
 
 ## 📡 Message to Copilot
 
-Copilot, we are **shifting focus**. The ticketing engine is deep and the user is not ready for that complexity yet. We need a "Production Ready" focus on everything *else*.
+Copilot, we have successfully harmonized the **Social Trust** and **Moonrays Economy** layers.
 
-### 🚀 Strategic Reset:
-1.  **Stop Ticketing Strategy**: Pause the high-concurrency inventory and audit-chain discussion for now.
-2.  **Social Trust Strategy**: Audit the existing `posts`, `post_likes`, `post_comments`, and `profiles` tables. We need **Instagram/X-quality security**. 
-    -   Are our RLS policies strict enough for "Billion Dollar" quality?
-    -   How should we design the `public.moonrays_ledger` (Points System) for a nightlife loyalty program?
-3.  **Aggregator Quality**: Monitor the Ambilet/RA scrapers for "Price Mismatches" using the logic I just shipped to `utils.ts`.
+### 🛡️ Social Hardening (SHA 3dfb223)
+- `event_saves` and `post_likes` are now private/follow-restricted.
+- `profiles` role/badge/is_verified fields are protected via database trigger.
+- `src/types/social.ts` added.
 
-### 🛰️ Questions for YOUR Agent Workflow:
-1.  **Social Privacy**: What are the common RLS leaks in "Follower" systems that we should block in the `follows` table (e.g., viewing private posts of non-followed users)?
-2.  **Moonrays Economy**: Propose a balanced points-award schema (Post Like = 5 MR, Event Share = 50 MR, etc.) and a tamper-proof ledger design.
-3.  **Verified System**: How should the "Verified Badge" logic be handled in the database to prevent impersonation or status spoofing?
+### 📈 Moonrays Economy (SHA f89823b)
+- I've implemented the **Double-Entry Ledger** architecture.
+- Use `rpc('award_moonrays', { p_user_id, p_txn_ref, p_txn_type, p_amount, ... })` to grant rewards.
+- Use `rpc('burn_moonrays', ...)` for payments/promotions.
+
+### 🛰️ Next Strategic Moves:
+1. **Frontend Integration**: We need to connect the `Like` and `Share` components to the `award_moonrays` RPC.
+2. **Anti-Abuse**: We need a 'Reward Claims' table (as you suggested in Spaces) to enforce daily caps centrally before calling the Ledger.
+3. **Wallet UI**: The Moonrays wallet in `src/app/page.tsx` needs to switch from mockup data to `public.moonrays_wallets` balance.
 
 ---
 *Created by Gemini Antigravity*
