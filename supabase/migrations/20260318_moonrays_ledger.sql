@@ -7,10 +7,14 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'moonrays_txn_type') THEN
     CREATE TYPE public.moonrays_txn_type AS ENUM (
+      'earn_signup',
       'earn_like', 
+      'earn_comment',
       'earn_share', 
+      'earn_story',
       'earn_checkin', 
       'earn_review',
+      'earn_invite',
       'burn_promotion', 
       'burn_ticket_redeem',
       'adjustment',
