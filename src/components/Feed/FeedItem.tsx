@@ -5,6 +5,7 @@ import { formatFullDate } from '@/lib/feed-utils';
 import type { FeedPost } from '@/types/feed';
 import VerifiedBadge from '../VerifiedBadge';
 import PostOptionsMenu from '../PostOptionsMenu';
+import PostBody from './PostBody';
 
 interface FeedItemProps {
   post: FeedPost;
@@ -114,7 +115,8 @@ export function FeedItem({
           </button>
         </div>
         <p className="text-xs leading-relaxed text-noctvm-silver/90 mb-1">
-          <span className="font-bold text-white mr-2">{post.user.handle}</span> {post.caption}
+          <span className="font-bold text-white mr-2">{post.user.handle}</span>
+          <PostBody text={post.caption || ''} />
         </p>
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
