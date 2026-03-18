@@ -20,15 +20,15 @@ import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
-import { MoonIcon, UserIcon, TicketIcon, WalletIcon, StarIcon, CogIcon, GridIcon } from '@/components/icons';
+import { MoonIcon, UserIcon, TicketIcon, StarIcon, CogIcon, GridIcon } from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { useFrostedGlass } from '@/hooks/useFrostedGlass';
-import WalletPage from '@/components/WalletPage';
+import PocketPage from '@/components/PocketPage';
 import { useAuth } from '@/contexts/AuthContext';
 
-type TabType = 'events' | 'feed' | 'venues' | 'wallet' | 'profile';
+type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
 // Profile views:
 //   'profile'         → Instagram-style public profile page
@@ -72,10 +72,10 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    // Deep linking support for tabs (e.g. ?tab=wallet)
+    // Deep linking support for tabs (e.g. ?tab=pocket)
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab') as TabType;
-    if (tab && ['events', 'feed', 'venues', 'wallet', 'profile'].includes(tab)) {
+    if (tab && ['events', 'feed', 'venues', 'pocket', 'profile'].includes(tab)) {
       setActiveTab(tab);
     }
   }, []);
@@ -464,10 +464,10 @@ export default function Home() {
               </div>
             )}
 
-            {/* ── Wallet / Moonrays Tab ────────────────────────── */}
-            {activeTab === 'wallet' && (
+            {/* ── Pocket / Moonrays Tab ────────────────────────── */}
+            {activeTab === 'pocket' && (
               <div className="tab-content h-full overflow-y-auto">
-                <WalletPage />
+                <PocketPage />
               </div>
             )}
 
