@@ -672,10 +672,21 @@ export async function parseDetailPage(
   const og = extractOgMeta(html);
 
   // ── 1. Try JSON-LD Event blocks ──────────────────────────────────────────
+  // Build a slug from the page URL we fetched — used to reject JSON-LD blocks
+  // from "similar events" sidebars that inject other events into the same page.
+  const pageSlug = url.replace(/\/$/, '').split('/').pop()?.toLowerCase() ?? '';
+
   for (const block of extractJsonLd(html)) {
     const b = block as Record<string, unknown>;
     const type = String(b['@type'] ?? '');
     if (!type.includes('Event')) continue;
+
+    // ── Slug guard: if the JSON-LD block has a `url` field, it must share the
+    // same slug as the page we fetched. Rejects similar-events sidebar blocks.
+    if (b.url && pageSlug) {
+      const blockSlug = String(b.url).replace(/\/$/, '').split('/').pop()?.toLowerCase() ?? '';
+      if (blockSlug && blockSlug !== pageSlug) continue;
+    }
 
     const startDate = String(b.startDate ?? '');
     const date = parseDate(startDate);
