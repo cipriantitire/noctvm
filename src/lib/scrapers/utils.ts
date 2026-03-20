@@ -76,11 +76,13 @@ const RO_MONTHS: Record<string, string> = {
 export function parseDate(raw: string): string | null {
   if (!raw) return null;
   const currentYear = new Date().getFullYear().toString();
+  const isValidYear = (y: number) => y >= 2020 && y <= 2100;
 
-  // ISO-like: 2026-03-15 or 2026-3-15
+  // ISO-like: 2026-03-15 or 2026-3-15 (or ISO datetime: 2026-03-15T20:00:00)
   const isoMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (isoMatch) {
     const [, y, m, d] = isoMatch;
+    if (!isValidYear(parseInt(y, 10))) return null;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
 
@@ -88,6 +90,7 @@ export function parseDate(raw: string): string | null {
   const euNumeric = raw.match(/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/);
   if (euNumeric) {
     const [, d, m, y] = euNumeric;
+    if (!isValidYear(parseInt(y, 10))) return null;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
 
@@ -104,14 +107,18 @@ export function parseDate(raw: string): string | null {
     const [, day, monthStr, , year] = roText;
     const monthNum = RO_MONTHS[monthStr] ?? RO_MONTHS[monthStr.slice(0, 3)];
     if (monthNum) {
-      return `${year || currentYear}-${monthNum}-${day.padStart(2, '0')}`;
+      const yr = year || currentYear;
+      if (!isValidYear(parseInt(yr, 10))) return null;
+      return `${yr}-${monthNum}-${day.padStart(2, '0')}`;
     }
   }
 
-  // Fallback: native Date
+  // Fallback: native Date — only accept if year is sane
   try {
     const d = new Date(raw);
-    if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+    if (!isNaN(d.getTime()) && isValidYear(d.getFullYear())) {
+      return d.toISOString().split('T')[0];
+    }
   } catch { /* skip */ }
 
   return null;
@@ -681,11 +688,15 @@ export async function parseDetailPage(
     const type = String(b['@type'] ?? '');
     if (!type.includes('Event')) continue;
 
-    // ── Slug guard: if the JSON-LD block has a `url` field, it must share the
-    // same slug as the page we fetched. Rejects similar-events sidebar blocks.
+    // ── URL guard: if the JSON-LD block has a `url` field, it must relate to
+    // the page we fetched (either same slug OR url contains pageSlug as substring).
+    // This rejects similar-events sidebar blocks injected into every event page.
     if (b.url && pageSlug) {
-      const blockSlug = String(b.url).replace(/\/$/, '').split('/').pop()?.toLowerCase() ?? '';
-      if (blockSlug && blockSlug !== pageSlug) continue;
+      const blockUrl = String(b.url).toLowerCase();
+      const blockSlug = blockUrl.replace(/\/$/, '').split('/').pop() ?? '';
+      // Accept if the block URL contains our page slug anywhere
+      const slugMatches = blockSlug === pageSlug || blockUrl.includes(pageSlug);
+      if (!slugMatches) continue;
     }
 
     const startDate = String(b.startDate ?? '');

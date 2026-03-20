@@ -292,8 +292,9 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
 
 /**
  * Custom batch fetcher for RA to avoid dependency on utils.ts's hardcoded parseDetailPage
+ * Uses small batches with delays between them to avoid RA rate-limiting.
  */
-async function batchFetchRA(urls: string[], city: string, limit = 100, batchSize = 10): Promise<ScrapedEvent[]> {
+async function batchFetchRA(urls: string[], city: string, limit = 60, batchSize = 3): Promise<ScrapedEvent[]> {
   const results: ScrapedEvent[] = [];
   const capped = urls.slice(0, limit);
 
@@ -301,13 +302,17 @@ async function batchFetchRA(urls: string[], city: string, limit = 100, batchSize
     const chunk = capped.slice(i, i + batchSize);
     const chunkResults = await Promise.allSettled(
       chunk.map(async (url) => {
-        // Jitter delay per request in chunk
-        await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+        // Small jitter per-request within chunk
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 300));
         return parseRADetailPage(url, city);
       })
     );
     for (const r of chunkResults) {
       if (r.status === 'fulfilled' && r.value) results.push(r.value);
+    }
+    // Respectful delay between batches to avoid rate-limiting
+    if (i + batchSize < capped.length) {
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
     }
   }
   return results;
@@ -534,7 +539,7 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
   };
 
   const [bucharest, romania] = await Promise.all([
-    fetchForArea(BUCHAREST_AREA_ID, 'Bucharest', 40),
+    fetchForArea(BUCHAREST_AREA_ID, 'Bucharest', 60),
     fetchForArea(ROMANIA_AREA_ID, 'Constanta', 20)
   ]);
 

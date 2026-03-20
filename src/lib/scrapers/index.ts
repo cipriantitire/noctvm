@@ -234,10 +234,10 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   for (const group of Array.from(groups.values())) {
     // Sort by source priority (ra is best, then iabilet, livetickets, onevent, etc)
     const priority = (s: string) => {
-      if (s === 'livetickets') return 10;
-      if (s === 'ra') return 9;
+      if (s === 'controlclub') return 10; // Direct venue — always wins for its own events
+      if (s === 'livetickets') return 10; // Keep parity with livetickets
+      if (s === 'ra') return 9;           // RA fills in metadata where venue lacks it
       if (s === 'iabilet') return 8;
-      if (s === 'controlclub') return 7;
       if (s === 'eventbook') return 7;
       if (s === 'ambilet') return 6;
       return 1;
@@ -246,21 +246,35 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
     const best: DedupeRow = { ...group[0] };
     
-    // Merge data from any other source in the group if the best one is missing it
+    // Smart cross-source merge: RA and Control Club are equals, each has strengths
     for (let i = 1; i < group.length; i++) {
       const other = group[i];
-      if (!best.ticket_url && other.ticket_url) {
-        best.ticket_url = other.ticket_url;
+      const bestIsRA  = best.source === 'ra';
+      const bestIsCC  = best.source === 'controlclub';
+      const otherIsRA = other.source === 'ra';
+      const otherIsCC = other.source === 'controlclub';
+
+      // RA+CC special pairing: venue calendar wins for date & SOLD OUT price;
+      // RA platform wins for description, ticket_url, image
+      if (bestIsRA && otherIsCC) {
+        if (other.date) best.date = other.date;           // CC date is authoritative
+        if (other.time) best.time = other.time;           // CC time from the calendar
+        if (other.price === 'SOLD OUT') best.price = 'SOLD OUT';
+        else if (!best.price && other.price) best.price = other.price;
       }
-      if (!best.image_url && other.image_url) {
-        best.image_url = other.image_url;
+      if (bestIsCC && otherIsRA) {
+        if (!best.description && other.description) best.description = other.description;
+        if (!best.ticket_url && other.ticket_url)   best.ticket_url  = other.ticket_url;
+        if (!best.image_url  && other.image_url)    best.image_url   = other.image_url;
       }
-      if (!best.description && other.description) {
-        best.description = other.description;
-      }
-      // If we have an RA event and a LiveTickets event, ensure the LiveTickets link
-      // ends up in ticket_url if it's not already there.
-      if (best.source === 'ra' && other.source !== 'ra' && !best.ticket_url) {
+
+      // General fallback for all other source combos
+      if (!best.ticket_url  && other.ticket_url)  best.ticket_url  = other.ticket_url;
+      if (!best.image_url   && other.image_url)   best.image_url   = other.image_url;
+      if (!best.description && other.description) best.description = other.description;
+      if (!best.time        && other.time)        best.time        = other.time;
+      // RA-specific fallback: if RA is not the winner but another source lacked a ticket link
+      if (bestIsRA && !best.ticket_url && !otherIsCC && other.event_url) {
         best.ticket_url = other.event_url;
       }
     }
@@ -596,13 +610,16 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
   // ── Stale-source garbage collection ──────────────────────────────────────────
   // Delete events from active sources whose updated_at predates this run.
+  // Exception: never delete SOLD OUT events — they have historical value
+  // and may not be re-listed by the source after selling out.
   const activeSourcesWithEvents = results.filter(r => r.count > 0).map(r => r.source);
   for (const src of activeSourcesWithEvents) {
     const { error: staleErr } = await supabase
       .from('events')
       .delete()
       .eq('source', src)
-      .lt('updated_at', runStart);
+      .lt('updated_at', runStart)
+      .neq('price', 'SOLD OUT');  // Preserve SOLD OUT events
     if (staleErr) console.warn(`[orchestrator] stale cleanup error for ${src}:`, staleErr.message);
   }
   const activeCount = activeSourcesWithEvents.length;

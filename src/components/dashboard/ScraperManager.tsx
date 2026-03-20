@@ -38,12 +38,14 @@ interface Summary {
 }
 
 const SOURCES: ScraperSource[] = [
-  { id: 'iabilet', name: 'Iabilet', description: 'Ticketed events tracking', status: 'idle' },
+  { id: 'controlclub', name: 'Control Club', description: 'Direct venue calendar — authoritative dates & prices', status: 'idle' },
+  { id: 'ra', name: 'Resident Advisor', description: 'Electronic music platform — rich metadata & tickets', status: 'idle' },
   { id: 'livetickets', name: 'LiveTickets', description: 'Local club life data', status: 'idle' },
+  { id: 'iabilet', name: 'Iabilet', description: 'Ticketed events tracking', status: 'idle' },
   { id: 'eventbook', name: 'Eventbook', description: 'Cultural and art events', status: 'idle' },
-  { id: 'ra', name: 'Resident Advisor', description: 'Electronic music focus', status: 'idle' },
   { id: 'onevent', name: 'OnEvent', description: 'Regional gathering data', status: 'idle' },
   { id: 'ambilet', name: 'Ambilet', description: 'Music and theater ticketing', status: 'idle' },
+  { id: 'zilesinopti', name: 'Zile și Nopți', description: 'Music category — /muzica/ only', status: 'idle' },
 ];
 
 export default function ScraperManager() {
@@ -179,9 +181,17 @@ export default function ScraperManager() {
           <div className="divide-y divide-white/5">
             {SOURCES.map(source => (
               <div key={source.id} className="px-6 py-4 flex items-center justify-between group hover:bg-white/[0.02] transition-all cursor-pointer" onClick={() => setSelectedSource(source)}>
-                <div>
-                  <h4 className="text-sm font-bold text-white mb-0.5">{source.name}</h4>
-                  <p className="text-[10px] text-noctvm-silver/60 lowercase font-mono">{source.description}</p>
+                <div className="flex items-center gap-3">
+                  {/* Priority badge for top-tier sources */}
+                  {(source.id === 'controlclub' || source.id === 'ra') && (
+                    <span className="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-noctvm-gold/10 text-noctvm-gold border border-noctvm-gold/20">
+                      {source.id === 'controlclub' ? 'Venue' : 'Platform'}
+                    </span>
+                  )}
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-0.5">{source.name}</h4>
+                    <p className="text-[10px] text-noctvm-silver/60 lowercase font-mono">{source.description}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -334,7 +344,11 @@ export default function ScraperManager() {
               
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-noctvm-violet/10 border border-noctvm-violet/20 flex items-center justify-center text-xl">
-                  {selectedSource.id === 'ra' ? '🎧' : '🎫'}
+                  {selectedSource.id === 'controlclub' ? '🎛️'
+                    : selectedSource.id === 'ra' ? '🎧'
+                    : selectedSource.id === 'zilesinopti' ? '🌙'
+                    : selectedSource.id === 'livetickets' ? '🎟️'
+                    : '🎫'}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white uppercase tracking-tight">{selectedSource.name}</h3>
