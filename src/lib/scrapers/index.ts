@@ -10,10 +10,11 @@ import { scrapeAmbilet }      from './ambilet';
 import { scrapeLivetickets }  from './livetickets';
 import { scrapeRA }           from './ra';
 import { scrapeEventbook }    from './eventbook';
+import { scrapeControlClub }  from './controlclub';
 import { ScrapedEvent }       from './types';
 import { isValidVenueName }  from './utils';
 
-type Source = 'zilesinopti' | 'iabilet' | 'onevent' | 'ambilet' | 'livetickets' | 'ra' | 'eventbook';
+type Source = 'zilesinopti' | 'iabilet' | 'onevent' | 'ambilet' | 'livetickets' | 'ra' | 'eventbook' | 'controlclub';
 
 interface ScraperSettings {
   scan_depth?: number;
@@ -29,6 +30,9 @@ interface ScraperSettings {
 const VENUE_ALIASES: Record<string, string> = {
   // iabilet/zilesinopti list some events with hall name instead of club name
   'sala luceafarul': 'Control Club',   // default mapping; event-title override applied below
+  // Control Club variants (RA uses lowercase, zilesinopti appends suffix)
+  'control':        'Control Club',
+  'club control':   'Control Club',
   // Quantic appears both as "Quantic" and "Quantic Club"/"Quantic Pub"
   'quantic club': 'Quantic',
   'quantic pub':  'Quantic',
@@ -42,6 +46,10 @@ const VENUE_ALIASES: Record<string, string> = {
   'nether':             'Nether Club',
   'noar hall':          'Noar Hall',
   'the pub universitatii': 'The Pub Universității',
+  // Trattoria Monza variants
+  'trattoria monza drumul taberei': 'Trattoria Monza',
+  // Rio Club variants
+  'rio club bucuresti': 'Rio Club',
   // Constanta venue duplicates
   'club phoenix, constanta': 'Club Phoenix',
   'phoenix':                 'Club Phoenix',
@@ -54,6 +62,11 @@ const VENUE_ALIASES: Record<string, string> = {
   'restaurant dorna mamaia • zile si nopti':      'Restaurant Dorna Mamaia',
   // Forge aliases
   'forge bucharest': 'Forge',
+  // Apollo111 variants
+  'apollo111 barul & terasa': 'Apollo111',
+  // Hard Rock Cafe variants (sometimes with city suffix)
+  'hard rock cafe bucuresti': 'Hard Rock Cafe',
+  'hard rock cafe bucharest': 'Hard Rock Cafe',
 };
 
 // Event-title–aware overrides: if (title pattern) + wrong venue → correct venue.
@@ -66,12 +79,22 @@ const VENUE_TITLE_OVERRIDES: Array<{ titlePattern: RegExp; wrongVenue: RegExp; c
   { titlePattern: /echtzeit/i, wrongVenue: /venue tbc/i, correctVenue: 'Control Club' },
 ];
 
+/** Strip common branding suffixes appended by aggregator sites. */
+function stripVenueSuffix(name: string): string {
+  return name
+    .replace(/\s*[•·\-–—]\s*Zile [șs]i Nop[țt]i$/i, '')
+    .replace(/\s*&bull;\s*Zile [șs]i Nop[țt]i$/i, '')
+    .trim();
+}
+
 /** Normalise a scraped venue name to its canonical form. */
 function normalizeVenue(venueName: string, eventTitle: string): string {
-  const lower = venueName.toLowerCase().trim();
+  // Strip aggregator suffixes first (e.g. "Control Club • Zile și Nopți" → "Control Club")
+  const cleaned = stripVenueSuffix(venueName);
+  const lower = cleaned.toLowerCase().trim();
   // Simple alias lookup
   const alias = VENUE_ALIASES[lower];
-  const base = alias ?? venueName;
+  const base = alias ?? cleaned;
 
   // Title-aware overrides (e.g. Sala Luceafarul → Encore Club for Japanese acts)
   for (const { titlePattern, wrongVenue, correctVenue } of VENUE_TITLE_OVERRIDES) {
@@ -102,6 +125,7 @@ const SCRAPERS: [Source, (settings?: ScraperSettings) => Promise<ScrapedEvent[]>
   ['livetickets', scrapeLivetickets],
   ['ra',          scrapeRA],
   ['eventbook',   scrapeEventbook],
+  ['controlclub', scrapeControlClub],
 ];
 
 export async function fetchAndUpsertEvents(targetSource?: string): Promise<FetchSummary> {
@@ -181,7 +205,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/^(pw|ctrl|control|extra|live|concert|party|alt jazz)\s*[-•x]*\s*/i, '') // Strip common prefixes
-      .replace(/[|:;,.@()[\]{}/\\_•*–—-]/g, ' ')
+      .replace(/[|:;,.@()[\]{}/\\_•*–—!?&+#~'-]/g, ' ')  // Strip ALL punctuation including !?& (regression fix)
       .replace(/\s+/g, '') // Strip all spaces for strict core match
       .trim();
   }
@@ -213,6 +237,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       if (s === 'livetickets') return 10;
       if (s === 'ra') return 9;
       if (s === 'iabilet') return 8;
+      if (s === 'controlclub') return 7;
       if (s === 'eventbook') return 7;
       if (s === 'ambilet') return 6;
       return 1;
@@ -345,6 +370,17 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'NOAR HALL',
     'B52 The Club',
     'The Pub Universitatii',
+    // Zilesinopti suffixed duplicates (now stripped at normalisation time)
+    'Control Club • Zile și Nopți',
+    'Hard Rock Cafe • Zile și Nopți',
+    'Apollo111 Barul & Terasa • Zile și Nopți',
+    'Groove Alt Social Bar • Zile și Nopți',
+    'The Coffee Shop Constituției • Zile și Nopți',
+    // RA lowercase variant
+    'control',
+    // Other duplicates
+    'Trattoria Monza Drumul Taberei',
+    'Rio Club Bucuresti',
   ];
   await Promise.all([
     ...BAD_VENUES_EVENTS.map(v => supabase.from('events').delete().eq('venue', v)),
@@ -472,6 +508,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
         if (s === 'manual') return 100;
         if (s === 'livetickets') return 10;
         if (s === 'ra') return 9;
+        if (s === 'controlclub') return 8;
         if (s === 'eventbook') return 8;
         if (s === 'iabilet') return 7;
         return 1;
@@ -486,10 +523,12 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
           const leaderTitle = normalizeForDedupe(leader.title);
           
           // Fuzzy match: if titles are nearly identical or one is a significant substring of the other
-          // We use 8 chars as a minimum for substring matching to avoid "Club" matching "Club"
+          // We use 6 chars as a minimum for substring matching to avoid short false positives
           const isRelated = normTitle === leaderTitle || 
-                           (normTitle.length > 8 && leaderTitle.includes(normTitle)) ||
-                           (leaderTitle.length > 8 && normTitle.includes(leaderTitle));
+                           (normTitle.length > 6 && leaderTitle.includes(normTitle)) ||
+                           (leaderTitle.length > 6 && normTitle.includes(leaderTitle)) ||
+                           // Prefix match: if both titles share the same first 10+ chars, they're likely the same event
+                           (normTitle.length >= 10 && leaderTitle.length >= 10 && normTitle.slice(0, 10) === leaderTitle.slice(0, 10));
 
           if (isRelated) {
             cluster.push(event);

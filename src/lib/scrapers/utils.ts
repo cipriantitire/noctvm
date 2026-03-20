@@ -500,7 +500,34 @@ export function extractPriceFromHtml(html: string): string | null {
     return 'Free';
   }
 
-  // Regex to find all numbers followed by currency or currency symbols
+  // ── WooCommerce price extraction (ambilet.ro uses this) ──────────────────
+  // Targets <span class="woocommerce-Price-amount"><bdi>50,00 <span ...>lei</span></bdi></span>
+  // This is much more reliable than generic number hunting.
+  const wcPriceMatches = Array.from(html.matchAll(
+    /woocommerce-Price-amount[^>]*>\s*<bdi>\s*([\d.,]+)\s*(?:&nbsp;)?\s*<span[^>]*woocommerce-Price-currencySymbol[^>]*>([^<]+)<\/span>/gi
+  ));
+  if (wcPriceMatches.length > 0) {
+    const wcPrices = wcPriceMatches
+      .map(m => parseFloat(m[1].replace(',', '.')))
+      .filter(p => !isNaN(p) && p > 0)
+      .sort((a, b) => a - b);
+    
+    if (wcPrices.length > 0) {
+      const unique = Array.from(new Set(wcPrices));
+      const currency = wcPriceMatches[0][2]?.trim() || 'RON';
+      const currLabel = currency.toLowerCase() === 'lei' ? 'RON' : currency;
+      if (unique.length === 1) {
+        return unique[0] === 0 ? 'Free' : `${unique[0]} ${currLabel}`;
+      }
+      const min = unique[0];
+      const max = unique[unique.length - 1];
+      if (min === 0 && max === 0) return 'Free';
+      if (min === 0) return `Free - ${max} ${currLabel}`;
+      return `${min} - ${max} ${currLabel}`;
+    }
+  }
+
+  // ── Generic regex price extraction ───────────────────────────────────────
   // Stricter price regex: prioritize prefix or common price patterns
   // Increase digit limit to 1-5 to handle premium/festival tickets
   const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)\s*:?\s*)?(?:(?:\d{1,5}(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$)\s*(?:\d{1,5}(?:[.,]\d+)?))/gi));
@@ -539,11 +566,21 @@ export function extractPriceFromHtml(html: string): string | null {
       return `${sortedPrefixed[0]} - ${sortedPrefixed[sortedPrefixed.length - 1]} RON`;
     }
 
-    // Fallback to the full range if no prefixed prices found, but avoid extreme outliers
+    // Ratio-based sanity check: if the range is suspiciously wide (max/min > 15)
+    // and no prices had explicit labels, it's likely junk numbers from page elements
+    // (e.g. input value="1", data-product_id="831747")
+    const min = sorted[0];
+    const max = sorted[sorted.length - 1];
+    if (max / min > 15) {
+      // Range is suspiciously wide — reject it as likely containing stray numbers
+      // Return only the most common/middle value as single price, or null
+      return null;
+    }
+
     return `${sorted[0]} - ${sorted[sorted.length - 1]} RON`;
   }
 
-  // Explicit check for "Free" or "Graduit" in text if no numbers found
+  // Explicit check for "Free" or "Gratuit" in text if no numbers found
   if (/\b(free|gratuit|intrare libera|liberă)\b/i.test(html)) return 'Free';
 
   return null;
@@ -823,7 +860,11 @@ export async function batchFetch(
   for (let i = 0; i < capped.length; i += batchSize) {
     const chunk = capped.slice(i, i + batchSize);
     const settled = await Promise.allSettled(
-      chunk.map(url => parseDetailPage(url, city, timeoutMs, allowedCities)),
+      chunk.map(async (url) => {
+        // Small jitter delay
+        await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+        return parseDetailPage(url, city, 15_000, allowedCities);
+      }),
     );
     for (const r of settled) {
       if (r.status === 'fulfilled' && r.value) results.push(r.value);

@@ -29,11 +29,13 @@ function collectStubsFromHtml(html: string): Array<{ title: string; url: string;
   while ((m = cardRe.exec(html)) !== null) {
     const block = m[1];
 
-    // URL — look for first meaningful <a href>
-    const linkM = block.match(/href="(https?:\/\/zilesinopti\.ro\/[^"?#]+)"/i)
-      ?? block.match(/href="(\/[^"?#]+)"/i);
+    // URL — look for first meaningful <a href> that is an event route, not a venue/blog/category page
+    const linkM = block.match(/href="(https?:\/\/zilesinopti\.ro\/(?!locuri\/|blog\/|categor)[^"?#]+)"/i)
+      ?? block.match(/href="(\/(?!locuri\/|blog\/|categor)[^"?#]+)"/i);
     if (!linkM) continue;
     const url = linkM[1].startsWith('http') ? linkM[1] : `${BASE_URL}${linkM[1]}`;
+    // Extra guard: skip any URL that slipped through with a non-event path
+    if (/\/locuri\/|\/blog\/|\/categori/.test(url)) continue;
     if (seen.has(url)) continue;
     seen.add(url);
 
@@ -52,7 +54,8 @@ function collectStubsFromHtml(html: string): Array<{ title: string; url: string;
 
   // Also capture plain <article> or <li> links that might exist on the page
   if (stubs.length === 0) {
-    const linkRe = /href="(https?:\/\/zilesinopti\.ro\/event[^"?#]*)"/gi;
+    // Only match /event/ or /evenimente/ paths — never /locuri/ (venue pages) or /blog/
+    const linkRe = /href="(https?:\/\/zilesinopti\.ro\/(?:event|evenimente)[^"?#]*)"/gi;
     let lm;
     while ((lm = linkRe.exec(html)) !== null) {
       const url = lm[1].replace(/\/$/, '') + '/';
@@ -97,10 +100,14 @@ export async function scrapeZilesinopti(): Promise<ScrapedEvent[]> {
 
       // Phase 3: deep-fetch each stub's detail page for full data
       const capped = futureStubs.slice(0, 30);
-      for (let i = 0; i < capped.length; i += 5) {
-        const chunk = capped.slice(i, i + 5);
+      for (let i = 0; i < capped.length; i += 10) {
+        const chunk = capped.slice(i, i + 10);
         const results = await Promise.allSettled(
-          chunk.map(s => parseDetailPage(s.url, city, 12_000)),
+          chunk.map(async (s) => {
+            // Small jitter delay
+            await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+            return parseDetailPage(s.url, city, 15_000);
+          }),
         );
         for (const r of results) {
           if (r.status === 'fulfilled' && r.value) allEvents.push(r.value);

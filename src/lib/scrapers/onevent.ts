@@ -2,13 +2,13 @@
 // onevent.ro scraper
 // Strategy:
 //   1. Fetch music-category listing page per city
-//   2. Pull event URLs from JSON-LD (primary)
-//   3. Supplement with absolute hrefs to event detail pages
-//   4. Deep-fetch each event page
+//   2. Extract event URLs from HTML cards ONLY (listing-page JSON-LD has
+//      wrong URL-to-event mappings, causing duplicate/mismatched events)
+//   3. Deep-fetch each event detail page for full data
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { fetchHtml, batchFetch, extractUrlsFromJsonLd } from './utils';
+import { fetchHtml, batchFetch } from './utils';
 
 const LIST_URLS = [
   {
@@ -32,12 +32,13 @@ const SKIP_SEGMENTS = new Set([
   'music', 'sport', 'kids', 'theatre', 'comedy', 'festival',
 ]);
 
-/** Supplementary: extract event detail hrefs from raw HTML. */
+/** Extract event detail hrefs from raw HTML cards. */
 function extractHtmlUrls(html: string): string[] {
   const seen = new Set<string>();
   const urls: string[] = [];
-  // Match links that look like https://www.onevent.ro/event-name-slug/
-  const re = /href=["'](https?:\/\/www\.onevent\.ro\/([^"?#/\s]+)\/?)["']/gi;
+  // Match links that look like https://www.onevent.ro/evenimente/event-name-slug/
+  // Also match the shorter /event-name-slug/ pattern
+  const re = /href=["'](https?:\/\/www\.onevent\.ro\/(?:evenimente\/)?([^"?#/\s]+)\/?)['"]/gi;
   let m;
   while ((m = re.exec(html)) !== null) {
     const [, fullUrl, slug] = m;
@@ -69,12 +70,14 @@ export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
         continue;
       }
 
-      const ldUrls   = extractUrlsFromJsonLd(html, BASE_URL);
+      // NOTE: We intentionally skip extractUrlsFromJsonLd — the listing-page JSON-LD
+      // contains Event blocks whose `url` fields don't match the actual HTML cards.
+      // This caused triplicates like "Balkanique Drag Wedding" appearing 3 times
+      // with wrong venues/URLs. Detail pages have correct JSON-LD.
       const htmlUrls = extractHtmlUrls(html);
-      const allUrls  = Array.from(new Set([...ldUrls, ...htmlUrls]));
-      console.log(`[onevent] ${city}: ${ldUrls.length} JSON-LD + ${htmlUrls.length} HTML = ${allUrls.length} URLs`);
+      console.log(`[onevent] ${city}: ${htmlUrls.length} HTML URLs (JSON-LD skipped — unreliable on listing pages)`);
 
-      const events = await batchFetch(allUrls, city, { limit: 30, batchSize: 5, allowedCities });
+      const events = await batchFetch(htmlUrls, city, { limit: 30, batchSize: 10, allowedCities });
       console.log(`[onevent] ${city}: kept ${events.length} music events`);
       allEvents.push(...events);
     } catch (err) {
