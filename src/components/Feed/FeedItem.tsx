@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 import { HeartIcon, ChatIcon, ShareIcon, RepostIcon, CalendarIcon } from '../icons';
 import { getVenueLogo } from '@/lib/venue-logos';
 import { formatFullDate } from '@/lib/feed-utils';
@@ -11,6 +12,7 @@ import VerifiedBadge from '../VerifiedBadge';
 import PostOptionsMenu from '../PostOptionsMenu';
 import PostBody from './PostBody';
 import CommentSection from './CommentSection';
+import CommentSheet from './CommentSheet';
 
 interface FeedItemProps {
   post: FeedPost;
@@ -42,6 +44,7 @@ export function FeedItem({
   onFollow,
 }: FeedItemProps) {
   const [showComments, setShowComments] = useState(false);
+  const [showMobileSheet, setShowMobileSheet] = useState(false);
   const [copied, setCopied] = useState(false);
   const isFollowing = post.user.isFollowing || false;
   const isOwnPost = user?.id === post.userId;
@@ -54,205 +57,247 @@ export function FeedItem({
     });
   };
 
+  const handleCommentClick = () => {
+    // On mobile (max-width < 1024px) → bottom sheet
+    // On desktop → inline toggle
+    if (window.innerWidth < 1024) {
+      setShowMobileSheet(true);
+    } else {
+      setShowComments(v => !v);
+    }
+  };
+
   const authorLink = `/@${post.user.handle.replace('@', '')}`;
 
   return (
-    <article className="bg-noctvm-surface rounded-xl border border-noctvm-border overflow-hidden animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms` }}>
-      <div className="flex items-center gap-3 p-3">
-        <Link 
-          href={authorLink}
-          className="w-9 h-9 rounded-full border border-noctvm-border flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-noctvm-midnight hover:opacity-80 transition-opacity"
-          title={`View ${post.user.name}'s profile`}
-        >
-          {post.user.avatarUrl ? (
-            <Image src={post.user.avatarUrl} alt="" fill className="object-cover" unoptimized />
-          ) : (
-            <span className="text-xs font-bold text-white">{post.user.avatar}</span>
-          )}
-        </Link>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Link 
-              href={authorLink}
-              className="text-sm font-medium text-white hover:text-noctvm-violet transition-colors truncate"
-              title={post.user.name}
-            >
-              {post.user.name}
-            </Link>
-            {post.user.badge !== 'none' && <VerifiedBadge type={post.user.badge} size="sm" />}
-            
-            {/* Follow Pill */}
-            {!isFollowing && !isOwnPost && user && (
-              <button 
-                onClick={() => onFollow?.(post.userId!)}
-                className="ml-2 px-2.5 py-0.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/30 text-[9px] font-bold text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all animate-fade-in"
-                title={`Follow ${post.user.handle}`}
+    <>
+      <article
+        className="bg-noctvm-surface rounded-xl border border-noctvm-border overflow-hidden animate-fade-in-up"
+        style={{ animationDelay: `${idx * 80}ms` }}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 p-3">
+          <Link
+            href={authorLink}
+            className="w-9 h-9 rounded-full border border-noctvm-border flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-noctvm-midnight hover:opacity-80 transition-opacity"
+            title={`View ${post.user.name}'s profile`}
+          >
+            {post.user.avatarUrl ? (
+              <Image src={post.user.avatarUrl} alt="" fill className="object-cover" unoptimized />
+            ) : (
+              <span className="text-xs font-bold text-white">{post.user.avatar}</span>
+            )}
+          </Link>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Link
+                href={authorLink}
+                className="text-sm font-medium text-white hover:text-noctvm-violet transition-colors truncate"
+                title={post.user.name}
               >
-                Follow
-              </button>
+                {post.user.name}
+              </Link>
+              {post.user.badge !== 'none' && <VerifiedBadge type={post.user.badge} size="sm" />}
+
+              {!isFollowing && !isOwnPost && user && (
+                <button
+                  onClick={() => onFollow?.(post.userId!)}
+                  className="ml-2 px-2.5 py-0.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/30 text-[9px] font-bold text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all animate-fade-in"
+                  title={`Follow ${post.user.handle}`}
+                >
+                  Follow
+                </button>
+              )}
+            </div>
+            <Link
+              href={authorLink}
+              className="text-[10px] text-noctvm-silver block hover:text-noctvm-violet transition-colors"
+              title={post.user.handle}
+            >
+              {post.user.handle}
+            </Link>
+          </div>
+          <span title={formatFullDate(post.createdAt)} className="text-[10px] text-noctvm-silver font-mono">
+            {post.timeAgo}
+          </span>
+
+          <div className="relative">
+            <button
+              onClick={() => setActiveDotsId(activeDotsId === post.id ? null : post.id)}
+              className="text-noctvm-silver hover:text-white p-1"
+              title="Options"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
+            {activeDotsId === post.id && (
+              <PostOptionsMenu
+                postId={post.id}
+                postUserId={post.userId}
+                currentUserId={user?.id || null}
+                authorHandle={post.user.handle}
+                isFollowing={isFollowing}
+                onClose={() => setActiveDotsId(null)}
+                onCopyLink={handleCopyLink}
+                onDelete={() => onDelete(post.id)}
+                onNotInterested={() => {}}
+                onReport={() => {}}
+              />
             )}
           </div>
-          <Link 
-            href={authorLink}
-            className="text-[10px] text-noctvm-silver block hover:text-noctvm-violet transition-colors"
-            title={post.user.handle}
-          >
-            {post.user.handle}
-          </Link>
         </div>
-        <span title={formatFullDate(post.createdAt)} className="text-[10px] text-noctvm-silver font-mono">{post.timeAgo}</span>
 
-        <div className="relative">
-          <button 
-            onClick={() => setActiveDotsId(activeDotsId === post.id ? null : post.id)} 
-            className="text-noctvm-silver hover:text-white p-1"
-            title="Options"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-            </svg>
-          </button>
-          {activeDotsId === post.id && (
-            <PostOptionsMenu
-              postId={post.id}
-              postUserId={post.userId}
-              currentUserId={user?.id || null}
-              authorHandle={post.user.handle}
-              isFollowing={isFollowing}
-              onClose={() => setActiveDotsId(null)}
-              onCopyLink={handleCopyLink}
-              onDelete={() => onDelete(post.id)}
-              onNotInterested={() => {}}
-              onReport={() => {}}
-            />
+        {/* Image */}
+        <div className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden`}>
+          {post.imageUrl ? (
+            <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} unoptimized />
+          ) : (
+            <div className="text-white/20 italic p-4 text-center">Scene visualization unavailable</div>
           )}
-        </div>
-      </div>
-
-      <div className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden`}>
-        {post.imageUrl ? (
-          <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} unoptimized />
-        ) : (
-          <div className="text-white/20 italic p-4 text-center">Scene visualization unavailable</div>
-        )}
-        {post.venue.tagged && post.venue.name && (
-          <button onClick={() => onVenueClick(post.venue.name)} className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50" title={`View ${post.venue.name}`}>
-            <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
-              <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
-            </div>
-            <span className="text-[10px] font-bold text-white pr-1">{post.venue.name}</span>
-          </button>
-        )}
-
-        {/* Event Badge Overlay */}
-        {post.event && (
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in">
-            <CalendarIcon className="w-3 h-3 text-white" />
-            <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
-              {post.event.title}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="px-3 py-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => toggleLike(post)} 
-              title={post.liked ? "Unlike" : "Like"}
-              className={`flex items-center gap-1.5 group ${post.liked ? 'text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
+          {post.venue.tagged && post.venue.name && (
+            <button
+              onClick={() => onVenueClick(post.venue.name)}
+              className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50"
+              title={`View ${post.venue.name}`}
             >
-              <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current' : 'group-hover:scale-110'}`} />
-              <span className="text-xs font-mono">{post.likes}</span>
+              <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
+                <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
+              </div>
+              <span className="text-[10px] font-bold text-white pr-1">{post.venue.name}</span>
             </button>
-            <button 
-              onClick={() => setShowComments(!showComments)} 
-              title={showComments ? "Hide Comments" : "Show Comments"}
-              className={`flex items-center gap-1.5 transition-all ${showComments ? 'text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : 'text-noctvm-silver hover:text-white'} group`}
-            >
-              <ChatIcon className="w-5 h-5 group-hover:scale-110" />
-            </button>
-            <button 
-              onClick={() => onRepost(post)} 
-              title="Remix"
-              className={`flex items-center gap-1.5 group transition-all ${post.reposted ? 'text-noctvm-emerald' : 'text-noctvm-silver hover:text-white'}`}
-            >
-              <RepostIcon className={`w-5 h-5 ${post.reposted ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'group-hover:scale-110'}`} />
-              {post.reposts > 0 && <span className="text-xs font-mono">{post.reposts}</span>}
-            </button>
-            <button 
-              onClick={() => onShare(post.id)} 
-              title="Share"
-              className="flex items-center gap-1.5 text-noctvm-silver hover:text-white group"
-            >
-              <ShareIcon className="w-5 h-5 group-hover:scale-110" />
-            </button>
-          </div>
-          {copied && <span className="text-[10px] text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
-        </div>
-        <div className="text-xs leading-relaxed text-noctvm-silver/90 mb-1">
-          <Link href={authorLink} className="font-bold text-white mr-2 hover:underline">{post.user.handle}</Link>
-          <PostBody text={post.caption || ''} />
-        </div>
+          )}
 
-        {/* Minimal Entity Link Tags (Event & Venue) */}
-        <div className="flex flex-wrap gap-2 mt-3">
+          {/* Event Badge Overlay */}
           {post.event && (
-            <button 
-              onClick={() => {/* Trigger event modal logic */}} 
-              className="inline-flex items-center gap-2 group cursor-pointer bg-white/5 hover:bg-white/[0.08] px-2.5 py-1.5 rounded-full border border-white/5 transition-all active:scale-95"
-            >
-              <div className="w-5 h-5 rounded-md bg-noctvm-violet/20 flex items-center justify-center border border-noctvm-violet/20 group-hover:scale-110 transition-transform">
-                <CalendarIcon className="w-3 h-3 text-noctvm-violet" />
-              </div>
-              <div className="relative overflow-hidden max-w-[120px] sm:max-w-[180px]">
-                <p className="text-[10px] font-black text-white uppercase tracking-widest truncate whitespace-nowrap pr-4">
-                  {post.event.title}
-                </p>
-                <div className="absolute top-0 right-0 bottom-0 w-6 bg-gradient-to-l from-noctvm-black/80 to-transparent z-10" />
-              </div>
-            </button>
-          )}
-
-          {post.venue?.name && (
-            <button 
-              onClick={() => {/* Trigger venue navigation logic */}} 
-              className="inline-flex items-center gap-2 group cursor-pointer bg-noctvm-emerald/5 hover:bg-noctvm-emerald/[0.08] px-2.5 py-1.5 rounded-full border border-noctvm-emerald/10 transition-all active:scale-95"
-            >
-              <div className="w-5 h-5 rounded-md bg-noctvm-emerald/20 flex items-center justify-center border border-noctvm-emerald/20 group-hover:scale-110 transition-transform">
-                <svg className="w-3 h-3 text-noctvm-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
-              </div>
-              <div className="relative overflow-hidden max-w-[100px] sm:max-w-[150px]">
-                <p className="text-[10px] font-black text-noctvm-emerald uppercase tracking-widest truncate whitespace-nowrap pr-4">
-                  {post.venue.name}
-                </p>
-                <div className="absolute top-0 right-0 bottom-0 w-6 bg-gradient-to-l from-noctvm-black/80 to-transparent z-10" />
-              </div>
-            </button>
-          )}
-        </div>
-
-        {post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {post.tags.map(tag => (
-              <span key={tag} className="text-[9px] font-black text-noctvm-violet/40 hover:text-noctvm-violet cursor-pointer transition-colors uppercase tracking-widest">
-                #{tag}
+            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in">
+              <CalendarIcon className="w-3 h-3 text-white" />
+              <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+                {post.event.title}
               </span>
-            ))}
-          </div>
-        )}
-
-        {/* The "Dropdown" Row: Expandable Comment System */}
-        <div className="mt-4 py-1">
-          <CommentSection 
-            postId={post.id} 
-            postOwnerId={post.userId || ''} 
-            currentUserId={user?.id || null}
-            isCollapsed={true}
-          />
+            </div>
+          )}
         </div>
-      </div>
-    </article>
+
+        {/* Body */}
+        <div className="px-3 py-3">
+          {/* Action row */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => toggleLike(post)}
+                title={post.liked ? 'Unlike' : 'Like'}
+                className={`flex items-center gap-1.5 group ${post.liked ? 'text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
+              >
+                <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current' : 'group-hover:scale-110'}`} />
+                <span className="text-xs font-mono">{post.likes}</span>
+              </button>
+              <button
+                onClick={handleCommentClick}
+                title="Comments"
+                className={`flex items-center gap-1.5 transition-all ${showComments ? 'text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : 'text-noctvm-silver hover:text-white'} group`}
+              >
+                <ChatIcon className="w-5 h-5 group-hover:scale-110" />
+              </button>
+              <button
+                onClick={() => onRepost(post)}
+                title="Remix"
+                className={`flex items-center gap-1.5 group transition-all ${post.reposted ? 'text-noctvm-emerald' : 'text-noctvm-silver hover:text-white'}`}
+              >
+                <RepostIcon className={`w-5 h-5 ${post.reposted ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'group-hover:scale-110'}`} />
+                {post.reposts > 0 && <span className="text-xs font-mono">{post.reposts}</span>}
+              </button>
+              <button
+                onClick={() => onShare(post.id)}
+                title="Share"
+                className="flex items-center gap-1.5 text-noctvm-silver hover:text-white group"
+              >
+                <ShareIcon className="w-5 h-5 group-hover:scale-110" />
+              </button>
+            </div>
+            {copied && <span className="text-[10px] text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
+          </div>
+
+          {/* Caption */}
+          <div className="text-xs leading-relaxed text-noctvm-silver/90 mb-1">
+            <Link href={authorLink} className="font-bold text-white mr-2 hover:underline">{post.user.handle}</Link>
+            <PostBody text={post.caption || ''} />
+          </div>
+
+          {/* Entity Pills */}
+          {(post.event || post.venue.tagged) && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {post.event && (
+                <button
+                  className="inline-flex items-center gap-2 group bg-white/5 hover:bg-white/[0.08] px-2.5 py-1.5 rounded-full border border-white/5 transition-all active:scale-95"
+                >
+                  <div className="w-5 h-5 rounded-md bg-noctvm-violet/20 flex items-center justify-center border border-noctvm-violet/20 group-hover:scale-110 transition-transform">
+                    <CalendarIcon className="w-3 h-3 text-noctvm-violet" />
+                  </div>
+                  <div className="relative overflow-hidden max-w-[120px] sm:max-w-[180px]">
+                    <p className="text-[10px] font-black text-white uppercase tracking-widest truncate whitespace-nowrap pr-4">
+                      {post.event.title}
+                    </p>
+                    <div className="absolute top-0 right-0 bottom-0 w-6 bg-gradient-to-l from-noctvm-black/80 to-transparent z-10" />
+                  </div>
+                </button>
+              )}
+
+              {post.venue.tagged && post.venue.name && (
+                <button
+                  onClick={() => onVenueClick(post.venue.name)}
+                  className="inline-flex items-center gap-2 group bg-noctvm-emerald/5 hover:bg-noctvm-emerald/[0.08] px-2.5 py-1.5 rounded-full border border-noctvm-emerald/10 transition-all active:scale-95"
+                >
+                  <div className="w-5 h-5 rounded-md bg-noctvm-emerald/20 flex items-center justify-center border border-noctvm-emerald/20 group-hover:scale-110 transition-transform">
+                    <svg className="w-3 h-3 text-noctvm-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <div className="relative overflow-hidden max-w-[100px] sm:max-w-[150px]">
+                    <p className="text-[10px] font-black text-noctvm-emerald uppercase tracking-widest truncate whitespace-nowrap pr-4">
+                      {post.venue.name}
+                    </p>
+                    <div className="absolute top-0 right-0 bottom-0 w-6 bg-gradient-to-l from-noctvm-black/80 to-transparent z-10" />
+                  </div>
+                </button>
+              )}
+            </div>
+          )}
+
+          {post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {post.tags.map(tag => (
+                <span key={tag} className="text-[9px] font-black text-noctvm-violet/40 hover:text-noctvm-violet cursor-pointer transition-colors uppercase tracking-widest">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Desktop inline comment section — only rendered when toggled */}
+          {showComments && (
+            <div className="mt-4 hidden lg:block">
+              <CommentSection
+                postId={post.id}
+                postOwnerId={post.userId || ''}
+                currentUserId={user?.id || null}
+                isCollapsed={false}
+              />
+            </div>
+          )}
+        </div>
+      </article>
+
+      {/* Mobile bottom sheet — rendered in portal to break out of article stacking context */}
+      {showMobileSheet && typeof document !== 'undefined' && createPortal(
+        <CommentSheet
+          postId={post.id}
+          postOwnerId={post.userId || ''}
+          currentUserId={user?.id || null}
+          onClose={() => setShowMobileSheet(false)}
+        />,
+        document.body
+      )}
+    </>
   );
 }
