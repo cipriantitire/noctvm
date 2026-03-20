@@ -43,7 +43,7 @@ CREATE OR REPLACE FUNCTION public.get_venue_team(p_venue_id UUID)
 RETURNS TABLE (
     user_id UUID,
     username TEXT,
-    full_name TEXT,
+    display_name TEXT,
     avatar_url TEXT,
     role TEXT
 )
@@ -53,7 +53,7 @@ AS $$
     SELECT 
         p.id,
         p.username,
-        p.full_name,
+        p.display_name,
         p.avatar_url,
         vm.role
     FROM public.venue_managers vm

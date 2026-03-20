@@ -1,15 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon } from './icons';
+import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon, MapPinIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
 import type { NoctEvent } from '@/lib/types';
 import PostViewerModal from './PostViewerModal';
 import VerifiedBadge from './VerifiedBadge';
+import { 
+  MusicIcon, 
+  InstagramIcon, 
+  FacebookIcon, 
+  TwitterIcon, 
+  SnapchatIcon, 
+  TikTokIcon, 
+  GlobeIcon
+} from './icons';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +53,7 @@ interface VenueManagerRecord {
 interface UserProfilePageProps {
   onOpenAuth: () => void;
   onSettingsClick: () => void;
+  onEditProfileClick: () => void;
   onOpenCreatePost?: () => void;
   onOpenStories?: (users: StoryUser[], index: number) => void;
   onEventClick: (event: NoctEvent) => void;
@@ -54,6 +65,7 @@ interface UserProfilePageProps {
 export default function UserProfilePage({
   onOpenAuth,
   onSettingsClick,
+  onEditProfileClick,
   onOpenCreatePost,
   onOpenStories,
   onEventClick,
@@ -83,7 +95,13 @@ export default function UserProfilePage({
   const [managedVenues, setManagedVenues] = useState<VenueManagerRecord[]>([]);
 
   // ── Stats state ───────────────────────────────────────────────────────────
-  const [statsData, setStatsData] = useState({ posts: 0, followers: 0, following: 0 });
+  const [statsData, setStatsData] = useState({ 
+    posts: 0, 
+    followers: 0, 
+    following: 0,
+    eventsAttended: 0,
+    venuesVisited: 0
+  });
 
   // ── Share toast state ──────────────────────────────────────────────────────
   const [shareToast, setShareToast] = useState(false);
@@ -189,6 +207,8 @@ export default function UserProfilePage({
         posts: postsRes.count ?? 0,
         followers: followersRes.count ?? 0,
         following: followingRes.count ?? 0,
+        eventsAttended: profile?.events_attended ?? 0,
+        venuesVisited: profile?.venues_visited ?? 0
       });
     });
 
@@ -204,7 +224,7 @@ export default function UserProfilePage({
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [user, profile?.events_attended, profile?.venues_visited]);
 
   // ── Stories Logic ──────────────────────────────────────────────────────────
 
@@ -216,13 +236,14 @@ export default function UserProfilePage({
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString())
       .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchAndOpenMyStories = async () => {
     if (!user || !onOpenStories) return;
     const { data } = await supabase
       .from('stories')
-      .select('id, image_url, caption, venue_name, created_at')
+      .select('id, image_url, caption, venue_name, event_id, event_title, created_at')
       .eq('user_id', user.id)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: true });
@@ -241,6 +262,8 @@ export default function UserProfilePage({
         image_url: s.image_url,
         caption: s.caption,
         venue_name: s.venue_name,
+        event_id: s.event_id ?? null,
+        event_title: s.event_title ?? null,
         created_at: s.created_at,
       })),
     };
@@ -255,7 +278,11 @@ export default function UserProfilePage({
       .order('added_at', { ascending: true });
 
     const realStories: RealStory[] = (data ?? [])
-      .map((row: any) => row.stories)
+      .map((row: any) => ({
+        ...row.stories,
+        event_id: row.stories.event_id ?? null,
+        event_title: row.stories.event_title ?? null
+      }))
       .filter(Boolean);
 
     if (!realStories.length) return;
@@ -309,82 +336,156 @@ export default function UserProfilePage({
   ];
 
   return (
-    <div className="max-w-xl mx-auto tab-content animate-fade-in">
+    <div className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans">
 
       {/* ── Profile Header ────────────────────────────────────── */}
-      <div className="px-4 pt-2 pb-4">
-        {/* Avatar + stats */}
-        <div className="flex items-center gap-6 mb-4">
-          <div className="relative flex-shrink-0">
-            {hasActiveStories ? (
+      <div className="px-0 sm:px-4 pt-4 pb-8">
+        {/* Main Header Container: Desktop side-by-side, Mobile stacked */}
+        <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-0 mb-8">
+          
+          {/* Left Side: Identity */}
+          <div className="flex items-center gap-6 flex-1 min-w-0">
+            {/* Avatar block */}
+            <div className="relative flex-shrink-0">
               <div
-                className="w-20 h-20 rounded-full p-0.5 bg-gradient-to-br from-noctvm-violet via-purple-500 to-pink-500 cursor-pointer"
-                onClick={fetchAndOpenMyStories}
+                className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full p-0.5 relative ${
+                  hasActiveStories 
+                    ? 'bg-gradient-to-tr from-noctvm-violet via-purple-500 to-pink-500 animate-spin-slow cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.5)]' 
+                    : 'bg-white/10'
+                }`}
+                onClick={hasActiveStories ? fetchAndOpenMyStories : undefined}
               >
                 <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-midnight relative border border-white/5">
                     {profile?.avatar_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      <NextImage src={profile.avatar_url} alt="" fill className="object-cover" unoptimized />
                     ) : (
-                      <span className="text-2xl font-bold text-white">{initials}</span>
+                      <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/10">
+                        <span className="text-4xl font-sans font-black text-white tracking-widest leading-none translate-y-[-2px]">{initials}</span>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-noctvm-violet/30 to-purple-500/30 flex items-center justify-center">
-                {profile?.avatar_url ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-2xl font-bold text-white">{initials}</span>
+            </div>
+
+            {/* Name + Nickname Block */}
+            <div className="flex-1 flex flex-col justify-center min-w-0">
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <h2 className="text-3xl sm:text-4xl font-sans font-black text-white tracking-tight truncate leading-none">
+                  {profile?.display_name || 'Night Owl'}
+                </h2>
+                {profile?.badge && profile.badge !== 'none' && (
+                  <VerifiedBadge type={profile.badge} size="md" />
                 )}
               </div>
-            )}
+              <p className="text-sm font-black text-noctvm-silver/40 uppercase tracking-[0.2em]">@{profile?.username || 'nightowl'}</p>
+              
+              {profile?.city && (
+                <div className="flex items-center gap-2 mt-3 p-1 px-3 w-fit rounded-full bg-white/[0.03] border border-white/5">
+                  <MapPinIcon className="w-3 h-3 text-noctvm-violet" />
+                  <span className="text-[9px] text-noctvm-silver font-black uppercase tracking-widest">{profile.city}</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 flex justify-around">
-            {[
-              { label: 'Posts', value: statsData.posts },
-              { label: 'Followers', value: statsData.followers },
-              { label: 'Following', value: statsData.following },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <span className="block text-base font-bold text-white font-heading">{stat.value}</span>
-                <span className="text-[11px] text-noctvm-silver">{stat.label}</span>
-              </div>
-            ))}
+          {/* Right Side: High-End Stats Grid (Moved to same row on Desktop) */}
+          <div className="w-full lg:w-[320px] grid grid-cols-2 gap-2">
+            {/* Card 1: Network (Followers) */}
+            <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center group hover:bg-white/[0.05] hover:border-noctvm-violet/30 transition-all cursor-default relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-12 h-12 bg-noctvm-violet/5 blur-xl group-hover:bg-noctvm-violet/10 transition-colors" />
+               <span className="text-2xl font-mono font-black text-noctvm-violet group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(139,92,246,0.3)]">{statsData.followers}</span>
+               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Network</span>
+            </div>
+
+            {/* Card 2: Activity (Events) */}
+            <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center group hover:bg-white/[0.05] hover:border-noctvm-emerald/30 transition-all cursor-default relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-12 h-12 bg-noctvm-emerald/5 blur-xl group-hover:bg-noctvm-emerald/10 transition-colors" />
+               <span className="text-2xl font-mono font-black text-noctvm-emerald group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{statsData.eventsAttended}</span>
+               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Activity</span>
+            </div>
+
+            {/* Card 3: Social Proof (Following/Venues Combined) */}
+            <div className="col-span-2 bg-white/[0.02] border border-white/[0.03] rounded-2xl p-3 px-4 flex items-center justify-around group hover:bg-white/[0.04] transition-all">
+                <div className="text-center">
+                  <span className="block text-xs font-mono font-bold text-white/50">{statsData.following}</span>
+                  <span className="text-[7px] uppercase tracking-widest text-white/20 font-black">Following</span>
+                </div>
+                <div className="w-px h-6 bg-white/5" />
+                <div className="text-center">
+                  <span className="block text-xs font-mono font-bold text-white/50">{statsData.posts}</span>
+                  <span className="text-[7px] uppercase tracking-widest text-white/20 font-black">Moments</span>
+                </div>
+                <div className="w-px h-6 bg-white/5" />
+                <div className="text-center">
+                  <span className="block text-xs font-mono font-bold text-white/50">{statsData.venuesVisited}</span>
+                  <span className="text-[7px] uppercase tracking-widest text-white/20 font-black">Venues</span>
+                </div>
+            </div>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="mb-3 space-y-0.5">
-          <div className="flex items-center gap-1.5">
-            <p className="text-sm font-semibold text-white leading-tight">
-              {profile?.display_name || 'Night Owl'}
-            </p>
-            {profile?.badge && profile.badge !== 'none' && (
-              <VerifiedBadge type={profile.badge} size="sm" />
+        {/* Bio & Links area */}
+        <div className="px-4 lg:px-0 mb-6">
+          {profile?.bio && (
+            <p className="text-xs text-noctvm-silver/80 leading-relaxed max-w-lg mb-4 italic font-medium">&quot;{profile.bio}&quot;</p>
+          )}
+
+          <div className="flex flex-wrap gap-4 items-center">
+            {/* Music Link */}
+            {profile?.music_link && (
+              <div className="flex items-center gap-2 p-2 px-3 rounded-full bg-noctvm-surface/50 border border-noctvm-border/50 hover:border-noctvm-violet/30 transition-all">
+                <MusicIcon className="w-3.5 h-3.5 text-noctvm-violet shadow-glow" />
+                <a 
+                  href={profile.music_link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[10px] font-mono font-bold text-white hover:text-noctvm-violet transition-colors flex items-center gap-1 uppercase tracking-wider"
+                >
+                  {profile.music_link.type}
+                  <svg className="w-2.5 h-2.5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                </a>
+              </div>
+            )}
+
+            {/* Social Links */}
+            {profile?.social_links && profile.social_links.length > 0 && (
+              <div className="flex items-center gap-3">
+                {profile.social_links.map(link => {
+                  const Icon = link.platform === 'instagram' ? InstagramIcon :
+                               link.platform === 'facebook' ? FacebookIcon :
+                               link.platform === 'twitter' ? TwitterIcon :
+                               link.platform === 'snapchat' ? SnapchatIcon :
+                               link.platform === 'tiktok' ? TikTokIcon : GlobeIcon;
+                  return (
+                    <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer" title={link.platform} className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-white/5 transition-all">
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  );
+                })}
+              </div>
             )}
           </div>
-          <p className="text-xs text-noctvm-silver">@{profile?.username || 'nightowl'}</p>
-          {profile?.bio && (
-            <p className="text-xs text-noctvm-silver/80 mt-1.5 leading-relaxed">{profile.bio}</p>
-          )}
-          {profile?.city && (
-            <div className="flex items-center gap-1 mt-1">
-              <svg className="w-3 h-3 text-noctvm-silver/50" viewBox="0 0 24 24" fill="currentColor">
-                <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-              </svg>
-              <span className="text-[10px] text-noctvm-silver/50">{profile.city}</span>
+
+          {/* Genre Pills */}
+          {profile?.genres && profile.genres.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-5">
+              {profile.genres.map(genre => (
+                <span key={genre} className="px-3 py-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10 text-[9px] font-mono font-bold text-noctvm-violet/80 uppercase tracking-widest">
+                  #{genre}
+                </span>
+              ))}
             </div>
           )}
         </div>
 
-        <div className="flex gap-2">
-          <button onClick={onSettingsClick} className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors">Edit Profile</button>
-          <button onClick={handleShareProfile} className="flex-1 py-2 rounded-lg bg-noctvm-surface border border-noctvm-border text-xs font-semibold text-white hover:bg-noctvm-surface/70 transition-colors">{shareToast ? 'Copied!' : 'Share Profile'}</button>
+        {/* Profile Action Buttons */}
+        <div className="flex gap-2.5 px-4 lg:px-0">
+          <button onClick={onEditProfileClick} className="flex-1 py-3 rounded-xl bg-white text-black text-[11px] font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all shadow-xl shadow-white/5 active:scale-95">Edit Profile</button>
+          <button onClick={handleShareProfile} className="flex-1 py-3 rounded-xl bg-noctvm-surface border border-noctvm-border text-[11px] font-black uppercase tracking-wider text-white hover:bg-noctvm-surface/70 transition-all active:scale-95">
+            {shareToast ? 'Address Copied' : 'Share Profile'}
+          </button>
         </div>
       </div>
 
@@ -406,7 +507,7 @@ export default function UserProfilePage({
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-noctvm-surface overflow-hidden">
                       {mv.venues.image_url ? (
-                        <img src={mv.venues.image_url} alt="" className="w-full h-full object-cover" />
+                      <NextImage src={mv.venues.image_url} alt="" fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-noctvm-silver text-xs font-bold">{mv.venues.name[0]}</div>
                       )}
@@ -446,7 +547,7 @@ export default function UserProfilePage({
                 <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} p-[2px] transition-all group-hover:p-[1px]`}>
                   <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-black flex items-center justify-center">
                     {hl.cover_url ? (
-                      <img src={hl.cover_url} alt="" className="w-full h-full object-cover" />
+                      <NextImage src={hl.cover_url} alt="" fill className="object-cover" unoptimized />
                     ) : (
                       <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
                     )}
@@ -490,7 +591,7 @@ export default function UserProfilePage({
             {posts.map((post, i) => (
               <button key={post.id} onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
-                  <img src={post.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
+                  <NextImage src={post.image_url} alt="" fill className="object-cover group-hover:scale-105 transition-all duration-500" unoptimized />
                 ) : (
                   <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}
@@ -511,7 +612,7 @@ export default function UserProfilePage({
             {reposts.map((post, i) => (
               <button key={post.id} onClick={() => { setActiveViewerPosts(reposts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
-                  <img src={post.image_url} alt="" className="w-full h-full object-cover opacity-80" />
+                  <NextImage src={post.image_url} alt="" fill className="object-cover opacity-80" unoptimized />
                 ) : (
                   <div className="w-full h-full bg-noctvm-midnight flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-emerald/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}
@@ -548,7 +649,7 @@ export default function UserProfilePage({
             {taggedPosts.map((post, i) => (
               <button key={post.id} onClick={() => { setActiveViewerPosts(taggedPosts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
-                  <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                  <NextImage src={post.image_url} alt="" fill className="object-cover" unoptimized />
                 ) : (
                   <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}

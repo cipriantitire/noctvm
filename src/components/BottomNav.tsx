@@ -8,8 +8,8 @@ type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
 const ITEMS: { icon: any; label: string; tab: TabType }[] = [
   { icon: EventsIcon, label: 'Events', tab: 'events' },
-  { icon: FeedIcon, label: 'Feed', tab: 'feed' },
   { icon: VenuesIcon, label: 'Venues', tab: 'venues' },
+  { icon: FeedIcon, label: 'Feed', tab: 'feed' },
   { icon: PocketIcon, label: 'Pocket',  tab: 'pocket' },
   { icon: UserIcon, label: 'Profile', tab: 'profile' },
 ];
@@ -37,30 +37,19 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
               activeTab === tab ? 'text-white' : 'text-noctvm-silver hover:text-white'
             }`}
           >
-            <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
-            <span className={`text-[10px] font-medium ${activeTab === tab ? 'text-white' : ''}`}>{label}</span>
+            {tab === 'profile' && profile?.avatar_url ? (
+              <div className={`w-6 h-6 rounded-full overflow-hidden ${activeTab === 'profile' ? 'ring-2 ring-noctvm-violet' : 'ring-1 ring-white/10'}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
+            )}
+            <span className={`text-[10px] font-medium truncate max-w-[52px] ${activeTab === tab ? 'text-white' : ''}`}>
+              {tab === 'profile' ? profileLabel : label}
+            </span>
           </button>
         ))}
-
-        {/* Profile tab */}
-        <button
-          onClick={() => onTabChange('profile')}
-          className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
-            activeTab === 'profile' ? 'text-white' : 'text-noctvm-silver hover:text-white'
-          }`}
-        >
-          {profile?.avatar_url ? (
-            <div className={`w-6 h-6 rounded-full overflow-hidden ${activeTab === 'profile' ? 'ring-2 ring-noctvm-violet' : ''}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <UserIcon className={`w-6 h-6 ${activeTab === 'profile' ? 'scale-110' : ''} transition-transform`} />
-          )}
-          <span className={`text-[10px] font-medium truncate max-w-[52px] ${activeTab === 'profile' ? 'text-white' : ''}`}>
-            {profileLabel}
-          </span>
-        </button>
       </div>
     </nav>
   );

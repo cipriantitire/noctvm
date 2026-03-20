@@ -249,6 +249,14 @@ export function ChevronDownIcon({ className = "w-5 h-5" }: { className?: string 
   );
 }
 
+export function ChevronLeftIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  );
+}
+
 export function ChevronUpIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -327,6 +335,69 @@ export function UploadIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    </svg>
+  );
+}
+
+export function MusicIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+
+export function InstagramIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+export function FacebookIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+
+export function TwitterIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+export function SnapchatIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.25c-2.454 0-4.444 1.487-4.444 3.322 0 .092.005.183.015.273a2.028 2.028 0 0 1-.515-.157c-.432-.192-1.29-.444-1.748-.444a1.111 1.111 0 0 0-1.077 1.388c.278.833.834 1.111 1.389 1.111.124 0 .265-.015.414-.044.204.426.545.748.966.924.364.153 1.05.295 1.777.426-.14.192-.25.405-.333.64-.222.61-.167 1.166.167 1.666a4.44 4.44 0 0 0-.25 1.5c0 .358.04.664.116.945-.444.13-1.036.31-1.36.444-.834.334-3.333 1.667-3.333 3.611a.833.833 0 0 0 .833.833h13.333a.833.833 0 0 0 .833-.833c0-1.944-2.5-3.277-3.333-3.611-.324-.13-.916-.314-1.36-.444.076-.28.116-.587.116-.945a4.44 4.44 0 0 0-.25-1.5c.334-.5.389-1.056.167-1.666a1.98 1.98 0 0 0-.333-.64c.727-.13 1.413-.273 1.777-.426.421-.176.762-.498.966-.924.15.03.29.044.414.044.555 0 1.111-.278 1.389-1.111a1.111 1.111 0 0 0-1.077-1.388c-.458 0-1.316.252-1.748.444a2.028 2.028 0 0 1-.515.157c.01-.09.015-.181.015-.273 0-1.835-1.99-3.322-4.444-3.322z" />
+    </svg>
+  );
+}
+
+export function TikTokIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.525.45c1.31 0 2.57.51 3.51 1.44.49.48.88 1.05 1.15 1.68.27.63.41 1.3.41 1.98v.48a4.92 4.92 0 0 0 3.2.77c.33-.04.66-.11.98-.21v3.91c-.3.08-.6.14-.91.17a6.95 6.95 0 0 1-5.12-1.67v6.39c0 1.05-.27 2.08-.78 3a5.53 5.53 0 0 1-2.14 2.14c-.92.51-1.95.78-3 .78-1.05 0-2.08-.27-3-.78a5.53 5.53 0 0 1-2.14-2.14c-.51-.92-.78-1.95-.78-3 0-1.05.27-2.08.78-3a5.53 5.53 0 0 1 2.14-2.14c.92-.51 1.95-.78 3-.78.33 0 .66.04.98.11v4.06c-.32-.1-.65-.15-.98-.15-.55 0-1.09.14-1.57.41a2.89 2.89 0 0 0-1.11 1.11c-.27.48-.41 1.02-.41 1.57s.14 1.09.41 1.57a2.89 2.89 0 0 0 1.11 1.11c.48.27 1.02.41 1.57.41.55 0 1.09-.14 1.57-.41a2.89 2.89 0 0 0 1.11-1.11c.27-.48.41-1.02.41-1.57z" />
+    </svg>
+  );
+}
+
+export function GlobeIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  );
+}
+export function BellIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
     </svg>
   );
 }

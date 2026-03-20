@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
 import Image from 'next/image';
+import Link from 'next/link';
+import { getVenueLogo } from '@/lib/venue-logos';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -13,6 +15,8 @@ export interface RealStory {
   image_url: string | null;
   caption: string | null;
   venue_name: string | null;
+  event_id: string | null;
+  event_title: string | null;
   created_at: string;
 }
 
@@ -220,11 +224,40 @@ export default function StoriesViewerModal({
         </div>
       </div>
 
-      {/* Story caption */}
-      {story.caption && (
-        <div className="absolute bottom-0 left-0 right-0 px-6 z-20 pointer-events-none pb-[max(3rem,env(safe-area-inset-bottom))]">
-          <p className="text-white text-sm text-center drop-shadow-lg">{story.caption}</p>
-          {story.venue_name && <p className="text-white/60 text-xs text-center mt-1">📍 {story.venue_name}</p>}
+      {/* Story caption & tags */}
+      {(story.caption || story.venue_name || story.event_title) && (
+        <div className="absolute bottom-0 left-0 right-0 px-6 z-20 pointer-events-auto pb-[max(3rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-2">
+          {story.caption && (
+            <p className="text-white text-sm text-center drop-shadow-lg max-w-xs">{story.caption}</p>
+          )}
+          
+          <div className="flex flex-wrap justify-center gap-2">
+            {story.venue_name && (
+              <Link
+                href={`/venues/${encodeURIComponent(story.venue_name)}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-noctvm-midnight/60 backdrop-blur-md border border-white/10 text-white text-xs hover:bg-noctvm-surface transition-colors animate-fade-in"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="w-4 h-4 rounded-full overflow-hidden border border-white/10 relative">
+                  <Image src={getVenueLogo(story.venue_name)} alt="" fill className="object-cover" />
+                </div>
+                <span className="font-semibold">{story.venue_name}</span>
+              </Link>
+            )}
+            
+            {story.event_id && story.event_title && (
+              <Link
+                href={`/events/${story.event_id}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-noctvm-emerald/20 backdrop-blur-md border border-noctvm-emerald/30 text-noctvm-emerald text-xs hover:bg-noctvm-emerald/30 transition-colors animate-fade-in"
+                onClick={e => e.stopPropagation()}
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span className="font-bold">{story.event_title}</span>
+              </Link>
+            )}
+          </div>
         </div>
       )}
 

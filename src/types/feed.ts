@@ -8,6 +8,7 @@ export interface FeedPost {
     avatarUrl: string | null;
     verified: boolean;
     badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
+    isFollowing?: boolean;
   };
   caption: string;
   venue: { name: string; tagged: boolean };

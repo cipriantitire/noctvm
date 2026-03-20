@@ -1,8 +1,10 @@
 'use client';
 
-import { MoonIcon, EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon } from './icons';
+import { MoonIcon, EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
@@ -17,29 +19,38 @@ interface SidebarProps {
   activeTab?: TabType;
   onTabChange?: (tab: TabType) => void;
   onSettingsClick?: () => void;
+  onNotificationsClick?: () => void;
   activeCity?: 'bucuresti' | 'constanta';
 }
 
-export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, onSettingsClick }: SidebarProps) {
+export default function Sidebar({ 
+  activeTab = 'events', 
+  onTabChange = () => {}, 
+  onSettingsClick,
+  onNotificationsClick 
+}: SidebarProps) {
   const { profile, user, isAdmin, isOwner } = useAuth();
+  const [isHovered, setIsHovered] = useState(false);
 
   const profileLabel = user
     ? (profile?.username || profile?.display_name || 'Profile')
     : 'Log In';
 
-  // Shared label class: zero width when collapsed (no space taken), fades in when expanded.
-  // max-w change is instant (no layout transition), only opacity animates (GPU composited).
   const labelCls = 'max-w-0 group-hover/sidebar:max-w-[160px] overflow-hidden opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75 whitespace-nowrap';
 
   return (
-    <aside className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-200 ease-out py-6 overflow-hidden">
+    <aside 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-200 ease-out py-6 overflow-hidden"
+    >
       {/* Moon Logo */}
       <div className="flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-3 px-5 mb-10 w-full">
         <MoonIcon className="w-8 h-8 text-noctvm-violet flex-shrink-0" />
         <span className={labelCls + ' font-heading text-xl font-bold text-glow'}>NOCTVM</span>
       </div>
 
-      {/* Nav icons — centered when collapsed, left-aligned when expanded */}
+      {/* Nav icons - centered when collapsed, left-aligned when expanded */}
       <nav className="flex-1 flex flex-col items-center justify-center w-full space-y-1 px-3">
         {NAV_ITEMS.map(({ icon: Icon, label, tab }) => (
           <button
@@ -57,45 +68,20 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
         ))}
       </nav>
 
-      {/* Bottom: Cogwheel + Profile */}
-      <div className="px-3 w-full space-y-1">
-        {/* Command Center (Admin/Owner only) */}
-        {(isAdmin || isOwner) && (
-          <Link
-            href="/dashboard"
-            className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-violet hover:bg-noctvm-violet/10 group/cc"
-            title="Command Center"
-          >
-            <svg className="w-6 h-6 flex-shrink-0 group-hover/cc:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6V3.75a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75V6m-1.5 1.5h1.5a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75V8.25a.75.75 0 01.75-.75z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9H6a.75.75 0 01.75.75v7.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75v-7.5a.75.75 0 01.75-.75zM18 12.75h2.25a.75.75 0 01.75.75v3.75a.75.75 0 01-.75.75H18a.75.75 0 01-.75-.75v-3.75a.75.75 0 01.75-.75z" />
-            </svg>
-            <span className={labelCls}>Command Center</span>
-          </Link>
-        )}
-
-        {/* Settings */}
-        <button
-          onClick={onSettingsClick}
-          className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
-          title="Account Settings"
-        >
-          <CogIcon className="w-6 h-6 flex-shrink-0" />
-          <span className={labelCls}>Settings</span>
-        </button>
-
-        {/* Profile */}
+      {/* Bottom: Profile (Bottom-most) -> Notifications -> Settings -> Dashboard (Top-most of group) */}
+      <div className="px-3 w-full flex flex-col-reverse gap-1">
+        
+        {/* Profile (Base Button) */}
         <button
           onClick={() => onTabChange('profile')}
-          className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
+          className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 z-20 ${
             activeTab === 'profile'
-              ? 'bg-noctvm-violet/10 text-white'
-              : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
+              ? 'bg-noctvm-violet/10 text-white border border-noctvm-violet/20'
+              : 'bg-noctvm-black text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
           }`}
         >
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 ring-2 ring-noctvm-border overflow-hidden">
             {profile?.avatar_url ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
               <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (
               <UserIcon className="w-4 h-4 text-white" />
@@ -103,6 +89,49 @@ export default function Sidebar({ activeTab = 'events', onTabChange = () => {}, 
           </div>
           <span className={labelCls + ' truncate'}>{profileLabel}</span>
         </button>
+
+        {/* Animated Stack */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex flex-col-reverse gap-1 mb-1"
+            >
+              {/* Notifications */}
+              <button
+                onClick={onNotificationsClick}
+                className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+              >
+                <BellIcon className="w-6 h-6 flex-shrink-0" />
+                <span className={labelCls}>Notifications</span>
+              </button>
+
+              {/* Settings */}
+              <button
+                onClick={onSettingsClick}
+                className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+              >
+                <CogIcon className="w-6 h-6 flex-shrink-0" />
+                <span className={labelCls}>Settings</span>
+              </button>
+
+              {/* Dashboard */}
+              {(isAdmin || isOwner) && (
+                <Link
+                  href="/dashboard"
+                  className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-violet hover:bg-noctvm-violet/10"
+                >
+                  <GridIcon className="w-6 h-6 flex-shrink-0" />
+                  <span className={labelCls}>Dashboard</span>
+                </Link>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     </aside>
   );

@@ -520,9 +520,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       const clusters: any[][] = [];
       const priority = (s: string) => {
         if (s === 'manual') return 100;
+        if (s === 'controlclub') return 11; // Always wins for its own venue
         if (s === 'livetickets') return 10;
         if (s === 'ra') return 9;
-        if (s === 'controlclub') return 8;
         if (s === 'eventbook') return 8;
         if (s === 'iabilet') return 7;
         return 1;
@@ -542,7 +542,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
                            (normTitle.length > 6 && leaderTitle.includes(normTitle)) ||
                            (leaderTitle.length > 6 && normTitle.includes(leaderTitle)) ||
                            // Prefix match: if both titles share the same first 10+ chars, they're likely the same event
-                           (normTitle.length >= 10 && leaderTitle.length >= 10 && normTitle.slice(0, 10) === leaderTitle.slice(0, 10));
+                           (normTitle.length >= 10 && leaderTitle.length >= 10 && normTitle.slice(0, 10) === leaderTitle.slice(0, 10)) ||
+                           // URL match: if they point to the exact same ticket listing (e.g. RA event link)
+                           (event.ticket_url && leader.ticket_url && event.ticket_url === leader.ticket_url && event.ticket_url.length > 20);
 
           if (isRelated) {
             cluster.push(event);

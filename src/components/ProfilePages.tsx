@@ -1,130 +1,217 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { logActivity } from '@/lib/activity';
+import { GENRE_FILTERS } from './FilterBar';
+import { 
+  BellIcon, 
+  EditIcon, 
+  GlobeIcon, 
+  InstagramIcon, 
+  MapPinIcon, 
+  MusicIcon, 
+  ShieldIcon, 
+  StarIcon, 
+  TwitterIcon,
+  TikTokIcon,
+  FacebookIcon,
+  SnapchatIcon,
+  CogIcon,
+  UserIcon,
+  LayoutListIcon,
+  ChevronRightIcon,
+  GridIcon
+} from '@/components/icons';
 
-// Shared back button
-function BackButton({ onBack }: { onBack: () => void; label?: string }) {
+// ==================== SHARED COMPONENTS ====================
+
+function BackButton({ onBack, label }: { onBack: () => void, label: string }) {
   return (
     <button
       onClick={onBack}
-      className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all mb-6"
+      className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors mb-6 group"
     >
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
+      <div className="w-8 h-8 rounded-lg bg-noctvm-midnight border border-noctvm-border flex items-center justify-center group-hover:bg-noctvm-surface transition-colors">
+        <svg className="w-4 h-4 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
     </button>
   );
 }
 
-// Shared input component
-function FormInput({ label, type = 'text', placeholder, value, onChange, disabled }: {
-  label: string; type?: string; placeholder?: string; value: string; onChange: (v: string) => void; disabled?: boolean;
-}) {
+function FormInput({ label, value, onChange, placeholder = '', type = 'text', title }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string, type?: string, title?: string }) {
   return (
-    <div>
-      <label className="block text-xs font-medium text-noctvm-silver mb-1.5">{label}</label>
+    <div className="space-y-1.5 text-left">
+      <label className="text-[10px] font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
       <input
         type={type}
-        placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors disabled:opacity-50"
+        placeholder={placeholder}
+        title={title || label}
+        className="w-full px-4 py-2.5 rounded-xl bg-noctvm-midnight border border-noctvm-border focus:border-noctvm-violet/40 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/30"
       />
     </div>
   );
 }
 
-function FormTextarea({ label, placeholder, value, onChange, rows = 3 }: {
-  label: string; placeholder?: string; value: string; onChange: (v: string) => void; rows?: number;
-}) {
+function FormTextarea({ label, value, onChange, rows = 3 }: { label: string, value: string, onChange: (v: string) => void, rows?: number }) {
   return (
-    <div>
-      <label className="block text-xs font-medium text-noctvm-silver mb-1.5">{label}</label>
+    <div className="space-y-1.5 text-left">
+      <label className="text-[10px] font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
       <textarea
-        placeholder={placeholder}
+        rows={rows}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors resize-none"
+        title={label}
+        className="w-full px-4 py-2.5 rounded-xl bg-noctvm-midnight border border-noctvm-border focus:border-noctvm-violet/40 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/30 resize-none"
       />
     </div>
   );
 }
 
-function FormSelect({ label, options, value, onChange }: {
-  label: string; options: { value: string; label: string }[]; value: string; onChange: (v: string) => void;
-}) {
+function FormSelect({ label, value, onChange, options, title }: { label: string, value: string, onChange: (v: string) => void, options: { value: string, label: string }[], title?: string }) {
   return (
-    <div>
-      <label className="block text-xs font-medium text-noctvm-silver mb-1.5">{label}</label>
+    <div className="space-y-1.5 flex-1 text-left">
+      <label className="text-[10px] font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-noctvm-violet/50 transition-colors appearance-none"
+        title={title || label}
+        className="w-full px-4 py-2.5 rounded-xl bg-noctvm-midnight border border-noctvm-border focus:border-noctvm-violet/40 transition-all outline-none text-sm text-white appearance-none cursor-pointer"
       >
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
       </select>
     </div>
   );
 }
 
-function ToggleSwitch({ enabled, onToggle, label, desc }: {
-  enabled: boolean; onToggle: () => void; label: string; desc?: string;
-}) {
+function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, onToggle: () => void, label: string, desc?: string }) {
   return (
-    <button onClick={onToggle} className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors">
+    <button
+      onClick={onToggle}
+      title={label}
+      className="w-full flex items-center justify-between p-4 rounded-xl bg-noctvm-midnight/40 border border-noctvm-border hover:border-noctvm-violet/20 transition-all text-left"
+    >
       <div>
-        <p className="text-sm font-medium text-white text-left">{label}</p>
-        {desc && <p className="text-[10px] text-noctvm-silver mt-0.5 text-left">{desc}</p>}
+        <p className="text-sm font-bold text-white">{label}</p>
+        {desc && <p className="text-[11px] text-noctvm-silver mt-0.5">{desc}</p>}
       </div>
-      <div className={`w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-noctvm-violet' : 'bg-noctvm-surface'} relative`}>
-        <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+      <div className={`w-10 h-5 rounded-full transition-all relative ${enabled ? 'bg-noctvm-violet' : 'bg-noctvm-surface border border-noctvm-border'}`}>
+        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${enabled ? 'left-6' : 'left-1'}`} />
       </div>
     </button>
   );
 }
 
-// ==================== MANAGE ACCOUNT ====================
-export function ManageAccountPage({ onBack }: { onBack: () => void }) {
+// ==================== MAIN SETTINGS HUB ====================
+
+export function SettingsPage({ onBack }: { onBack: () => void }) {
+  const { signOut } = useAuth();
+  const [view, setView] = useState<'hub' | 'edit' | 'privacy' | 'account' | 'activity' | 'notifications' | 'inventory'>('hub');
+  const menuItems = [
+    { id: 'edit',     label: 'Edit Profile',   desc: 'Bio, music, genres, socials', icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
+    { id: 'inventory',label: 'Inventory',      desc: 'Premium profile effects',      icon: <LayoutListIcon className="w-5 h-5 text-noctvm-emerald" /> },
+    { id: 'privacy',  label: 'Privacy',        desc: 'Visibility & interactions',    icon: <ShieldIcon className="w-5 h-5 text-noctvm-emerald" /> },
+    { id: 'account',  label: 'Account',        desc: 'Email, data, security',        icon: <UserIcon className="w-5 h-5 text-noctvm-silver" /> },
+    { id: 'notifications', label: 'Notifications', desc: 'Alerts & preferences',      icon: <CogIcon className="w-5 h-5 text-noctvm-silver" /> },
+    { id: 'activity', label: 'Activity Log',   desc: 'History of your actions',      icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
+  ];
+
+  if (view === 'edit')     return <EditProfilePage onBack={() => setView('hub')} />;
+  if (view === 'inventory')return <InventoryPage onBack={() => setView('hub')} />;
+  if (view === 'privacy')  return <PrivacySettingsPage onBack={() => setView('hub')} />;
+  if (view === 'account')  return <ManageAccountPage onBack={() => setView('hub')} />;
+  if (view === 'notifications') return <NotificationSettingsPage onBack={() => setView('hub')} />;
+  if (view === 'activity') return <ActivityLogPage onBack={() => setView('hub')} />;
+
+  return (
+    <div className="max-w-lg mx-auto pb-24">
+      <BackButton onBack={onBack} label="Back to Profile" />
+      <h2 className="font-heading text-xl font-bold text-white mb-6">Settings</h2>
+
+      <div className="space-y-2">
+        {menuItems.map(item => (
+          <button
+            key={item.id}
+            onClick={() => setView(item.id as any)}
+            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-[40px] border border-white/5 hover:bg-white/[0.08] hover:border-noctvm-violet/30 transition-all duration-300 transform active:scale-[0.98] text-left group relative overflow-hidden"
+            style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.2, 0.64, 1)' }}
+          >
+            {/* Specular Highlight */}
+            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+            
+            <div className="w-10 h-10 rounded-xl bg-noctvm-surface border border-noctvm-border flex items-center justify-center group-hover:scale-105 transition-transform text-noctvm-violet shadow-lg shadow-noctvm-violet/10">
+              {item.icon}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-white leading-tight">{item.label}</p>
+              <p className="text-[11px] text-noctvm-silver mt-0.5">{item.desc}</p>
+            </div>
+            <ChevronRightIcon className="w-4 h-4 text-noctvm-silver opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-12 pt-6 border-t border-noctvm-border">
+        <button
+          onClick={() => { signOut(); onBack(); }}
+          className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20 transition-all text-left group active:scale-[0.98]"
+          title="Log out of your account"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-red-500">Log Out</p>
+              <p className="text-[11px] text-noctvm-silver mt-0.5">Sign out of your account</p>
+            </div>
+            <svg className="w-5 h-5 text-red-500 opacity-50 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ==================== SUB-PAGES ====================
+
+export function EditProfilePage({ onBack }: { onBack: () => void }) {
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [username, setUsername] = useState(profile?.username || '');
   const [bio, setBio] = useState(profile?.bio || '');
-  const [city, setCity] = useState(profile?.city || 'Bucharest');
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [showSaved, setShowSaved] = useState(true);
+  const [city, setCity] = useState(profile?.city || '');
+  const [genres, setGenres] = useState<string[]>(Array.isArray(profile?.genres) ? profile.genres : []);
+  const [genreSearch, setGenreSearch] = useState('');
+  const [socialLinks, setSocialLinks] = useState<any[]>(Array.isArray(profile?.social_links) ? profile.social_links : []);
+  const [musicType, setMusicType] = useState(profile?.music_link?.type || 'spotify');
+  const [musicUrl, setMusicUrl] = useState(profile?.music_link?.url || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
+  const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
+
+  const GENRE_OPTIONS = GENRE_FILTERS.filter(g => g !== 'All');
+  const PLATFORMS = ['instagram', 'facebook', 'twitter', 'tiktok', 'snapchat', 'website'];
 
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
-    setError('');
-    const { error: updateError } = await supabase
+    const { error } = await supabase
       .from('profiles')
       .update({
         display_name: displayName,
         username,
         bio,
         city,
-        updated_at: new Date().toISOString(),
+        genres,
+        music_link: musicUrl ? { type: musicType, url: musicUrl } : null,
+        social_links: socialLinks.filter(l => l.url),
       })
       .eq('id', profile.id);
-
-    if (updateError) {
-      setError(updateError.message);
-    } else {
-      await logActivity({
-        type: 'user_edit',
-        message: `Updated profile: @${username}`,
-        entity_id: profile.id,
-        user_name: displayName || username
-      });
+    
+    if (!error) {
       await refreshProfile();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -132,406 +219,455 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
     setSaving(false);
   };
 
-  return (
-    <div className="max-w-lg mx-auto">
-      <BackButton onBack={onBack} label="Back to Profile" />
-      <h2 className="font-heading text-xl font-bold text-white mb-6">Manage Account</h2>
+  const updateSocial = (platform: string, url: string) => {
+    setSocialLinks(prev => {
+      if (!url) return prev.filter(l => l.platform !== platform);
+      const existing = prev.find(l => l.platform === platform);
+      if (existing) {
+        return prev.map(l => l.platform === platform ? { ...l, url } : l);
+      }
+      return [...prev, { platform, url }];
+    });
+  };
 
-      {/* Avatar */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center overflow-hidden">
-          {profile?.avatar_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-2xl font-heading font-bold text-noctvm-violet">
-              {(profile?.display_name || 'N')[0].toUpperCase()}
-            </span>
-          )}
-        </div>
-        <div>
-          <button className="text-xs text-noctvm-violet font-medium hover:text-noctvm-violet/80 transition-colors">Change Avatar</button>
-          <p className="text-[10px] text-noctvm-silver mt-0.5">JPG, PNG or GIF. Max 2MB.</p>
-        </div>
+  const filteredGenreOptions = GENRE_OPTIONS.filter(g => 
+    g.toLowerCase().includes(genreSearch.toLowerCase())
+  );
+  
+  const unusedPlatforms = PLATFORMS.filter(p => !socialLinks.some(l => l.platform === p));
+
+  return (
+    <div className="max-w-xl mx-auto h-[75vh] flex flex-col">
+      <div className="px-4 pt-2">
+        <BackButton onBack={onBack} label="Settings" />
+        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Edit Profile</h3>
       </div>
 
-      <div className="space-y-4">
-        <FormInput label="Display Name" value={displayName} onChange={setDisplayName} placeholder="Your display name" />
-        <FormInput label="Username" value={username} onChange={setUsername} placeholder="@username" />
-        <FormInput label="Email" type="email" value={profile?.email || ''} onChange={() => {}} placeholder="your@email.com" disabled />
-        <p className="text-[10px] text-noctvm-silver/50 -mt-2">Email cannot be changed here</p>
-        <FormTextarea label="Bio" value={bio} onChange={setBio} placeholder="Tell people about yourself..." rows={2} />
-        <FormInput label="City" value={city} onChange={setCity} placeholder="Your city" />
+      <div className="flex-1 overflow-y-auto px-4 pb-12 scrollbar-hide space-y-8">
+        {/* Core Info */}
+        <div className="space-y-5">
+          <FormInput label="Display Name" value={displayName} onChange={setDisplayName} />
+          <FormInput label="Username" value={username} onChange={setUsername} />
+          <FormTextarea label="Bio" value={bio} onChange={setBio} rows={3} />
+          <FormInput label="City" value={city} onChange={setCity} />
+        </div>
 
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Privacy</h3>
-          <div className="space-y-2">
-            <ToggleSwitch enabled={isPrivate} onToggle={() => setIsPrivate(!isPrivate)} label="Private Account" desc="Only approved followers can see your posts" />
-            <ToggleSwitch enabled={showSaved} onToggle={() => setShowSaved(!showSaved)} label="Show Saved Events" desc="Let others see events you've saved" />
+        {/* Music */}
+        <div className="pt-6 border-t border-white/5">
+          <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest mb-4 text-left">Music Presence</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <FormSelect label="Platform" value={musicType} onChange={setMusicType} options={[
+               { value: 'spotify', label: 'Spotify' },
+               { value: 'soundcloud', label: 'SoundCloud' },
+               { value: 'youtube', label: 'YouTube' },
+               { value: 'ytmusic', label: 'YT Music' },
+             ]} />
+             <FormInput label="Link URL" value={musicUrl} onChange={setMusicUrl} placeholder="https://..." />
           </div>
         </div>
 
-        {error && (
-          <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
-            <p className="text-xs text-red-400">{error}</p>
+        {/* Genres */}
+        <div className="pt-6 border-t border-white/5 text-left">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest">Favorite Genres</p>
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white outline-none w-24 focus:w-32 focus:border-noctvm-violet/40 transition-all"
+                value={genreSearch}
+                onChange={(e) => setGenreSearch(e.target.value)}
+              />
+            </div>
           </div>
-        )}
+          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto scrollbar-hide p-1">
+            {filteredGenreOptions.length > 0 ? (
+              filteredGenreOptions.map(g => (
+                <button
+                  key={g}
+                  onClick={() => setGenres(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])}
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${
+                    genres.includes(g) 
+                      ? 'bg-noctvm-violet border-noctvm-violet text-white shadow-glow' 
+                      : 'bg-white/5 border-white/10 text-noctvm-silver hover:border-white/20'
+                  } active:scale-95`}
+                  title={`Toggle ${g} genre`}
+                >
+                  {g}
+                </button>
+              ))
+            ) : (
+              <p className="text-[10px] text-noctvm-silver/40">No genres found...</p>
+            )}
+          </div>
+        </div>
 
-        <div className="pt-4 flex gap-3">
-          <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors disabled:opacity-50">
-            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-          </button>
-          <button onClick={onBack} className="px-6 py-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border text-sm text-noctvm-silver hover:text-white transition-colors">
-            Cancel
+        {/* Socials */}
+        <div className="pt-6 border-t border-white/5 text-left">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest">Social Connections</p>
+            {unusedPlatforms.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] text-noctvm-silver hover:text-white hover:bg-white/10 transition-all active:scale-95"
+                  title="Add a social media link"
+                >
+                  <span>Add Social</span>
+                  <svg className={`w-3 h-3 transition-transform ${showPlatformDropdown ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {showPlatformDropdown && (
+                  <div className="absolute right-0 top-full mt-1 z-50 bg-[#0A0A0A] border border-white/10 rounded-xl shadow-2xl py-1 min-w-[120px] animate-in fade-in slide-in-from-top-1">
+                    {unusedPlatforms.map(p => (
+                      <button
+                        key={p}
+                        onClick={() => {
+                          updateSocial(p, ' '); // Temporary space to show it
+                          setShowPlatformDropdown(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-[10px] text-noctvm-silver hover:text-white hover:bg-white/5 capitalize active:scale-95"
+                        title={`Add ${p} link`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="space-y-3">
+            {socialLinks.length > 0 ? (
+              socialLinks.map(link => {
+                const p = link.platform;
+                const Icon = p === 'instagram' ? InstagramIcon :
+                            p === 'twitter' ? TwitterIcon :
+                            p === 'tiktok' ? TikTokIcon : 
+                            p === 'facebook' ? FacebookIcon :
+                            p === 'snapchat' ? SnapchatIcon : GlobeIcon;
+                return (
+                  <div key={p} className="relative group animate-in fade-in slide-in-from-left-2">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40 group-focus-within:text-noctvm-violet transition-colors">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder={`${p.charAt(0).toUpperCase() + p.slice(1)} URL`}
+                      value={link.url === ' ' ? '' : link.url}
+                      onChange={(e) => updateSocial(p, e.target.value)}
+                      className="w-full pl-12 pr-10 py-3 rounded-xl bg-noctvm-midnight/50 border border-white/5 focus:border-noctvm-violet/30 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/20"
+                    />
+                    <button 
+                      onClick={() => updateSocial(p, '')}
+                      title={`Remove ${p} link`}
+                      aria-label={`Remove ${p} link`}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all active:scale-95"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                );
+              })
+            ) : (
+                <div className="py-8 text-center bg-white/[0.02] border border-dashed border-white/5 rounded-xl">
+                    <p className="text-[10px] text-noctvm-silver/30">No social links added yet</p>
+                </div>
+            )}
+          </div>
+        </div>
+
+        <div className="pt-4 pb-8">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full py-4 rounded-xl bg-noctvm-violet text-white text-sm font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : saved ? 'Success!' : 'Save All Changes'}
           </button>
         </div>
 
-        <div className="pt-4 border-t border-noctvm-border">
-          <button className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete Account</button>
+        {/* Integrated Inventory Section */}
+        <div className="mt-8 pt-8 border-t border-white/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-yellow-500/10 rounded-xl">
+              <StarIcon className="w-5 h-5 text-yellow-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white font-heading">Premium Profile Effects</h3>
+              <p className="text-xs text-noctvm-silver/50">Purchase and select visual enhancers</p>
+            </div>
+          </div>
+          <InventoryPage onBack={() => {}} hideHeader={true} />
         </div>
       </div>
     </div>
   );
 }
 
-// ==================== ADD LOCATION ====================
-export function AddLocationPage({ onBack }: { onBack: () => void }) {
-  const { profile } = useAuth();
-  const [venueName, setVenueName] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('Bucharest');
-  const [venueType, setVenueType] = useState('club');
-  const [capacity, setCapacity] = useState('');
-  const [description, setDescription] = useState('');
-  const [website, setWebsite] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
+  const [mentions, setMentions] = useState('everyone');
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [showStats, setShowStats] = useState(true);
+  const [canComment, setCanComment] = useState('everyone');
+  const [canRemix, setCanRemix] = useState('everyone');
 
-  if (submitted) {
-    return (
-      <div className="max-w-lg mx-auto">
-        <BackButton onBack={onBack} label="Back to Profile" />
-        <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-noctvm-emerald/20 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-noctvm-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-          </div>
-          <h2 className="font-heading text-xl font-bold text-white mb-2">Location Submitted!</h2>
-          <p className="text-sm text-noctvm-silver">Your venue &quot;{venueName}&quot; has been submitted for review.</p>
-          <p className="text-xs text-noctvm-silver/60 mt-2">We&apos;ll notify you once it&apos;s approved.</p>
-          <button onClick={onBack} className="mt-6 px-6 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors">
-            Back to Profile
+  return (
+    <div className="max-w-xl mx-auto px-4 h-[75vh] flex flex-col">
+      <div className="pt-2">
+        <BackButton onBack={onBack} label="Settings" />
+        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Privacy & Safety</h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto pb-12 space-y-8 scrollbar-hide">
+        {/* Profile Visibility */}
+        <div className="space-y-4">
+          <p className="text-[10px] font-bold text-noctvm-emerald uppercase tracking-widest text-left">Discovery</p>
+          <ToggleSwitch 
+            enabled={isPrivate} 
+            onToggle={() => setIsPrivate(!isPrivate)} 
+            label="Private Profile" 
+            desc="Only followers can see your posts and highlights" 
+          />
+          <ToggleSwitch 
+            enabled={showStats} 
+            onToggle={() => setShowStats(!showStats)} 
+            label="Show Stats" 
+            desc="Display your Posts, Network, and Activity counts publically" 
+          />
+        </div>
+
+        {/* Interactions */}
+        <div className="pt-6 border-t border-white/5 space-y-4">
+          <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest text-left">Interactions</p>
+          <FormSelect 
+            label="Who can mention you?" 
+            value={mentions} 
+            onChange={setMentions} 
+            options={[
+              { value: 'everyone', label: 'Everyone' },
+              { value: 'following', label: 'People You Follow' },
+              { value: 'none', label: 'No One' },
+            ]} 
+          />
+          <FormSelect 
+            label="Who can comment on posts?" 
+            value={canComment} 
+            onChange={setCanComment} 
+            options={[
+              { value: 'everyone', label: 'Everyone' },
+              { value: 'following', label: 'People You Follow' },
+              { value: 'none', label: 'No One' },
+            ]} 
+          />
+          <FormSelect 
+            label="Who can share/repost your content?" 
+            value={canRemix} 
+            onChange={setCanRemix} 
+            options={[
+              { value: 'everyone', label: 'Everyone' },
+              { value: 'following', label: 'People You Follow' },
+              { value: 'none', label: 'No One' },
+            ]} 
+          />
+        </div>
+
+        {/* Blocked Users */}
+        <div className="pt-6 border-t border-white/5 text-left">
+          <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-4">Safety</p>
+          <button className="w-full flex items-center justify-between p-4 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition-all text-left group">
+            <div>
+              <p className="text-sm font-bold text-red-500">Blocked Users</p>
+              <p className="text-[11px] text-noctvm-silver mt-0.5">Manage accounts you have restricted</p>
+            </div>
+            <ChevronRightIcon className="w-4 h-4 text-red-500/50 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+function ActivityLogPage({ onBack }: { onBack: () => void }) {
+  const { profile } = useAuth();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!profile) return;
+    // Mocking combined activity for now: including posts + log entries
+    const fetchActivities = async () => {
+      const { data: logs } = await supabase
+        .from('user_activity')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(30);
+      
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id, caption, created_at')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const combined = [
+        ...(logs || []).map(l => ({ ...l, type: 'action' })),
+        ...(posts || []).map(p => ({ 
+          id: p.id, 
+          message: `Shared a post: "${p.caption.slice(0, 30)}..."`, 
+          created_at: p.created_at, 
+          type: 'post' 
+        }))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setActivities(combined);
+      setLoading(false);
+    };
+
+    fetchActivities();
+  }, [profile]);
 
   return (
-    <div className="max-w-lg mx-auto">
-      <BackButton onBack={onBack} label="Back to Profile" />
-      <h2 className="font-heading text-xl font-bold text-white mb-1">Add Location</h2>
-      <p className="text-sm text-noctvm-silver mb-6">Register a new venue or event space on NOCTVM</p>
+    <div className="max-w-xl mx-auto px-4 h-[75vh] flex flex-col">
+      <div className="pt-2">
+        <BackButton onBack={onBack} label="Settings" />
+        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Activity Journal</h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto pb-12 space-y-4 scrollbar-hide">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
+            <div className="w-10 h-10 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-noctvm-violet">Retrieving Timeline...</p>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center py-24 text-noctvm-silver/30">
+            <LayoutListIcon className="w-12 h-12 mx-auto mb-4 opacity-10" />
+            <p className="text-xs font-medium">Your nightlife journey starts here.</p>
+          </div>
+        ) : (
+          <div className="space-y-6 relative">
+            <div className="absolute left-6 top-2 bottom-2 w-px bg-white/5" />
+            {activities.map((a, i) => (
+              <div key={a.id + i} className="flex gap-6 group">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all z-10 ${
+                  a.type === 'post' ? 'bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/30' : 'bg-noctvm-midnight/50 text-noctvm-silver border border-white/5'
+                }`}>
+                  {a.type === 'post' ? <GridIcon className="w-5 h-5" /> : <ShieldIcon className="w-5 h-5" />}
+                </div>
+                <div className="flex-1 pt-1 border-b border-white/[0.03] pb-6 last:border-0">
+                  <p className="text-[13px] text-white/90 leading-relaxed font-medium">{a.message}</p>
+                  <p className="text-[10px] text-noctvm-silver/40 mt-1.5 font-bold uppercase tracking-wider">{new Date(a.created_at).toLocaleDateString()} • {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
+export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
+  const [pushNotifs, setPushNotifs] = useState(true);
+  const [emailNotifs, setEmailNotifs] = useState(true);
+
+  return (
+    <div className="max-w-xl mx-auto px-4">
+      <BackButton onBack={onBack} label="Settings" />
+      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Notifications</h3>
+      
+      <div className="space-y-6">
+        <div className="space-y-2">
+           <ToggleSwitch enabled={pushNotifs} onToggle={() => setPushNotifs(!pushNotifs)} label="Social Activity" desc="Follows, mentions, and shares" />
+           <ToggleSwitch enabled={emailNotifs} onToggle={() => setEmailNotifs(!emailNotifs)} label="Marketing & Tips" desc="New features and venue discovery" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => void, hideHeader?: boolean }) {
+  const premiumEffects = [
+    { id: 'neon_ring', name: 'Neon Avatar Ring', price: '500 MR', locked: true },
+    { id: 'emerald_badge', name: 'Emerald VIP Badge', price: '1000 MR', locked: true },
+    { id: 'animated_bio', name: 'Animated Bio Text', price: '250 MR', locked: true },
+  ];
+
+  return (
+    <div className={`max-w-xl mx-auto px-4 ${hideHeader ? '' : 'h-[75vh] flex flex-col'}`}>
+      {!hideHeader && (
+        <div className="pt-2">
+          <BackButton onBack={onBack} label="Settings" />
+          <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Vanity Inventory</h3>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto pb-12 space-y-4 scrollbar-hide">
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight border border-noctvm-violet/30 mb-6">
+          <p className="text-xs font-bold text-noctvm-violet uppercase tracking-widest mb-1">Your Stash</p>
+          <p className="text-[11px] text-noctvm-silver leading-relaxed">Customize your presence with premium gear unlocked from the Boutique.</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3">
+          {premiumEffects.map(effect => (
+            <div key={effect.id} className="p-4 rounded-xl bg-noctvm-surface border border-white/5 opacity-50 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-white">{effect.name}</p>
+                <p className="text-[10px] text-noctvm-silver font-bold uppercase tracking-widest mt-0.5">{effect.price}</p>
+              </div>
+              {effect.locked && <ShieldIcon className="w-4 h-4 text-noctvm-silver/30" />}
+            </div>
+          ))}
+        </div>
+
+        <button className="w-full py-4 rounded-xl bg-noctvm-surface border border-noctvm-border text-xs font-bold text-noctvm-silver mt-8 hover:bg-noctvm-midnight transition-all"> Visit Boutique for more </button>
+      </div>
+    </div>
+  );
+}
+
+export function ManageAccountPage({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="max-w-xl mx-auto px-4">
+      <BackButton onBack={onBack} label="Settings" />
+      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Account Portal</h3>
       <div className="space-y-4">
-        <FormInput label="Venue Name" value={venueName} onChange={setVenueName} placeholder="e.g. Control Club" />
-        <FormSelect label="Venue Type" value={venueType} onChange={setVenueType} options={[
-          { value: 'club', label: 'Nightclub' },
-          { value: 'bar', label: 'Bar / Lounge' },
-          { value: 'festival', label: 'Festival Ground' },
-          { value: 'concert', label: 'Concert Hall' },
-          { value: 'rooftop', label: 'Rooftop' },
-          { value: 'warehouse', label: 'Warehouse / Industrial' },
-          { value: 'other', label: 'Other' },
-        ]} />
-        <FormInput label="Street Address" value={address} onChange={setAddress} placeholder="Str. Constantin Mille 4" />
-        <FormInput label="City" value={city} onChange={setCity} placeholder="Bucharest" />
-        <FormInput label="Capacity" type="number" value={capacity} onChange={setCapacity} placeholder="e.g. 400" />
-        <FormTextarea label="Description" value={description} onChange={setDescription} placeholder="Tell people what makes this venue special..." />
-
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Social & Contact</h3>
-          <div className="space-y-3">
-            <FormInput label="Website" value={website} onChange={setWebsite} placeholder="https://" />
-            <FormInput label="Instagram" value={instagram} onChange={setInstagram} placeholder="@handle" />
+        <div className="p-6 rounded-2xl bg-noctvm-surface/40 border border-noctvm-border">
+          <p className="text-[10px] font-bold text-noctvm-silver uppercase tracking-widest mb-4">Identity</p>
+          <div className="space-y-4">
+            <FormInput label="Email Address" value="user@example.com" onChange={() => {}} title="Email is managed via Auth" />
+            <button className="text-[11px] font-bold text-noctvm-violet hover:underline">Change Password</button>
           </div>
         </div>
 
-        {/* Photo upload placeholder */}
-        <div>
-          <label className="block text-xs font-medium text-noctvm-silver mb-1.5">Photos</label>
-          <div className="border-2 border-dashed border-noctvm-border rounded-lg p-6 text-center hover:border-noctvm-violet/30 transition-colors cursor-pointer">
-            <svg className="w-8 h-8 text-noctvm-silver/30 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 21h18a1.5 1.5 0 001.5-1.5V4.5A1.5 1.5 0 0021 3H3a1.5 1.5 0 00-1.5 1.5v15A1.5 1.5 0 003 21z" /></svg>
-            <p className="text-xs text-noctvm-silver/60">Click to upload venue photos</p>
-            <p className="text-[10px] text-noctvm-silver/30 mt-1">JPG, PNG up to 5MB each</p>
-          </div>
-        </div>
-
-        <button
-          onClick={async () => {
-            if (venueName && address) {
-              await logActivity({
-                type: 'venue_add',
-                message: `Submitted new location: ${venueName}`,
-                entity_name: venueName,
-                user_name: profile?.display_name || 'User'
-              });
-              setSubmitted(true);
-            }
-          }}
-          className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${
-            venueName && address
-              ? 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
-              : 'bg-noctvm-surface text-noctvm-silver cursor-not-allowed'
-          }`}
-        >
-          Submit Location
+        <button className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/10 transition-all text-left">
+          Request Data Export
         </button>
       </div>
     </div>
   );
 }
 
-// ==================== CLAIM LOCATION ====================
-export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
-  const [search, setSearch] = useState('');
-  const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
-  const [role, setRole] = useState('owner');
-  const [fullName, setFullName] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [proof, setProof] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const VENUES = ['Control Club', 'Nook Club', 'Club Guesthouse', 'Expirat Halele Carol', 'Platforma Wolff', 'Beraria H', 'OXYA Club', 'Interbelic', 'Maison 64', 'Noar Hall', 'KAYO Club', 'Princess Club', 'Forge Bucharest'];
-  const filtered = search ? VENUES.filter(v => v.toLowerCase().includes(search.toLowerCase())) : VENUES;
-
-  if (submitted) {
-    return (
-      <div className="max-w-lg mx-auto">
-        <BackButton onBack={onBack} label="Back to Profile" />
-        <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-noctvm-violet/20 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-noctvm-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-          </div>
-          <h2 className="font-heading text-xl font-bold text-white mb-2">Claim Submitted!</h2>
-          <p className="text-sm text-noctvm-silver">Your claim for &quot;{selectedVenue}&quot; is being reviewed.</p>
-          <p className="text-xs text-noctvm-silver/60 mt-2">Verification usually takes 2-3 business days.</p>
-          <button onClick={onBack} className="mt-6 px-6 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors">
-            Back to Profile
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+export function AddLocationPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="max-w-lg mx-auto">
-      <BackButton onBack={onBack} label="Back to Profile" />
-      <h2 className="font-heading text-xl font-bold text-white mb-1">Claim Location</h2>
-      <p className="text-sm text-noctvm-silver mb-6">Claim ownership or management of an existing venue</p>
-
-      {!selectedVenue ? (
-        <div className="space-y-4">
-          <FormInput label="Search Venue" value={search} onChange={setSearch} placeholder="Type venue name..." />
-          <div className="space-y-1.5 max-h-80 overflow-y-auto">
-            {filtered.map(v => (
-              <button
-                key={v}
-                onClick={() => setSelectedVenue(v)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-left"
-              >
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-white">{v[0]}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">{v}</p>
-                  <p className="text-[10px] text-noctvm-silver">Bucharest, Romania</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {/* Selected venue */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-noctvm-violet/10 border border-noctvm-violet/20">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center">
-              <span className="text-sm font-bold text-white">{selectedVenue[0]}</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-white">{selectedVenue}</p>
-              <p className="text-[10px] text-noctvm-silver">Bucharest, Romania</p>
-            </div>
-            <button onClick={() => setSelectedVenue(null)} className="text-xs text-noctvm-silver hover:text-white transition-colors">Change</button>
-          </div>
-
-          <FormSelect label="Your Role" value={role} onChange={setRole} options={[
-            { value: 'owner', label: 'Owner' },
-            { value: 'manager', label: 'Manager' },
-            { value: 'promoter', label: 'Event Promoter' },
-            { value: 'representative', label: 'Authorized Representative' },
-          ]} />
-          <FormInput label="Full Name" value={fullName} onChange={setFullName} placeholder="Your full legal name" />
-          <FormInput label="Contact Email" type="email" value={contactEmail} onChange={setContactEmail} placeholder="business@venue.com" />
-          <FormTextarea label="Proof of Ownership" value={proof} onChange={setProof} placeholder="Describe how you can verify your connection to this venue (business registration, domain ownership, social media admin access, etc.)" rows={3} />
-
-          {/* Document upload */}
-          <div>
-            <label className="block text-xs font-medium text-noctvm-silver mb-1.5">Supporting Documents</label>
-            <div className="border-2 border-dashed border-noctvm-border rounded-lg p-4 text-center hover:border-noctvm-violet/30 transition-colors cursor-pointer">
-              <svg className="w-6 h-6 text-noctvm-silver/30 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-              <p className="text-[10px] text-noctvm-silver/60">Upload business license, ID, or other proof</p>
-            </div>
-          </div>
-
-          <button
-            onClick={async () => {
-              if (fullName && contactEmail) {
-                await logActivity({
-                  type: role === 'owner' ? 'owner_claim' : 'venue_claim',
-                  message: `Claimed ${selectedVenue} as ${role}`,
-                  entity_name: selectedVenue,
-                  user_name: fullName
-                });
-                setSubmitted(true);
-              }
-            }}
-            className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              fullName && contactEmail
-                ? 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
-                : 'bg-noctvm-surface text-noctvm-silver cursor-not-allowed'
-            }`}
-          >
-            Submit Claim
-          </button>
-        </div>
-      )}
+    <div className="max-w-lg mx-auto px-4">
+      <BackButton onBack={onBack} label="Profile" />
+      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Add Location</h3>
+      <div className="p-8 text-center text-noctvm-silver text-sm border-2 border-dashed border-noctvm-border rounded-2xl">
+        Search for your business or location to add it.
+      </div>
     </div>
   );
 }
 
-// ==================== SETTINGS ====================
-export function SettingsPage({ onBack }: { onBack: () => void }) {
-  const { signOut } = useAuth();
-  const [pushNotifs, setPushNotifs] = useState(true);
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [eventReminders, setEventReminders] = useState(true);
-  const [friendActivity, setFriendActivity] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
-  const [language, setLanguage] = useState('en');
-  const [distanceUnit, setDistanceUnit] = useState('km');
-
+export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="max-w-lg mx-auto">
-      <BackButton onBack={onBack} label="Back to Profile" />
-      <h2 className="font-heading text-xl font-bold text-white mb-6">Settings</h2>
-
-      <div className="space-y-6">
-        {/* Notifications */}
-        <div>
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Notifications</h3>
-          <div className="space-y-2">
-            <ToggleSwitch enabled={pushNotifs} onToggle={() => setPushNotifs(!pushNotifs)} label="Push Notifications" desc="Get alerts on your device" />
-            <ToggleSwitch enabled={emailNotifs} onToggle={() => setEmailNotifs(!emailNotifs)} label="Email Notifications" desc="Receive updates via email" />
-            <ToggleSwitch enabled={eventReminders} onToggle={() => setEventReminders(!eventReminders)} label="Event Reminders" desc="Remind me before saved events start" />
-            <ToggleSwitch enabled={friendActivity} onToggle={() => setFriendActivity(!friendActivity)} label="Friend Activity" desc="When friends check in or post" />
-          </div>
-        </div>
-
-        {/* Privacy & Security */}
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Privacy & Security</h3>
-          <div className="space-y-2">
-            <ToggleSwitch enabled={friendActivity} onToggle={() => setFriendActivity(!friendActivity)} label="Activity Visibility" desc="Let people see where you are tonight" />
-            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors text-left group">
-              <div>
-                <p className="text-sm font-medium text-white">Blocked Accounts</p>
-                <p className="text-[10px] text-noctvm-silver">Manage restricted profiles</p>
-              </div>
-              <svg className="w-4 h-4 text-noctvm-silver group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors text-left group">
-              <div>
-                <p className="text-sm font-medium text-white">Two-Factor Auth</p>
-                <p className="text-[10px] text-noctvm-emerald font-bold">Recommended</p>
-              </div>
-              <svg className="w-4 h-4 text-noctvm-silver group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Device Permissions */}
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Device Permissions</h3>
-          <div className="space-y-2">
-            <ToggleSwitch enabled={true} onToggle={() => {}} label="Location Services" desc="Needed for nearby events & maps" />
-            <ToggleSwitch enabled={false} onToggle={() => {}} label="Camera Access" desc="Needed for stories and posts" />
-            <ToggleSwitch enabled={true} onToggle={() => {}} label="Microphone" desc="Needed for stories with audio" />
-          </div>
-        </div>
-
-        {/* Appearance */}
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Appearance</h3>
-          <div className="space-y-2">
-            <ToggleSwitch enabled={darkMode} onToggle={() => setDarkMode(!darkMode)} label="Dark Mode" desc="Always on (it's a nightlife app)" />
-          </div>
-        </div>
-
-        {/* Preferences */}
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">Preferences</h3>
-          <div className="space-y-3">
-            <FormSelect label="Language" value={language} onChange={setLanguage} options={[
-              { value: 'en', label: 'English' },
-              { value: 'ro', label: 'Romana' },
-              { value: 'de', label: 'Deutsch' },
-              { value: 'fr', label: 'Francais' },
-              { value: 'es', label: 'Espanol' },
-            ]} />
-            <FormSelect label="Distance Unit" value={distanceUnit} onChange={setDistanceUnit} options={[
-              { value: 'km', label: 'Kilometers' },
-              { value: 'mi', label: 'Miles' },
-            ]} />
-          </div>
-        </div>
-
-        {/* About */}
-        <div className="pt-2 border-t border-noctvm-border">
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-3">About</h3>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border">
-              <span className="text-sm text-white">Version</span>
-              <span className="text-xs text-noctvm-silver font-mono">0.1.0-alpha</span>
-            </div>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors">
-              <span className="text-sm text-white">Terms of Service</span>
-              <svg className="w-4 h-4 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors">
-              <span className="text-sm text-white">Privacy Policy</span>
-              <svg className="w-4 h-4 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/20 transition-colors">
-              <span className="text-sm text-white">Contact Support</span>
-              <svg className="w-4 h-4 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Danger zone */}
-        <div className="pt-2 border-t border-red-500/20">
-          <h3 className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-3">Danger Zone</h3>
-          <div className="space-y-2">
-            <button onClick={() => { signOut(); onBack(); }} className="w-full p-3 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-red-500/30 transition-colors text-left">
-              <p className="text-sm font-medium text-white">Log Out</p>
-              <p className="text-[10px] text-noctvm-silver mt-0.5">Sign out of your account</p>
-            </button>
-            <button className="w-full p-3 rounded-lg bg-noctvm-midnight border border-red-500/20 hover:border-red-500/50 transition-colors text-left">
-              <p className="text-sm font-medium text-red-400">Delete Account</p>
-              <p className="text-[10px] text-noctvm-silver mt-0.5">Permanently remove your account and all data</p>
-            </button>
-          </div>
-        </div>
+    <div className="max-w-lg mx-auto px-4">
+      <BackButton onBack={onBack} label="Profile" />
+      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Claim Your Venue</h3>
+      <div className="p-8 text-center text-noctvm-silver text-sm border-2 border-dashed border-noctvm-border rounded-2xl">
+        Verify ownrship to manage your venue profile and events.
       </div>
     </div>
   );

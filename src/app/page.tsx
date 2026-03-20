@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
-import FilterBar from '@/components/FilterBar';
+import FilterBar, { GENRE_FILTERS } from '@/components/FilterBar';
 import Link from 'next/link';
 import EventCard from '@/components/EventCard';
 import RightPanel from '@/components/RightPanel';
@@ -13,14 +13,35 @@ import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
 import UserProfilePage from '@/components/UserProfilePage';
 import SearchBar from '@/components/SearchBar';
-import { ManageAccountPage, AddLocationPage, ClaimLocationPage, SettingsPage } from '@/components/ProfilePages';
+import { 
+  EditProfilePage, 
+  PrivacySettingsPage, 
+  InventoryPage, 
+  NotificationSettingsPage, 
+  AddLocationPage, 
+  ClaimLocationPage 
+} from '@/components/ProfilePages';
 import AuthModal from '@/components/AuthModal';
 import EventModal from '@/components/EventModal';
 import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
-import { MoonIcon, UserIcon, TicketIcon, PocketIcon, StarIcon, CogIcon, GridIcon } from '@/components/icons';
+import NotificationsPanel from '@/components/NotificationsPanel';
+import { 
+  MoonIcon, 
+  UserIcon, 
+  EventsIcon, 
+  FeedIcon, 
+  PocketIcon, 
+  CogIcon, 
+  VenuesIcon, 
+  GridIcon, 
+  BellIcon,
+  EditIcon,
+  ShieldIcon,
+  StarIcon 
+} from '@/components/icons';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
@@ -44,13 +65,16 @@ type ProfileView =
   | 'manage-account'
   | 'add-location'
   | 'claim-location'
-  | 'app-settings';
+  | 'app-settings'
+  | 'edit-profile'
+  | 'inventory';
 
 export default function Home() {
   const { user, profile, signOut, isAdmin, isOwner } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [activeGenreVenues, setActiveGenreVenues] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -152,6 +176,23 @@ export default function Home() {
   }, [activeTab]);
 
   // Switch to a tab and reset profile view to 'profile'
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsNotificationsOpen(false);
+        setShowAuthModal(false);
+        setSelectedEvent(null);
+        setSelectedVenue(null);
+        setShowCreatePost(false);
+        setShowCreateStory(false);
+        setShowStories(false);
+        setManagedVenueId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleTabChange = useCallback((tab: TabType) => {
     setActiveTab(tab);
     if (tab === 'profile') setProfileView('profile');
@@ -196,7 +237,7 @@ export default function Home() {
 
     if (!activeGenres.includes('All')) {
       events = events.filter(e =>
-        e.genres.some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
+        (e.genres || []).some(g => activeGenres.some(ag => g.toLowerCase().includes(ag.toLowerCase())))
       );
     }
     if (searchQuery) {
@@ -204,7 +245,7 @@ export default function Home() {
       events = events.filter(e =>
         e.title.toLowerCase().includes(q) ||
         e.venue.toLowerCase().includes(q) ||
-        e.genres.some(g => g.toLowerCase().includes(q))
+        (e.genres || []).some(g => g.toLowerCase().includes(q))
       );
     }
     if (selectedDate) {
@@ -230,22 +271,33 @@ export default function Home() {
 
   // Account menu items
   const accountMenuItems = [
-    { label: 'Manage Account', desc: 'Edit profile, privacy settings', key: 'manage-account' as ProfileView, icon: <UserIcon className="w-5 h-5" /> },
+    { label: 'Edit Profile', desc: 'Avatar, bio, social links, effects', key: 'edit-profile' as ProfileView, icon: <EditIcon className="w-5 h-5" /> },
+    { label: 'Inventory', desc: 'Manage your premium profile effects', key: 'inventory' as ProfileView, icon: <StarIcon className="w-5 h-5" /> },
+    { label: 'Privacy & Terms', desc: 'Security and usage preferences', key: 'manage-account' as ProfileView, icon: <ShieldIcon className="w-5 h-5" /> },
+    { label: 'Settings', desc: 'App preferences and notifications', key: 'app-settings' as ProfileView, icon: <CogIcon className="w-5 h-5" /> },
     { label: 'Add Location', desc: 'Add a venue or event space', key: 'add-location' as ProfileView, icon: addLocationIcon },
     { label: 'Claim Location', desc: 'Claim ownership of a venue', key: 'claim-location' as ProfileView, icon: claimLocationIcon },
-    { label: 'Settings', desc: 'App preferences and notifications', key: 'app-settings' as ProfileView, icon: <CogIcon className="w-5 h-5" /> },
   ];
 
   // ── Profile sub-page resolver ─────────────────────────────────────────────
   const backToMenu = () => setProfileView('account-menu');
   const profileSubContent: Record<string, React.ReactNode> = {
-    'manage-account': <ManageAccountPage onBack={backToMenu} />,
+    'edit-profile': <EditProfilePage onBack={backToMenu} />,
+    'manage-account': <PrivacySettingsPage onBack={backToMenu} />,
+    'inventory': <InventoryPage onBack={backToMenu} />,
     'add-location': <AddLocationPage onBack={backToMenu} />,
     'claim-location': <ClaimLocationPage onBack={backToMenu} />,
-    'app-settings': <SettingsPage onBack={backToMenu} />,
+    'app-settings': <NotificationSettingsPage onBack={backToMenu} />,
   };
 
-  const isProfileSubPage = ['manage-account', 'add-location', 'claim-location', 'app-settings'].includes(profileView);
+  const isProfileSubPage = [
+    'edit-profile',
+    'manage-account',
+    'inventory',
+    'add-location',
+    'claim-location',
+    'app-settings'
+  ].includes(profileView);
 
   return (
     <>
@@ -327,6 +379,7 @@ export default function Home() {
           activeTab={activeTab}
           onTabChange={handleTabChange}
           onSettingsClick={handleSettingsClick}
+          onNotificationsClick={() => setIsNotificationsOpen(true)}
           activeCity={activeCity}
         />
 
@@ -334,12 +387,33 @@ export default function Home() {
           {/* Mobile header */}
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
             <div className="grid grid-cols-3 items-center">
+              {/* Left: Logo */}
               <div className="flex items-center gap-2">
                 <MoonIcon className="w-6 h-6 text-noctvm-violet" />
                 <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
               </div>
               
+              {/* Middle: City Selector */}
               <div className="flex justify-center">
+                <div className="flex items-center gap-1.5 opacity-80">
+                  <div className="relative">
+                    <select
+                      value={activeCity}
+                      onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
+                      className="bg-transparent text-[11px] text-noctvm-silver font-mono capitalize focus:outline-none cursor-pointer appearance-none pr-4"
+                    >
+                      <option value="bucuresti" className="bg-noctvm-black">București</option>
+                      <option value="constanta" className="bg-noctvm-black">Constanța</option>
+                    </select>
+                    <svg className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Actions */}
+              <div className="flex items-center gap-2 justify-end">
                 {(isAdmin || isOwner) && (
                   <Link 
                     href="/dashboard"
@@ -349,27 +423,19 @@ export default function Home() {
                     <GridIcon className="w-3.5 h-3.5" />
                   </Link>
                 )}
-              </div>
-
-              <div className="flex items-center gap-2 justify-end">
-                <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse"></span>
-                <div className="relative">
-                  <select
-                    value={activeCity}
-                    onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
-                    className="bg-transparent text-[10px] text-noctvm-silver font-mono capitalize focus:outline-none cursor-pointer appearance-none pr-4"
-                  >
-                    <option value="bucuresti">București</option>
-                    <option value="constanta">Constanța</option>
-                  </select>
-                  <svg className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-                </div>
+                <button
+                  onClick={() => setIsNotificationsOpen(true)}
+                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative"
+                  title="Notifications"
+                >
+                  <BellIcon className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={handleSettingsClick}
-                  className="p-1.5 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-surface transition-colors"
+                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
                   title="Settings"
                 >
-                  <CogIcon className="w-4 h-4" />
+                  <CogIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -462,14 +528,15 @@ export default function Home() {
             {/* ── Venues Tab ──────────────────────────────────── */}
             {activeTab === 'venues' && (
               <div className="tab-content">
-                <VenuesPage
-                  onVenueClick={handleVenueClick}
-                  activeCity={activeCity}
-                  onCityChange={setActiveCity}
-                  headerHidden={headerHidden}
-                  activeGenre={activeGenreVenues}
-                  onGenreChange={setActiveGenreVenues}
-                />
+                  <VenuesPage
+                    onVenueClick={handleVenueClick}
+                    activeCity={activeCity}
+                    onCityChange={setActiveCity}
+                    headerHidden={headerHidden}
+                    activeGenre={activeGenreVenues}
+                    onGenreChange={setActiveGenreVenues}
+                    allGenres={GENRE_FILTERS}
+                  />
               </div>
             )}
 
@@ -488,6 +555,10 @@ export default function Home() {
                   <UserProfilePage
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
+                    onEditProfileClick={() => {
+                      setActiveTab('profile');
+                      setProfileView('edit-profile' as ProfileView);
+                    }}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
                     onEventClick={(e) => setSelectedEvent(e)}
@@ -498,17 +569,9 @@ export default function Home() {
                 {/* Account menu (old profile menu, now behind the cogwheel) */}
                 {profileView === 'account-menu' && (
                   <div className="space-y-6 max-w-lg mx-auto tab-content">
-                    {/* Header with back button */}
-                    <div className="flex items-center gap-3 animate-fade-in">
+                    <div className="flex items-center gap-3 animate-fade-in mb-6">
                       <button
-                        onClick={() => {
-                          if (previousTab === 'profile') {
-                            setProfileView('profile');
-                          } else {
-                            setActiveTab(previousTab);
-                            setProfileView('profile');
-                          }
-                        }}
+                        onClick={() => setProfileView('profile')}
                         className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all"
                       >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -588,6 +651,11 @@ export default function Home() {
         )}
 
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        {/* Notifications Panel */}
+        <NotificationsPanel 
+          isOpen={isNotificationsOpen} 
+          onClose={() => setIsNotificationsOpen(false)} 
+        />
       </div>
     </>
   );

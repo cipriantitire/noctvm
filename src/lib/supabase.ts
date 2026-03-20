@@ -17,6 +17,11 @@ export type Profile = {
   badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
   is_verified: boolean;
   referral_code: string | null;
+  music_link: { type: string; url: string } | null;
+  social_links: { platform: string; url: string }[] | null;
+  genres: string[];
+  events_attended: number;
+  venues_visited: number;
   created_at: string;
   updated_at: string;
 };

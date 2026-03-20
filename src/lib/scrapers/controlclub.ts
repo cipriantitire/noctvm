@@ -44,10 +44,13 @@ function parseListingPage(html: string): EventStub[] {
   //   [ADD TO CALENDAR](calendar_url)
 
   // Extract all event detail links
-  const eventLinkRe = /href=["'](https?:\/\/www\.control-club\.ro\/event\/\?slug=([^"'&]+))["'][^>]*>([^<]+)</gi;
+  const eventLinkRe = /href=["']((?:https?:\/\/www\.control-club\.ro)?\/?event\/\?slug=([^"'&]+))["'][^>]*>([^<]+)</gi;
   let m;
   while ((m = eventLinkRe.exec(html)) !== null) {
-    const [, url, slug, linkText] = m;
+    let url = m[1];
+    if (url.startsWith('/')) url = `https://www.control-club.ro${url}`;
+    const slug = m[2];
+    const linkText = m[3];
     const trimmedText = clean(linkText);
 
     // Skip "MORE INFO" / "ADD TO CALENDAR" links — we only want the event title links
@@ -122,17 +125,39 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     const genres = guessGenres(stub.title, description ?? '');
     if (!genres) return null;
 
-    // Price: check for ticket link page or description
+    // Price detection inside the HTML description content
     let price: string | null = null;
     const isSoldOut = stub.title.includes('[SOLD OUT]');
     if (isSoldOut) {
       price = 'SOLD OUT';
+    } else {
+      // Look for standard money strings in the HTML like "50 lei" or "50 RON"
+      const descPriceRegex = /(\d+(?:[.,]\d+)?)\s*(?:lei|RON)/i;
+      const match = html.match(descPriceRegex);
+      if (match) price = `${Math.round(parseFloat(match[1].replace(',', '.')))} RON`;
     }
 
-    // Try to extract ticket link from detail page if not found on listing
-    let ticket_url = stub.ticketUrl;
-    if (!ticket_url) {
+    // Try to extract ticket link. Prioritize RA link from the .buttons area as requested by user.
+    let ticket_url: string | null = null;
+    const raLinkMatch = html.match(/href=["'](https?:\/\/ra\.co\/events\/\d+)["']/i);
+    if (raLinkMatch) {
+      ticket_url = raLinkMatch[1];
+    } else if (stub.ticketUrl) {
+      ticket_url = stub.ticketUrl;
+    } else {
       ticket_url = extractTicketsFromHtml(html);
+    }
+
+    // Proactive external price fetching if price is missing
+    if (!price && ticket_url) {
+      try {
+        if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('iabilet.ro')) {
+          const extHtml = await fetchHtml(ticket_url);
+          const { extractPriceFromHtml } = await import('./utils');
+          const extPrice = extractPriceFromHtml(extHtml);
+          if (extPrice && extPrice !== 'FREE') price = extPrice;
+        }
+      } catch (e) { /* ignore */ }
     }
 
     return {

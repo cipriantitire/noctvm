@@ -1,11 +1,25 @@
 # COORDINATION: Social Media & Wallet (Pocket) Overhaul
-Last Sync: c6d54d5 (Current Branch Delta)
+## NOCTVM Tactical Coordination
 
-## [CONFIRMED FROM FILE]
-- App naming: Wallet renamed to Pocket (Canonical: `/?tab=pocket`)
-- Feed Version: v5 (Optimized for friend/mutual relationships)
-- Repost Logic: Dry-run RPC based (Migration `20260318050000`)
-- Event Tagging: Partial implementation in CreatePostModal
+[STATE SYNC]
+- **App naming**: Pocket (Confirmed)
+- **Deep link canonical**: /?tab=pocket
+- **GitHub SHA**: 1d2aac5
+- **Supabase MCP drift present**: NO (Migrations manually synced)
+- **Uncommitted SQL objects**: None
+- **Uncommitted frontend files**: None
+- **Migration files**: 20260318050000_repost_and_event_tagging.sql (and children) applied.
+
+## Confirmation Section: Branch State 
+**Branch**: `main`
+**SHA**: `1d2aac5`
+**Delta since c6d54d5**: 
+- Pocket overhaul (Activity Tracker + Premium Cards)
+- Social Feeds Refinement (Reposts logic + animation)
+- Event Tagging (tagged events appear in FeedItem)
+- Manage Venue (owner dashboard for venues)
+- Privacy & Device settings UI
+- Economy Infrastructure (reward_config + mutual_connections scaling)
 
 ## [LATEST CHANGES - DELTA SINCE c6d54d5]
 - **UserProfilePage Refusal**:

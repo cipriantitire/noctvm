@@ -3,12 +3,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { SearchIcon } from './icons';
 
-const GENRE_FILTERS = [
+export const GENRE_FILTERS = [
   'All', 'Techno', 'House', 'Electronic', 'Minimal', 'Underground',
   'Club', 'Party', 'Hip-Hop', 'Reggaeton', 'Latin', 'Live Music',
   'Alternative', 'Drum & Bass', 'Hard Dance', 'Hardcore', 'Dub',
   'Reggae', 'Bass Music', 'Experimental', 'Deep House', 'Acid',
-  'EBM', 'Nightlife', 'Queer'
+  'EBM', 'Nightlife', 'Queer', 'Melodic Techno', 'Indie Dance', 
+  'Nu-Disco', 'Afro House', 'Progressive House', 'Tech House', 
+  'Psytrance', 'Breaks', 'Garage', 'Grime', 'Phonk', 'Ambient', 
+  'Downtempo', 'Jazz', 'Soul', 'Funk', 'Disco'
 ];
 
 interface FilterBarProps {
@@ -156,6 +159,7 @@ export default function FilterBar({
           <input
             id="event-date-filter"
             type="date"
+            title="Filter events by date"
             min={new Date().toISOString().split('T')[0]}
             value={selectedDate ?? ''}
             onChange={e => onDateChange(e.target.value || null)}

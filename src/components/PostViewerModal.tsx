@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
@@ -9,6 +10,7 @@ import PostOptionsMenu from './PostOptionsMenu';
 import LikesModal from './LikesModal';
 
 import VerifiedBadge from './VerifiedBadge';
+import CommentSection from './Feed/CommentSection';
 
 interface ProfilePost {
   id: string;
@@ -248,7 +250,9 @@ export default function PostViewerModal({
       {/* Close button top right */}
       <button 
         onClick={onClose}
-        className="absolute top-6 right-6 z-[110] p-2 text-white/50 hover:text-white transition-colors"
+        title="Close modal"
+        aria-label="Close modal"
+        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all active:scale-90"
       >
         <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6L6 18M6 6l12 12" />
@@ -260,6 +264,7 @@ export default function PostViewerModal({
         <button
           onClick={() => setIndex(i => i - 1)}
           disabled={!hasPrev}
+          title="Previous post"
           className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all pointer-events-auto ${!hasPrev ? 'opacity-0 scale-90' : 'opacity-100'}`}
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
@@ -267,6 +272,7 @@ export default function PostViewerModal({
         <button
           onClick={() => setIndex(i => i + 1)}
           disabled={!hasNext}
+          title="Next post"
           className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all pointer-events-auto ${!hasNext ? 'opacity-0 scale-90' : 'opacity-100'}`}
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
@@ -279,10 +285,12 @@ export default function PostViewerModal({
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
           {post.image_url ? (
-            <img 
+            <Image 
               src={post.image_url} 
               alt="Post media" 
-              className="w-full h-full object-contain"
+              fill 
+              className="object-contain"
+              unoptimized
             />
           ) : (
              <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/40 p-12 flex items-center justify-center">
@@ -298,7 +306,13 @@ export default function PostViewerModal({
           <div className="p-4 border-b border-noctvm-border flex items-center gap-3 relative">
              <div className="w-10 h-10 rounded-full border border-noctvm-border flex items-center justify-center overflow-hidden flex-shrink-0 bg-noctvm-midnight">
                 {profileAvatar ? (
-                  <img src={profileAvatar} alt={profileName || 'Profile'} className="w-full h-full object-cover" />
+                  <Image
+                    src={profileAvatar}
+                    alt={profileName || 'Profile'}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
                 ) : (
                   <span className="text-xs font-bold text-white">{profileInitial || 'U'}</span>
                 )}
@@ -316,6 +330,8 @@ export default function PostViewerModal({
                 <button 
                   onClick={() => setShowOptions(!showOptions)}
                   className="p-1.5 text-noctvm-silver/60 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                  title="More options"
+                  aria-label="More options"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                 </button>
@@ -330,6 +346,47 @@ export default function PostViewerModal({
                     onDelete={handleDelete}
                   />
                 )}
+             </div>
+          </div>
+
+          {/* New: Interaction Bar moved under header */}
+          <div className="p-4 py-3 border-b border-noctvm-border bg-white/[0.02]">
+             <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleLike} 
+                  className={`${liked ? 'scale-110' : 'hover:scale-110 active:scale-90'} transition-all`}
+                  title={liked ? "Unlike post" : "Like post"}
+                  aria-label={liked ? "Unlike post" : "Like post"}
+                >
+                  {liked 
+                    ? <svg className="w-6 h-6 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                    : <HeartIcon className="w-6 h-6 text-white/70 hover:text-white" />
+                  }
+                </button>
+                <button 
+                  className="hover:scale-110 active:scale-90 transition-all"
+                  title="Comment"
+                  aria-label="Comment"
+                >
+                  <ChatIcon className="w-6 h-6 text-white/70 hover:text-white" />
+                </button>
+                <button 
+                  onClick={handleShare} 
+                  className="hover:scale-110 active:scale-90 transition-all"
+                  title="Share"
+                  aria-label="Share post"
+                >
+                  <ShareIcon className="w-6 h-6 text-white/70 hover:text-white" />
+                </button>
+                <div className="ml-auto">
+                    <button 
+                      onClick={() => setShowLikesModal(true)}
+                      title="View likes"
+                      aria-label="View users who liked this post"
+                    >
+                      {likeCount.toLocaleString()} likes
+                    </button>
+                </div>
              </div>
           </div>
 
@@ -350,76 +407,19 @@ export default function PostViewerModal({
                   </div>
                </div>
              )}
-
-              {comments.map((c, i) => (
-                <div key={i} className="flex gap-3 animate-fade-in-up" style={{ animationDelay: `${i * 30}ms` }}>
-                  <div className="flex-1">
-                    <div className="text-xs text-noctvm-silver leading-relaxed flex items-center flex-wrap gap-x-1">
-                      <span className="flex items-center gap-1">
-                        <button className="font-bold text-white hover:text-noctvm-violet transition-colors focus:outline-none">
-                          {c.user}
-                        </button>
-                        {c.badge !== 'none' && <VerifiedBadge type={c.badge} size="xs" />}
-                      </span>
-                      <span>{c.text}</span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 op-60">
-                      <span className="text-[10px] text-noctvm-silver/50">12h</span>
-                      <button className="text-[10px] items-center font-semibold text-noctvm-silver/50 hover:text-white transition-colors">Reply</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-             {comments.length === 0 && !post.caption && (
-               <div className="flex flex-col items-center justify-center h-full py-20 opacity-30">
-                  <ChatIcon className="w-8 h-8 mb-2" />
-                  <p className="text-xs">No comments yet.</p>
+               <div className="pt-2">
+                 <CommentSection 
+                   postId={post.id} 
+                   postOwnerId={post.user_id} 
+                   currentUserId={user?.id || null}
+                   isCollapsed={false}
+                 />
                </div>
-             )}
           </div>
 
-          {/* Interaction Area */}
-          <div className="p-4 border-t border-noctvm-border bg-noctvm-midnight/30">
-             <div className="flex items-center gap-4 mb-3">
-                <button onClick={handleLike} className={`${liked ? 'scale-110' : 'hover:scale-110 active:scale-90'} transition-all`}>
-                  {liked 
-                    ? <svg className="w-7 h-7 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
-                    : <HeartIcon className="w-7 h-7 text-white/70 hover:text-white" />
-                  }
-                </button>
-                <button className="hover:scale-110 active:scale-90 transition-all">
-                  <ChatIcon className="w-7 h-7 text-white/70 hover:text-white" />
-                </button>
-                <button onClick={handleShare} className="hover:scale-110 active:scale-90 transition-all">
-                  <ShareIcon className="w-7 h-7 text-white/70 hover:text-white" />
-                </button>
-             </div>
-
-             <button 
-               onClick={() => setShowLikesModal(true)}
-               className="text-sm font-bold text-white mb-1 hover:underline focus:outline-none"
-             >
-               {likeCount.toLocaleString()} like{likeCount !== 1 ? 's' : ''}
-             </button>
-             <p className="text-[10px] text-noctvm-silver/50 uppercase font-mono">{timeAgo(post.created_at)} ago</p>
-
-             <div className="mt-4 flex items-center gap-3">
-                <input 
-                  type="text" 
-                  value={commentInput}
-                  onChange={e => setCommentInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSubmitComment()}
-                  placeholder="Add a comment..."
-                  className="flex-1 bg-transparent text-sm text-white placeholder:text-noctvm-silver/30 outline-none"
-                />
-                <button 
-                  onClick={handleSubmitComment}
-                  disabled={!commentInput.trim() || !user || submittingComment}
-                  className="text-sm font-bold text-noctvm-violet hover:text-white transition-colors disabled:opacity-30"
-                >
-                  Post
-                </button>
-             </div>
+          {/* Bottom Bar: Removed input as CommentSection handles it */}
+          <div className="p-4 border-t border-noctvm-border bg-noctvm-midnight/10 flex items-center justify-center">
+            <p className="text-[10px] text-noctvm-silver/30 font-black uppercase tracking-widest italic">Discussion protected by NOCTVM Anti-Void</p>
           </div>
 
         </div>

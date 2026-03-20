@@ -179,8 +179,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             setActiveDotsId={setActiveDotsId}
             onVenueClick={onVenueClick}
             toggleLike={handleToggleLike} 
-            toggleSave={handleToggleSave}
-            toggleComments={(id) => console.log('Open comments', id)}
             onShare={setSharePostId}
             onRepost={handleRepost}
             onDelete={handleDeletePost}

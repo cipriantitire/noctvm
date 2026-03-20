@@ -29,6 +29,7 @@ function isRealEvent(id: string | undefined): boolean {
 
 function getSourceBadge(source: string) {
   switch (source) {
+    case 'controlclub': return { label: 'Control Club', color: 'bg-zinc-500/20 text-zinc-300 border-white/10' };
     case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400 border-white/10' };
     case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848] border-white/10' };
     case 'eventbook':   return { label: 'Eventbook',      color: 'bg-[#E01539]/15 text-[#E01539] border-white/10' };
@@ -134,7 +135,16 @@ export default function EventModal({
 
   if (!event) return null;
 
-  const sourceBadge = getSourceBadge(event.source);
+  const isCCMergedWithRA = event.source === 'controlclub' && !!event.ticket_url && event.ticket_url.includes('ra.co');
+  const displaySource = isCCMergedWithRA ? 'ra' : event.source;
+  const sourceBadge = getSourceBadge(displaySource);
+  
+  const badgeLink = isCCMergedWithRA ? event.ticket_url || undefined : event.event_url;
+  
+  const isValidTicketUrl = event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc');
+  // For Control Club, we ALWAYS want the CTA to go to their event page where tickets are sold.
+  const priceLink = event.source === 'controlclub' ? event.event_url : (isValidTicketUrl ? event.ticket_url || undefined : event.event_url);
+
   const hasPrice = event.price && event.price.toLowerCase() !== 'free';
   const isFree = event.price?.toLowerCase() === 'free';
 
@@ -201,7 +211,7 @@ export default function EventModal({
         <div className="absolute top-0 left-0 right-0 h-[260px] sm:h-[300px] pointer-events-none">
           {/* Source badge (ticket platform) — clickable link */}
           <a
-            href={event.event_url}
+            href={badgeLink}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
@@ -215,7 +225,7 @@ export default function EventModal({
           {(hasPrice || isFree) && (
             <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
               <a
-                href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc') ? event.ticket_url : event.event_url}
+                href={priceLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
@@ -321,7 +331,7 @@ export default function EventModal({
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
           <a
-            href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc') ? event.ticket_url : event.event_url}
+            href={badgeLink}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}

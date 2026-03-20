@@ -50,6 +50,7 @@ interface VenuesPageProps {
   headerHidden?: boolean;
   activeGenre?: string;
   onGenreChange?: (genre: string) => void;
+  allGenres?: string[];
 }
 
 export default function VenuesPage({ 
@@ -58,7 +59,8 @@ export default function VenuesPage({
   onCityChange, 
   headerHidden = false,
   activeGenre = 'All',
-  onGenreChange
+  onGenreChange,
+  allGenres: allGenresProp
 }: VenuesPageProps) {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
@@ -180,7 +182,7 @@ export default function VenuesPage({
   };
 
   // Genre filters
-  const allGenres = ['All', ...Array.from(new Set(venues.flatMap(v => v.genres))).sort()];
+  const allGenres = allGenresProp || ['All', ...Array.from(new Set(venues.flatMap(v => v.genres))).sort()];
 
   const filteredVenues = venues.filter(v => {
     const matchesSearch = v.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -446,6 +448,7 @@ export default function VenuesPage({
                 }}
                 className="w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors"
               >
+                <div className="absolute inset-0 z-0 mask-gradient" />
                 <div className="flex items-center gap-1.5">
                   {(() => {
                     const stat = loadedReviews[venue.name] !== undefined
@@ -484,6 +487,7 @@ export default function VenuesPage({
                               ) : (
                                 <span className="text-[10px] font-bold text-white">{initial}</span>
                               )}
+                              <div className="absolute inset-0 pointer-events-none z-10 glass-fade-edge" />
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">

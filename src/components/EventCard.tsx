@@ -14,16 +14,17 @@ function formatDate(dateStr: string): string {
 
 function getSourceBadge(source: string) {
   switch (source) {
-    case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400' };
-    case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848]' };
+    case 'controlclub': return { label: 'Control Club', color: 'bg-zinc-500/20 text-zinc-300 pointer-events-auto' };
+    case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400 pointer-events-auto' };
+    case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848] pointer-events-auto' };
     case 'eventbook':   return { label: 'Eventbook',      color: 'bg-[#E01539]/15 text-[#E01539]' };
     case 'livetickets': return { label: 'LiveTickets',    color: 'bg-pink-500/15 text-pink-400' };
     case 'iabilet':     return { label: 'iaBilet',        color: 'bg-cyan-500/15 text-cyan-400' };
-    case 'beethere':    return { label: 'BeeThere',       color: 'bg-yellow-500/15 text-yellow-400' };
-    case 'zilesinopti': return { label: 'Zile si Nopti',  color: 'bg-amber-500/15 text-amber-400' };
-    case 'onevent':     return { label: 'OnEvent',         color: 'bg-violet-500/15 text-violet-400' };
-    case 'ambilet':     return { label: 'Ambilet',         color: 'bg-teal-500/15 text-teal-400' };
-    default:            return { label: source,            color: 'bg-noctvm-silver/15 text-noctvm-silver' };
+    case 'beethere':    return { label: 'BeeThere',       color: 'bg-yellow-500/15 text-yellow-400 pointer-events-auto' };
+    case 'zilesinopti': return { label: 'Zile si Nopti',  color: 'bg-amber-500/15 text-amber-400 pointer-events-auto' };
+    case 'onevent':     return { label: 'OnEvent',         color: 'bg-violet-500/15 text-violet-400 pointer-events-auto' };
+    case 'ambilet':     return { label: 'Ambilet',         color: 'bg-teal-500/15 text-teal-400 pointer-events-auto' };
+    default:            return { label: source,            color: 'bg-noctvm-silver/15 text-noctvm-silver pointer-events-auto' };
   }
 }
 
@@ -45,7 +46,16 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
   const [saveCount, setSaveCount] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
 
-  const sourceBadge = getSourceBadge(event.source);
+  const isCCMergedWithRA = event.source === 'controlclub' && !!event.ticket_url && event.ticket_url.includes('ra.co');
+  const displaySource = isCCMergedWithRA ? 'ra' : event.source;
+  const sourceBadge = getSourceBadge(displaySource);
+  
+  const badgeLink = isCCMergedWithRA ? event.ticket_url || undefined : event.event_url;
+  
+  const isValidTicketUrl = event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc');
+  // For Control Club, we ALWAYS want the CTA to go to their event page where tickets are sold.
+  const priceLink = event.source === 'controlclub' ? event.event_url : (isValidTicketUrl ? event.ticket_url || undefined : event.event_url);
+
   const real = isRealEvent(event.id);
 
   // Fetch save count + user's saved state
@@ -139,7 +149,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
 
     return (
       <a
-        href={event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc') ? event.ticket_url : event.event_url}
+        href={priceLink}
         target="_blank"
         rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}
@@ -185,9 +195,9 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
               unoptimized
             />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          {/* Source badge — links to ticket platform */}
+          {/* Source badge — links to platform or venue */}
           <a
-            href={event.event_url}
+            href={badgeLink}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
@@ -241,9 +251,9 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
           unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        {/* Source badge — links to ticket platform */}
+        {/* Source badge — links to platform or venue */}
         <a
-          href={event.event_url}
+          href={badgeLink}
           target="_blank"
           rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
