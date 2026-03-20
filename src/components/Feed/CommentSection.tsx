@@ -29,6 +29,7 @@ interface CommentSectionProps {
   currentUserId: string | null;
   initialComments?: any[];
   isCollapsed?: boolean;
+  hideRootInput?: boolean;
 }
 
 export default function CommentSection({ 
@@ -36,7 +37,8 @@ export default function CommentSection({
   postOwnerId, 
   currentUserId, 
   initialComments = [],
-  isCollapsed = false
+  isCollapsed = false,
+  hideRootInput = false
 }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -47,6 +49,10 @@ export default function CommentSection({
   const [editContent, setEditContent] = useState('');
   const [truncatedIds, setTruncatedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setIsExpanded(!isCollapsed);
+  }, [isCollapsed]);
 
   useEffect(() => {
     fetchComments();
@@ -147,25 +153,12 @@ export default function CommentSection({
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
-      <div className={`group animate-fade-in relative transition-all duration-300 ${depth > 0 ? 'ml-6 sm:ml-8' : 'mt-6'}`}>
-        {/* Reddit-style Vertical Thread Lines */}
-        {depth > 0 && Array.from({ length: depth }).map((_, i) => (
-          <div 
-            key={i}
-            className="absolute top-0 bottom-0 w-[1.5px] bg-white/5 group-hover:bg-noctvm-violet/20 transition-colors"
-            style={{ left: `-${(i + 1) * 24}px` }} 
-          />
-        ))}
-        
-        {/* Current Node Point */}
-        {depth > 0 && (
-          <div className="absolute -left-6 sm:-left-8 top-4 w-4 h-[1.5px] bg-white/5 group-hover:bg-noctvm-violet/20 transition-colors rounded-full" />
-        )}
-
-        <div className="flex gap-3 relative z-10">
-          <Link href={`/@${comment.user.username}`} className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-white/10 hover:ring-noctvm-violet/40 transition-all hover:scale-105 active:scale-95 shadow-lg">
+      <div className={`group/item animate-fade-in relative transition-all duration-300 w-full`}>
+        {/* Main Row */}
+        <div className="flex gap-3 relative z-10 w-full">
+          <Link href={`/@${comment.user.username}`} className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-white/10 hover:ring-noctvm-violet/40 transition-all hover:scale-105 active:scale-95 shadow-lg bg-noctvm-midnight">
             {comment.user.avatar_url ? (
-              <Image src={comment.user.avatar_url} alt="" width={32} height={32} className="object-cover" unoptimized />
+              <Image src={comment.user.avatar_url} alt="" width={32} height={32} className="object-cover w-full h-full" unoptimized />
             ) : (
               <div className="w-full h-full bg-noctvm-violet/20 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-tighter">
                 {comment.user.display_name[0]}
@@ -174,115 +167,127 @@ export default function CommentSection({
           </Link>
 
           <div className="flex-1 min-w-0">
-            {/* Instagram Premium Format: Name + Text on same line */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col">
-                  {editingId === comment.id ? (
-                    <div className="space-y-2 mt-1">
-                      <textarea
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full bg-noctvm-midnight/50 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 transition-all resize-none shadow-inner"
-                        rows={3}
-                        autoFocus
-                      />
-                      <div className="flex justify-end gap-3 px-2 pb-1">
-                        <button onClick={() => setEditingId(null)} className="text-[10px] text-noctvm-silver hover:text-white uppercase font-black tracking-widest transition-colors">Cancel</button>
-                        <button onClick={() => handleUpdate(comment.id)} className="text-[10px] text-noctvm-violet hover:text-white uppercase font-black tracking-widest transition-colors">Save Changes</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[13px] leading-relaxed break-words group/text relative">
-                      {/* Name + Badge */}
-                      <span className="inline-flex items-center gap-1.5 mr-2">
-                        <Link href={`/@${comment.user.username}`} className="font-black text-white hover:text-noctvm-violet transition-colors tracking-tight">
-                          {comment.user.display_name}
-                        </Link>
-                        {comment.user_id === postOwnerId && (
-                          <span className="text-[7px] bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet px-1.5 py-0.5 rounded-full uppercase font-black tracking-widest shadow-[0_0_10px_rgba(139,92,246,0.2)]">Author</span>
-                        )}
-                        {comment.user.badge && comment.user.badge !== 'none' && (
-                          <VerifiedBadge type={comment.user.badge as 'owner' | 'admin' | 'verified' | 'gold'} size="xs" />
-                        )}
-                      </span>
-                      
-                      {/* Comment Body */}
-                      <span className="text-white/80 font-medium selection:bg-noctvm-violet/30 tracking-tight">
-                        {isCollapsed ? (
-                          <button onClick={() => setIsCollapsed(false)} className="italic text-noctvm-silver/40 hover:text-noctvm-violet transition-colors">[ Comment collapsed ]</button>
-                        ) : comment.text}
-                      </span>
-                    </div>
-                  )}
-
-                  {!isCollapsed && !editingId && (
-                    <div className="flex items-center gap-4 mt-2 mb-1">
-                      <span className="text-[10px] text-noctvm-silver/30 font-bold uppercase tracking-tighter">{displayTime}</span>
-                      
-                      <button 
-                        onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                        className={`text-[10px] font-black uppercase tracking-widest transition-all ${replyingTo === comment.id ? 'text-noctvm-violet scale-105' : 'text-noctvm-silver/50 hover:text-white'}`}
-                      >
-                        Reply
-                      </button>
-
-                      <button 
-                        onClick={() => setIsCollapsed(true)}
-                        className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/20 hover:text-noctvm-violet transition-colors group-hover:opacity-100 opacity-0"
-                      >
-                        Collapse
-                      </button>
-                      
-                      {/* Moderation Controls hidden by default, shown on hover */}
-                      <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all ml-2 scale-95 group-hover:scale-100">
-                        {isOwnComment && (
-                          <button onClick={() => { setEditingId(comment.id); setEditContent(comment.text); }} className="text-[9px] font-black text-noctvm-silver/30 hover:text-noctvm-violet transition-colors uppercase tracking-widest">Edit</button>
-                        )}
-                        {canDelete && (
-                          <button onClick={() => handleDelete(comment.id)} className="text-[9px] font-black text-red-500/30 hover:text-red-400 transition-colors uppercase tracking-widest">Delete</button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Reply Input */}
-            {replyingTo === comment.id && !isCollapsed && (
-              <div className="mt-4 mb-4 relative animate-slide-up">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-noctvm-violet/20 rounded-full" />
-                <div className="pl-4">
-                  <input
-                    type="text"
+            {/* Name + Text line */}
+            <div className="flex flex-col">
+              {editingId === comment.id ? (
+                <div className="space-y-2 mt-1 pr-4">
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="w-full bg-noctvm-surface/50 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 transition-all resize-none shadow-inner"
+                    rows={3}
                     autoFocus
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder={`Reply to @${comment.user.username}...`}
-                    className="w-full bg-noctvm-midnight/40 border border-white/5 rounded-2xl px-5 py-2.5 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 pr-20 transition-all shadow-inner"
-                    onKeyDown={(e) => e.key === 'Enter' && handlePost(comment.id)}
                   />
-                  <button
-                    onClick={() => handlePost(comment.id)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-noctvm-violet hover:text-white hover:scale-110 active:scale-95 transition-all"
-                  >
-                    Send
-                  </button>
+                  <div className="flex justify-end gap-3 px-2 pb-1">
+                    <button onClick={() => setEditingId(null)} className="text-[10px] text-noctvm-silver hover:text-white uppercase font-black tracking-widest transition-colors">Cancel</button>
+                    <button onClick={() => handleUpdate(comment.id)} className="text-[10px] text-noctvm-violet hover:text-white uppercase font-black tracking-widest transition-colors">Save Changes</button>
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-[13px] leading-relaxed break-words relative pr-4">
+                  {/* Name + Badge */}
+                  <span className="inline-flex items-center gap-1.5 mr-2">
+                    <Link href={`/@${comment.user.username}`} className="font-bold text-white hover:text-noctvm-violet transition-colors tracking-tight text-[13px]">
+                      {comment.user.username}
+                    </Link>
+                    {comment.user_id === postOwnerId && (
+                      <span className="text-[7px] bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet px-1.5 py-[1px] rounded-full uppercase font-black tracking-widest shadow-[0_0_10px_rgba(139,92,246,0.2)]">Author</span>
+                    )}
+                    {comment.user.badge && comment.user.badge !== 'none' && (
+                      <VerifiedBadge type={comment.user.badge as 'owner' | 'admin' | 'verified' | 'gold'} size="xs" />
+                    )}
+                  </span>
+                  
+                  {/* Comment Body */}
+                  <span className="text-white/80 font-normal selection:bg-noctvm-violet/30">
+                    {isCollapsed ? (
+                      <button onClick={() => setIsCollapsed(false)} className="italic text-noctvm-silver/40 hover:text-noctvm-violet transition-colors">[ Comment collapsed ]</button>
+                    ) : comment.text}
+                  </span>
+                </div>
+              )}
 
-            {/* Recursive Replies */}
-            {!isCollapsed && comment.replies && comment.replies.length > 0 && (
-              <div className="mt-2 space-y-1">
-                {comment.replies.map(reply => (
-                  <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
-                ))}
-              </div>
-            )}
+              {/* Action Buttons */}
+              {!isCollapsed && !editingId && (
+                <div className="flex items-center gap-4 mt-1 mb-1">
+                  <span className="text-[11px] text-noctvm-silver/40 font-medium tracking-tight">{displayTime}</span>
+                  
+                  <button 
+                    onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                    className={`text-[11px] font-bold transition-all ${replyingTo === comment.id ? 'text-noctvm-violet scale-105' : 'text-noctvm-silver/60 hover:text-white'}`}
+                  >
+                    Reply
+                  </button>
+
+                  <button 
+                    onClick={() => setIsCollapsed(true)}
+                    className="text-[11px] font-bold text-noctvm-silver/30 hover:text-noctvm-violet transition-colors group-hover/item:opacity-100 opacity-0"
+                  >
+                    Collapse
+                  </button>
+                  
+                  {/* Moderation Controls hidden by default, shown on hover */}
+                  <div className="flex items-center gap-3 opacity-0 group-hover/item:opacity-100 transition-all ml-2">
+                    {isOwnComment && (
+                      <button onClick={() => { setEditingId(comment.id); setEditContent(comment.text); }} className="text-[11px] font-bold text-noctvm-silver/50 hover:text-noctvm-violet transition-colors">Edit</button>
+                    )}
+                    {canDelete && (
+                      <button onClick={() => handleDelete(comment.id)} className="text-[11px] font-bold text-red-500/50 hover:text-red-400 transition-colors">Delete</button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Reply Input */}
+        {replyingTo === comment.id && !isCollapsed && (
+          <div className="mt-2 mb-4 relative animate-slide-up ml-[44px]">
+            <input
+              type="text"
+              autoFocus
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder={`Reply to ${comment.user.username}...`}
+              className="w-full bg-noctvm-surface/50 border border-white/5 rounded-2xl px-4 py-2 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 pr-16 transition-all shadow-inner"
+              onKeyDown={(e) => e.key === 'Enter' && handlePost(comment.id)}
+            />
+            <button
+              onClick={() => handlePost(comment.id)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-noctvm-violet hover:text-white hover:scale-105 active:scale-95 transition-all"
+            >
+              Post
+            </button>
+          </div>
+        )}
+
+        {/* Recursive Replies Container with Thread Branches */}
+        {!isCollapsed && comment.replies && comment.replies.length > 0 && (
+          <div className="relative mt-2">
+            {/* The continuous vertical stem extending from the parent's avatar (centered at 16px).
+                Since parent avatar is 32px, its center is at left 15px/16px. 
+                But wait, the replies wrapper is inside the main container. */}
+            
+            {comment.replies.map((reply, i) => {
+              const isLast = i === comment.replies!.length - 1;
+              return (
+                <div key={reply.id} className="relative mt-2 group/thread">
+                  {/* Vertical stem from parent's avatar going down entirely (or just until this child if last) */}
+                  <div className={`absolute left-[15px] w-[2px] bg-white/10 group-hover/thread:bg-white/20 transition-colors ${isLast ? 'top-[-8px] h-[24px]' : 'top-[-8px] bottom-0'}`} />
+                  
+                  {/* Elbow curve from the vertical line horizontally to the child's avatar */}
+                  <div className="absolute left-[15px] top-[-8px] w-[25px] h-[24px] border-l-2 border-b-2 border-white/10 rounded-bl-[12px] group-hover/thread:border-white/20 transition-colors pointer-events-none" />
+                  
+                  {/* The child comment itself, indented so its avatar sits right at the end of the elbow */}
+                  <div className="pl-[40px]">
+                    <CommentItem comment={reply} depth={depth + 1} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
@@ -298,9 +303,9 @@ export default function CommentSection({
   }
 
   return (
-    <div className="mt-4 space-y-4 border-t border-white/5 pt-4">
+    <div className={`mt-4 space-y-4 border-t border-white/5 pt-4 ${hideRootInput ? 'pb-4' : ''}`}>
       {/* Root Input - Top only when expanded */}
-      {currentUserId && isExpanded && (
+      {!hideRootInput && currentUserId && isExpanded && (
         <div className="relative group mb-4">
           <input
             type="text"
@@ -351,7 +356,7 @@ export default function CommentSection({
       )}
 
       {/* Input at bottom if collapsed */}
-      {currentUserId && !isExpanded && (
+      {!hideRootInput && currentUserId && !isExpanded && (
         <div className="relative group">
           <input
             type="text"

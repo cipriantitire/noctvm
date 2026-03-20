@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
+import { supabase } from '@/lib/supabase';
 import { HeartIcon, ChatIcon, ShareIcon, RepostIcon, CalendarIcon } from '../icons';
 import { getVenueLogo } from '@/lib/venue-logos';
 import { formatFullDate } from '@/lib/feed-utils';
@@ -11,8 +12,10 @@ import type { FeedPost } from '@/types/feed';
 import VerifiedBadge from '../VerifiedBadge';
 import PostOptionsMenu from '../PostOptionsMenu';
 import PostBody from './PostBody';
-import CommentSection from './CommentSection';
 import CommentSheet from './CommentSheet';
+import CommentSection from './CommentSection';
+import PostViewerModal from '../PostViewerModal';
+import EditPostModal from '../EditPostModal';
 
 interface FeedItemProps {
   post: FeedPost;
@@ -43,11 +46,26 @@ export function FeedItem({
   venueLogosMap,
   onFollow,
 }: FeedItemProps) {
-  const [showComments, setShowComments] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [commentPreview, setCommentPreview] = useState<{count: number, firstComment: any | null}>({ count: 0, firstComment: null });
   const isFollowing = post.user.isFollowing || false;
   const isOwnPost = user?.id === post.userId;
+
+  // Fetch comment preview for this feed item
+  useEffect(() => {
+    supabase.from('post_comments')
+      .select('id, text, user_id, user:profiles(username, display_name)', { count: 'exact' })
+      .eq('post_id', post.id)
+      .order('created_at', { ascending: false }) // GET LATEST COMMENT
+      .limit(1)
+      .then(({ data, count }) => {
+        if (count !== null) setCommentPreview({ count, firstComment: data?.[0] || null });
+      });
+  }, [post.id]);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/?post=${post.id}`;
@@ -59,12 +77,17 @@ export function FeedItem({
 
   const handleCommentClick = () => {
     // On mobile (max-width < 1024px) → bottom sheet
-    // On desktop → inline toggle
+    // On desktop → PostViewerModal overlay
     if (window.innerWidth < 1024) {
       setShowMobileSheet(true);
     } else {
-      setShowComments(v => !v);
+      setShowComments(!showComments);
     }
+  };
+
+  const handleEditPost = async () => {
+    setActiveDotsId(null);
+    setShowEditModal(true);
   };
 
   const authorLink = `/@${post.user.handle.replace('@', '')}`;
@@ -140,6 +163,7 @@ export function FeedItem({
                 isFollowing={isFollowing}
                 onClose={() => setActiveDotsId(null)}
                 onCopyLink={handleCopyLink}
+                onEdit={handleEditPost}
                 onDelete={() => onDelete(post.id)}
                 onNotInterested={() => {}}
                 onReport={() => {}}
@@ -149,7 +173,10 @@ export function FeedItem({
         </div>
 
         {/* Image */}
-        <div className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden`}>
+        <div 
+          className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden ${window.innerWidth >= 1024 ? 'cursor-pointer' : ''}`}
+          onClick={() => { if (window.innerWidth >= 1024) setViewerOpen(true); }}
+        >
           {post.imageUrl ? (
             <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} unoptimized />
           ) : (
@@ -195,7 +222,7 @@ export function FeedItem({
               <button
                 onClick={handleCommentClick}
                 title="Comments"
-                className={`flex items-center gap-1.5 transition-all ${showComments ? 'text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' : 'text-noctvm-silver hover:text-white'} group`}
+                className="flex items-center gap-1.5 text-noctvm-silver hover:text-white transition-all group"
               >
                 <ChatIcon className="w-5 h-5 group-hover:scale-110" />
               </button>
@@ -218,11 +245,35 @@ export function FeedItem({
             {copied && <span className="text-[10px] text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
           </div>
 
-          {/* Caption */}
-          <div className="text-xs leading-relaxed text-noctvm-silver/90 mb-1">
-            <Link href={authorLink} className="font-bold text-white mr-2 hover:underline">{post.user.handle}</Link>
-            <PostBody text={post.caption || ''} />
+          {/* Caption (Inline with Nickname) */}
+          <div className="text-[13px] leading-relaxed text-noctvm-silver/90 mb-1 break-words">
+            <Link href={authorLink} className="font-bold text-white mr-1.5 hover:text-noctvm-violet transition-colors">
+              {post.user.handle.replace('@', '')}
+            </Link>
+            {post.caption ? <PostBody text={post.caption} /> : null}
           </div>
+
+          {/* Comment Preview Area */}
+          {commentPreview.count > 0 && (
+            <div className="mt-1 space-y-1">
+               {/* 1st/Latest Comment */}
+               {commentPreview.firstComment && (
+                 <div className="text-[13px] leading-relaxed text-noctvm-silver/90 break-words mb-1">
+                   <Link href={`/@${commentPreview.firstComment.user.username}`} className="font-bold text-white mr-1.5 hover:text-noctvm-violet transition-colors">
+                      {commentPreview.firstComment.user.username}
+                   </Link>
+                   <span className="font-medium text-white/80">{commentPreview.firstComment.text}</span>
+                 </div>
+               )}
+               {/* View all X comments */}
+               <button 
+                 onClick={handleCommentClick}
+                 className="text-[12px] font-bold text-noctvm-silver/40 hover:text-noctvm-silver transition-colors pt-0.5"
+               >
+                 View {commentPreview.count === 1 ? '1 comment' : `all ${commentPreview.count} comments`}
+               </button>
+            </div>
+          )}
 
           {/* Entity Pills */}
           {(post.event || post.venue.tagged) && (
@@ -274,14 +325,13 @@ export function FeedItem({
             </div>
           )}
 
-          {/* Desktop inline comment section — only rendered when toggled */}
+          {/* Desktop inline comment section */}
           {showComments && (
-            <div className="mt-4 hidden lg:block">
+            <div className="hidden lg:block mt-4 pt-4 border-t border-white/5 animate-fade-in">
               <CommentSection
                 postId={post.id}
                 postOwnerId={post.userId || ''}
                 currentUserId={user?.id || null}
-                isCollapsed={false}
               />
             </div>
           )}
@@ -289,7 +339,7 @@ export function FeedItem({
       </article>
 
       {/* Mobile bottom sheet — rendered in portal to break out of article stacking context */}
-      {showMobileSheet && typeof document !== 'undefined' && createPortal(
+      {showMobileSheet && typeof window !== 'undefined' && createPortal(
         <CommentSheet
           postId={post.id}
           postOwnerId={post.userId || ''}
@@ -297,6 +347,36 @@ export function FeedItem({
           onClose={() => setShowMobileSheet(false)}
         />,
         document.body
+      )}
+
+      {viewerOpen && typeof window !== 'undefined' && createPortal(
+        <PostViewerModal
+          posts={[{
+            id: post.id,
+            user_id: post.userId || '',
+            caption: post.caption || '',
+            image_url: post.imageUrl || null,
+            created_at: post.createdAt,
+            likes_count: post.likes
+          }]}
+          initialIndex={0}
+          isOpen={viewerOpen}
+          onClose={() => setViewerOpen(false)}
+          profileAvatar={post.user.avatarUrl}
+          profileName={post.user.name}
+          profileInitial={post.user.avatar}
+          profileBadge={post.user.badge}
+        />,
+        document.body
+      )}
+
+      {/* Edit Post Modal */}
+      {showEditModal && (
+        <EditPostModal
+          post={post}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        />
       )}
     </>
   );

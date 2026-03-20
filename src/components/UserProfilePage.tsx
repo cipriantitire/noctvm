@@ -90,6 +90,7 @@ export default function UserProfilePage({
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [activeViewerPosts, setActiveViewerPosts] = useState<ProfilePost[]>([]);
+  const [mobileFeedView, setMobileFeedView] = useState(false);
 
   // ── Venue Management ──────────────────────────────────────────────────────
   const [managedVenues, setManagedVenues] = useState<VenueManagerRecord[]>([]);
@@ -545,7 +546,7 @@ export default function UserProfilePage({
             <div key={hl.id} className="flex flex-col items-center gap-1 flex-shrink-0 relative group">
               <button onClick={() => openHighlight(hl)} className="focus:outline-none">
                 <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} p-[2px] transition-all group-hover:p-[1px]`}>
-                  <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-black flex items-center justify-center">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-black flex items-center justify-center relative">
                     {hl.cover_url ? (
                       <NextImage src={hl.cover_url} alt="" fill className="object-cover" unoptimized />
                     ) : (
@@ -586,10 +587,52 @@ export default function UserProfilePage({
 
       {/* ── Content Grid ──────────────────────────────────────── */}
       <div className="pb-24">
-        {activeTab === 'posts' && (
+        {activeTab === 'posts' && mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+            <div className="flex flex-col mb-16">
+              <div className="flex items-center gap-3 p-4 border-b border-noctvm-border bg-noctvm-midnight sticky top-0 z-20">
+                <button onClick={() => setMobileFeedView(false)} title="Close feed view" className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <span className="text-sm font-bold text-white tracking-widest uppercase">Posts</span>
+              </div>
+              {posts.map((post, i) => (
+                <div key={post.id} className="w-full bg-noctvm-surface border-b border-noctvm-border mb-4 pb-4 animate-fade-in" id={`post-${i}`}>
+                  {post.image_url ? (
+                    <div className="w-full aspect-square relative" onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }}>
+                      <NextImage src={post.image_url} alt="" fill className="object-cover" unoptimized />
+                    </div>
+                  ) : null}
+                  <div className="p-4 flex gap-4">
+                    <button className="text-white hover:text-noctvm-violet transition-colors" title="Like">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    </button>
+                    <button className="text-white hover:text-noctvm-violet transition-colors" onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }} title="Comment">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                    </button>
+                  </div>
+                  {post.likes_count > 0 && <div className="px-4 text-xs font-bold text-white mb-1">{post.likes_count} likes</div>}
+                  {post.caption && (
+                    <div className="px-4 text-sm text-noctvm-silver leading-relaxed">
+                      <span className="font-bold text-white mr-2">{profile?.username || 'nightowl'}</span>
+                      {post.caption}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+        )}
+
+        {activeTab === 'posts' && !(mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024) && (
           <div className="grid grid-cols-3 gap-0.5">
             {posts.map((post, i) => (
-              <button key={post.id} onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
+              <button key={post.id} onClick={() => { 
+                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                  setMobileFeedView(true);
+                  setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
+                } else {
+                  setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); 
+                }
+              }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
                   <NextImage src={post.image_url} alt="" fill className="object-cover group-hover:scale-105 transition-all duration-500" unoptimized />
                 ) : (
@@ -681,6 +724,19 @@ export default function UserProfilePage({
         profileAvatar={profile?.avatar_url ?? null}
         profileInitial={initials}
       />
+
+      {/* ── Profile Create Post FAB ──────────────────────────────── */}
+      {onOpenCreatePost && (
+        <button
+          onClick={onOpenCreatePost}
+          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-600 shadow-lg shadow-noctvm-violet/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border border-noctvm-violet/30"
+          title="Create Post"
+        >
+          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ interface PostOptionsMenuProps {
   onNotInterested?: () => void;
   onCopyLink?: () => void;
   onReport?: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
 }
 
@@ -26,6 +27,7 @@ export default function PostOptionsMenu({
   onNotInterested,
   onCopyLink,
   onReport,
+  onEdit,
   onDelete,
 }: PostOptionsMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -67,8 +69,7 @@ export default function PostOptionsMenu({
   return (
     <div
       ref={menuRef}
-      className="absolute top-8 right-0 z-50 w-52 bg-noctvm-midnight border border-noctvm-border rounded-xl overflow-hidden shadow-2xl shadow-black/60 animate-scale-in"
-      style={{ transformOrigin: 'top right' }}
+      className="absolute top-8 right-0 z-50 w-52 bg-noctvm-midnight border border-noctvm-border rounded-xl overflow-hidden shadow-2xl shadow-black/60 animate-scale-in origin-top-right"
     >
       {isOwnPost ? (
         <>
@@ -76,6 +77,12 @@ export default function PostOptionsMenu({
             label="Copy Link"
             icon={<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>}
             onClick={onCopyLink || (() => {})}
+          />
+          <div className="h-px bg-noctvm-border mx-4" />
+          <OptionRow
+            label="Edit Post"
+            icon={<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>}
+            onClick={onEdit || (() => {})}
           />
           <div className="h-px bg-noctvm-border mx-4" />
           <OptionRow

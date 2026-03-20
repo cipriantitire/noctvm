@@ -11,6 +11,7 @@ import LikesModal from './LikesModal';
 
 import VerifiedBadge from './VerifiedBadge';
 import CommentSection from './Feed/CommentSection';
+import EditPostModal from './EditPostModal';
 
 interface ProfilePost {
   id: string;
@@ -66,6 +67,8 @@ export default function PostViewerModal({
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showLikesModal, setShowLikesModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [reposting, setReposting] = useState(false);
 
   const post = posts[index];
 
@@ -195,7 +198,22 @@ export default function PostViewerModal({
     }
   };
 
-  // Save post is deprecated
+  const handleRepost = async () => {
+    if (!user || reposting) return;
+    setReposting(true);
+    try {
+      const { data: existing } = await supabase.from('reposts').select('id').eq('post_id', post.id).eq('user_id', user.id).maybeSingle();
+      if (existing) {
+        await supabase.from('reposts').delete().eq('id', existing.id);
+      } else {
+        await supabase.from('reposts').insert({ post_id: post.id, user_id: user.id });
+      }
+    } catch (err) {
+       console.error("Failed to repost", err);
+    } finally {
+      setReposting(false);
+    }
+  };
 
   const handleSubmitComment = async () => {
     const text = commentInput.trim();
@@ -280,7 +298,7 @@ export default function PostViewerModal({
       </div>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-5xl h-full md:h-[90vh] frosted-glass-modal frosted-noise md:rounded-xl overflow-hidden shadow-2xl z-[105] flex flex-col md:flex-row transition-transform animate-scale-in md:mx-0">
+      <div className="relative w-full max-w-[1200px] lg:max-w-5xl h-full lg:h-[calc(100vh-80px)] lg:max-h-[850px] bg-noctvm-midnight border border-white/10 lg:rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] z-[105] flex flex-col lg:flex-row transition-transform animate-scale-in mx-auto">
         
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
@@ -300,11 +318,11 @@ export default function PostViewerModal({
         </div>
 
         {/* Right: Info + Comments Side */}
-        <div className="w-full md:w-[400px] border-l border-noctvm-border flex flex-col bg-noctvm-surface">
+        <div className="w-full lg:w-[400px] xl:w-[450px] border-l border-white/5 flex flex-col bg-noctvm-surface flex-shrink-0">
           
           {/* Header */}
-          <div className="p-4 border-b border-noctvm-border flex items-center gap-3 relative">
-             <div className="w-10 h-10 rounded-full border border-noctvm-border flex items-center justify-center overflow-hidden flex-shrink-0 bg-noctvm-midnight">
+          <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3 relative shrink-0 min-h-[60px]">
+             <div className="w-[36px] h-[36px] min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-full border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 bg-noctvm-midnight relative">
                 {profileAvatar ? (
                   <Image
                     src={profileAvatar}
@@ -344,64 +362,30 @@ export default function PostViewerModal({
                     onClose={() => setShowOptions(false)}
                     onCopyLink={handleShare}
                     onDelete={handleDelete}
+                    onEdit={() => { setShowOptions(false); setShowEditModal(true); }}
                   />
                 )}
              </div>
           </div>
 
-          {/* New: Interaction Bar moved under header */}
-          <div className="p-4 py-3 border-b border-noctvm-border bg-white/[0.02]">
-             <div className="flex items-center gap-4">
-                <button 
-                  onClick={handleLike} 
-                  className={`${liked ? 'scale-110' : 'hover:scale-110 active:scale-90'} transition-all`}
-                  title={liked ? "Unlike post" : "Like post"}
-                  aria-label={liked ? "Unlike post" : "Like post"}
-                >
-                  {liked 
-                    ? <svg className="w-6 h-6 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
-                    : <HeartIcon className="w-6 h-6 text-white/70 hover:text-white" />
-                  }
-                </button>
-                <button 
-                  className="hover:scale-110 active:scale-90 transition-all"
-                  title="Comment"
-                  aria-label="Comment"
-                >
-                  <ChatIcon className="w-6 h-6 text-white/70 hover:text-white" />
-                </button>
-                <button 
-                  onClick={handleShare} 
-                  className="hover:scale-110 active:scale-90 transition-all"
-                  title="Share"
-                  aria-label="Share post"
-                >
-                  <ShareIcon className="w-6 h-6 text-white/70 hover:text-white" />
-                </button>
-                <div className="ml-auto">
-                    <button 
-                      onClick={() => setShowLikesModal(true)}
-                      title="View likes"
-                      aria-label="View users who liked this post"
-                    >
-                      {likeCount.toLocaleString()} likes
-                    </button>
-                </div>
-             </div>
-          </div>
+          {/* Actions Bar removed from here, moved to Bottom Area */}
 
           {/* Comments Section (Scrollable) */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar flex flex-col gap-2">
              {post.caption && (
-               <div className="flex gap-3">
-                  <div>
-                     <p className="text-xs text-white leading-relaxed">
-                        <div className="flex items-center gap-1 line-relaxed mb-1">
-                          <button className="font-bold text-noctvm-violet hover:underline focus:outline-none">
-                            {profileName}
-                          </button>
-                          {profileBadge !== 'none' && <VerifiedBadge type={profileBadge} size="xs" />}
-                        </div>
+               <div className="flex gap-3 mb-4 mt-2">
+                  <div className="w-[32px] h-[32px] min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full border border-white/10 overflow-hidden flex-shrink-0 relative bg-noctvm-midnight">
+                    {profileAvatar ? (
+                      <Image src={profileAvatar} alt="" fill className="object-cover" unoptimized />
+                    ) : (
+                      <span className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white">{profileInitial || 'U'}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                     <p className="text-xs text-white leading-relaxed break-words">
+                        <strong className="font-black text-white hover:text-noctvm-violet cursor-pointer mr-1.5 transition-colors">
+                          {profileName}
+                        </strong>
                         {post.caption}
                      </p>
                   </div>
@@ -413,13 +397,74 @@ export default function PostViewerModal({
                    postOwnerId={post.user_id} 
                    currentUserId={user?.id || null}
                    isCollapsed={false}
+                   hideRootInput={true}
                  />
                </div>
           </div>
 
-          {/* Bottom Bar: Removed input as CommentSection handles it */}
-          <div className="p-4 border-t border-noctvm-border bg-noctvm-midnight/10 flex items-center justify-center">
-            <p className="text-[10px] text-noctvm-silver/30 font-black uppercase tracking-widest italic">Discussion protected by NOCTVM Anti-Void</p>
+          {/* Bottom Actions Bar + Input */}
+          <div className="border-t border-white/5 bg-noctvm-surface shrink-0 pt-3 pb-4 px-4">
+             {/* Action Icons */}
+             <div className="flex items-center gap-4 mb-2">
+                <button 
+                  onClick={handleLike} 
+                  className={`hover:scale-110 active:scale-95 transition-all ${liked ? 'text-red-500 hover:text-red-400' : 'text-noctvm-silver hover:text-white'}`}
+                  title={liked ? "Unlike post" : "Like post"}
+                >
+                  {liked 
+                    ? <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                    : <HeartIcon className="w-7 h-7" />
+                  }
+                </button>
+                
+                {/* Repost Icon */}
+                <button 
+                  onClick={handleRepost}
+                  disabled={reposting}
+                  title="Remix / Repost"
+                  className={`hover:scale-110 active:scale-95 transition-all disabled:opacity-50 text-noctvm-silver hover:text-emerald-400`}
+                >
+                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="M7 23l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg>
+                </button>
+                
+                {/* Share Icon */}
+                <button 
+                  onClick={handleShare} 
+                  className="text-noctvm-silver hover:text-white hover:scale-110 active:scale-95 transition-all"
+                  title="Share"
+                >
+                  <ShareIcon className="w-7 h-7" />
+                </button>
+             </div>
+
+             {/* Likes Count */}
+             <button 
+               onClick={() => setShowLikesModal(true)}
+               className="text-xs font-black text-white hover:text-noctvm-violet transition-colors mb-3"
+             >
+               {likeCount.toLocaleString()} likes
+             </button>
+
+             {/* Inline Comment Input Box */}
+             <div className="relative flex items-center gap-3">
+                <input
+                  type="text"
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="w-full bg-transparent border-none p-0 text-sm text-white focus:outline-none focus:ring-0 placeholder-noctvm-silver/50"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
+                />
+                {commentInput.trim() && (
+                  <button
+                    onClick={handleSubmitComment}
+                    disabled={submittingComment}
+                    className="text-sm font-black text-noctvm-violet hover:text-purple-400 uppercase tracking-wider transition-colors disabled:opacity-50"
+                  >
+                    Post
+                  </button>
+                )}
+             </div>
           </div>
 
         </div>
@@ -429,6 +474,30 @@ export default function PostViewerModal({
         isOpen={showLikesModal}
         onClose={() => setShowLikesModal(false)}
       />
+
+      {/* Edit Post Modal overlay */}
+      {showEditModal && (
+        <EditPostModal
+          post={{
+             ...post,
+             userId: post.user_id,
+             user: { display_name: profileName || '', username: profileName || '', avatar_url: profileAvatar || null, is_verified: false, badge: profileBadge as any },
+             venue: { name: '', tagged: false },
+             tags: [],
+             likes: post.likes_count,
+             reposts: 0,
+             comments: [],
+             timeAgo: '',
+             liked: false,
+             reposted: false,
+             saved: false,
+             imageUrl: post.image_url,
+             imageTheme: { gradient: '', scene: '' }
+          } as any}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
     </div>,
     document.body
   );

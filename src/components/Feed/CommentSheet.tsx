@@ -70,12 +70,8 @@ export default function CommentSheet({ postId, postOwnerId, currentUserId, onClo
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className="fixed inset-x-0 bottom-0 z-[201] lg:hidden flex flex-col bg-noctvm-midnight border-t border-noctvm-border rounded-t-3xl"
-        style={{
-          maxHeight: '90dvh',
-          transform: 'translateY(0)',
-          animation: 'slideUp 0.35s cubic-bezier(0.32,0.72,0,1)',
-        }}
+        className="fixed inset-x-0 bottom-0 z-[201] lg:hidden flex flex-col bg-noctvm-midnight border-t border-noctvm-border rounded-t-3xl max-h-[90dvh] translate-y-0"
+        style={{ animation: 'slideUp 0.35s cubic-bezier(0.32,0.72,0,1)' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
