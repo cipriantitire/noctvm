@@ -132,30 +132,31 @@ export default function UserProfilePage({
       // 1. Fetch own posts
       const { data: ownData } = await supabase
         .from('posts')
-        .select('id, user_id, image_url, caption, created_at, likes_count, reposts_count')
+        .select('id, user_id, image_url, caption, created_at, likes_count')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       // 2. Fetch reposted posts
       const { data: repostData } = await supabase
         .from('reposts')
-        .select('post_id, posts(id, user_id, image_url, caption, created_at, likes_count, reposts_count)')
+        .select('post_id, posts(id, user_id, image_url, caption, created_at, likes_count)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       // 3. Fetch tagged posts (mentions in caption or tagged_users array)
       const { data: taggedData } = await supabase
         .from('posts')
-        .select('id, user_id, image_url, caption, created_at, likes_count, reposts_count')
+        .select('id, user_id, image_url, caption, created_at, likes_count')
         .or(`caption.ilike.%@${profile?.username}%,tagged_users.cs.{"@${profile?.username}"}`)
         .order('created_at', { ascending: false });
 
-      const ownPosts = (ownData || []).map(p => ({ ...p, reposted: false })) as ProfilePost[];
+      const ownPosts = (ownData || []).map(p => ({ ...p, reposted: false, reposts_count: 0 })) as ProfilePost[];
       const repostedPosts = (repostData || [])
         .map((r: any) => r.posts)
         .filter(Boolean)
-        .map((p: any) => ({ ...p, reposted: true })) as ProfilePost[];
-      const tagged = (taggedData || []).map(p => ({ ...p, reposted: false })) as ProfilePost[];
+        .map((p: any) => ({ ...p, reposted: true, reposts_count: 0 })) as ProfilePost[];
+      const tagged = (taggedData || []).map(p => ({ ...p, reposted: false, reposts_count: 0 })) as ProfilePost[];
+
 
       setPosts(ownPosts);
       setReposts(repostedPosts);
