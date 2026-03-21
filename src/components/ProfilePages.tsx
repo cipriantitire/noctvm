@@ -237,7 +237,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
   const unusedPlatforms = PLATFORMS.filter(p => !socialLinks.some(l => l.platform === p));
 
   return (
-    <div className="max-w-xl mx-auto h-[75vh] flex flex-col">
+    <div className="max-w-xl mx-auto h-full flex flex-col">
       <div className="px-4 pt-2">
         <BackButton onBack={onBack} label="Settings" />
         <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Edit Profile</h3>
@@ -412,7 +412,7 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
   const [canRemix, setCanRemix] = useState('everyone');
 
   return (
-    <div className="max-w-xl mx-auto px-4 h-[75vh] flex flex-col">
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
       <div className="pt-2">
         <BackButton onBack={onBack} label="Settings" />
         <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Privacy & Safety</h3>

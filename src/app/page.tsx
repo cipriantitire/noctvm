@@ -441,7 +441,7 @@ export default function Home() {
             </div>
           </header>
 
-          <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6">
+          <div className="w-full h-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6">
 
             {/* ── Events Tab ──────────────────────────────────── */}
             {activeTab === 'events' && (
@@ -568,7 +568,7 @@ export default function Home() {
 
                 {/* Account menu (old profile menu, now behind the cogwheel) */}
                 {profileView === 'account-menu' && (
-                  <div className="space-y-6 max-w-lg mx-auto tab-content">
+                    <div className="space-y-6 h-full max-w-lg mx-auto tab-content">
                     <div className="flex items-center gap-3 animate-fade-in mb-6">
                       <button
                         onClick={() => setProfileView('profile')}
