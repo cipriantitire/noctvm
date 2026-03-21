@@ -255,9 +255,10 @@ export function FeedItem({
 
               <button
                 onClick={handleCommentClick}
-                className="flex items-center gap-1.5 text-noctvm-silver/60 hover:text-noctvm-gold transition-all group"
+                className={`flex items-center gap-1.5 transition-all group ${showComments ? 'text-noctvm-gold' : 'text-noctvm-silver/60 hover:text-noctvm-gold'}`}
+                title="Comments"
               >
-                <ChatIcon className="w-5 h-5 group-hover:scale-110" />
+                <ChatIcon className={`w-5 h-5 ${showComments ? 'fill-current' : 'group-hover:scale-110'}`} />
                 {commentPreview.count > 0 && <span className="text-[12px] font-mono leading-none">{commentPreview.count}</span>}
               </button>
 

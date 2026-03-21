@@ -460,55 +460,48 @@ export default function PostViewerModal({
 
           {/* Bottom Actions Bar + Input */}
           <div className="border-t border-white/5 bg-noctvm-surface shrink-0 pt-3 pb-4 px-4">
-             {/* Action Icons */}
-             <div className="flex items-center gap-6 mb-3">
-                <div className="flex flex-col items-center">
-                   <button 
-                     onClick={handleLike} 
-                     className={`hover:scale-110 active:scale-95 transition-all ${liked ? 'text-red-500' : 'text-noctvm-silver/60 hover:text-red-500'}`}
-                     title={liked ? "Unlike post" : "Like post"}
-                   >
-                     {liked 
-                       ? <HeartIcon className="w-7 h-7 fill-current" />
-                       : <HeartIcon className="w-7 h-7" />
-                     }
-                   </button>
-                   <button 
-                     onClick={() => setShowLikesModal(true)}
-                     className="text-[10px] font-mono text-noctvm-silver/60 mt-1 hover:text-white transition-colors"
-                   >
-                     {likeCount}
-                   </button>
-                </div>
+              {/* Action Icons */}
+              <div className="flex items-center gap-4 mb-2">
+                 <button 
+                   onClick={handleLike} 
+                   className={`flex items-center gap-1.5 group transition-all ${liked ? 'text-red-500' : 'text-noctvm-silver/60 hover:text-red-500'}`}
+                   title={liked ? "Unlike post" : "Like post"}
+                 >
+                   {liked 
+                     ? <HeartIcon className="w-5 h-5 fill-current scale-110" />
+                     : <HeartIcon className="w-5 h-5 group-hover:scale-110" />
+                   }
+                   <span className="text-[12px] font-mono leading-none">{likeCount}</span>
+                 </button>
                 
-                {/* Comment Icon */}
-                <button 
-                  className="text-noctvm-silver/60 hover:text-noctvm-gold hover:scale-110 transition-all pb-4"
-                  onClick={() => setShowComments(!showComments)}
-                  title="View comments"
-                >
-                  <ChatIcon className="w-7 h-7" />
-                </button>
-
                 {/* Repost Icon */}
                 <button 
                   onClick={handleRepost}
                   disabled={reposting}
                   title="Remix / Repost"
-                  className={`hover:scale-110 active:scale-95 transition-all disabled:opacity-50 pb-4 text-noctvm-silver/60 hover:text-blue-500`}
+                  className={`flex items-center gap-1.5 hover:scale-110 active:scale-95 transition-all disabled:opacity-50 text-noctvm-silver/60 hover:text-blue-500`}
                 >
-                  <RepostIcon className={`w-7 h-7 ${reposting ? 'animate-pulse' : ''}`} />
+                  <RepostIcon className={`w-5 h-5 ${reposting ? 'animate-pulse' : ''}`} />
                 </button>
-                
+
                 {/* Share Icon */}
                 <button 
                   onClick={handleShare} 
-                  className="text-noctvm-silver/60 hover:text-noctvm-emerald hover:scale-110 active:scale-95 transition-all pb-4"
+                  className="text-noctvm-silver/60 hover:text-noctvm-emerald hover:scale-110 active:scale-95 transition-all"
                   title="Share"
                 >
-                  <ShareIcon className="w-7 h-7" />
+                  <ShareIcon className="w-5 h-5" />
                 </button>
-             </div>
+              </div>
+
+              <div className="mb-3">
+                <button 
+                  onClick={() => setShowLikesModal(true)}
+                  className="text-xs font-black text-white hover:text-noctvm-violet transition-colors"
+                >
+                  {likeCount.toLocaleString()} likes
+                </button>
+              </div>
 
              {/* Inline Comment Input Box */}
              <div className="relative flex items-center gap-3">
