@@ -81,9 +81,9 @@ const CommentItem = ({
   const [showOptions, setShowOptions] = useState(false);
 
   return (
-    <div className={`group/item animate-fade-in relative transition-all duration-300 w-full`}>
+    <div className={`animate-fade-in relative transition-all duration-300 w-full`}>
       {/* Main Row */}
-      <div className="flex gap-3 relative z-10 w-full">
+      <div className="group/mainrow flex gap-3 relative z-10 w-full">
         {/* Avatar Area with Parent Stem */}
         <div className="relative flex-shrink-0 flex flex-col items-center">
           <Link href={`/@${comment.user.username}`} className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/10 hover:ring-noctvm-violet/40 transition-all hover:scale-105 active:scale-95 shadow-lg bg-noctvm-midnight relative z-10 block">
@@ -139,7 +139,7 @@ const CommentItem = ({
 
                 {/* Popover Edit/Delete on Hover (User Requested 3-horizontal-dots at the right end) */}
                 {!editingId && canDelete && (
-                  <div className="absolute right-0 top-0 group/menu opacity-0 group-hover/item:opacity-100 transition-all z-20">
+                  <div className={`absolute right-0 top-0 group/menu transition-all z-20 ${showOptions ? 'opacity-100' : 'opacity-0 group-hover/mainrow:opacity-100'}`}>
                     <button 
                       onClick={() => setShowOptions(!showOptions)}
                       className={`p-1 transition-colors ${showOptions ? 'text-white' : 'text-noctvm-silver/40 hover:text-white'}`}
