@@ -13,6 +13,7 @@ export interface FeedPost {
   caption: string;
   venue: { name: string; tagged: boolean };
   tags: string[];
+  taggedUsers: string[];
   likes: number;
   reposts: number;
   comments: { user: string; text: string; badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified' }[];

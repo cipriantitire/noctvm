@@ -16,6 +16,7 @@ import CommentSheet from './CommentSheet';
 import CommentSection from './CommentSection';
 import PostViewerModal from '../PostViewerModal';
 import EditPostModal from '../EditPostModal';
+import TaggedUsersModal from '../TaggedUsersModal';
 
 interface FeedItemProps {
   post: FeedPost;
@@ -49,6 +50,7 @@ export function FeedItem({
   const [viewerOpen, setViewerOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const [showTaggedUsers, setShowTaggedUsers] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
   const [commentPreview, setCommentPreview] = useState<{count: number, firstComment: any | null}>({ count: 0, firstComment: null });
@@ -185,7 +187,7 @@ export function FeedItem({
           {post.venue.tagged && post.venue.name && (
             <button
               onClick={() => onVenueClick(post.venue.name)}
-              className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50"
+              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50"
               title={`View ${post.venue.name}`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
@@ -195,9 +197,36 @@ export function FeedItem({
             </button>
           )}
 
+          {/* Tagged Users Pill */}
+          {post.taggedUsers && post.taggedUsers.length > 0 && (
+            <button
+              onClick={() => setShowTaggedUsers(true)}
+              className="absolute bottom-3 left-3 flex items-center gap-2 px-2 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all"
+              title={`${post.taggedUsers.length} people tagged`}
+            >
+              <div className="flex px-1">
+                {post.taggedUsers.slice(0, 5).map((handle, i) => {
+                  const is5th = i === 4;
+                  return (
+                    <div 
+                      key={handle}
+                      className={`w-6 h-6 rounded-full border border-black flex items-center justify-center bg-noctvm-surface/80 shadow-sm ${is5th && post.taggedUsers.length > 5 ? 'opacity-50' : ''}`}
+                      style={{ marginLeft: i === 0 ? 0 : '-10px', zIndex: 10 - i }}
+                    >
+                      <span className="text-[9px] font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <span className="text-[10px] font-bold text-white pr-1 tracking-wider">
+                {post.taggedUsers.length > 9 ? '9+' : post.taggedUsers.length}
+              </span>
+            </button>
+          )}
+
           {/* Event Badge Overlay */}
           {post.event && (
-            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in">
+            <div className="absolute bottom-[44px] right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in">
               <CalendarIcon className="w-3 h-3 text-white" />
               <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
                 {post.event.title}
@@ -256,12 +285,15 @@ export function FeedItem({
           {/* Comment Preview Area */}
           {commentPreview.count > 0 && (
             <div className="mt-1 space-y-1">
-               {/* View all X comments */}
+               {/* View all X comments / Close comments */}
                <button 
                  onClick={handleCommentClick}
                  className="text-[12px] font-bold text-noctvm-silver/40 hover:text-noctvm-silver transition-colors pt-0.5"
                >
-                 View {commentPreview.count === 1 ? '1 comment' : `all ${commentPreview.count} comments`}
+                 {showComments 
+                   ? 'Close comments' 
+                   : `View ${commentPreview.count === 1 ? '1 comment' : `all ${commentPreview.count} comments`}`
+                 }
                </button>
             </div>
           )}
@@ -280,7 +312,7 @@ export function FeedItem({
 
           {/* Desktop inline comment section */}
           {showComments && (
-            <div className="hidden lg:block mt-4 pt-4 border-t border-white/5 animate-fade-in">
+            <div className="hidden lg:block mt-4 animate-fade-in">
               <CommentSection
                 postId={post.id}
                 postOwnerId={post.userId || ''}
@@ -290,6 +322,12 @@ export function FeedItem({
           )}
         </div>
       </article>
+
+      <TaggedUsersModal
+        handles={post.taggedUsers || []}
+        isOpen={showTaggedUsers}
+        onClose={() => setShowTaggedUsers(false)}
+      />
 
       {/* Mobile bottom sheet — rendered in portal to break out of article stacking context */}
       {showMobileSheet && typeof window !== 'undefined' && createPortal(

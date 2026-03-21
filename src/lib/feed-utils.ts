@@ -42,6 +42,7 @@ export function mapSupabasePost(row: any): FeedPost {
     caption: (row.caption as string) || '',
     venue: { name: (row.venue_name as string) || '', tagged: !!row.venue_name },
     tags: (row.tags as string[]) || [],
+    taggedUsers: (row.tagged_users as string[]) || [],
     likes: (row.likes_count as number) || 0,
     reposts: (row.reposts_count as number) || 0,
     comments: [],

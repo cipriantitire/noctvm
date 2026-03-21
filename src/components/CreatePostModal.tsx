@@ -107,7 +107,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   }, []);
 
   const addTag = () => {
-    const raw = tagInput.trim().replace(/^#/, '');
+    const raw = tagInput.trim().replace(/#/g, '');
     if (raw && !tags.includes(`#${raw}`) && tags.length < 10) {
       setTags(prev => [...prev, `#${raw}`]);
     }
@@ -126,7 +126,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
     // Auto-append pending hashtag if they didn't hit enter
     let currentTags = tags;
     if (tagInput.trim()) {
-      const raw = tagInput.trim().replace(/^#/, '');
+      const raw = tagInput.trim().replace(/#/g, '');
       if (raw && !currentTags.includes(`#${raw}`) && currentTags.length < 10) {
         currentTags = [...currentTags, `#${raw}`];
         setTags(currentTags);
