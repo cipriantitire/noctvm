@@ -78,6 +78,7 @@ const CommentItem = ({
   const isPostOwner = currentUserId === postOwnerId;
   const canDelete = isOwnComment || isPostOwner;
   const displayTime = timeAgo(comment.created_at);
+  const [showOptions, setShowOptions] = useState(false);
 
   return (
     <div className={`group/item animate-fade-in relative transition-all duration-300 w-full`}>
@@ -126,9 +127,6 @@ const CommentItem = ({
                   <Link href={`/@${comment.user.username}`} className="font-bold text-white hover:text-noctvm-violet transition-colors tracking-tight text-[13px]">
                     {comment.user.username}
                   </Link>
-                  {comment.user_id === postOwnerId && (
-                    <span className="text-[7px] bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet px-1.5 py-[1px] rounded-full uppercase font-black tracking-widest shadow-[0_0_10px_rgba(139,92,246,0.2)]">Author</span>
-                  )}
                   {comment.user.badge && comment.user.badge !== 'none' && (
                     <VerifiedBadge type={comment.user.badge as 'owner' | 'admin' | 'verified' | 'gold'} size="xs" />
                   )}
@@ -142,16 +140,34 @@ const CommentItem = ({
                 {/* Popover Edit/Delete on Hover (User Requested 3-horizontal-dots at the right end) */}
                 {!editingId && canDelete && (
                   <div className="absolute right-0 top-0 group/menu opacity-0 group-hover/item:opacity-100 transition-all z-20">
-                    <button className="text-noctvm-silver/40 hover:text-white p-1" title="Options">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                    <button 
+                      onClick={() => setShowOptions(!showOptions)}
+                      className={`p-1 transition-colors ${showOptions ? 'text-white' : 'text-noctvm-silver/40 hover:text-white'}`}
+                      title="Options"
+                    >
+                      <svg className="w-5 h-5 font-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 12h.01M12 12h.01M19 12h.01" /></svg>
                     </button>
                     
-                    <div className="absolute right-0 top-full mt-1 hidden group-hover/menu:flex flex-col bg-noctvm-surface border border-noctvm-border rounded-xl shadow-xl overflow-hidden min-w-[120px] z-50 animate-fade-in pointer-events-auto">
-                      {isOwnComment && (
-                        <button onClick={() => { setEditingId(comment.id); setEditContent(comment.text); }} className="px-4 py-3 text-xs text-left text-white hover:bg-white/5 font-bold transition-colors">Edit</button>
-                      )}
-                      <button onClick={() => handleDelete(comment.id)} className="px-4 py-3 text-xs text-left text-red-500 hover:bg-red-500/10 font-bold transition-colors">Delete</button>
-                    </div>
+                    {showOptions && (
+                      <div className="absolute right-0 top-full mt-1 flex flex-col bg-noctvm-midnight border border-noctvm-border rounded-xl shadow-2xl overflow-hidden min-w-[140px] z-[100] animate-scale-in pointer-events-auto">
+                        {isOwnComment && (
+                          <button 
+                            onClick={() => { setEditingId(comment.id); setEditContent(comment.text); setShowOptions(false); }} 
+                            className="px-4 py-3 text-xs text-left text-white hover:bg-white/10 font-black uppercase tracking-wider transition-colors border-b border-white/5"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => { handleDelete(comment.id); setShowOptions(false); }} 
+                          className="px-4 py-3 text-xs text-left text-red-500 hover:bg-red-500/10 font-black uppercase tracking-wider transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                    {/* Invisible backdrop to close popover when clicking outside */}
+                    {showOptions && <div className="fixed inset-0 z-[-1]" onClick={() => setShowOptions(false)} />}
                   </div>
                 )}
               </div>
