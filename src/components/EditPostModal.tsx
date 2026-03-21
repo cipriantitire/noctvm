@@ -59,7 +59,7 @@ export default function EditPostModal({ post, isOpen, onClose }: EditPostModalPr
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}>
+    <div className={`fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}>
       <div
         className={`w-full max-w-md frosted-glass-modal frosted-noise rounded-2xl overflow-hidden shadow-2xl shadow-black/80 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
         onClick={e => e.stopPropagation()}
