@@ -12,6 +12,9 @@ import LikesModal from './LikesModal';
 import VerifiedBadge from './VerifiedBadge';
 import CommentSection from './Feed/CommentSection';
 import EditPostModal from './EditPostModal';
+import TaggedUsersModal from './TaggedUsersModal';
+import { getVenueLogo } from '@/lib/venue-logos';
+import { RepostIcon, CalendarIcon } from './icons';
 
 interface ProfilePost {
   id: string;
@@ -20,6 +23,9 @@ interface ProfilePost {
   caption: string;
   created_at: string;
   likes_count: number;
+  venue?: { name: string; tagged: boolean };
+  event?: { title: string };
+  tagged_users?: string[];
 }
 
 interface PostViewerModalProps {
@@ -31,6 +37,7 @@ interface PostViewerModalProps {
   profileAvatar?: string | null;
   profileInitial?: string;
   profileBadge?: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
+  venueLogosMap?: Record<string, string>;
 }
 
 function timeAgo(dateStr: string): string {
@@ -51,6 +58,7 @@ export default function PostViewerModal({
   profileAvatar,
   profileInitial,
   profileBadge = 'none',
+  venueLogosMap = {},
 }: PostViewerModalProps) {
   const { user, profile } = useAuth();
   const [index, setIndex] = useState(initialIndex);
@@ -68,6 +76,7 @@ export default function PostViewerModal({
   const [showOptions, setShowOptions] = useState(false);
   const [showLikesModal, setShowLikesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showTaggedUsers, setShowTaggedUsers] = useState(false);
   const [reposting, setReposting] = useState(false);
 
   const post = posts[index];
@@ -327,6 +336,53 @@ export default function PostViewerModal({
                 <p className="text-noctvm-silver text-center italic text-lg leading-relaxed">{post.caption}</p>
              </div>
           )}
+
+          {/* Image Pills (Matching FeedItem) */}
+          <div className="absolute inset-0 pointer-events-none z-10 p-4">
+             {post.venue?.tagged && post.venue?.name && (
+               <button
+                 onClick={(e) => { e.stopPropagation(); /* onVenueClick handling? maybe link to it later */ }}
+                 className="absolute bottom-4 right-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 pointer-events-auto"
+                 title={`View ${post.venue.name}`}
+               >
+                 <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
+                   <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
+                 </div>
+                 <span className="text-[10px] font-bold text-white pr-1">{post.venue.name}</span>
+               </button>
+             )}
+
+             {post.event && (
+               <div className="absolute bottom-16 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg animate-fade-in pointer-events-auto">
+                 <CalendarIcon className="w-3 h-3 text-white" />
+                 <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+                   {post.event.title}
+                 </span>
+               </div>
+             )}
+
+             {post.tagged_users && post.tagged_users.length > 0 && (
+               <button
+                 onClick={(e) => { e.stopPropagation(); setShowTaggedUsers(true); }}
+                 className="absolute bottom-4 left-4 flex items-center gap-2 px-2 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all pointer-events-auto"
+                 title={`${post.tagged_users.length} people tagged`}
+               >
+                 <div className="flex px-1">
+                   {post.tagged_users.slice(0, 5).map((handle, i) => {
+                     const is5th = i === 4;
+                     return (
+                       <div key={handle} className={`w-6 h-6 rounded-full border border-black flex items-center justify-center bg-noctvm-surface/80 shadow-sm ${is5th && (post.tagged_users?.length || 0) > 5 ? 'opacity-50' : ''}`} style={{ marginLeft: i === 0 ? 0 : '-10px', zIndex: 10 - i }}>
+                         <span className="text-[9px] font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
+                       </div>
+                     );
+                   })}
+                 </div>
+                 <span className="text-[10px] font-bold text-white pr-1 tracking-wider">
+                   {(post.tagged_users?.length || 0) > 9 ? '9+' : post.tagged_users?.length}
+                 </span>
+               </button>
+             )}
+          </div>
         </div>
 
         {/* Right: Info + Comments Side */}
@@ -405,45 +461,54 @@ export default function PostViewerModal({
           {/* Bottom Actions Bar + Input */}
           <div className="border-t border-white/5 bg-noctvm-surface shrink-0 pt-3 pb-4 px-4">
              {/* Action Icons */}
-             <div className="flex items-center gap-4 mb-2">
-                <button 
-                  onClick={handleLike} 
-                  className={`hover:scale-110 active:scale-95 transition-all ${liked ? 'text-red-500 hover:text-red-400' : 'text-noctvm-silver hover:text-white'}`}
-                  title={liked ? "Unlike post" : "Like post"}
-                >
-                  {liked 
-                    ? <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
-                    : <HeartIcon className="w-7 h-7" />
-                  }
-                </button>
+             <div className="flex items-center gap-6 mb-3">
+                <div className="flex flex-col items-center">
+                   <button 
+                     onClick={handleLike} 
+                     className={`hover:scale-110 active:scale-95 transition-all ${liked ? 'text-red-500' : 'text-noctvm-silver hover:text-red-500'}`}
+                     title={liked ? "Unlike post" : "Like post"}
+                   >
+                     {liked 
+                       ? <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                       : <HeartIcon className="w-7 h-7" />
+                     }
+                   </button>
+                   <button 
+                     onClick={() => setShowLikesModal(true)}
+                     className="text-[10px] font-mono text-noctvm-silver/60 mt-1 hover:text-white transition-colors"
+                   >
+                     {likeCount}
+                   </button>
+                </div>
                 
+                {/* Comment Icon */}
+                <button 
+                  className="text-noctvm-gold hover:text-white hover:scale-110 transition-all pb-4"
+                  onClick={() => setShowComments(!showComments)}
+                  title="View comments"
+                >
+                  <ChatIcon className="w-7 h-7" />
+                </button>
+
                 {/* Repost Icon */}
                 <button 
                   onClick={handleRepost}
                   disabled={reposting}
                   title="Remix / Repost"
-                  className={`hover:scale-110 active:scale-95 transition-all disabled:opacity-50 text-noctvm-silver hover:text-emerald-400`}
+                  className={`hover:scale-110 active:scale-95 transition-all disabled:opacity-50 pb-4 ${reposting ? 'text-blue-500' : 'text-blue-500 hover:text-blue-400'}`}
                 >
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="M7 23l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg>
+                  <RepostIcon className={`w-7 h-7 ${reposting ? 'animate-pulse' : ''}`} />
                 </button>
                 
                 {/* Share Icon */}
                 <button 
                   onClick={handleShare} 
-                  className="text-noctvm-silver hover:text-white hover:scale-110 active:scale-95 transition-all"
+                  className="text-noctvm-emerald hover:text-emerald-400 hover:scale-110 active:scale-95 transition-all pb-4"
                   title="Share"
                 >
                   <ShareIcon className="w-7 h-7" />
                 </button>
              </div>
-
-             {/* Likes Count */}
-             <button 
-               onClick={() => setShowLikesModal(true)}
-               className="text-xs font-black text-white hover:text-noctvm-violet transition-colors mb-3"
-             >
-               {likeCount.toLocaleString()} likes
-             </button>
 
              {/* Inline Comment Input Box */}
              <div className="relative flex items-center gap-3">
@@ -475,14 +540,26 @@ export default function PostViewerModal({
         onClose={() => setShowLikesModal(false)}
       />
 
+      <TaggedUsersModal
+        handles={post.tagged_users || []}
+        isOpen={showTaggedUsers}
+        onClose={() => setShowTaggedUsers(false)}
+      />
+
       {/* Edit Post Modal overlay */}
       {showEditModal && (
         <EditPostModal
           post={{
              ...post,
              userId: post.user_id,
-             user: { display_name: profileName || '', username: profileName || '', avatar_url: profileAvatar || null, is_verified: false, badge: profileBadge as any },
-             venue: { name: '', tagged: false },
+             user: { 
+               display_name: profileName || '', 
+               username: profileName || '', 
+               avatar_url: profileAvatar || null, 
+               is_verified: profileBadge === 'verified' || profileBadge === 'gold', 
+               badge: profileBadge as any 
+             },
+             venue: post.venue || { name: '', tagged: false },
              tags: [],
              likes: post.likes_count,
              reposts: 0,
@@ -492,7 +569,8 @@ export default function PostViewerModal({
              reposted: false,
              saved: false,
              imageUrl: post.image_url,
-             imageTheme: { gradient: '', scene: '' }
+             imageTheme: { gradient: '', scene: '' },
+             taggedUsers: post.tagged_users || []
           } as any}
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}

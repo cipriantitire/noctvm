@@ -186,8 +186,8 @@ export function FeedItem({
           )}
           {post.venue.tagged && post.venue.name && (
             <button
-              onClick={() => onVenueClick(post.venue.name)}
-              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50"
+              onClick={(e) => { e.stopPropagation(); onVenueClick(post.venue.name); }}
+              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 z-10"
               title={`View ${post.venue.name}`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
@@ -200,8 +200,8 @@ export function FeedItem({
           {/* Tagged Users Pill */}
           {post.taggedUsers && post.taggedUsers.length > 0 && (
             <button
-              onClick={() => setShowTaggedUsers(true)}
-              className="absolute bottom-3 left-3 flex items-center gap-2 px-2 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all"
+              onClick={(e) => { e.stopPropagation(); setShowTaggedUsers(true); }}
+              className="absolute bottom-3 left-3 flex items-center gap-2 px-2 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all z-10"
               title={`${post.taggedUsers.length} people tagged`}
             >
               <div className="flex px-1">
@@ -226,7 +226,10 @@ export function FeedItem({
 
           {/* Event Badge Overlay */}
           {post.event && (
-            <div className="absolute bottom-[44px] right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in">
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-14 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in z-10"
+            >
               <CalendarIcon className="w-3 h-3 text-white" />
               <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
                 {post.event.title}
@@ -239,39 +242,39 @@ export function FeedItem({
         <div className="px-3 py-3">
           {/* Action row */}
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => toggleLike(post)}
-                title={post.liked ? 'Unlike' : 'Like'}
-                className={`flex items-center gap-1.5 group ${post.liked ? 'text-noctvm-violet' : 'text-noctvm-silver hover:text-white'}`}
-              >
-                <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current' : 'group-hover:scale-110'}`} />
-                <span className="text-xs font-mono">{post.likes}</span>
-              </button>
+            <div className="flex items-center gap-5">
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={() => toggleLike(post)}
+                  title={post.liked ? 'Unlike' : 'Like'}
+                  className={`group ${post.liked ? 'text-red-500' : 'text-noctvm-silver hover:text-red-500'} transition-all`}
+                >
+                  <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current' : 'group-hover:scale-110'}`} />
+                </button>
+                <span className="text-[9px] font-mono mt-0.5 text-noctvm-silver/60">{post.likes}</span>
+              </div>
               <button
                 onClick={handleCommentClick}
                 title="Comments"
-                className="flex items-center gap-1.5 text-noctvm-silver hover:text-white transition-all group"
+                className="text-noctvm-gold hover:text-white transition-all group pb-2"
               >
                 <ChatIcon className="w-5 h-5 group-hover:scale-110" />
               </button>
               <button
                 onClick={() => onRepost(post)}
                 title="Remix"
-                className={`flex items-center gap-1.5 group transition-all ${post.reposted ? 'text-noctvm-emerald' : 'text-noctvm-silver hover:text-white'}`}
+                className={`group transition-all pb-2 ${post.reposted ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-noctvm-silver hover:text-blue-500'}`}
               >
-                <RepostIcon className={`w-5 h-5 ${post.reposted ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'group-hover:scale-110'}`} />
-                {post.reposts > 0 && <span className="text-xs font-mono">{post.reposts}</span>}
+                <RepostIcon className={`w-5 h-5 group-hover:scale-110`} />
               </button>
               <button
                 onClick={() => onShare(post.id)}
                 title="Share"
-                className="flex items-center gap-1.5 text-noctvm-silver hover:text-white group"
+                className="text-noctvm-emerald hover:text-emerald-400 group pb-2 transition-all"
               >
                 <ShareIcon className="w-5 h-5 group-hover:scale-110" />
               </button>
             </div>
-            {copied && <span className="text-[10px] text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
           </div>
 
           {/* Caption (Inline with Nickname) */}
@@ -348,7 +351,10 @@ export function FeedItem({
             caption: post.caption || '',
             image_url: post.imageUrl || null,
             created_at: post.createdAt,
-            likes_count: post.likes
+            likes_count: post.likes,
+            venue: post.venue,
+            event: post.event,
+            tagged_users: post.taggedUsers
           }]}
           initialIndex={0}
           isOpen={viewerOpen}
