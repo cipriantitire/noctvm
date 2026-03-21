@@ -81,11 +81,12 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
   };
 
   const searchProfiles = async (q: string) => {
-    if (!q || q.length < 2) { setProfileResults([]); return; }
+    const term = q.replace(/^@/, '');
+    if (!term || term.length < 2) { setProfileResults([]); return; }
     const { data } = await supabase
       .from('profiles')
       .select('id, username, display_name')
-      .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+      .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
       .limit(8);
     setProfileResults((data || []).map((p: any) => ({
       id: p.id,
@@ -123,6 +124,17 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
 
   const handleSubmit = async () => {
     if (!user) return;
+    
+    // Auto-append pending hashtag if they didn't hit enter
+    let currentTags = tags;
+    if (tagInput.trim()) {
+      const raw = tagInput.trim().replace(/^#/, '');
+      if (raw && !currentTags.includes(`#${raw}`) && currentTags.length < 10) {
+        currentTags = [...currentTags, `#${raw}`];
+        setTags(currentTags);
+      }
+    }
+    
     setSubmitting(true);
     setError('');
 
@@ -132,7 +144,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
         .update({
           caption: caption.trim(),
           venue_name: selectedVenue || null,
-          tags: tags.length > 0 ? tags : null,
+          tags: currentTags.length > 0 ? currentTags : null,
           tagged_users: taggedUsers.length > 0 ? taggedUsers : null,
           event_id: selectedEvent?.id || null,
           event_title: selectedEvent?.title || null,

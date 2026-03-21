@@ -60,11 +60,12 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
   };
 
   const searchProfiles = async (q: string) => {
-    if (!q || q.length < 2) { setProfileResults([]); return; }
+    const term = q.replace(/^@/, '');
+    if (!term || term.length < 2) { setProfileResults([]); return; }
     const { data } = await supabase
       .from('profiles')
       .select('id, username, display_name')
-      .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+      .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
       .limit(8);
     setProfileResults((data || []).map((p: any) => ({
       id: p.id,
@@ -121,6 +122,17 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
       setError('Add a caption or photo before posting.');
       return;
     }
+    
+    // Auto-append pending hashtag if they didn't hit enter
+    let currentTags = tags;
+    if (tagInput.trim()) {
+      const raw = tagInput.trim().replace(/^#/, '');
+      if (raw && !currentTags.includes(`#${raw}`) && currentTags.length < 10) {
+        currentTags = [...currentTags, `#${raw}`];
+        setTags(currentTags);
+      }
+    }
+    
     setSubmitting(true);
     setError('');
 
@@ -144,7 +156,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
           caption: caption.trim(),
           image_url: uploadedUrl,
           venue_name: selectedVenue || null,
-          tags: tags.length > 0 ? tags : null,
+          tags: currentTags.length > 0 ? currentTags : null,
           tagged_users: taggedUsers.length > 0 ? taggedUsers : null,
           city: activeCity === 'bucuresti' ? 'Bucharest' : 'Constanta',
           event_id: selectedEvent?.id || null,

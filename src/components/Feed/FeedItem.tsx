@@ -256,15 +256,6 @@ export function FeedItem({
           {/* Comment Preview Area */}
           {commentPreview.count > 0 && (
             <div className="mt-1 space-y-1">
-               {/* 1st/Latest Comment */}
-               {commentPreview.firstComment && (
-                 <div className="text-[13px] leading-relaxed text-noctvm-silver/90 break-words mb-1">
-                   <Link href={`/@${commentPreview.firstComment.user.username}`} className="font-bold text-white mr-1.5 hover:text-noctvm-violet transition-colors">
-                      {commentPreview.firstComment.user.username}
-                   </Link>
-                   <span className="font-medium text-white/80">{commentPreview.firstComment.text}</span>
-                 </div>
-               )}
                {/* View all X comments */}
                <button 
                  onClick={handleCommentClick}
@@ -275,45 +266,7 @@ export function FeedItem({
             </div>
           )}
 
-          {/* Entity Pills */}
-          {(post.event || post.venue.tagged) && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {post.event && (
-                <button
-                  className="inline-flex items-center gap-2 group bg-white/5 hover:bg-white/[0.08] px-2.5 py-1.5 rounded-full border border-white/5 transition-all active:scale-95"
-                >
-                  <div className="w-5 h-5 rounded-md bg-noctvm-violet/20 flex items-center justify-center border border-noctvm-violet/20 group-hover:scale-110 transition-transform">
-                    <CalendarIcon className="w-3 h-3 text-noctvm-violet" />
-                  </div>
-                  <div className="relative overflow-hidden max-w-[120px] sm:max-w-[180px]">
-                    <p className="text-[10px] font-black text-white uppercase tracking-widest truncate whitespace-nowrap pr-4">
-                      {post.event.title}
-                    </p>
-                    <div className="absolute top-0 right-0 bottom-0 w-6 bg-gradient-to-l from-noctvm-black/80 to-transparent z-10" />
-                  </div>
-                </button>
-              )}
 
-              {post.venue.tagged && post.venue.name && (
-                <button
-                  onClick={() => onVenueClick(post.venue.name)}
-                  className="inline-flex items-center gap-2 group bg-noctvm-emerald/5 hover:bg-noctvm-emerald/[0.08] px-2.5 py-1.5 rounded-full border border-noctvm-emerald/10 transition-all active:scale-95"
-                >
-                  <div className="w-5 h-5 rounded-md bg-noctvm-emerald/20 flex items-center justify-center border border-noctvm-emerald/20 group-hover:scale-110 transition-transform">
-                    <svg className="w-3 h-3 text-noctvm-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
-                    </svg>
-                  </div>
-                  <div className="relative overflow-hidden max-w-[100px] sm:max-w-[150px]">
-                    <p className="text-[10px] font-black text-noctvm-emerald uppercase tracking-widest truncate whitespace-nowrap pr-4">
-                      {post.venue.name}
-                    </p>
-                    <div className="absolute top-0 right-0 bottom-0 w-6 bg-gradient-to-l from-noctvm-black/80 to-transparent z-10" />
-                  </div>
-                </button>
-              )}
-            </div>
-          )}
 
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">

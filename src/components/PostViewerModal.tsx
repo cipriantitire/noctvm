@@ -385,22 +385,10 @@ export default function PostViewerModal({
           {/* Comments Section (Scrollable) */}
           <div className="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar flex flex-col gap-2">
              {post.caption && (
-               <div className="flex gap-3 mb-4 mt-2">
-                  <div className="w-[32px] h-[32px] min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full border border-white/10 overflow-hidden flex-shrink-0 relative bg-noctvm-midnight">
-                    {profileAvatar ? (
-                      <Image src={profileAvatar} alt="" fill className="object-cover" unoptimized />
-                    ) : (
-                      <span className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white">{profileInitial || 'U'}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 pt-0.5">
-                     <p className="text-xs text-white leading-relaxed break-words">
-                        <strong className="font-black text-white hover:text-noctvm-violet cursor-pointer mr-1.5 transition-colors">
-                          {profileName}
-                        </strong>
-                        {post.caption}
-                     </p>
-                  </div>
+               <div className="mb-2 mt-1">
+                  <p className="text-[13px] text-white/90 leading-relaxed break-words">
+                     {post.caption}
+                  </p>
                </div>
              )}
                <div className="pt-2">
