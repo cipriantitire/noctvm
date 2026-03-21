@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -275,11 +275,7 @@ export default function CommentSection({
     setIsExpanded(!isCollapsed);
   }, [isCollapsed]);
 
-  useEffect(() => {
-    fetchComments();
-  }, [postId]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('post_comments')
@@ -306,7 +302,11 @@ export default function CommentSection({
       setComments(tree.reverse()); 
     }
     setLoading(false);
-  };
+  }, [postId]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const handlePost = async (parentId: string | null = null) => {
     const text = parentId ? replyText : newComment;

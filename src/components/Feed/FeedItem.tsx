@@ -372,9 +372,11 @@ export function FeedItem({
             image_url: post.imageUrl || null,
             created_at: post.createdAt,
             likes_count: post.likes,
+            reposts_count: post.reposts,
+            reposted: post.reposted || false,
             venue: post.venue,
             event: post.event,
-            tagged_users: post.taggedUsers
+            tagged_users: post.taggedUsers || []
           }]}
           initialIndex={0}
           isOpen={viewerOpen}
