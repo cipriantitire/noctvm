@@ -18,11 +18,13 @@ import { RepostIcon, CalendarIcon } from './icons';
 
 interface ProfilePost {
   id: string;
-  user_id: string; // Added user_id
+  user_id: string;
   image_url: string | null;
   caption: string;
   created_at: string;
   likes_count: number;
+  reposts_count: number;
+  reposted: boolean;
   venue?: { name: string; tagged: boolean };
   event?: { title: string };
   tagged_users?: string[];
@@ -67,6 +69,8 @@ export default function PostViewerModal({
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [reposted, setReposted] = useState(false);
+  const [repostCount, setRepostCount] = useState(0);
   const [comments, setComments] = useState<{ user: string; text: string; badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified' }[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
@@ -139,7 +143,7 @@ export default function PostViewerModal({
     
     setCommentInput('');
     setShowComments(false);
-  }, [user]);
+  }, [user, post]); // Added post to dependencies
 
   useEffect(() => {
     if (!isOpen || !post?.id) return;
@@ -162,6 +166,19 @@ export default function PostViewerModal({
         setLikeCount(count ?? 0);
       })
       .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'reposts', 
+        filter: `post_id=eq.${postId}` 
+      }, async (payload) => {
+        const { count } = await supabase.from('reposts').select('id', { count: 'exact', head: true }).eq('post_id', postId);
+        setRepostCount(count ?? 0);
+        if (user) {
+          const { data: userRepost } = await supabase.from('reposts').select('id').eq('post_id', postId).eq('user_id', user.id).maybeSingle();
+          setReposted(!!userRepost);
+        }
+      })
+      .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 
         table: 'post_comments', 
@@ -178,7 +195,7 @@ export default function PostViewerModal({
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [isOpen, index, post?.id]);
+  }, [isOpen, index, post?.id, user]);
 
   if (!isOpen || posts.length === 0 || !post || typeof document === 'undefined') return null;
 
@@ -211,12 +228,10 @@ export default function PostViewerModal({
     if (!user || reposting) return;
     setReposting(true);
     try {
-      const { data: existing } = await supabase.from('reposts').select('id').eq('post_id', post.id).eq('user_id', user.id).maybeSingle();
-      if (existing) {
-        await supabase.from('reposts').delete().eq('id', existing.id);
-      } else {
-        await supabase.from('reposts').insert({ post_id: post.id, user_id: user.id });
-      }
+      const { error } = await supabase.rpc('repost_post', { p_post_id: post.id });
+      if (error) throw error;
+      setReposted(!reposted);
+      setRepostCount(prev => reposted ? prev - 1 : prev + 1);
     } catch (err) {
        console.error("Failed to repost", err);
     } finally {
@@ -460,12 +475,12 @@ export default function PostViewerModal({
 
           {/* Bottom Actions Bar + Input */}
           <div className="border-t border-white/5 bg-noctvm-surface shrink-0 pt-3 pb-4 px-4">
-              {/* Action Icons */}
-              <div className="flex items-center gap-4 mb-2">
+              {/* Action Icons Mimicked from FeedItem */}
+              <div className="flex items-center gap-4 mb-1">
                  <button 
                    onClick={handleLike} 
                    className={`flex items-center gap-1.5 group transition-all ${liked ? 'text-red-500' : 'text-noctvm-silver/60 hover:text-red-500'}`}
-                   title={liked ? "Unlike post" : "Like post"}
+                   title={liked ? "Unlike" : "Like"}
                  >
                    {liked 
                      ? <HeartIcon className="w-5 h-5 fill-current scale-110" />
@@ -478,26 +493,28 @@ export default function PostViewerModal({
                 <button 
                   onClick={handleRepost}
                   disabled={reposting}
+                  className={`flex items-center gap-1.5 group transition-all ${reposted ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-noctvm-silver/60 hover:text-blue-500'}`}
                   title="Remix / Repost"
-                  className={`flex items-center gap-1.5 hover:scale-110 active:scale-95 transition-all disabled:opacity-50 text-noctvm-silver/60 hover:text-blue-500`}
                 >
-                  <RepostIcon className={`w-5 h-5 ${reposting ? 'animate-pulse' : ''}`} />
+                  <RepostIcon className={`w-5 h-5 ${reposted ? 'scale-110' : 'group-hover:scale-110'} ${reposting ? 'animate-pulse' : ''}`} />
+                  {repostCount > 0 && <span className="text-[12px] font-mono leading-none">{repostCount}</span>}
                 </button>
 
                 {/* Share Icon */}
                 <button 
                   onClick={handleShare} 
-                  className="text-noctvm-silver/60 hover:text-noctvm-emerald hover:scale-110 active:scale-95 transition-all"
+                  className="flex items-center gap-1.5 text-noctvm-silver/60 hover:text-noctvm-emerald transition-all group"
                   title="Share"
                 >
-                  <ShareIcon className="w-5 h-5" />
+                  <ShareIcon className="w-5 h-5 group-hover:scale-110" />
                 </button>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <button 
                   onClick={() => setShowLikesModal(true)}
-                  className="text-xs font-black text-white hover:text-noctvm-violet transition-colors"
+                  title="View likes"
+                  className="text-[12px] font-black text-white hover:text-noctvm-violet transition-colors"
                 >
                   {likeCount.toLocaleString()} likes
                 </button>
