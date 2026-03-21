@@ -17,6 +17,7 @@ import CommentSection from './CommentSection';
 import PostViewerModal from '../PostViewerModal';
 import EditPostModal from '../EditPostModal';
 import TaggedUsersModal from '../TaggedUsersModal';
+import LikesModal from '../LikesModal';
 
 interface FeedItemProps {
   post: FeedPost;
@@ -51,6 +52,7 @@ export function FeedItem({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMobileSheet, setShowMobileSheet] = useState(false);
   const [showTaggedUsers, setShowTaggedUsers] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
   const [commentPreview, setCommentPreview] = useState<{count: number, firstComment: any | null}>({ count: 0, firstComment: null });
@@ -241,40 +243,51 @@ export function FeedItem({
         {/* Body */}
         <div className="px-3 py-3">
           {/* Action row */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-5">
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={() => toggleLike(post)}
-                  title={post.liked ? 'Unlike' : 'Like'}
-                  className={`group ${post.liked ? 'text-red-500' : 'text-noctvm-silver hover:text-red-500'} transition-all`}
-                >
-                  <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current' : 'group-hover:scale-110'}`} />
-                </button>
-                <span className="text-[9px] font-mono mt-0.5 text-noctvm-silver/60">{post.likes}</span>
-              </div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => toggleLike(post)}
+                className={`flex items-center gap-1.5 group transition-all ${post.liked ? 'text-red-500' : 'text-noctvm-silver/60 hover:text-red-500'}`}
+              >
+                 <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current scale-110' : 'group-hover:scale-110'}`} />
+                 <span className="text-[12px] font-mono leading-none">{post.likes}</span>
+              </button>
+
               <button
                 onClick={handleCommentClick}
-                title="Comments"
-                className="text-noctvm-gold hover:text-white transition-all group pb-2"
+                className="flex items-center gap-1.5 text-noctvm-silver/60 hover:text-noctvm-gold transition-all group"
               >
                 <ChatIcon className="w-5 h-5 group-hover:scale-110" />
+                {commentPreview.count > 0 && <span className="text-[12px] font-mono leading-none">{commentPreview.count}</span>}
               </button>
+
               <button
                 onClick={() => onRepost(post)}
-                title="Remix"
-                className={`group transition-all pb-2 ${post.reposted ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-noctvm-silver hover:text-blue-500'}`}
+                className={`flex items-center gap-1.5 group transition-all ${post.reposted ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-noctvm-silver/60 hover:text-blue-500'}`}
               >
-                <RepostIcon className={`w-5 h-5 group-hover:scale-110`} />
+                <RepostIcon className={`w-5 h-5 ${post.reposted ? 'scale-110' : 'group-hover:scale-110'}`} />
+                {post.reposts > 0 && <span className="text-[12px] font-mono leading-none">{post.reposts}</span>}
               </button>
+
               <button
                 onClick={() => onShare(post.id)}
                 title="Share"
-                className="text-noctvm-emerald hover:text-emerald-400 group pb-2 transition-all"
+                className="flex items-center gap-1.5 text-noctvm-silver/60 hover:text-noctvm-emerald transition-all group"
               >
                 <ShareIcon className="w-5 h-5 group-hover:scale-110" />
               </button>
             </div>
+            {copied && <span className="text-[10px] text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
+          </div>
+
+          <div className="mb-2">
+            <button 
+              onClick={() => setShowLikesModal(true)}
+              title="View likes"
+              className="text-[12px] font-black text-white hover:text-noctvm-violet transition-colors"
+            >
+              {post.likes.toLocaleString()} likes
+            </button>
           </div>
 
           {/* Caption (Inline with Nickname) */}
@@ -330,6 +343,12 @@ export function FeedItem({
         handles={post.taggedUsers || []}
         isOpen={showTaggedUsers}
         onClose={() => setShowTaggedUsers(false)}
+      />
+
+      <LikesModal
+        postId={post.id}
+        isOpen={showLikesModal}
+        onClose={() => setShowLikesModal(false)}
       />
 
       {/* Mobile bottom sheet — rendered in portal to break out of article stacking context */}

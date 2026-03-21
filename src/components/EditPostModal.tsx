@@ -25,7 +25,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
   const [selectedVenue, setSelectedVenue] = useState('');
   const [showVenueSuggestions, setShowVenueSuggestions] = useState(false);
   const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(post.tags?.map(t => t.replace(/#/g, '')) || []);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   
@@ -114,8 +114,8 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
 
   const addTag = () => {
     const raw = tagInput.trim().replace(/#/g, '');
-    if (raw && !tags.includes(`#${raw}`) && tags.length < 10) {
-      setTags(prev => [...prev, `#${raw}`]);
+    if (raw && !tags.includes(raw) && tags.length < 10) {
+      setTags(prev => [...prev, raw]);
     }
     setTagInput('');
   };
@@ -129,8 +129,8 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
     let currentTags = tags;
     if (tagInput.trim()) {
       const raw = tagInput.trim().replace(/#/g, '');
-      if (raw && !currentTags.includes(`#${raw}`) && currentTags.length < 10) {
-        currentTags = [...currentTags, `#${raw}`];
+      if (raw && !currentTags.includes(raw) && currentTags.length < 10) {
+        currentTags = [...currentTags, raw];
         setTags(currentTags);
       }
     }

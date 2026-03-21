@@ -465,11 +465,11 @@ export default function PostViewerModal({
                 <div className="flex flex-col items-center">
                    <button 
                      onClick={handleLike} 
-                     className={`hover:scale-110 active:scale-95 transition-all ${liked ? 'text-red-500' : 'text-noctvm-silver hover:text-red-500'}`}
+                     className={`hover:scale-110 active:scale-95 transition-all ${liked ? 'text-red-500' : 'text-noctvm-silver/60 hover:text-red-500'}`}
                      title={liked ? "Unlike post" : "Like post"}
                    >
                      {liked 
-                       ? <svg className="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" /></svg>
+                       ? <HeartIcon className="w-7 h-7 fill-current" />
                        : <HeartIcon className="w-7 h-7" />
                      }
                    </button>
@@ -483,7 +483,7 @@ export default function PostViewerModal({
                 
                 {/* Comment Icon */}
                 <button 
-                  className="text-noctvm-gold hover:text-white hover:scale-110 transition-all pb-4"
+                  className="text-noctvm-silver/60 hover:text-noctvm-gold hover:scale-110 transition-all pb-4"
                   onClick={() => setShowComments(!showComments)}
                   title="View comments"
                 >
@@ -495,7 +495,7 @@ export default function PostViewerModal({
                   onClick={handleRepost}
                   disabled={reposting}
                   title="Remix / Repost"
-                  className={`hover:scale-110 active:scale-95 transition-all disabled:opacity-50 pb-4 ${reposting ? 'text-blue-500' : 'text-blue-500 hover:text-blue-400'}`}
+                  className={`hover:scale-110 active:scale-95 transition-all disabled:opacity-50 pb-4 text-noctvm-silver/60 hover:text-blue-500`}
                 >
                   <RepostIcon className={`w-7 h-7 ${reposting ? 'animate-pulse' : ''}`} />
                 </button>
@@ -503,7 +503,7 @@ export default function PostViewerModal({
                 {/* Share Icon */}
                 <button 
                   onClick={handleShare} 
-                  className="text-noctvm-emerald hover:text-emerald-400 hover:scale-110 active:scale-95 transition-all pb-4"
+                  className="text-noctvm-silver/60 hover:text-noctvm-emerald hover:scale-110 active:scale-95 transition-all pb-4"
                   title="Share"
                 >
                   <ShareIcon className="w-7 h-7" />

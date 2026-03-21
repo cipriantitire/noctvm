@@ -108,8 +108,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
 
   const addTag = () => {
     const raw = tagInput.trim().replace(/#/g, '');
-    if (raw && !tags.includes(`#${raw}`) && tags.length < 10) {
-      setTags(prev => [...prev, `#${raw}`]);
+    if (raw && !tags.includes(raw) && tags.length < 10) {
+      setTags(prev => [...prev, raw]);
     }
     setTagInput('');
   };
@@ -127,8 +127,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
     let currentTags = tags;
     if (tagInput.trim()) {
       const raw = tagInput.trim().replace(/#/g, '');
-      if (raw && !currentTags.includes(`#${raw}`) && currentTags.length < 10) {
-        currentTags = [...currentTags, `#${raw}`];
+      if (raw && !currentTags.includes(raw) && currentTags.length < 10) {
+        currentTags = [...currentTags, raw];
         setTags(currentTags);
       }
     }
