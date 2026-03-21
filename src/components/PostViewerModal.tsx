@@ -270,10 +270,22 @@ export default function PostViewerModal({
         onClick={onClose}
         title="Close modal"
         aria-label="Close modal"
-        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all active:scale-90"
+        className="absolute top-10 right-4 lg:top-6 lg:right-6 z-[201] p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90"
       >
-        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-6 h-6 lg:w-8 lg:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Mobile Back button top left (for extra safety) */}
+      <button 
+        onClick={onClose}
+        title="Go back"
+        aria-label="Go back"
+        className="absolute top-10 left-4 lg:hidden z-[201] p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90 shadow-xl"
+      >
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
 

@@ -32,6 +32,212 @@ interface CommentSectionProps {
   hideRootInput?: boolean;
 }
 
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
+}
+
+const CommentItem = ({ 
+  comment, 
+  depth = 0,
+  currentUserId,
+  postOwnerId,
+  editingId,
+  setEditingId,
+  editContent,
+  setEditContent,
+  replyingTo,
+  setReplyingTo,
+  replyText,
+  setReplyText,
+  handleUpdate,
+  handleDelete,
+  handlePost
+}: { 
+  comment: Comment, 
+  depth?: number,
+  currentUserId: string | null,
+  postOwnerId: string,
+  editingId: string | null,
+  setEditingId: (id: string | null) => void,
+  editContent: string,
+  setEditContent: (c: string) => void,
+  replyingTo: string | null,
+  setReplyingTo: (id: string | null) => void,
+  replyText: string,
+  setReplyText: (t: string) => void,
+  handleUpdate: (id: string) => void,
+  handleDelete: (id: string) => void,
+  handlePost: (id: string | null) => void 
+}) => {
+  const isOwnComment = currentUserId === comment.user_id;
+  const isPostOwner = currentUserId === postOwnerId;
+  const canDelete = isOwnComment || isPostOwner;
+  const displayTime = timeAgo(comment.created_at);
+
+  return (
+    <div className={`group/item animate-fade-in relative transition-all duration-300 w-full`}>
+      {/* Main Row */}
+      <div className="flex gap-3 relative z-10 w-full">
+        {/* Avatar Area with Parent Stem */}
+        <div className="relative flex-shrink-0 flex flex-col items-center">
+          <Link href={`/@${comment.user.username}`} className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/10 hover:ring-noctvm-violet/40 transition-all hover:scale-105 active:scale-95 shadow-lg bg-noctvm-midnight relative z-10 block">
+            {comment.user.avatar_url ? (
+              <Image src={comment.user.avatar_url} alt="" width={32} height={32} className="object-cover w-full h-full" unoptimized />
+            ) : (
+              <div className="w-full h-full bg-noctvm-violet/20 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-tighter">
+                {comment.user.display_name[0]}
+              </div>
+            )}
+          </Link>
+          
+          {/* Stem connecting this avatar down to its replies wrapper */}
+          {comment.replies && comment.replies.length > 0 && (
+             <div className="absolute top-[32px] bottom-[0px] w-[2px] bg-white/10 pointer-events-none" />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0 pb-1">
+          {/* Name + Text line */}
+          <div className="flex flex-col relative">
+            {editingId === comment.id ? (
+              <div className="space-y-2 mt-1 pr-4">
+                <input
+                  type="text"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full bg-noctvm-surface/50 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 transition-all shadow-inner"
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && handleUpdate(comment.id)}
+                />
+                <div className="flex justify-end gap-3 px-2 pb-1">
+                  <button onClick={() => { setEditingId(null); setEditContent(''); }} className="text-[10px] text-noctvm-silver hover:text-white uppercase font-black tracking-widest transition-colors">Cancel</button>
+                  <button onClick={() => handleUpdate(comment.id)} className="text-[10px] text-noctvm-violet hover:text-white uppercase font-black tracking-widest transition-colors">Save</button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-[13px] leading-relaxed break-words relative pr-8">
+                {/* Name + Badge */}
+                <span className="inline-flex items-center gap-1.5 mr-2">
+                  <Link href={`/@${comment.user.username}`} className="font-bold text-white hover:text-noctvm-violet transition-colors tracking-tight text-[13px]">
+                    {comment.user.username}
+                  </Link>
+                  {comment.user_id === postOwnerId && (
+                    <span className="text-[7px] bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet px-1.5 py-[1px] rounded-full uppercase font-black tracking-widest shadow-[0_0_10px_rgba(139,92,246,0.2)]">Author</span>
+                  )}
+                  {comment.user.badge && comment.user.badge !== 'none' && (
+                    <VerifiedBadge type={comment.user.badge as 'owner' | 'admin' | 'verified' | 'gold'} size="xs" />
+                  )}
+                </span>
+                
+                {/* Comment Body */}
+                <span className="text-white/80 font-normal selection:bg-noctvm-violet/30">
+                  {comment.text}
+                </span>
+
+                {/* Popover Edit/Delete on Hover (User Requested 3-horizontal-dots at the right end) */}
+                {!editingId && canDelete && (
+                  <div className="absolute right-0 top-0 group/menu opacity-0 group-hover/item:opacity-100 transition-all z-20">
+                    <button className="text-noctvm-silver/40 hover:text-white p-1" title="Options">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                    </button>
+                    
+                    <div className="absolute right-0 top-full mt-1 hidden group-hover/menu:flex flex-col bg-noctvm-surface border border-noctvm-border rounded-xl shadow-xl overflow-hidden min-w-[120px] z-50 animate-fade-in pointer-events-auto">
+                      {isOwnComment && (
+                        <button onClick={() => { setEditingId(comment.id); setEditContent(comment.text); }} className="px-4 py-3 text-xs text-left text-white hover:bg-white/5 font-bold transition-colors">Edit</button>
+                      )}
+                      <button onClick={() => handleDelete(comment.id)} className="px-4 py-3 text-xs text-left text-red-500 hover:bg-red-500/10 font-bold transition-colors">Delete</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            {!editingId && (
+              <div className="flex items-center gap-4 mt-1 mb-1">
+                <span className="text-[11px] text-noctvm-silver/40 font-medium tracking-tight">{displayTime}</span>
+                <button 
+                  onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                  className={`text-[11px] font-bold transition-all ${replyingTo === comment.id ? 'text-noctvm-violet scale-105' : 'text-noctvm-silver/60 hover:text-white'}`}
+                >
+                  Reply
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Reply Input */}
+      {replyingTo === comment.id && (
+        <div className="mt-2 mb-4 relative animate-slide-up ml-[44px]">
+          <input
+            type="text"
+            autoFocus
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            placeholder={`Reply to ${comment.user.username}...`}
+            className="w-full bg-noctvm-surface/50 border border-white/5 rounded-2xl px-4 py-2 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 pr-16 transition-all shadow-inner"
+            onKeyDown={(e) => e.key === 'Enter' && handlePost(comment.id)}
+          />
+          <button
+            onClick={() => handlePost(comment.id)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-noctvm-violet hover:text-white hover:scale-105 active:scale-95 transition-all"
+          >
+            Post
+          </button>
+        </div>
+      )}
+
+      {/* Recursive Replies Container with Thread Branches */}
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="relative mt-2">
+          {comment.replies.map((reply, i) => {
+            const isLast = i === comment.replies!.length - 1;
+            return (
+              <div key={reply.id} className="relative mt-2 group/thread">
+                {/* Vertical stem ONLY if not last. 
+                    Starts exactly at the end of the elbow (top: 16px) and spans directly across the margin (bottom: -8px) */}
+                {!isLast && (
+                  <div className="absolute left-[15px] top-[16px] bottom-[-8px] w-[2px] bg-white/10 group-hover/thread:bg-white/20 transition-colors pointer-events-none" />
+                )}
+                
+                {/* Elbow curve to child avatar (spanning the first 24px) */}
+                <div className="absolute left-[15px] top-[-8px] w-[25px] h-[24px] border-l-2 border-b-2 border-white/10 rounded-bl-[12px] group-hover/thread:border-white/20 transition-colors pointer-events-none" />
+                
+                <div className="pl-[40px]">
+                  <CommentItem 
+                    comment={reply} 
+                    depth={depth + 1}
+                    currentUserId={currentUserId}
+                    postOwnerId={postOwnerId}
+                    editingId={editingId}
+                    setEditingId={setEditingId}
+                    editContent={editContent}
+                    setEditContent={setEditContent}
+                    replyingTo={replyingTo}
+                    setReplyingTo={setReplyingTo}
+                    replyText={replyText}
+                    setReplyText={setReplyText}
+                    handleUpdate={handleUpdate}
+                    handleDelete={handleDelete}
+                    handlePost={handlePost}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function CommentSection({ 
   postId, 
   postOwnerId, 
@@ -47,7 +253,6 @@ export default function CommentSection({
   const [isExpanded, setIsExpanded] = useState(!isCollapsed);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
-  const [truncatedIds, setTruncatedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,7 +272,6 @@ export default function CommentSection({
       .order('created_at', { ascending: true });
 
     if (!error && data) {
-      // Build tree
       const commentMap: Record<string, Comment> = {};
       const tree: Comment[] = [];
 
@@ -83,7 +287,7 @@ export default function CommentSection({
         }
       });
 
-      setComments(tree.reverse()); // Show newest top-level first
+      setComments(tree.reverse()); 
     }
     setLoading(false);
   };
@@ -113,7 +317,7 @@ export default function CommentSection({
         setNewComment('');
       }
       
-      fetchComments(); // Refresh tree
+      fetchComments(); 
     } catch (err) {
       console.error('Failed to post comment:', err);
     }
@@ -145,166 +349,8 @@ export default function CommentSection({
     }
   };
 
-  const CommentItem = ({ comment, depth = 0 }: { comment: Comment, depth?: number }) => {
-    const isOwnComment = currentUserId === comment.user_id;
-    const isPostOwner = currentUserId === postOwnerId;
-    const canDelete = isOwnComment || isPostOwner;
-    const displayTime = timeAgo(comment.created_at);
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
-    return (
-      <div className={`group/item animate-fade-in relative transition-all duration-300 w-full`}>
-        {/* Main Row */}
-        <div className="flex gap-3 relative z-10 w-full">
-          <Link href={`/@${comment.user.username}`} className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-white/10 hover:ring-noctvm-violet/40 transition-all hover:scale-105 active:scale-95 shadow-lg bg-noctvm-midnight">
-            {comment.user.avatar_url ? (
-              <Image src={comment.user.avatar_url} alt="" width={32} height={32} className="object-cover w-full h-full" unoptimized />
-            ) : (
-              <div className="w-full h-full bg-noctvm-violet/20 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-tighter">
-                {comment.user.display_name[0]}
-              </div>
-            )}
-          </Link>
-
-          <div className="flex-1 min-w-0">
-            {/* Name + Text line */}
-            <div className="flex flex-col">
-              {editingId === comment.id ? (
-                <div className="space-y-2 mt-1 pr-4">
-                  <textarea
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full bg-noctvm-surface/50 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 transition-all resize-none shadow-inner"
-                    rows={3}
-                    autoFocus
-                  />
-                  <div className="flex justify-end gap-3 px-2 pb-1">
-                    <button onClick={() => setEditingId(null)} className="text-[10px] text-noctvm-silver hover:text-white uppercase font-black tracking-widest transition-colors">Cancel</button>
-                    <button onClick={() => handleUpdate(comment.id)} className="text-[10px] text-noctvm-violet hover:text-white uppercase font-black tracking-widest transition-colors">Save Changes</button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-[13px] leading-relaxed break-words relative pr-4">
-                  {/* Name + Badge */}
-                  <span className="inline-flex items-center gap-1.5 mr-2">
-                    <Link href={`/@${comment.user.username}`} className="font-bold text-white hover:text-noctvm-violet transition-colors tracking-tight text-[13px]">
-                      {comment.user.username}
-                    </Link>
-                    {comment.user_id === postOwnerId && (
-                      <span className="text-[7px] bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-violet px-1.5 py-[1px] rounded-full uppercase font-black tracking-widest shadow-[0_0_10px_rgba(139,92,246,0.2)]">Author</span>
-                    )}
-                    {comment.user.badge && comment.user.badge !== 'none' && (
-                      <VerifiedBadge type={comment.user.badge as 'owner' | 'admin' | 'verified' | 'gold'} size="xs" />
-                    )}
-                  </span>
-                  
-                  {/* Comment Body */}
-                  <span className="text-white/80 font-normal selection:bg-noctvm-violet/30">
-                    {isCollapsed ? (
-                      <button onClick={() => setIsCollapsed(false)} className="italic text-noctvm-silver/40 hover:text-noctvm-violet transition-colors">[ Comment collapsed ]</button>
-                    ) : comment.text}
-                  </span>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              {!isCollapsed && !editingId && (
-                <div className="flex items-center gap-4 mt-1 mb-1">
-                  <span className="text-[11px] text-noctvm-silver/40 font-medium tracking-tight">{displayTime}</span>
-                  
-                  <button 
-                    onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                    className={`text-[11px] font-bold transition-all ${replyingTo === comment.id ? 'text-noctvm-violet scale-105' : 'text-noctvm-silver/60 hover:text-white'}`}
-                  >
-                    Reply
-                  </button>
-
-                  <button 
-                    onClick={() => setIsCollapsed(true)}
-                    className="text-[11px] font-bold text-noctvm-silver/30 hover:text-noctvm-violet transition-colors group-hover/item:opacity-100 opacity-0"
-                  >
-                    Collapse
-                  </button>
-                  
-                  {/* Moderation Controls hidden by default, shown on hover */}
-                  <div className="flex items-center gap-3 opacity-0 group-hover/item:opacity-100 transition-all ml-2">
-                    {isOwnComment && (
-                      <button onClick={() => { setEditingId(comment.id); setEditContent(comment.text); }} className="text-[11px] font-bold text-noctvm-silver/50 hover:text-noctvm-violet transition-colors">Edit</button>
-                    )}
-                    {canDelete && (
-                      <button onClick={() => handleDelete(comment.id)} className="text-[11px] font-bold text-red-500/50 hover:text-red-400 transition-colors">Delete</button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Reply Input */}
-        {replyingTo === comment.id && !isCollapsed && (
-          <div className="mt-2 mb-4 relative animate-slide-up ml-[44px]">
-            <input
-              type="text"
-              autoFocus
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder={`Reply to ${comment.user.username}...`}
-              className="w-full bg-noctvm-surface/50 border border-white/5 rounded-2xl px-4 py-2 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 pr-16 transition-all shadow-inner"
-              onKeyDown={(e) => e.key === 'Enter' && handlePost(comment.id)}
-            />
-            <button
-              onClick={() => handlePost(comment.id)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-noctvm-violet hover:text-white hover:scale-105 active:scale-95 transition-all"
-            >
-              Post
-            </button>
-          </div>
-        )}
-
-        {/* Recursive Replies Container with Thread Branches */}
-        {!isCollapsed && comment.replies && comment.replies.length > 0 && (
-          <div className="relative mt-2">
-            {/* The continuous vertical stem extending from the parent's avatar (centered at 16px).
-                Since parent avatar is 32px, its center is at left 15px/16px. 
-                But wait, the replies wrapper is inside the main container. */}
-            
-            {comment.replies.map((reply, i) => {
-              const isLast = i === comment.replies!.length - 1;
-              return (
-                <div key={reply.id} className="relative mt-2 group/thread">
-                  {/* Vertical stem from parent's avatar going down entirely (or just until this child if last) */}
-                  <div className={`absolute left-[15px] w-[2px] bg-white/10 group-hover/thread:bg-white/20 transition-colors ${isLast ? 'top-[-8px] h-[24px]' : 'top-[-8px] bottom-0'}`} />
-                  
-                  {/* Elbow curve from the vertical line horizontally to the child's avatar */}
-                  <div className="absolute left-[15px] top-[-8px] w-[25px] h-[24px] border-l-2 border-b-2 border-white/10 rounded-bl-[12px] group-hover/thread:border-white/20 transition-colors pointer-events-none" />
-                  
-                  {/* The child comment itself, indented so its avatar sits right at the end of the elbow */}
-                  <div className="pl-[40px]">
-                    <CommentItem comment={reply} depth={depth + 1} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Helper function for time ago in comments
-  function timeAgo(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
-  }
-
   return (
     <div className={`mt-4 space-y-4 border-t border-white/5 pt-4 ${hideRootInput ? 'pb-4' : ''}`}>
-      {/* Root Input - Top only when expanded */}
       {!hideRootInput && currentUserId && isExpanded && (
         <div className="relative group mb-4">
           <input
@@ -325,7 +371,6 @@ export default function CommentSection({
         </div>
       )}
 
-      {/* Main List */}
       <div className={`transition-all duration-500 overflow-hidden ${isExpanded ? 'max-h-[800px] overflow-y-auto custom-scrollbar' : ''}`}>
         {loading ? (
           <div className="py-8 flex flex-col items-center justify-center gap-3">
@@ -339,7 +384,23 @@ export default function CommentSection({
         ) : (
           <div className="space-y-1">
             {(isExpanded ? comments.slice(0, 10) : comments.slice(0, 2)).map(comment => (
-              <CommentItem key={comment.id} comment={comment} />
+              <CommentItem 
+                key={comment.id} 
+                comment={comment} 
+                currentUserId={currentUserId}
+                postOwnerId={postOwnerId}
+                editingId={editingId}
+                setEditingId={setEditingId}
+                editContent={editContent}
+                setEditContent={setEditContent}
+                replyingTo={replyingTo}
+                setReplyingTo={setReplyingTo}
+                replyText={replyText}
+                setReplyText={setReplyText}
+                handleUpdate={handleUpdate}
+                handleDelete={handleDelete}
+                handlePost={handlePost}
+              />
             ))}
           </div>
         )}
@@ -355,7 +416,6 @@ export default function CommentSection({
         </button>
       )}
 
-      {/* Input at bottom if collapsed */}
       {!hideRootInput && currentUserId && !isExpanded && (
         <div className="relative group">
           <input
