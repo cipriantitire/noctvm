@@ -16,7 +16,7 @@ import TaggedUsersModal from './TaggedUsersModal';
 import { getVenueLogo } from '@/lib/venue-logos';
 import { RepostIcon, CalendarIcon } from './icons';
 
-interface ProfilePost {
+export interface ProfilePost {
   id: string;
   user_id: string;
   image_url: string | null;
@@ -143,7 +143,7 @@ export default function PostViewerModal({
     
     setCommentInput('');
     setShowComments(false);
-  }, [user, post]); // Added post to dependencies
+  }, [user]); // Added post to dependencies
 
   useEffect(() => {
     if (!isOpen || !post?.id) return;

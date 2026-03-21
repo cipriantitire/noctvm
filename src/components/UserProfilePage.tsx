@@ -9,7 +9,7 @@ import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
 import type { NoctEvent } from '@/lib/types';
-import PostViewerModal from './PostViewerModal';
+import PostViewerModal, { type ProfilePost } from './PostViewerModal';
 import VerifiedBadge from './VerifiedBadge';
 import { 
   MusicIcon, 
@@ -23,14 +23,7 @@ import {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-interface ProfilePost {
-  id: string;
-  user_id: string;
-  image_url: string | null;
-  caption: string;
-  created_at: string;
-  likes_count: number;
-}
+// Removed local ProfilePost, using imported one.
 
 interface DbHighlight {
   id: string;
@@ -139,27 +132,30 @@ export default function UserProfilePage({
       // 1. Fetch own posts
       const { data: ownData } = await supabase
         .from('posts')
-        .select('id, user_id, image_url, caption, created_at, likes_count')
+        .select('id, user_id, image_url, caption, created_at, likes_count, reposts_count')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       // 2. Fetch reposted posts
       const { data: repostData } = await supabase
         .from('reposts')
-        .select('post_id, posts(id, user_id, image_url, caption, created_at, likes_count)')
+        .select('post_id, posts(id, user_id, image_url, caption, created_at, likes_count, reposts_count)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       // 3. Fetch tagged posts (mentions in caption or tagged_users array)
       const { data: taggedData } = await supabase
         .from('posts')
-        .select('id, user_id, image_url, caption, created_at, likes_count')
+        .select('id, user_id, image_url, caption, created_at, likes_count, reposts_count')
         .or(`caption.ilike.%@${profile?.username}%,tagged_users.cs.{"@${profile?.username}"}`)
         .order('created_at', { ascending: false });
 
-      const ownPosts = (ownData || []) as ProfilePost[];
-      const repostedPosts = (repostData || []).map((r: any) => r.posts).filter(Boolean) as ProfilePost[];
-      const tagged = (taggedData || []) as ProfilePost[];
+      const ownPosts = (ownData || []).map(p => ({ ...p, reposted: false })) as ProfilePost[];
+      const repostedPosts = (repostData || [])
+        .map((r: any) => r.posts)
+        .filter(Boolean)
+        .map((p: any) => ({ ...p, reposted: true })) as ProfilePost[];
+      const tagged = (taggedData || []).map(p => ({ ...p, reposted: false })) as ProfilePost[];
 
       setPosts(ownPosts);
       setReposts(repostedPosts);
