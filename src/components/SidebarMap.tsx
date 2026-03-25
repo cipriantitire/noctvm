@@ -86,13 +86,13 @@ export default function SidebarMap({
     return (
       <div className="w-full h-full bg-noctvm-midnight flex flex-col items-center justify-center text-noctvm-silver gap-2">
         <div className="w-4 h-4 border-2 border-noctvm-violet border-t-transparent rounded-full animate-spin" />
-        <span className="text-[10px] uppercase tracking-widest font-mono">Initializing Map</span>
+        <span className="text-noctvm-caption uppercase tracking-widest font-mono">Initializing Map</span>
       </div>
     );
   }
 
   const center = CITY_CENTERS[activeCity] || CITY_CENTERS.bucuresti;
-  const isEventsMode = activeTab === 'events' || activeTab === 'feed';
+  const isEventsMode = activeTab === 'events' || activeTab === 'feed' || activeTab === 'profile';
   
   const customIcon = L.divIcon({
     className: 'custom-div-icon',
@@ -115,7 +115,7 @@ export default function SidebarMap({
         />
         
         {/* Radar Effect Overlays Moved Inside with lower Z-index */}
-        <div className="absolute inset-0 z-[400] pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 relative z-10 pointer-events-none overflow-hidden">
           <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] radar-sweep opacity-20" />
           <div className="absolute top-1/2 left-1/2 w-32 h-32 rounded-full border border-noctvm-violet/20 radar-pulse" />
           <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full border border-noctvm-violet/10 radar-pulse stagger-2" />
@@ -145,13 +145,13 @@ export default function SidebarMap({
                   className="bg-noctvm-black/98 text-white p-1.5 rounded-xl border border-white/10 min-w-0 w-[115px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col gap-0.5"
                 >
                   <div className="flex items-start justify-between gap-1">
-                    <p className="text-[10px] font-bold text-white truncate leading-tight flex-1">{venue.name}</p>
+                    <p className="text-noctvm-caption font-bold text-white truncate leading-tight flex-1">{venue.name}</p>
                     <div className="w-4 h-4 rounded-md bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all flex-shrink-0">
                       <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
                   </div>
                   
-                  <p className="text-[8px] text-noctvm-silver/40 truncate leading-none mb-0.5">{venue.address}</p>
+                  <p className="text-noctvm-xs text-noctvm-silver/40 truncate leading-none mb-0.5">{venue.address}</p>
                   
                   {isEventsMode && tonightEvent ? (
                     <div className="p-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/15">
@@ -159,12 +159,12 @@ export default function SidebarMap({
                         <span className="w-1 h-1 rounded-full bg-noctvm-violet animate-pulse" />
                         <p className="text-[7px] text-noctvm-violet font-mono uppercase tracking-tight">Tonight</p>
                       </div>
-                      <p className="text-[9px] font-semibold text-white/90 truncate leading-tight">{tonightEvent.title}</p>
+                      <p className="text-noctvm-micro font-semibold text-white/90 truncate leading-tight">{tonightEvent.title}</p>
                     </div>
                   ) : (
                     <>
                       {count > 0 ? (
-                        <p className="text-[8px] text-noctvm-emerald font-mono leading-none">{count} events</p>
+                        <p className="text-noctvm-xs text-noctvm-emerald font-mono leading-none">{count} events</p>
                       ) : (
                         <div className="flex gap-1 overflow-hidden">
                           {venue.genres?.slice(0, 1).map((g, i) => (

@@ -55,7 +55,7 @@ export function MoonraysTicker() {
     <section className="space-y-4">
       <div className="flex items-center justify-between px-2">
         <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest opacity-40">Live Feed</h2>
-        <span className="text-[10px] font-mono text-noctvm-violet animate-pulse uppercase tracking-wider flex items-center gap-1.5">
+        <span className="text-noctvm-caption font-mono text-noctvm-violet animate-pulse uppercase tracking-wider flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-noctvm-violet" />
           Real-time Nexus
         </span>
@@ -81,7 +81,7 @@ export function MoonraysTicker() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-white/90">{txn.description}</p>
-                  <p className="text-[10px] text-noctvm-silver/40 font-mono mt-0.5 uppercase flex items-center gap-1">
+                  <p className="text-noctvm-caption text-noctvm-silver/40 font-mono mt-0.5 uppercase flex items-center gap-1">
                     <ClockIcon className="w-2.5 h-2.5" />
                     {new Date(txn.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>

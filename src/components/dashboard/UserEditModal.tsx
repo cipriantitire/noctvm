@@ -75,7 +75,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
   );
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-lg bg-noctvm-black/90 border border-white/10 rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden frosted-noise">
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
@@ -87,7 +87,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
              </div>
              <div>
                 <h3 className="text-lg font-bold text-white tracking-tight">{user.display_name || 'Edit User'}</h3>
-                <p className="text-[10px] text-noctvm-silver/40 uppercase font-mono tracking-widest">{user.email}</p>
+                <p className="text-noctvm-caption text-noctvm-silver/40 uppercase font-mono tracking-widest">{user.email}</p>
              </div>
           </div>
           <button 
@@ -116,7 +116,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
         {/* List */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
           {loading ? (
-            <div className="p-12 text-center text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest animate-pulse">Loading venues...</div>
+            <div className="p-12 text-center text-noctvm-caption font-mono text-noctvm-silver/40 uppercase tracking-widest animate-pulse">Loading venues...</div>
           ) : filteredVenues.map(venue => (
             <button
               key={venue.id}
@@ -131,7 +131,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
                 <p className={`text-sm font-bold transition-colors ${assignedVenueIds.includes(venue.id) ? 'text-white' : 'text-noctvm-silver'}`}>
                   {venue.name}
                 </p>
-                <p className="text-[9px] font-mono text-noctvm-silver/30 uppercase tracking-widest">{venue.city}</p>
+                <p className="text-noctvm-micro font-mono text-noctvm-silver/30 uppercase tracking-widest">{venue.city}</p>
               </div>
               <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
                 assignedVenueIds.includes(venue.id)

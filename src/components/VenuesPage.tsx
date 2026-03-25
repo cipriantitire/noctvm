@@ -326,7 +326,7 @@ export default function VenuesPage({
                   />
                   <span className={`fallback hidden text-2xl font-bold text-white absolute inset-0 flex items-center justify-center`}>{venue.name[0]}</span>
                 </div>
-                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/80 text-white text-[9px] font-semibold">Following</span>}
+                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/80 text-white text-noctvm-micro font-semibold">Following</span>}
               </div>
               {/* Info */}
               <div className="p-3 flex flex-col flex-1">
@@ -336,19 +336,19 @@ export default function VenuesPage({
                 </div>
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <StarRating rating={venue.rating} />
-                  <span className="text-[9px] text-noctvm-silver/60">{venue.rating}</span>
+                  <span className="text-noctvm-micro text-noctvm-silver/60">{venue.rating}</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mb-auto">
                   {venue.genres.slice(0, 2).map(g => (
-                    <span key={g} className="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{g}</span>
+                    <span key={g} className="px-1.5 py-0.5 rounded text-noctvm-micro uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{g}</span>
                   ))}
                 </div>
                 <div className="flex items-center justify-between pt-2 mt-2 border-t border-noctvm-border">
-                  <span className="text-[9px] text-noctvm-silver/40 font-mono">Cap. {venue.capacity}</span>
+                  <span className="text-noctvm-micro text-noctvm-silver/40 font-mono">Cap. {venue.capacity}</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFollow(venue.name); }}
                     disabled={isLoading || !user}
-                    className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all ${isFollowed ? 'bg-noctvm-violet/10 text-noctvm-violet' : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-white'} disabled:opacity-40`}
+                    className={`px-2 py-1 rounded-md text-noctvm-caption font-semibold transition-all ${isFollowed ? 'bg-noctvm-violet/10 text-noctvm-violet' : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-white'} disabled:opacity-40`}
                   >
                     {isLoading ? '...' : isFollowed ? 'Following' : 'Follow'}
                   </button>
@@ -394,13 +394,13 @@ export default function VenuesPage({
                     {venue.badge !== 'none' && <VerifiedBadge type={venue.badge} size="xs" />}
                   </div>
                     {isFollowed && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet text-[9px] font-semibold flex-shrink-0">Following</span>
+                      <span className="px-1.5 py-0.5 rounded-full bg-noctvm-violet/10 text-noctvm-violet text-noctvm-micro font-semibold flex-shrink-0">Following</span>
                     )}
                   </div>
                   {venue.followers > 0 && (
-                    <p className="text-[10px] text-noctvm-silver/40 mb-0.5">{venue.followers.toLocaleString()} followers</p>
+                    <p className="text-noctvm-caption text-noctvm-silver/40 mb-0.5">{venue.followers.toLocaleString()} followers</p>
                   )}
-                  <p className="text-[10px] text-noctvm-silver/50 truncate">{venue.address}</p>
+                  <p className="text-noctvm-caption text-noctvm-silver/50 truncate">{venue.address}</p>
                 </div>
 
                 {/* Follow button */}
@@ -420,12 +420,12 @@ export default function VenuesPage({
               {/* Genres + capacity inline */}
               <div className="flex flex-wrap items-center gap-1.5 px-4 pb-3">
                 {venue.genres.map(g => (
-                  <span key={g} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-noctvm-violet/8 text-noctvm-violet/70 border border-noctvm-violet/10">
+                  <span key={g} className="px-2 py-0.5 rounded-full text-noctvm-micro font-semibold bg-noctvm-violet/8 text-noctvm-violet/70 border border-noctvm-violet/10">
                     {g}
                   </span>
                 ))}
                 {venue.capacity > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-noctvm-surface text-noctvm-silver/40 border border-noctvm-border">
+                  <span className="px-2 py-0.5 rounded-full text-noctvm-micro font-semibold bg-noctvm-surface text-noctvm-silver/40 border border-noctvm-border">
                     Cap. {venue.capacity}
                   </span>
                 )}
@@ -457,7 +457,7 @@ export default function VenuesPage({
                     return (
                       <>
                         <StarRating rating={stat.avg} />
-                        <span className="text-[10px] text-noctvm-silver/60">
+                        <span className="text-noctvm-caption text-noctvm-silver/60">
                           {stat.avg > 0 ? stat.avg.toFixed(1) : 'N/A'} · {stat.count} Reviews
                         </span>
                       </>
@@ -485,15 +485,15 @@ export default function VenuesPage({
                               {review.profiles?.avatar_url ? (
                                 <Image src={review.profiles.avatar_url} alt="" fill className="object-cover" unoptimized />
                               ) : (
-                                <span className="text-[10px] font-bold text-white">{initial}</span>
+                                <span className="text-noctvm-caption font-bold text-white">{initial}</span>
                               )}
                               <div className="absolute inset-0 pointer-events-none z-10 glass-fade-edge" />
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[11px] font-semibold text-white">@{handle}</span>
+                                <span className="text-noctvm-label font-semibold text-white">@{handle}</span>
                                 <StarRating rating={review.rating} />
-                                <span className="text-[10px] text-noctvm-silver/40 ml-auto">{timeAgoShort(review.created_at)}</span>
+                                <span className="text-noctvm-caption text-noctvm-silver/40 ml-auto">{timeAgoShort(review.created_at)}</span>
                               </div>
                               <p className="text-xs text-noctvm-silver/80 leading-relaxed">{review.text}</p>
                             </div>

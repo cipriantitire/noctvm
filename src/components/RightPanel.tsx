@@ -99,7 +99,7 @@ export default function RightPanel({
     <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-hidden">
       <div className="flex items-center justify-end gap-2 mb-5 px-1">
         <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
-        <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">
+        <span className="text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest">
           {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'}
         </span>
       </div>
@@ -121,8 +121,8 @@ export default function RightPanel({
         <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-noctvm-violet/10 transition-colors" />
         <div className="flex items-center gap-2 mb-3 relative z-10">
           <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
-          <span className="text-[10px] uppercase tracking-widest text-noctvm-emerald font-mono font-medium">Live Tonight</span>
-          <span className="ml-auto text-[10px] text-noctvm-silver font-mono">{tonightEvents.length} events</span>
+          <span className="text-noctvm-caption uppercase tracking-widest text-noctvm-emerald font-mono font-medium">Live Tonight</span>
+          <span className="ml-auto text-noctvm-caption text-noctvm-silver font-mono">{tonightEvents.length} events</span>
         </div>
         {tonightEvents.length > 0 ? (
           <div className="space-y-1 max-h-[220px] overflow-y-auto custom-scrollbar relative z-10 pr-1">
@@ -140,13 +140,13 @@ export default function RightPanel({
                       el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-[10px] font-bold bg-gradient-to-br ${getVenueColor(event.venue)} bg-clip-text text-transparent`}>
+                  <span className={`fallback hidden text-noctvm-caption font-bold bg-gradient-to-br ${getVenueColor(event.venue)} bg-clip-text text-transparent`}>
                     {event.venue[0]}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-medium text-white truncate group-hover/event:text-noctvm-violet transition-colors">{event.title}</p>
-                  <p className="text-[10px] text-noctvm-silver truncate">{event.venue}{event.time ? ` · ${event.time}` : ''}</p>
+                  <p className="text-noctvm-label font-medium text-white truncate group-hover/event:text-noctvm-violet transition-colors">{event.title}</p>
+                  <p className="text-noctvm-caption text-noctvm-silver truncate">{event.venue}{event.time ? ` · ${event.time}` : ''}</p>
                 </div>
               </button>
             ))}
@@ -180,7 +180,7 @@ export default function RightPanel({
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-xs font-medium text-white group-hover:text-noctvm-violet transition-colors truncate">{name}</p>
-                <p className="text-[10px] text-noctvm-silver">{count} Upcoming Events</p>
+                <p className="text-noctvm-caption text-noctvm-silver">{count} Upcoming Events</p>
               </div>
             </button>
           ))}

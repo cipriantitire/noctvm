@@ -56,6 +56,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // ── DEV BYPASS ──────────────────────────────────────────────────────────
+    // Allow mocking a user via ?dev=true on localhost
+    const isLocal = typeof window !== 'undefined' && 
+                   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const params = new URLSearchParams(window.location.search);
+    
+    if (isLocal && params.get('dev') === 'true') {
+      const mockUser = {
+        id: '00000000-0000-0000-0000-000000000001',
+        email: 'dev@noctvm.com',
+        app_metadata: { provider: 'google' },
+        user_metadata: { full_name: 'Dev Admin' }
+      } as any as User;
+
+      const mockProfile: Profile = {
+        id: mockUser.id,
+        display_name: 'Night Owl Dev',
+        username: 'nightowl_dev',
+        email: mockUser.email!,
+        avatar_url: null,
+        bio: 'Developer mode active. Verifying Saved Events and Profile Sidebar.',
+        city: 'Bucharest',
+        role: 'admin',
+        badge: 'verified',
+        is_verified: true,
+        referral_code: 'DEVMOON',
+        music_link: null,
+        social_links: null,
+        genres: ['Electronic', 'Techno'],
+        events_attended: 42,
+        venues_visited: 13,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      setUser(mockUser);
+      setProfile(mockProfile);
+      setLoading(false);
+      return;
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     // Restore existing session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);

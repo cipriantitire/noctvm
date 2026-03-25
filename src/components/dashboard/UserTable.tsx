@@ -151,7 +151,7 @@ export default function UserTable() {
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as UserSortField)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all"
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-noctvm-caption font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all"
             title="Sort users by field"
           >
             <option value="created_at">Date Joined</option>
@@ -186,7 +186,7 @@ export default function UserTable() {
             </button>
           </div>
 
-          <div className="hidden xl:flex px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-mono text-noctvm-silver uppercase tracking-widest items-center justify-center gap-2">
+          <div className="hidden xl:flex px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest items-center justify-center gap-2">
             Count: <span className="text-white font-bold">{users.length}</span>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function UserTable() {
                       </h3>
                       <VerifiedBadge type={user.badge} size="xs" />
                     </div>
-                    <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest truncate">{user.email || 'NO_EMAIL'}</p>
+                    <p className="text-noctvm-caption font-mono text-noctvm-silver/40 uppercase tracking-widest truncate">{user.email || 'NO_EMAIL'}</p>
                   </div>
                 </div>
               </div>
@@ -234,7 +234,7 @@ export default function UserTable() {
               <div className="space-y-3 relative z-10 flex-1">
                 <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest">Account Status {user.signup_method && `(${user.signup_method})`}</p>
+                    <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest">Account Status {user.signup_method && `(${user.signup_method})`}</p>
                     <span className={`text-[7px] px-1.5 py-0.5 rounded font-black tracking-widest uppercase ${
                       user.is_verified 
                         ? 'bg-noctvm-emerald/10 text-noctvm-emerald border border-noctvm-emerald/20' 
@@ -246,7 +246,7 @@ export default function UserTable() {
                   <button
                     onClick={() => handleToggleVerified(user.id, user.is_verified)}
                     disabled={updatingId === user.id}
-                    className={`w-full py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full py-2.5 rounded-xl text-noctvm-caption font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
                       user.is_verified 
                         ? 'bg-noctvm-emerald text-white shadow-lg shadow-noctvm-emerald/20' 
                         : 'bg-white/5 text-noctvm-silver hover:text-white hover:bg-white/10 border border-white/10'
@@ -257,13 +257,13 @@ export default function UserTable() {
                 </div>
 
                 <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                  <p className="text-[9px] text-noctvm-silver/40 uppercase font-mono tracking-widest mb-3">Access Level</p>
+                  <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-3">Access Level</p>
                   <div className="flex items-center gap-3">
                     <select 
                       value={user.badge || 'none'}
                       onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
                       disabled={updatingId === user.id}
-                      className="flex-1 bg-noctvm-black/40 text-[10px] font-bold py-2 px-3 rounded-xl border border-white/5 text-white outline-none cursor-pointer"
+                      className="flex-1 bg-noctvm-black/40 text-noctvm-caption font-bold py-2 px-3 rounded-xl border border-white/5 text-white outline-none cursor-pointer"
                       title="Set Access Level"
                     >
                       <option value="none">Regular</option>
@@ -277,7 +277,7 @@ export default function UserTable() {
                 </div>
 
                 <div className="flex items-center justify-between px-1 mt-auto">
-                  <p className="text-[10px] font-mono text-noctvm-silver/40">
+                  <p className="text-noctvm-caption font-mono text-noctvm-silver/40">
                     JOINED: {user.created_at ? new Date(user.created_at).toLocaleDateString() : '---'}
                   </p>
                   <div className="flex gap-2">
@@ -330,24 +330,24 @@ export default function UserTable() {
                    </h4>
                    <VerifiedBadge type={user.badge} size="xs" />
                  </div>
-                 <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest truncate">{user.email}</p>
+                 <p className="text-noctvm-caption font-mono text-noctvm-silver/40 uppercase tracking-widest truncate">{user.email}</p>
                </div>
 
                <div className="hidden md:flex flex-col items-center px-4 border-l border-white/5">
-                 <span className="text-[8px] text-noctvm-silver/30 uppercase font-mono mb-1">Signup</span>
-                 <span className="text-[10px] text-noctvm-silver font-mono bg-white/5 px-2 py-0.5 rounded uppercase">{user.signup_method || 'email'}</span>
+                 <span className="text-noctvm-xs text-noctvm-silver/30 uppercase font-mono mb-1">Signup</span>
+                 <span className="text-noctvm-caption text-noctvm-silver font-mono bg-white/5 px-2 py-0.5 rounded uppercase">{user.signup_method || 'email'}</span>
                </div>
 
                <div className="hidden lg:flex flex-col items-center px-4 border-l border-white/5 min-w-[120px]">
-                 <span className="text-[8px] text-noctvm-silver/30 uppercase font-mono mb-1">Joined</span>
-                 <span className="text-[10px] text-noctvm-silver font-mono">{new Date(user.created_at).toLocaleDateString()}</span>
+                 <span className="text-noctvm-xs text-noctvm-silver/30 uppercase font-mono mb-1">Joined</span>
+                 <span className="text-noctvm-caption text-noctvm-silver font-mono">{new Date(user.created_at).toLocaleDateString()}</span>
                </div>
 
                <div className="flex items-center gap-3 px-4 border-l border-white/5">
                  <select 
                     value={user.badge || 'none'}
                     onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
-                    className="bg-noctvm-black/40 text-[9px] font-bold py-1.5 px-3 rounded-lg border border-white/5 text-white outline-none cursor-pointer uppercase font-mono tracking-tighter"
+                    className="bg-noctvm-black/40 text-noctvm-micro font-bold py-1.5 px-3 rounded-lg border border-white/5 text-white outline-none cursor-pointer uppercase font-mono tracking-tighter"
                   >
                     <option value="none">Regular</option>
                     <option value="owner">Owner</option>

@@ -23,8 +23,6 @@ interface FeedItemProps {
   post: FeedPost;
   idx: number;
   user: any;
-  activeDotsId: string | null;
-  setActiveDotsId: (id: string | null) => void;
   onVenueClick: (name: string) => void;
   toggleLike: (post: FeedPost) => void;
   onShare: (id: string) => void;
@@ -38,8 +36,6 @@ export function FeedItem({
   post,
   idx,
   user,
-  activeDotsId,
-  setActiveDotsId,
   onVenueClick,
   toggleLike,
   onShare,
@@ -90,7 +86,6 @@ export function FeedItem({
   };
 
   const handleEditPost = async () => {
-    setActiveDotsId(null);
     setShowEditModal(true);
   };
 
@@ -129,7 +124,7 @@ export function FeedItem({
               {!isFollowing && !isOwnPost && user && (
                 <button
                   onClick={() => onFollow?.(post.userId!)}
-                  className="ml-2 px-2.5 py-0.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/30 text-[9px] font-bold text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all animate-fade-in"
+                  className="ml-2 px-2.5 py-0.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-micro font-bold text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all animate-fade-in"
                   title={`Follow ${post.user.handle}`}
                 >
                   Follow
@@ -138,42 +133,28 @@ export function FeedItem({
             </div>
             <Link
               href={authorLink}
-              className="text-[10px] text-noctvm-silver block hover:text-noctvm-violet transition-colors"
+              className="text-noctvm-caption text-noctvm-silver block hover:text-noctvm-violet transition-colors"
               title={post.user.handle}
             >
               {post.user.handle}
             </Link>
           </div>
-          <span title={formatFullDate(post.createdAt)} className="text-[10px] text-noctvm-silver font-mono">
+          <span title={formatFullDate(post.createdAt)} className="text-noctvm-caption text-noctvm-silver font-mono">
             {post.timeAgo}
           </span>
 
-          <div className="relative">
-            <button
-              onClick={() => setActiveDotsId(activeDotsId === post.id ? null : post.id)}
-              className="text-noctvm-silver hover:text-white p-1"
-              title="Options"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-              </svg>
-            </button>
-            {activeDotsId === post.id && (
-              <PostOptionsMenu
-                postId={post.id}
-                postUserId={post.userId}
-                currentUserId={user?.id || null}
-                authorHandle={post.user.handle}
-                isFollowing={isFollowing}
-                onClose={() => setActiveDotsId(null)}
-                onCopyLink={handleCopyLink}
-                onEdit={handleEditPost}
-                onDelete={() => onDelete(post.id)}
-                onNotInterested={() => {}}
-                onReport={() => {}}
-              />
-            )}
-          </div>
+          <PostOptionsMenu
+            postId={post.id}
+            postUserId={post.userId}
+            currentUserId={user?.id || null}
+            authorHandle={post.user.handle}
+            isFollowing={isFollowing}
+            onCopyLink={handleCopyLink}
+            onEdit={handleEditPost}
+            onDelete={() => onDelete(post.id)}
+            onNotInterested={() => {}}
+            onReport={() => {}}
+          />
         </div>
 
         {/* Image */}
@@ -195,7 +176,7 @@ export function FeedItem({
               <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
                 <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
               </div>
-              <span className="text-[10px] font-bold text-white pr-1">{post.venue.name}</span>
+              <span className="text-noctvm-caption font-bold text-white pr-1">{post.venue.name}</span>
             </button>
           )}
 
@@ -215,12 +196,12 @@ export function FeedItem({
                       className={`w-6 h-6 rounded-full border border-black flex items-center justify-center bg-noctvm-surface/80 shadow-sm ${is5th && post.taggedUsers.length > 5 ? 'opacity-50' : ''}`}
                       style={{ marginLeft: i === 0 ? 0 : '-10px', zIndex: 10 - i }}
                     >
-                      <span className="text-[9px] font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
+                      <span className="text-noctvm-micro font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
                     </div>
                   );
                 })}
               </div>
-              <span className="text-[10px] font-bold text-white pr-1 tracking-wider">
+              <span className="text-noctvm-caption font-bold text-white pr-1 tracking-wider">
                 {post.taggedUsers.length > 9 ? '9+' : post.taggedUsers.length}
               </span>
             </button>
@@ -233,7 +214,7 @@ export function FeedItem({
               className="absolute bottom-14 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in z-10"
             >
               <CalendarIcon className="w-3 h-3 text-white" />
-              <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+              <span className="text-noctvm-micro font-black text-white uppercase tracking-wider truncate max-w-[120px]">
                 {post.event.title}
               </span>
             </div>
@@ -250,7 +231,7 @@ export function FeedItem({
                 className={`flex items-center gap-1.5 group transition-all ${post.liked ? 'text-red-500' : 'text-noctvm-silver/60 hover:text-red-500'}`}
               >
                  <HeartIcon className={`w-5 h-5 ${post.liked ? 'fill-current scale-110' : 'group-hover:scale-110'}`} />
-                 <span className="text-[12px] font-mono leading-none">{post.likes}</span>
+                 <span className="text-xs font-mono leading-none">{post.likes}</span>
               </button>
 
               <button
@@ -259,7 +240,7 @@ export function FeedItem({
                 title="Comments"
               >
                 <ChatIcon className={`w-5 h-5 ${showComments ? 'fill-current' : 'group-hover:scale-110'}`} />
-                {commentPreview.count > 0 && <span className="text-[12px] font-mono leading-none">{commentPreview.count}</span>}
+                {commentPreview.count > 0 && <span className="text-xs font-mono leading-none">{commentPreview.count}</span>}
               </button>
 
               <button
@@ -267,7 +248,7 @@ export function FeedItem({
                 className={`flex items-center gap-1.5 group transition-all ${post.reposted ? 'text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'text-noctvm-silver/60 hover:text-blue-500'}`}
               >
                 <RepostIcon className={`w-5 h-5 ${post.reposted ? 'scale-110' : 'group-hover:scale-110'}`} />
-                {post.reposts > 0 && <span className="text-[12px] font-mono leading-none">{post.reposts}</span>}
+                {post.reposts > 0 && <span className="text-xs font-mono leading-none">{post.reposts}</span>}
               </button>
 
               <button
@@ -278,21 +259,21 @@ export function FeedItem({
                 <ShareIcon className="w-5 h-5 group-hover:scale-110" />
               </button>
             </div>
-            {copied && <span className="text-[10px] text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
+            {copied && <span className="text-noctvm-caption text-noctvm-emerald font-bold animate-fade-in">Link Copied!</span>}
           </div>
 
           <div className="mb-2">
             <button 
               onClick={() => setShowLikesModal(true)}
               title="View likes"
-              className="text-[12px] font-black text-white hover:text-noctvm-violet transition-colors"
+              className="text-xs font-black text-white hover:text-noctvm-violet transition-colors"
             >
               {post.likes.toLocaleString()} likes
             </button>
           </div>
 
           {/* Caption (Inline with Nickname) */}
-          <div className="text-[13px] leading-relaxed text-noctvm-silver/90 mb-1 break-words">
+          <div className="text-xs leading-relaxed text-noctvm-silver/90 mb-1 break-words">
             <Link href={authorLink} className="font-bold text-white mr-1.5 hover:text-noctvm-violet transition-colors">
               {post.user.handle.replace('@', '')}
             </Link>
@@ -305,7 +286,7 @@ export function FeedItem({
                {/* View all X comments / Close comments */}
                <button 
                  onClick={handleCommentClick}
-                 className="text-[12px] font-bold text-noctvm-silver/40 hover:text-noctvm-silver transition-colors pt-0.5"
+                 className="text-xs font-bold text-noctvm-silver/40 hover:text-noctvm-silver transition-colors pt-0.5"
                >
                  {showComments 
                    ? 'Close comments' 
@@ -320,7 +301,7 @@ export function FeedItem({
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">
               {post.tags.map(tag => (
-                <span key={tag} className="text-[9px] font-black text-noctvm-violet/40 hover:text-noctvm-violet cursor-pointer transition-colors uppercase tracking-widest">
+                <span key={tag} className="text-noctvm-micro font-black text-noctvm-violet/40 hover:text-noctvm-violet cursor-pointer transition-colors uppercase tracking-widest">
                   #{tag}
                 </span>
               ))}

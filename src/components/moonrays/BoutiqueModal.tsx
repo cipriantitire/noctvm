@@ -113,7 +113,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-sm font-bold text-white truncate">{asset.name}</h4>
-                          <p className="text-[10px] text-noctvm-silver/50 font-mono mt-0.5 uppercase tracking-wide">
+                          <p className="text-noctvm-caption text-noctvm-silver/50 font-mono mt-0.5 uppercase tracking-wide">
                             {asset.type.replace('_', ' ')}
                           </p>
                         </div>
@@ -123,7 +123,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                         {owned ? (
                           <button
                             onClick={() => !invItem.is_equipped && handleEquip(invItem.id)}
-                            className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                            className={`px-4 py-1.5 rounded-full text-noctvm-caption font-black uppercase tracking-widest transition-all ${
                               invItem.is_equipped 
                                 ? 'bg-noctvm-emerald/20 text-noctvm-emerald border border-noctvm-emerald/30' 
                                 : 'bg-white/10 text-white border border-white/10 hover:bg-noctvm-violet hover:border-noctvm-violet'
@@ -135,7 +135,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                           <button
                             disabled={!canAfford || purchasing === asset.id}
                             onClick={() => handlePurchase(asset)}
-                            className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+                            className={`px-5 py-2 rounded-full text-noctvm-caption font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
                               canAfford 
                                 ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95' 
                                 : 'bg-white/5 text-noctvm-silver/40 border border-white/5 cursor-not-allowed'
@@ -146,7 +146,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                             ) : (
                               <>
                                 <ShoppingBasketIcon className="w-3 h-3" />
-                                {asset.cost} <span className="text-[8px] font-mono">MR</span>
+                                {asset.cost} <span className="text-noctvm-xs font-mono">MR</span>
                               </>
                             )}
                           </button>
@@ -161,7 +161,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
         </section>
 
         {/* 🛍️ Boutique Status Footer ─────────────────────── */}
-        <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[9px] text-noctvm-silver/40 font-mono uppercase italic tracking-widest">
+        <div className="pt-4 border-t border-white/5 flex items-center justify-between text-noctvm-micro text-noctvm-silver/40 font-mono uppercase italic tracking-widest">
            <span>Stock: {assets.length} Assets Available</span>
            <span className="flex items-center gap-1">
              Your Pocket: <span className="text-noctvm-violet font-bold">{pocketBalance.toLocaleString()} MR</span>

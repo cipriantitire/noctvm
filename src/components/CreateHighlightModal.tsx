@@ -266,7 +266,7 @@ export default function CreateHighlightModal({
                 autoFocus
                 className="w-full bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-2 text-sm text-white placeholder-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50"
               />
-              <p className="text-right text-[10px] text-noctvm-silver/40 mt-1">
+              <p className="text-right text-noctvm-caption text-noctvm-silver/40 mt-1">
                 {name.length}/24
               </p>
             </div>

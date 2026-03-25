@@ -1,3 +1,6 @@
+@import url('../styles/design-tokens.css');
+@import 'tw-animate-css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,17 +12,6 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap');
-
-:root {
-  --noctvm-black: #0D0D0D;
-  --noctvm-midnight: #1A0A2E;
-  --noctvm-violet: #7C3AED;
-  --noctvm-gold: #D4A843;
-  --noctvm-silver: #9CA3AF;
-  --noctvm-emerald: #10B981;
 }
 
 * {
@@ -56,28 +48,11 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.4);
+  background: rgb(var(--noctvm-violet-rgb) / 0.4);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 58, 237, 0.7);
-}
-
-/* ========================= */
-/* GLASSMORPHISM             */
-/* ========================= */
-.glass {
-  background: rgba(20, 20, 20, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.frosted-glass {
-  background: hsla(0, 0%, 100%, 0.1); /* Adjusted for dark mode default */
-  backdrop-filter: url(#displace) blur(12px) saturate(1.8);
-  -webkit-backdrop-filter: blur(12px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--noctvm-violet-rgb) / 0.7);
 }
 
 /* 
@@ -87,29 +62,39 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 */
 
 /* ========================= */
-/* FROSTED GLASS             */
+/* GLASSMORPHISM             */
+/* ========================= */
+.glass {
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(var(--glass-blur-md));
+  -webkit-backdrop-filter: blur(var(--glass-blur-md));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ========================= */
+/* FROSTED GLASS (single definition; tokens in design-tokens.css) */
 /* ========================= */
 .frosted-glass {
-  background: hsla(0, 0%, 100%, 0.07);
-  -webkit-backdrop-filter: blur(12px) saturate(2);
-  backdrop-filter: url(#displace) blur(12px) saturate(2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-bg-frosted);
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(2);
+  backdrop-filter: url(#displace) blur(var(--glass-blur-md)) saturate(2);
+  border: 1px solid var(--glass-border);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 60px rgba(124, 58, 237, 0.06);
+    0 0 0 1px var(--glass-inset-highlight) inset,
+    var(--glass-shadow-outer),
+    var(--glass-shadow-violet-glow);
   position: relative;
   overflow: hidden;
 }
 
 /* Modal variant: handle nested blurs by increasing opacity and reducing blur slightly */
 .frosted-glass-modal {
-  background: rgba(18, 18, 18, 0.14);
-  -webkit-backdrop-filter: blur(12.8px);
-  backdrop-filter: blur(12.8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-modal-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur-modal));
+  backdrop-filter: blur(var(--glass-blur-modal));
+  border: 1px solid var(--glass-border);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   position: relative;
   overflow: hidden;
 }
@@ -117,9 +102,9 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* Header variant: specifically for sticky search bars */
 .frosted-glass-header {
   background: hsla(0, 0%, 5%, 0.75);
-  -webkit-backdrop-filter: blur(25px) saturate(2.5);
-  backdrop-filter: blur(25px) saturate(2.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(var(--glass-blur-header)) saturate(2.5);
+  backdrop-filter: blur(var(--glass-blur-header)) saturate(2.5);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .frosted-glass::before,
@@ -142,9 +127,9 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* Subtle variant for cards */
 .frosted-glass-subtle {
   background: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--glass-blur-lg)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(1.4);
+  border: 1px solid var(--glass-border-subtle);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.03) inset,
     0 4px 24px rgba(0, 0, 0, 0.4);
@@ -154,7 +139,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* TEXT EFFECTS              */
 /* ========================= */
 .text-glow {
-  text-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+  text-shadow: 0 0 20px rgb(var(--noctvm-violet-rgb) / 0.5);
 }
 
 /* ========================= */
@@ -293,9 +278,9 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .animate-shimmer {
   background: linear-gradient(
     90deg,
-    rgba(124, 58, 237, 0.03) 0%,
-    rgba(124, 58, 237, 0.08) 50%,
-    rgba(124, 58, 237, 0.03) 100%
+    rgb(var(--noctvm-violet-rgb) / 0.03) 0%,
+    rgb(var(--noctvm-violet-rgb) / 0.08) 50%,
+    rgb(var(--noctvm-violet-rgb) / 0.03) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
@@ -323,15 +308,15 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 .hover-lift:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 58, 237, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgb(var(--noctvm-violet-rgb) / 0.08);
 }
 
 .hover-glow {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .hover-glow:hover {
-  border-color: rgba(124, 58, 237, 0.3);
-  box-shadow: 0 0 24px rgba(124, 58, 237, 0.1);
+  border-color: rgb(var(--noctvm-violet-rgb) / 0.3);
+  box-shadow: 0 0 24px rgb(var(--noctvm-violet-rgb) / 0.1);
 }
 
 /* Gallery thumbnail hover zoom */
@@ -393,9 +378,9 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* FROSTED GLASS PRICE BADGE  */
 /* ========================= */
 .frosted-glass-price {
-  background: rgba(16, 185, 129, 0.15);
-  backdrop-filter: blur(25px) saturate(2);
-  -webkit-backdrop-filter: blur(25px) saturate(2);
+  background: rgb(var(--noctvm-emerald-rgb) / 0.15);
+  backdrop-filter: blur(var(--glass-blur-xl)) saturate(2);
+  -webkit-backdrop-filter: blur(var(--glass-blur-xl)) saturate(2);
   border: 1px solid rgba(52, 211, 153, 0.45);
   box-shadow: 
     0 8px 32px 0 rgba(0, 0, 0, 0.4),
@@ -432,7 +417,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     background: radial-gradient(
       600px circle at calc(var(--mouse-x, 50%) * 1%) calc(var(--mouse-y, 50%) * 1%),
       rgba(255, 255, 255, 0.07) 0%,
-      rgba(124, 58, 237, 0.04) 35%,
+      rgb(var(--noctvm-violet-rgb) / 0.04) 35%,
       transparent 70%
     );
     background-size: 100% 100%;
@@ -451,8 +436,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .leaflet-popup-tip {
-  background: rgba(13, 13, 13, 0.9) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--noctvm-black-rgb) / 0.9) !important;
+  border: 1px solid var(--glass-border);
 }
 
 .noctvm-popup .leaflet-popup-content {
@@ -500,7 +485,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .radar-sweep {
   animation: radar-sweep 4s linear infinite;
-  background: conic-gradient(from 0deg, transparent 0%, rgba(124, 58, 237, 0.25) 15%, transparent 30%);
+  background: conic-gradient(from 0deg, transparent 0%, rgb(var(--noctvm-violet-rgb) / 0.25) 15%, transparent 30%);
 }
 
 .radar-pulse {

@@ -141,7 +141,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <select 
                   value={props.venueSort}
                   onChange={(e) => props.onVenueSortChange?.(e.target.value as any)}
-                  className="bg-transparent text-[10px] font-bold text-white focus:outline-none cursor-pointer appearance-none uppercase"
+                  className="bg-transparent text-noctvm-caption font-bold text-white focus:outline-none cursor-pointer appearance-none uppercase"
                   title="Sort venues"
                 >
                   <option value="popularity">POPULAR</option>
@@ -194,7 +194,7 @@ export default function SearchBar(props: SearchBarProps) {
 
         {/* Count footer */}
         <div className="flex items-center mt-1">
-          <span className="text-[10px] text-noctvm-silver/50 font-mono">
+          <span className="text-noctvm-caption text-noctvm-silver/50 font-mono">
             {type === 'events' ? `${eventsCount || 0} events` : `${venuesCount || 0} venues`}
           </span>
         </div>

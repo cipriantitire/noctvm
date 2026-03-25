@@ -5,6 +5,26 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export type UserSettings = {
+  user_id: string;
+  is_profile_private: boolean;
+  likes_visibility: 'public' | 'followers' | 'none';
+  comment_restrictions: 'everyone' | 'following' | 'none';
+  tag_restrictions: 'everyone' | 'following' | 'none';
+  show_moonray_level: boolean;
+  camera_access: boolean;
+  contacts_access: boolean;
+  location_access: boolean;
+  notif_access: boolean;
+  files_access: boolean;
+  notify_likes: boolean;
+  notify_comments: boolean;
+  notify_followers: boolean;
+  notify_events: boolean;
+  theme: 'light' | 'dark' | 'system';
+  updated_at: string;
+};
+
 export type Profile = {
   id: string;
   display_name: string;
@@ -24,4 +44,5 @@ export type Profile = {
   venues_visited: number;
   created_at: string;
   updated_at: string;
+  settings?: UserSettings;
 };

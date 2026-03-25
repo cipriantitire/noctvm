@@ -28,6 +28,7 @@ export interface ProfilePost {
   venue?: { name: string; tagged: boolean };
   event?: { title: string };
   tagged_users?: string[];
+  raw_row?: any;
 }
 
 interface PostViewerModalProps {
@@ -77,7 +78,6 @@ export default function PostViewerModal({
   const [loadingLike, setLoadingLike] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
   const [showLikesModal, setShowLikesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTaggedUsers, setShowTaggedUsers] = useState(false);
@@ -285,7 +285,7 @@ export default function PostViewerModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+    <div className="fixed inset-0 z-viewer flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity animate-fade-in" onClick={onClose} />
 
@@ -294,7 +294,7 @@ export default function PostViewerModal({
         onClick={onClose}
         title="Close modal"
         aria-label="Close modal"
-        className="absolute top-10 right-4 lg:top-6 lg:right-6 z-[201] p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90"
+        className="absolute top-10 right-4 lg:top-6 lg:right-6 z-viewer-controls p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90"
       >
         <svg className="w-6 h-6 lg:w-8 lg:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6L6 18M6 6l12 12" />
@@ -306,7 +306,7 @@ export default function PostViewerModal({
         onClick={onClose}
         title="Go back"
         aria-label="Go back"
-        className="absolute top-10 left-4 lg:hidden z-[201] p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90 shadow-xl"
+        className="absolute top-10 left-4 lg:hidden z-viewer-controls p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90 shadow-xl"
       >
         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 18l-6-6 6-6" />
@@ -314,7 +314,7 @@ export default function PostViewerModal({
       </button>
 
       {/* Nav Arrows */}
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-6 pointer-events-none z-[110]">
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-6 pointer-events-none z-overlay">
         <button
           onClick={() => setIndex(i => i - 1)}
           disabled={!hasPrev}
@@ -334,7 +334,7 @@ export default function PostViewerModal({
       </div>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-[1200px] lg:max-w-5xl h-full lg:h-[calc(100vh-80px)] lg:max-h-[850px] bg-noctvm-midnight border border-white/10 lg:rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] z-[105] flex flex-col lg:flex-row transition-transform animate-scale-in mx-auto">
+      <div className="relative w-full max-w-[1200px] lg:max-w-5xl h-full lg:h-[calc(100vh-80px)] lg:max-h-[850px] bg-noctvm-midnight border border-white/10 lg:rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] z-modal flex flex-col lg:flex-row transition-transform animate-scale-in mx-auto">
         
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
@@ -363,14 +363,14 @@ export default function PostViewerModal({
                  <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
                    <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
                  </div>
-                 <span className="text-[10px] font-bold text-white pr-1">{post.venue.name}</span>
+                 <span className="text-noctvm-caption font-bold text-white pr-1">{post.venue.name}</span>
                </button>
              )}
 
              {post.event && (
                <div className="absolute bottom-16 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg animate-fade-in pointer-events-auto">
                  <CalendarIcon className="w-3 h-3 text-white" />
-                 <span className="text-[9px] font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+                 <span className="text-noctvm-micro font-black text-white uppercase tracking-wider truncate max-w-[120px]">
                    {post.event.title}
                  </span>
                </div>
@@ -387,12 +387,12 @@ export default function PostViewerModal({
                      const is5th = i === 4;
                      return (
                        <div key={handle} className={`w-6 h-6 rounded-full border border-black flex items-center justify-center bg-noctvm-surface/80 shadow-sm ${is5th && (post.tagged_users?.length || 0) > 5 ? 'opacity-50' : ''}`} style={{ marginLeft: i === 0 ? 0 : '-10px', zIndex: 10 - i }}>
-                         <span className="text-[9px] font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
+                         <span className="text-noctvm-micro font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
                        </div>
                      );
                    })}
                  </div>
-                 <span className="text-[10px] font-bold text-white pr-1 tracking-wider">
+                 <span className="text-noctvm-caption font-bold text-white pr-1 tracking-wider">
                    {(post.tagged_users?.length || 0) > 9 ? '9+' : post.tagged_users?.length}
                  </span>
                </button>
@@ -425,30 +425,17 @@ export default function PostViewerModal({
                     </button>
                     {profileBadge !== 'none' && <VerifiedBadge type={profileBadge} size="sm" />}
                  </div>
-                 <p className="text-[10px] text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
+                 <p className="text-noctvm-caption text-noctvm-silver/50 uppercase tracking-wider font-mono mt-0.5">{timeAgo(post.created_at)} ago</p>
               </div>
-             <div className="relative">
-                <button 
-                  onClick={() => setShowOptions(!showOptions)}
-                  className="p-1.5 text-noctvm-silver/60 hover:text-white transition-colors rounded-lg hover:bg-white/5"
-                  title="More options"
-                  aria-label="More options"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                </button>
-                {showOptions && (
-                  <PostOptionsMenu
-                    postId={post.id}
-                    postUserId={post.user_id}
-                    currentUserId={user?.id || null}
-                    authorHandle={profileName || 'user'}
-                    onClose={() => setShowOptions(false)}
-                    onCopyLink={handleShare}
-                    onDelete={handleDelete}
-                    onEdit={() => { setShowOptions(false); setShowEditModal(true); }}
-                  />
-                )}
-             </div>
+             <PostOptionsMenu
+                postId={post.id}
+                postUserId={post.user_id}
+                currentUserId={user?.id || null}
+                authorHandle={profileName || 'user'}
+                onCopyLink={handleShare}
+                onDelete={handleDelete}
+                onEdit={() => setShowEditModal(true)}
+             />
           </div>
 
           {/* Actions Bar removed from here, moved to Bottom Area */}
@@ -457,7 +444,7 @@ export default function PostViewerModal({
           <div className="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar flex flex-col gap-2">
              {post.caption && (
                <div className="mb-2 mt-1">
-                  <p className="text-[13px] text-white/90 leading-relaxed break-words">
+                  <p className="text-xs text-white/90 leading-relaxed break-words">
                      {post.caption}
                   </p>
                </div>
@@ -486,7 +473,7 @@ export default function PostViewerModal({
                      ? <HeartIcon className="w-5 h-5 fill-current scale-110" />
                      : <HeartIcon className="w-5 h-5 group-hover:scale-110" />
                    }
-                   <span className="text-[12px] font-mono leading-none">{likeCount}</span>
+                   <span className="text-xs font-mono leading-none">{likeCount}</span>
                  </button>
                 
                 {/* Repost Icon */}
@@ -497,7 +484,7 @@ export default function PostViewerModal({
                   title="Remix / Repost"
                 >
                   <RepostIcon className={`w-5 h-5 ${reposted ? 'scale-110' : 'group-hover:scale-110'} ${reposting ? 'animate-pulse' : ''}`} />
-                  {repostCount > 0 && <span className="text-[12px] font-mono leading-none">{repostCount}</span>}
+                  {repostCount > 0 && <span className="text-xs font-mono leading-none">{repostCount}</span>}
                 </button>
 
                 {/* Share Icon */}
@@ -514,7 +501,7 @@ export default function PostViewerModal({
                 <button 
                   onClick={() => setShowLikesModal(true)}
                   title="View likes"
-                  className="text-[12px] font-black text-white hover:text-noctvm-violet transition-colors"
+                  className="text-xs font-black text-white hover:text-noctvm-violet transition-colors"
                 >
                   {likeCount.toLocaleString()} likes
                 </button>

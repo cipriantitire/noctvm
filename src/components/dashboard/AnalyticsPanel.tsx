@@ -71,7 +71,7 @@ export default function AnalyticsPanel() {
           {/* Subtle Glow Background */}
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-noctvm-violet/10 blur-3xl group-hover:bg-noctvm-violet/20 transition-all rounded-full pointer-events-none"></div>
           
-          <p className="text-noctvm-silver text-[10px] uppercase font-mono tracking-widest mb-2 flex items-center gap-2">
+          <p className="text-noctvm-silver text-noctvm-caption uppercase font-mono tracking-widest mb-2 flex items-center gap-2">
             <span className="w-1 h-1 rounded-full bg-noctvm-violet"></span>
             {stat.label}
           </p>
@@ -81,7 +81,7 @@ export default function AnalyticsPanel() {
               {loading ? '---' : stat.value}
             </h4>
             {!loading && (
-              <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+              <span className={`text-noctvm-caption font-mono font-bold px-1.5 py-0.5 rounded border ${
                 stat.trend === 'up' ? 'text-noctvm-emerald bg-noctvm-emerald/10 border-noctvm-emerald/20' :
                 stat.trend === 'down' ? 'text-red-400 bg-red-400/10 border-red-400/20' :
                 'text-noctvm-silver bg-white/5 border-white/10'

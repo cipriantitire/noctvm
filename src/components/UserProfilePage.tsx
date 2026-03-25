@@ -1,4 +1,5 @@
 'use client';
+// Triggering preview build for mobile feed enhancement
 
 import { useState, useEffect, useCallback } from 'react';
 import NextImage from 'next/image';
@@ -9,6 +10,8 @@ import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
 import type { NoctEvent } from '@/lib/types';
+import { FeedItem } from './Feed/FeedItem';
+import { mapSupabasePost } from '../lib/feed-utils';
 import PostViewerModal, { type ProfilePost } from './PostViewerModal';
 import VerifiedBadge from './VerifiedBadge';
 import { 
@@ -18,8 +21,11 @@ import {
   TwitterIcon, 
   SnapchatIcon, 
   TikTokIcon, 
-  GlobeIcon
+  GlobeIcon,
+  CalendarIcon
 } from './icons';
+import SavedEventsSheet from './SavedEventsSheet';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,7 +84,7 @@ export default function UserProfilePage({
   const [posts, setPosts] = useState<ProfilePost[]>([]);
   const [reposts, setReposts] = useState<ProfilePost[]>([]);
   const [taggedPosts, setTaggedPosts] = useState<ProfilePost[]>([]);
-  const [savedEvents, setSavedEvents] = useState<NoctEvent[]>([]);
+  const [savedPosts, setSavedPosts] = useState<ProfilePost[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -99,6 +105,9 @@ export default function UserProfilePage({
 
   // ── Share toast state ──────────────────────────────────────────────────────
   const [shareToast, setShareToast] = useState(false);
+
+  // ── Saved Events Sheet state ──────────────────────────────────────────────
+  const [isSavedEventsOpen, setIsSavedEventsOpen] = useState(false);
 
   const handleShareProfile = async () => {
     const url = window.location.href;
@@ -132,30 +141,47 @@ export default function UserProfilePage({
       // 1. Fetch own posts
       const { data: ownData } = await supabase
         .from('posts')
-        .select('id, user_id, image_url, caption, created_at, likes_count')
+        .select('*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       // 2. Fetch reposted posts
       const { data: repostData } = await supabase
         .from('reposts')
-        .select('post_id, posts(id, user_id, image_url, caption, created_at, likes_count)')
+        .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       // 3. Fetch tagged posts (mentions in caption or tagged_users array)
       const { data: taggedData } = await supabase
         .from('posts')
-        .select('id, user_id, image_url, caption, created_at, likes_count')
+        .select('*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count')
         .or(`caption.ilike.%@${profile?.username}%,tagged_users.cs.{"@${profile?.username}"}`)
         .order('created_at', { ascending: false });
 
-      const ownPosts = (ownData || []).map(p => ({ ...p, reposted: false, reposts_count: 0 })) as ProfilePost[];
+      const ownPosts = (ownData || []).map(p => ({ 
+        ...p, 
+        reposted: false, 
+        reposts_count: p.reposts_count,
+        raw_row: p
+      })) as ProfilePost[];
+
       const repostedPosts = (repostData || [])
         .map((r: any) => r.posts)
         .filter(Boolean)
-        .map((p: any) => ({ ...p, reposted: true, reposts_count: 0 })) as ProfilePost[];
-      const tagged = (taggedData || []).map(p => ({ ...p, reposted: false, reposts_count: 0 })) as ProfilePost[];
+        .map((p: any) => ({ 
+          ...p, 
+          reposted: true, 
+          reposts_count: p.reposts_count,
+          raw_row: p
+        })) as ProfilePost[];
+
+      const tagged = (taggedData || []).map(p => ({ 
+        ...p, 
+        reposted: false, 
+        reposts_count: p.reposts_count,
+        raw_row: p
+      })) as ProfilePost[];
 
 
       setPosts(ownPosts);
@@ -166,14 +192,26 @@ export default function UserProfilePage({
     }
   }, [user, profile?.username]);
 
-  const fetchSavedEvents = useCallback(async () => {
+  const fetchSavedPosts = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
-      .from('event_saves')
-      .select('events(*)')
+      .from('post_saves')
+      .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    setSavedEvents((data ?? []).map((r: any) => r.events).filter(Boolean) as NoctEvent[]);
+    
+    if (data) {
+      const posts = (data as any[])
+        .map(r => r.posts)
+        .filter(Boolean)
+        .map(p => ({ 
+          ...p, 
+          reposted: false, 
+          reposts_count: p.reposts_count,
+          raw_row: p
+        })) as ProfilePost[];
+      setSavedPosts(posts);
+    }
   }, [user]);
 
   const fetchManagedVenues = useCallback(async () => {
@@ -188,9 +226,9 @@ export default function UserProfilePage({
   useEffect(() => {
     fetchHighlights();
     fetchPosts();
-    fetchSavedEvents();
+    fetchSavedPosts();
     fetchManagedVenues();
-  }, [fetchHighlights, fetchPosts, fetchSavedEvents, fetchManagedVenues]);
+  }, [fetchHighlights, fetchPosts, fetchSavedPosts, fetchManagedVenues]);
 
   // ── Stats Real-time ───────────────────────────────────────────────────────
 
@@ -334,7 +372,21 @@ export default function UserProfilePage({
   ];
 
   return (
-    <div className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans">
+    <motion.div 
+      className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans"
+      onPanEnd={(_, info) => {
+        // Detect right-to-left swipe (velocity < -500 or offset < -100)
+        if (info.offset.x < -100 || info.velocity.x < -500) {
+          setIsSavedEventsOpen(true);
+        }
+      }}
+    >
+      <SavedEventsSheet 
+        userId={user?.id || ''} 
+        isOpen={isSavedEventsOpen} 
+        onClose={() => setIsSavedEventsOpen(false)} 
+        activeCity={profile?.city as any}
+      />
 
       {/* ── Profile Header ────────────────────────────────────── */}
       <div className="px-0 sm:px-4 pt-4 pb-8">
@@ -376,13 +428,22 @@ export default function UserProfilePage({
                 {profile?.badge && profile.badge !== 'none' && (
                   <VerifiedBadge type={profile.badge} size="md" />
                 )}
+                {/* Mobile Saved Events Trigger */}
+                <button
+                  onClick={() => setIsSavedEventsOpen(true)}
+                  className="xl:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
+                  title="View Agenda"
+                >
+                  <CalendarIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-noctvm-violet rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(139,92,246,0.6)] animate-pulse" />
+                </button>
               </div>
               <p className="text-sm font-black text-noctvm-silver/40 uppercase tracking-[0.2em]">@{profile?.username || 'nightowl'}</p>
               
               {profile?.city && (
                 <div className="flex items-center gap-2 mt-3 p-1 px-3 w-fit rounded-full bg-white/[0.03] border border-white/5">
                   <MapPinIcon className="w-3 h-3 text-noctvm-violet" />
-                  <span className="text-[9px] text-noctvm-silver font-black uppercase tracking-widest">{profile.city}</span>
+                  <span className="text-noctvm-micro text-noctvm-silver font-black uppercase tracking-widest">{profile.city}</span>
                 </div>
               )}
             </div>
@@ -394,14 +455,14 @@ export default function UserProfilePage({
             <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center group hover:bg-white/[0.05] hover:border-noctvm-violet/30 transition-all cursor-default relative overflow-hidden">
                <div className="absolute top-0 right-0 w-12 h-12 bg-noctvm-violet/5 blur-xl group-hover:bg-noctvm-violet/10 transition-colors" />
                <span className="text-2xl font-mono font-black text-noctvm-violet group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(139,92,246,0.3)]">{statsData.followers}</span>
-               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Network</span>
+               <span className="text-noctvm-xs uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Network</span>
             </div>
 
             {/* Card 2: Activity (Events) */}
             <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center group hover:bg-white/[0.05] hover:border-noctvm-emerald/30 transition-all cursor-default relative overflow-hidden">
                <div className="absolute top-0 right-0 w-12 h-12 bg-noctvm-emerald/5 blur-xl group-hover:bg-noctvm-emerald/10 transition-colors" />
                <span className="text-2xl font-mono font-black text-noctvm-emerald group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{statsData.eventsAttended}</span>
-               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Activity</span>
+               <span className="text-noctvm-xs uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Activity</span>
             </div>
 
             {/* Card 3: Social Proof (Following/Venues Combined) */}
@@ -439,7 +500,7 @@ export default function UserProfilePage({
                   href={profile.music_link.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-[10px] font-mono font-bold text-white hover:text-noctvm-violet transition-colors flex items-center gap-1 uppercase tracking-wider"
+                  className="text-noctvm-caption font-mono font-bold text-white hover:text-noctvm-violet transition-colors flex items-center gap-1 uppercase tracking-wider"
                 >
                   {profile.music_link.type}
                   <svg className="w-2.5 h-2.5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
@@ -470,7 +531,7 @@ export default function UserProfilePage({
           {profile?.genres && profile.genres.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-5">
               {profile.genres.map(genre => (
-                <span key={genre} className="px-3 py-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10 text-[9px] font-mono font-bold text-noctvm-violet/80 uppercase tracking-widest">
+                <span key={genre} className="px-3 py-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10 text-noctvm-micro font-mono font-bold text-noctvm-violet/80 uppercase tracking-widest">
                   #{genre}
                 </span>
               ))}
@@ -480,8 +541,8 @@ export default function UserProfilePage({
 
         {/* Profile Action Buttons */}
         <div className="flex gap-2.5 px-4 lg:px-0">
-          <button onClick={onEditProfileClick} className="flex-1 py-3 rounded-xl bg-white text-black text-[11px] font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all shadow-xl shadow-white/5 active:scale-95">Edit Profile</button>
-          <button onClick={handleShareProfile} className="flex-1 py-3 rounded-xl bg-noctvm-surface border border-noctvm-border text-[11px] font-black uppercase tracking-wider text-white hover:bg-noctvm-surface/70 transition-all active:scale-95">
+          <button onClick={onEditProfileClick} className="flex-1 py-3 rounded-xl bg-white text-black text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all shadow-xl shadow-white/5 active:scale-95">Edit Profile</button>
+          <button onClick={handleShareProfile} className="flex-1 py-3 rounded-xl bg-noctvm-surface border border-noctvm-border text-noctvm-label font-black uppercase tracking-wider text-white hover:bg-noctvm-surface/70 transition-all active:scale-95">
             {shareToast ? 'Address Copied' : 'Share Profile'}
           </button>
         </div>
@@ -494,9 +555,9 @@ export default function UserProfilePage({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-noctvm-violet">
                 <ShieldIcon className="w-4 h-4" />
-                <span className="text-[11px] font-bold uppercase tracking-wider">Venue Management</span>
+                <span className="text-noctvm-label font-bold uppercase tracking-wider">Venue Management</span>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-[9px] font-bold uppercase">Authorized</span>
+              <span className="px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-noctvm-micro font-bold uppercase">Authorized</span>
             </div>
             
             <div className="space-y-3">
@@ -512,7 +573,7 @@ export default function UserProfilePage({
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-tight">{mv.venues.name}</p>
-                      <p className="text-[10px] text-noctvm-silver font-medium">{mv.role} • {mv.venues.city}</p>
+                      <p className="text-noctvm-caption text-noctvm-silver font-medium">{mv.role} • {mv.venues.city}</p>
                     </div>
                   </div>
                   <button 
@@ -536,7 +597,7 @@ export default function UserProfilePage({
             <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors">
               <svg className="w-6 h-6 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
             </div>
-            <span className="text-[9px] text-noctvm-silver">New</span>
+            <span className="text-noctvm-micro text-noctvm-silver">New</span>
           </button>
 
           {highlights.map((hl) => (
@@ -559,7 +620,7 @@ export default function UserProfilePage({
                >
                  <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 18L18 6M6 6l12 12" /></svg>
                </button>
-              <span className="text-[9px] text-noctvm-silver truncate max-w-[4rem] text-center">{hl.name}</span>
+              <span className="text-noctvm-micro text-noctvm-silver truncate max-w-[4rem] text-center">{hl.name}</span>
             </div>
           ))}
         </div>
@@ -584,56 +645,82 @@ export default function UserProfilePage({
 
       {/* ── Content Grid ──────────────────────────────────────── */}
       <div className="pb-24">
-        {activeTab === 'posts' && mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
-            <div className="flex flex-col mb-16">
-              <div className="flex items-center gap-3 p-4 border-b border-noctvm-border bg-noctvm-midnight sticky top-0 z-20">
-                <button onClick={() => setMobileFeedView(false)} title="Close feed view" className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        <AnimatePresence>
+          {mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+            <motion.div 
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-0 z-[100] bg-noctvm-midnight overflow-y-auto w-full h-full safe-top"
+            >
+              <div className="flex items-center gap-3 p-4 border-b border-noctvm-border bg-noctvm-midnight/90 backdrop-blur-md sticky top-0 z-20">
+                <button 
+                  onClick={() => setMobileFeedView(false)} 
+                  title="Close feed"
+                  className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
-                <span className="text-sm font-bold text-white tracking-widest uppercase">Posts</span>
-              </div>
-              {posts.map((post, i) => (
-                <div key={post.id} className="w-full bg-noctvm-surface border-b border-noctvm-border mb-4 pb-4 animate-fade-in" id={`post-${i}`}>
-                  {post.image_url ? (
-                    <div className="w-full aspect-square relative" onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }}>
-                      <NextImage src={post.image_url} alt="" fill className="object-cover" unoptimized />
-                    </div>
-                  ) : null}
-                  <div className="p-4 flex gap-4">
-                    <button className="text-white hover:text-noctvm-violet transition-colors" title="Like">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    </button>
-                    <button className="text-white hover:text-noctvm-violet transition-colors" onClick={() => { setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); }} title="Comment">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                    </button>
-                  </div>
-                  {post.likes_count > 0 && <div className="px-4 text-xs font-bold text-white mb-1">{post.likes_count} likes</div>}
-                  {post.caption && (
-                    <div className="px-4 text-sm text-noctvm-silver leading-relaxed">
-                      <span className="font-bold text-white mr-2">{profile?.username || 'nightowl'}</span>
-                      {post.caption}
-                    </div>
-                  )}
+                <div className="flex flex-col">
+                  <span className="text-xs font-black text-white tracking-[0.2em] uppercase">
+                    {activeTab === 'posts' ? 'Moments' : 
+                     activeTab === 'reposts' ? 'Reposts' :
+                     activeTab === 'saved' ? 'Saved' : 'Tagged'}
+                  </span>
+                  <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
+                    {profile?.display_name || profile?.username}
+                  </span>
                 </div>
-              ))}
-            </div>
-        )}
+              </div>
+
+              <div className="flex flex-col gap-px bg-noctvm-border">
+                {activeViewerPosts.map((post, i) => {
+                  const feedPost = post.raw_row ? mapSupabasePost(post.raw_row) : null;
+                  if (!feedPost) return null;
+                  
+                  return (
+                    <div key={post.id} className="bg-noctvm-midnight" id={`post-${i}`}>
+                      <FeedItem
+                        post={{
+                          ...feedPost,
+                          liked: feedPost.liked,
+                        }}
+                        idx={i}
+                        user={user}
+                        onVenueClick={() => {}} 
+                        toggleLike={() => {}} 
+                        onShare={() => {}}
+                        onRepost={() => {}}
+                        onDelete={() => {}}
+                        venueLogosMap={{}}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {activeTab === 'posts' && !(mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024) && (
           <div className="grid grid-cols-3 gap-0.5">
             {posts.map((post, i) => (
               <button key={post.id} onClick={() => { 
+                setActiveViewerPosts(posts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
                   setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
                 } else {
-                  setActiveViewerPosts(posts); setViewerIndex(i); setViewerOpen(true); 
+                  setViewerOpen(true); 
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
                   <NextImage src={post.image_url} alt="" fill className="object-cover group-hover:scale-105 transition-all duration-500" unoptimized />
                 ) : (
-                  <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
+                  <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-noctvm-caption text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}
               </button>
             ))}
@@ -650,11 +737,19 @@ export default function UserProfilePage({
         {activeTab === 'reposts' && (
           <div className="grid grid-cols-3 gap-0.5">
             {reposts.map((post, i) => (
-              <button key={post.id} onClick={() => { setActiveViewerPosts(reposts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
+              <button key={post.id} onClick={() => { 
+                setActiveViewerPosts(reposts); setViewerIndex(i);
+                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                  setMobileFeedView(true);
+                  setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
+                } else {
+                  setViewerOpen(true); 
+                }
+              }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
                   <NextImage src={post.image_url} alt="" fill className="object-cover opacity-80" unoptimized />
                 ) : (
-                  <div className="w-full h-full bg-noctvm-midnight flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-emerald/40 text-center line-clamp-3">{post.caption}</span></div>
+                  <div className="w-full h-full bg-noctvm-midnight flex items-center justify-center p-2"><span className="text-noctvm-caption text-noctvm-emerald/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}
                 <div className="absolute top-2 right-2 p-1 rounded-full bg-noctvm-emerald/80 backdrop-blur-sm border border-noctvm-emerald/30">
                   <RepostIcon className="w-3 h-3 text-white" />
@@ -671,14 +766,34 @@ export default function UserProfilePage({
         )}
 
         {activeTab === 'saved' && (
-          <div className="space-y-3 px-4 py-4">
-            {savedEvents.map(event => (
-              <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />
+          <div className="grid grid-cols-3 gap-0.5">
+            {savedPosts.map((post, i) => (
+              <button 
+                key={post.id} 
+                onClick={() => { 
+                  setActiveViewerPosts(savedPosts); setViewerIndex(i);
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                    setMobileFeedView(true);
+                    setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
+                  } else {
+                    setViewerOpen(true); 
+                  }
+                }} 
+                className="aspect-square bg-noctvm-surface relative group"
+              >
+                {post.image_url ? (
+                  <NextImage src={post.image_url} alt="" fill className="object-cover" unoptimized />
+                ) : (
+                  <div className="w-full h-full bg-noctvm-midnight flex items-center justify-center p-2">
+                    <span className="text-noctvm-caption text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span>
+                  </div>
+                )}
+              </button>
             ))}
-            {savedEvents.length === 0 && (
-              <div className="py-12 text-center text-noctvm-silver">
+            {!loadingPosts && savedPosts.length === 0 && (
+              <div className="col-span-3 py-16 text-center text-noctvm-silver">
                 <BookmarkIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
-                <p className="text-sm font-medium">No events bookmarked</p>
+                <p className="text-sm font-medium">No saved posts</p>
               </div>
             )}
           </div>
@@ -687,11 +802,19 @@ export default function UserProfilePage({
         {activeTab === 'tagged' && (
           <div className="grid grid-cols-3 gap-0.5">
             {taggedPosts.map((post, i) => (
-              <button key={post.id} onClick={() => { setActiveViewerPosts(taggedPosts); setViewerIndex(i); setViewerOpen(true); }} className="aspect-square bg-noctvm-surface relative group">
+              <button key={post.id} onClick={() => { 
+                setActiveViewerPosts(taggedPosts); setViewerIndex(i);
+                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                  setMobileFeedView(true);
+                  setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
+                } else {
+                  setViewerOpen(true); 
+                }
+              }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
                   <NextImage src={post.image_url} alt="" fill className="object-cover" unoptimized />
                 ) : (
-                  <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-[10px] text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
+                  <div className="w-full h-full bg-noctvm-surface flex items-center justify-center p-2"><span className="text-noctvm-caption text-noctvm-silver/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}
               </button>
             ))}
@@ -734,6 +857,6 @@ export default function UserProfilePage({
           </svg>
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }
