@@ -36,12 +36,17 @@ export default withSentryConfig(
     project: "noctvm-app",
   },
   {
+    // For all available options, see:
+    // https://github.com/getsentry/sentry-webpack-plugin#options
     widenClientFileUpload: true,
     transpileClientSDK: true,
     tunnelRoute: "/monitoring",
     hideSourceMaps: true,
     disableLogger: true,
     automaticVercelMonitors: true,
+    // Disable source map upload for preview builds to speed up deployment
+    disableServerWebpackPlugin: process.env.VERCEL_ENV !== "production",
+    disableClientWebpackPlugin: process.env.VERCEL_ENV !== "production",
   }
 );
 
