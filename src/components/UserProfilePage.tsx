@@ -143,21 +143,21 @@ export default function UserProfilePage({
       // 1. Fetch own posts
       const { data: ownData } = await supabase
         .from('posts')
-        .select('*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count')
+        .select('*, profiles(display_name, username, avatar_url, is_verified, badge)')
         .eq('user_id', targetProfile.id)
         .order('created_at', { ascending: false });
 
       // 2. Fetch reposted posts
       const { data: repostData } = await supabase
         .from('reposts')
-        .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count)')
+        .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge))')
         .eq('user_id', targetProfile.id)
         .order('created_at', { ascending: false });
 
       // 3. Fetch tagged posts (mentions in caption or tagged_users array)
       const { data: taggedData } = await supabase
         .from('posts')
-        .select('*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count')
+        .select('*, profiles(display_name, username, avatar_url, is_verified, badge)')
         .or(`caption.ilike.%@${targetProfile.username}%,tagged_users.cs.{"@${targetProfile.username}"}`)
         .order('created_at', { ascending: false });
 
@@ -198,7 +198,7 @@ export default function UserProfilePage({
     if (!user || !isOwner) return;
     const { data } = await supabase
       .from('post_saves')
-      .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count)')
+      .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge))')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     
