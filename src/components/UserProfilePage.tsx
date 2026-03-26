@@ -2,6 +2,7 @@
 // Triggering preview build for mobile feed enhancement
 
 import { useState, useEffect, useCallback, Fragment } from 'react';
+import { createPortal } from 'react-dom';
 import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -791,6 +792,7 @@ export default function UserProfilePage({
       )}
     </motion.div>
 
+    {typeof document !== 'undefined' && createPortal(
     <AnimatePresence>
       {mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
         <motion.div
@@ -868,6 +870,7 @@ export default function UserProfilePage({
         </motion.div>
       )}
     </AnimatePresence>
+    , document.body)}
     </Fragment>
   );
 }
