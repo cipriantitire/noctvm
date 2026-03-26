@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';

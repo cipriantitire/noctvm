@@ -1,0 +1,30 @@
+# docker-compose.yml for NOCTVM (Enterprise Dev Ecosystem)
+version: '3.8'
+
+services:
+  # Main Application: Next.js + Social Core
+  noctvm-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: noctvm-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true # Ensure hot-reloading works on Windows/WSL mounts
+    # Load all environment variables from .env.local
+    env_file:
+      - .env.local
+    stdin_open: true # Support for interactive TTY if needed
+    tty: true
+
+  # (Future Integration) SocratiCode Managed Stack
+  # This service is managed automatically by the MCP server, 
+  # but Docker Desktop allows you to see the Qdrant & Ollama containers 
+  # that power the AI search sitting right next to your app.

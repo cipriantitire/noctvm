@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Providers from "./providers";
+
+export const dynamic = 'force-dynamic';
 import "./globals.css";
 import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google';
 

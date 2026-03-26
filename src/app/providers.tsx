@@ -1,12 +1,10 @@
-'use client';
-
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ConsentManager } from './consent-manager';
+import { SafeConsentManager } from '@/components/SafeConsentManager';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ConsentManager>
+    <SafeConsentManager>
       <AuthProvider>{children}</AuthProvider>
-    </ConsentManager>
+    </SafeConsentManager>
   );
 }
