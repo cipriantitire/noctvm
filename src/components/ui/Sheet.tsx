@@ -30,7 +30,7 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Sheet
         'fixed inset-0 bg-black/60 backdrop-blur-sm',
         className,
       )}
-      style={{ zIndex: 80 }}
+      style={{ zIndex: 400 }}
       {...props}
     />
   );
@@ -58,7 +58,7 @@ function SheetContent({
           side === 'bottom' && 'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto rounded-t-noctvm-xl border-t border-noctvm-border',
           className,
         )}
-        style={{ zIndex: 81, position: 'fixed' }}
+        style={{ zIndex: 401, position: 'fixed' }}
         {...props}
       >
         {children}

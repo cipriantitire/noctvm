@@ -25,6 +25,7 @@ export interface ProfilePost {
   likes_count: number;
   reposts_count: number;
   reposted: boolean;
+  liked?: boolean;
   venue?: { name: string; tagged: boolean };
   event?: { title: string };
   tagged_users?: string[];

@@ -77,6 +77,26 @@ export default function UserProfilePage({
   const { user } = useAuth();
   const isOwner = user?.id === targetProfile.id;
   const dragControls = useDragControls();
+
+  const handleToggleLike = useCallback(async (post: import('@/types/feed').FeedPost) => {
+    if (!user) return;
+    // Optimistic update across all post lists
+    const toggle = (list: ProfilePost[]) => list.map(p =>
+      p.id === post.id
+        ? { ...p, liked: !p.liked, likes_count: p.liked ? Math.max(0, p.likes_count - 1) : p.likes_count + 1, raw_row: { ...p.raw_row, liked: !p.liked, likes_count: p.liked ? Math.max(0, p.likes_count - 1) : p.likes_count + 1 } }
+        : p
+    );
+    setPosts(prev => toggle(prev));
+    setReposts(prev => toggle(prev));
+    setTaggedPosts(prev => toggle(prev));
+    setSavedPosts(prev => toggle(prev));
+    setActiveViewerPosts(prev => toggle(prev));
+    // Persist
+    const { error } = await supabase.from('post_likes').insert({ post_id: post.id, user_id: user.id });
+    if (error?.code === '23505') {
+      await supabase.from('post_likes').delete().match({ post_id: post.id, user_id: user.id });
+    }
+  }, [user]);
   const feedScrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
@@ -173,7 +193,7 @@ export default function UserProfilePage({
         .or(`caption.ilike.%@${targetProfile.username}%,tagged_users.cs.{"@${targetProfile.username}"}`)
         .order('created_at', { ascending: false });
 
-      // Collect all post IDs and fetch real like counts from post_likes
+      // Collect all post IDs and fetch real like counts + current user's liked set
       const allRawPosts = [
         ...(ownData || []),
         ...((repostData || []).map((r: any) => r.posts).filter(Boolean)),
@@ -181,12 +201,17 @@ export default function UserProfilePage({
       ];
       const allPostIds = Array.from(new Set(allRawPosts.map((p: any) => p.id as string)));
       let likeCounts: Record<string, number> = {};
+      let likedSet = new Set<string>();
       if (allPostIds.length > 0) {
-        const { data: allLikes } = await supabase.from('post_likes').select('post_id').in('post_id', allPostIds);
+        const [{ data: allLikes }, { data: userLikes }] = await Promise.all([
+          supabase.from('post_likes').select('post_id').in('post_id', allPostIds),
+          user ? supabase.from('post_likes').select('post_id').eq('user_id', user.id).in('post_id', allPostIds) : Promise.resolve({ data: [] }),
+        ]);
         (allLikes || []).forEach((l: any) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
+        (userLikes || []).forEach((l: any) => likedSet.add(l.post_id));
       }
 
-      const withLikes = (p: any) => ({ ...p, likes_count: likeCounts[p.id] || 0 });
+      const withLikes = (p: any) => ({ ...p, likes_count: likeCounts[p.id] || 0, liked: likedSet.has(p.id) });
 
       const ownPosts = (ownData || []).map(p => ({
         ...withLikes(p),
@@ -869,11 +894,11 @@ export default function UserProfilePage({
                 return (
                   <div key={post.id} className="bg-noctvm-midnight" id={`post-${i}`}>
                     <FeedItem
-                      post={{ ...feedPost, liked: feedPost.liked }}
+                      post={{ ...feedPost, liked: post.liked ?? false, likes: post.likes_count }}
                       idx={i}
                       user={user}
                       onVenueClick={() => {}}
-                      toggleLike={() => {}}
+                      toggleLike={handleToggleLike}
                       onShare={() => {}}
                       onRepost={() => {}}
                       onDelete={() => {}}
