@@ -173,30 +173,41 @@ export default function UserProfilePage({
         .or(`caption.ilike.%@${targetProfile.username}%,tagged_users.cs.{"@${targetProfile.username}"}`)
         .order('created_at', { ascending: false });
 
-      const ownPosts = (ownData || []).map(p => ({ 
-        ...p, 
-        reposted: false, 
-        reposts_count: p.reposts_count,
-        raw_row: p
+      // Collect all post IDs and fetch real like counts from post_likes
+      const allRawPosts = [
+        ...(ownData || []),
+        ...((repostData || []).map((r: any) => r.posts).filter(Boolean)),
+        ...(taggedData || []),
+      ];
+      const allPostIds = Array.from(new Set(allRawPosts.map((p: any) => p.id as string)));
+      let likeCounts: Record<string, number> = {};
+      if (allPostIds.length > 0) {
+        const { data: allLikes } = await supabase.from('post_likes').select('post_id').in('post_id', allPostIds);
+        (allLikes || []).forEach((l: any) => { likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1; });
+      }
+
+      const withLikes = (p: any) => ({ ...p, likes_count: likeCounts[p.id] || 0 });
+
+      const ownPosts = (ownData || []).map(p => ({
+        ...withLikes(p),
+        reposted: false,
+        raw_row: withLikes(p)
       })) as ProfilePost[];
 
       const repostedPosts = (repostData || [])
         .map((r: any) => r.posts)
         .filter(Boolean)
-        .map((p: any) => ({ 
-          ...p, 
-          reposted: true, 
-          reposts_count: p.reposts_count,
-          raw_row: p
+        .map((p: any) => ({
+          ...withLikes(p),
+          reposted: true,
+          raw_row: withLikes(p)
         })) as ProfilePost[];
 
-      const tagged = (taggedData || []).map(p => ({ 
-        ...p, 
-        reposted: false, 
-        reposts_count: p.reposts_count,
-        raw_row: p
+      const tagged = (taggedData || []).map(p => ({
+        ...withLikes(p),
+        reposted: false,
+        raw_row: withLikes(p)
       })) as ProfilePost[];
-
 
       setPosts(ownPosts);
       setReposts(repostedPosts);
