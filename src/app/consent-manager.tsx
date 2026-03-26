@@ -1,9 +1,9 @@
 'use client';
 
-import { 
-  ConsentManagerProvider, 
-  useConsentManager 
-} from '@c15t/nextjs';
+import {
+  ConsentManagerProvider,
+  useConsentManager
+} from '@c15t/react';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';

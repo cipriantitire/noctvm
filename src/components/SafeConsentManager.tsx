@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
+// Completely isolate the import and instantiation of the Consent Manager
 const ConsentManagerBase = dynamic(() => 
   import('@/app/consent-manager').then(mod => mod.ConsentManager),
   { ssr: false }
@@ -15,6 +16,7 @@ export function SafeConsentManager({ children }: { children: React.ReactNode }) 
     setIsMounted(true);
   }, []);
 
+  // Strict guard: Do not even render the dynamic import until the client fully mounts
   if (!isMounted) return <>{children}</>;
 
   return <ConsentManagerBase>{children}</ConsentManagerBase>;
