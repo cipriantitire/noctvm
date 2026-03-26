@@ -1,7 +1,7 @@
 'use client';
 // Triggering preview build for mobile feed enhancement
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -351,7 +351,7 @@ export default function UserProfilePage({
   ];
 
   return (
-    <>
+    <Fragment>
     <motion.div
       className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans"
       onPanEnd={(_, info) => {
@@ -868,6 +868,6 @@ export default function UserProfilePage({
         </motion.div>
       )}
     </AnimatePresence>
-    </>
+    </Fragment>
   );
 }
