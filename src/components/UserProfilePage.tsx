@@ -26,7 +26,7 @@ import {
   CalendarIcon
 } from './icons';
 import SavedEventsSheet from './SavedEventsSheet';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,6 +75,7 @@ export default function UserProfilePage({
 }: UserProfilePageProps) {
   const { user } = useAuth();
   const isOwner = user?.id === targetProfile.id;
+  const dragControls = useDragControls();
   const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
@@ -350,7 +351,8 @@ export default function UserProfilePage({
   ];
 
   return (
-    <motion.div 
+    <>
+    <motion.div
       className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans"
       onPanEnd={(_, info) => {
         if (isOwner && (info.offset.x < -100 || info.velocity.x < -500)) {
@@ -634,81 +636,6 @@ export default function UserProfilePage({
 
       {/* ── Content Grid ──────────────────────────────────────── */}
       <div className="pb-24">
-        <AnimatePresence>
-          {mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
-            <motion.div
-              initial={{ opacity: 0, y: '100%' }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-0 z-[300] bg-noctvm-midnight overflow-y-auto w-full h-full"
-              onKeyDown={(e) => { if (e.key === 'Escape') setMobileFeedView(false); }}
-              tabIndex={-1}
-            >
-              {/* Drag handle — pull down to dismiss */}
-              <div className="sticky top-0 z-20 bg-noctvm-midnight/90 backdrop-blur-md border-b border-noctvm-border">
-                <motion.div
-                  className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing touch-none"
-                  drag="y"
-                  dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={{ top: 0, bottom: 0.3 }}
-                  onDragEnd={(_, info) => {
-                    if (info.offset.y > 80 || info.velocity.y > 400) setMobileFeedView(false);
-                  }}
-                >
-                  <div className="w-10 h-1 rounded-full bg-white/20" />
-                </motion.div>
-                <div className="flex items-center gap-3 px-4 pb-3">
-                  <button
-                    onClick={() => setMobileFeedView(false)}
-                    title="Close feed"
-                    className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-black text-white tracking-[0.2em] uppercase">
-                      {activeTab === 'posts' ? 'Moments' :
-                       activeTab === 'reposts' ? 'Reposts' :
-                       activeTab === 'saved' ? 'Saved' : 'Tagged'}
-                    </span>
-                    <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
-                      {targetProfile.display_name || targetProfile.username}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-px bg-noctvm-border">
-                {activeViewerPosts.map((post, i) => {
-                  const feedPost = post.raw_row ? mapSupabasePost(post.raw_row) : null;
-                  if (!feedPost) return null;
-                  
-                  return (
-                    <div key={post.id} className="bg-noctvm-midnight" id={`post-${i}`}>
-                      <FeedItem
-                        post={{
-                          ...feedPost,
-                          liked: feedPost.liked,
-                        }}
-                        idx={i}
-                        user={user}
-                        onVenueClick={() => {}} 
-                        toggleLike={() => {}} 
-                        onShare={() => {}}
-                        onRepost={() => {}}
-                        onDelete={() => {}}
-                        venueLogosMap={{}}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {activeTab === 'posts' && !(mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024) && (
           <div className="grid grid-cols-3 gap-0.5">
@@ -863,5 +790,84 @@ export default function UserProfilePage({
         </button>
       )}
     </motion.div>
+
+    <AnimatePresence>
+      {mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
+        <motion.div
+          drag="y"
+          dragControls={dragControls}
+          dragListener={false}
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0, bottom: 0.4 }}
+          onDragEnd={(_, info) => {
+            if (info.offset.y > 80 || info.velocity.y > 400) setMobileFeedView(false);
+          }}
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed inset-0 z-[300] bg-noctvm-midnight flex flex-col"
+          onKeyDown={(e) => { if (e.key === 'Escape') setMobileFeedView(false); }}
+          tabIndex={-1}
+        >
+          {/* Header — drag from anywhere here to dismiss */}
+          <div
+            className="flex-shrink-0 bg-noctvm-midnight/90 backdrop-blur-md border-b border-noctvm-border"
+            onPointerDown={(e) => dragControls.start(e)}
+            style={{ touchAction: 'none' }}
+          >
+            <div className="flex justify-center pt-2 pb-1">
+              <div className="w-10 h-1 rounded-full bg-white/20" />
+            </div>
+            <div className="flex items-center gap-3 px-4 pb-3">
+              <button
+                onClick={() => setMobileFeedView(false)}
+                title="Close feed"
+                className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="flex flex-col">
+                <span className="text-xs font-black text-white tracking-[0.2em] uppercase">
+                  {activeTab === 'posts' ? 'Moments' :
+                   activeTab === 'reposts' ? 'Reposts' :
+                   activeTab === 'saved' ? 'Saved' : 'Tagged'}
+                </span>
+                <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
+                  {targetProfile.display_name || targetProfile.username}
+                </span>
+              </div>
+            </div>
+          </div>
+          {/* Scrollable content — separate from draggable container */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col gap-px bg-noctvm-border">
+              {activeViewerPosts.map((post, i) => {
+                const feedPost = post.raw_row ? mapSupabasePost(post.raw_row) : null;
+                if (!feedPost) return null;
+                return (
+                  <div key={post.id} className="bg-noctvm-midnight" id={`post-${i}`}>
+                    <FeedItem
+                      post={{ ...feedPost, liked: feedPost.liked }}
+                      idx={i}
+                      user={user}
+                      onVenueClick={() => {}}
+                      toggleLike={() => {}}
+                      onShare={() => {}}
+                      onRepost={() => {}}
+                      onDelete={() => {}}
+                      venueLogosMap={{}}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
