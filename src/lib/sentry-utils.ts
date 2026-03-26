@@ -9,7 +9,7 @@ export async function withSentryScraper<T>(
   source: string,
   scraperFn: () => Promise<T>
 ): Promise<T> {
-  return await Sentry.withIsolatedScope(async (scope) => {
+  return await Sentry.withIsolationScope(async (scope) => {
     scope.setTag("component", "scraper");
     scope.setTag("scraper_source", source);
     
