@@ -135,7 +135,7 @@ export default function PocketPage() {
           <span className="text-4xl font-heading font-black text-white text-glow">
             {pocket?.balance.toLocaleString() || (loading ? '...' : '0')}
           </span>
-          <span className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-[0.3em] mt-1 italic">Pocket</span>
+          <span className="text-noctvm-caption text-noctvm-silver/60 font-mono uppercase tracking-[0.3em] mt-1 italic">Pocket</span>
         </motion.div>
       </section>
 
@@ -161,8 +161,8 @@ export default function PocketPage() {
             <PlusIcon className="w-12 h-12 text-noctvm-violet" />
           </div>
           <h3 className="text-sm font-heading font-bold text-white uppercase tracking-wider mb-1">Earning Guide</h3>
-          <p className="text-[10px] text-noctvm-silver/60">Unlock MR through social rites</p>
-          <div className="mt-4 flex items-center gap-1.5 text-[10px] font-mono text-noctvm-violet uppercase">
+          <p className="text-noctvm-caption text-noctvm-silver/60">Unlock MR through social rites</p>
+          <div className="mt-4 flex items-center gap-1.5 text-noctvm-caption font-mono text-noctvm-violet uppercase">
             Browse Methods <ChevronRightIcon className="w-3 h-3" />
           </div>
         </button>
@@ -173,10 +173,10 @@ export default function PocketPage() {
             <StarIcon className="w-12 h-12 text-noctvm-gold" />
           </div>
           <h3 className="text-sm font-heading font-bold text-white uppercase tracking-wider mb-1">Invite Nexus</h3>
-          <p className="text-[10px] text-noctvm-silver/60">Share code: <span className="text-noctvm-violet font-mono">{profile?.referral_code || '...'}</span></p>
+          <p className="text-noctvm-caption text-noctvm-silver/60">Share code: <span className="text-noctvm-violet font-mono">{profile?.referral_code || '...'}</span></p>
           <button 
             onClick={copyToClipboard}
-            className="mt-4 flex items-center gap-1.5 text-[10px] font-mono text-noctvm-violet uppercase hover:underline"
+            className="mt-4 flex items-center gap-1.5 text-noctvm-caption font-mono text-noctvm-violet uppercase hover:underline"
           >
             {copied ? 'Copied' : 'Copy Code'} <CopyIcon className="w-3 h-3" />
           </button>
@@ -189,7 +189,7 @@ export default function PocketPage() {
           <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Vanity Emporium</h2>
           <button 
             onClick={() => setIsBoutiqueOpen(true)}
-            className="text-[10px] text-noctvm-violet font-mono uppercase flex items-center gap-1 hover:underline active:scale-95 transition-all"
+            className="text-noctvm-caption text-noctvm-violet font-mono uppercase flex items-center gap-1 hover:underline active:scale-95 transition-all"
           >
             Enter Boutique <ShoppingBagIcon className="w-3 h-3" />
           </button>
@@ -209,11 +209,11 @@ export default function PocketPage() {
               <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 {item.icon}
               </div>
-              <h4 className="text-[10px] font-heading font-bold text-white mb-1 uppercase tracking-wider">{item.name}</h4>
-              <p className="text-[9px] text-noctvm-silver/50 font-mono mb-4">{item.type}</p>
+              <h4 className="text-noctvm-caption font-heading font-bold text-white mb-1 uppercase tracking-wider">{item.name}</h4>
+              <p className="text-noctvm-micro text-noctvm-silver/50 font-mono mb-4">{item.type}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-noctvm-violet">{item.cost} <span className="text-[8px]">MR</span></span>
-                <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="text-xs font-mono font-bold text-noctvm-violet">{item.cost} <span className="text-noctvm-xs">MR</span></span>
+                <span className="text-noctvm-xs font-mono text-white/20 uppercase tracking-widest flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
                    Preview <ExternalLinkIcon className="w-2 h-2" />
                 </span>
               </div>
@@ -244,7 +244,7 @@ export default function PocketPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-white font-bold leading-tight">{item.action}</p>
-                <p className="text-[10px] text-noctvm-silver/60 mt-0.5">{item.desc}</p>
+                <p className="text-noctvm-caption text-noctvm-silver/60 mt-0.5">{item.desc}</p>
               </div>
               <span className="text-xs font-bold text-noctvm-violet font-mono bg-noctvm-violet/10 px-3 py-1 rounded-lg border border-noctvm-violet/20">
                 {item.points}
@@ -269,7 +269,7 @@ export default function PocketPage() {
       >
         <div className="flex flex-col items-center justify-center py-12 space-y-8 animate-pulse">
            <div className="w-32 h-32 rounded-full border-4 border-noctvm-violet border-t-transparent animate-spin" />
-           <p className="text-[10px] font-mono text-noctvm-violet uppercase tracking-widest">Generating Neural Preview...</p>
+           <p className="text-noctvm-caption font-mono text-noctvm-violet uppercase tracking-widest">Generating Neural Preview...</p>
         </div>
       </PocketModal>
 

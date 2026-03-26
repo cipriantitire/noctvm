@@ -69,8 +69,8 @@ function DashboardPage() {
                   <div className="w-12 h-12 rounded-2xl bg-noctvm-violet/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 group-hover:bg-noctvm-violet/40">
                     <PlusIcon className="w-6 h-6 text-noctvm-violet" />
                   </div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Add Event</span>
-                  <span className="text-[8px] text-noctvm-silver/40 uppercase tracking-widest">Create nightlife</span>
+                  <span className="text-noctvm-caption font-bold tracking-widest uppercase mb-1">Add Event</span>
+                  <span className="text-noctvm-xs text-noctvm-silver/40 uppercase tracking-widest">Create nightlife</span>
                 </div>
               </button>
 
@@ -83,8 +83,8 @@ function DashboardPage() {
                    <div className="w-12 h-12 rounded-2xl bg-noctvm-emerald/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 group-hover:bg-noctvm-emerald/40">
                     <MapPinIcon className="w-6 h-6 text-noctvm-emerald" />
                   </div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Add Venue</span>
-                  <span className="text-[8px] text-noctvm-silver/40 uppercase">List location</span>
+                  <span className="text-noctvm-caption font-bold tracking-widest uppercase mb-1">Add Venue</span>
+                  <span className="text-noctvm-xs text-noctvm-silver/40 uppercase">List location</span>
                 </div>
               </button>
 
@@ -97,8 +97,8 @@ function DashboardPage() {
                   <div className="w-12 h-12 rounded-2xl bg-noctvm-gold/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 group-hover:bg-noctvm-gold/40">
                     <StarIcon className="w-6 h-6 text-noctvm-gold" />
                   </div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Promote</span>
-                  <span className="text-[8px] text-noctvm-silver/40 uppercase">Boost reach</span>
+                  <span className="text-noctvm-caption font-bold tracking-widest uppercase mb-1">Promote</span>
+                  <span className="text-noctvm-xs text-noctvm-silver/40 uppercase">Boost reach</span>
                 </div>
               </button>
 
@@ -111,8 +111,8 @@ function DashboardPage() {
                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 group-hover:bg-white/20">
                     <HubIcon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Automate</span>
-                  <span className="text-[8px] text-noctvm-silver/40 uppercase">Run scrapers</span>
+                  <span className="text-noctvm-caption font-bold tracking-widest uppercase mb-1">Automate</span>
+                  <span className="text-noctvm-xs text-noctvm-silver/40 uppercase">Run scrapers</span>
                 </div>
               </button>
             </div>
@@ -158,7 +158,7 @@ function DashboardPage() {
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-noctvm-violet/10 border border-noctvm-violet/20 rounded-full">
                           <span className="w-1 h-1 rounded-full bg-noctvm-violet animate-pulse"></span>
-                          <span className="text-[8px] font-bold text-noctvm-violet uppercase tracking-widest whitespace-nowrap">
+                          <span className="text-noctvm-xs font-bold text-noctvm-violet uppercase tracking-widest whitespace-nowrap">
                             {activity.user_name || 'System'}
                           </span>
                         </div>
@@ -168,10 +168,10 @@ function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right flex flex-col items-end gap-1">
-                      <span className="text-[10px] text-white/40 font-mono">
+                      <span className="text-noctvm-caption text-white/40 font-mono">
                         {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      <span className="text-[8px] text-noctvm-silver/20 uppercase font-mono tracking-tighter">
+                      <span className="text-noctvm-xs text-noctvm-silver/20 uppercase font-mono tracking-tighter">
                         {new Date(activity.created_at).toLocaleDateString()}
                       </span>
                     </div>

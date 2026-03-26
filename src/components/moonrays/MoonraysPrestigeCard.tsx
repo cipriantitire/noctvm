@@ -55,12 +55,12 @@ export const MoonraysPrestigeCard = () => {
               <MoonIcon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-[0.2em]">Current Rank</p>
+              <p className="text-noctvm-caption text-noctvm-silver/60 font-mono uppercase tracking-[0.2em]">Current Rank</p>
               <h3 className="text-xl font-heading font-bold text-white tracking-tight">{rank.name}</h3>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-noctvm-silver/60 font-mono uppercase tracking-[0.2em]">Lifetime Achievement</p>
+            <p className="text-noctvm-caption text-noctvm-silver/60 font-mono uppercase tracking-[0.2em]">Lifetime Achievement</p>
             <p className="text-lg font-heading font-bold text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]">
               {pocket.net_earned.toLocaleString()} <span className="text-sm">🌙</span>
             </p>
@@ -73,9 +73,9 @@ export const MoonraysPrestigeCard = () => {
             <div className="flex justify-between items-end">
               <p className="text-xs text-noctvm-silver/80 flex items-center gap-1.5 font-medium">
                 <TrendingUpIcon className="w-3.5 h-3.5 text-noctvm-violet" />
-                {rank.nextRankName} <span className="text-[10px] text-noctvm-silver/40 px-2 py-0.5 rounded-full bg-white/5 border border-white/5 uppercase font-mono">NEXT</span>
+                {rank.nextRankName} <span className="text-noctvm-caption text-noctvm-silver/40 px-2 py-0.5 rounded-full bg-white/5 border border-white/5 uppercase font-mono">NEXT</span>
               </p>
-              <p className="text-[10px] text-noctvm-silver/60 font-mono tracking-wider italic">
+              <p className="text-noctvm-caption text-noctvm-silver/60 font-mono tracking-wider italic">
                 {Math.max(0, (rank.nextRankGoal || 0) - pocket.net_earned).toLocaleString()} MR to rank up
               </p>
             </div>
@@ -86,7 +86,7 @@ export const MoonraysPrestigeCard = () => {
             {/* ── Next Perks Teaser ─────────────────────── */}
             <div className="flex flex-wrap gap-2 pt-2">
               {rank.perks.slice(0, 2).map((perk, i) => (
-                <span key={i} className="text-[9px] px-2 py-0.5 rounded-full bg-white/5 text-noctvm-silver/80 border border-white/5 backdrop-blur-md flex items-center gap-1 hover:bg-white/10 transition-colors">
+                <span key={i} className="text-noctvm-micro px-2 py-0.5 rounded-full bg-white/5 text-noctvm-silver/80 border border-white/5 backdrop-blur-md flex items-center gap-1 hover:bg-white/10 transition-colors">
                   <SparklesIcon className="w-2.5 h-2.5 text-noctvm-violet" />
                   {perk}
                 </span>

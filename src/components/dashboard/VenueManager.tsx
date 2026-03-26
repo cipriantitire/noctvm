@@ -220,7 +220,7 @@ export default function VenueManager() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
       <div className="w-10 h-10 border-4 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
-      <p className="text-noctvm-silver font-mono text-[10px] uppercase tracking-widest animate-pulse">Loading Venues...</p>
+      <p className="text-noctvm-silver font-mono text-noctvm-caption uppercase tracking-widest animate-pulse">Loading Venues...</p>
     </div>
   );
 
@@ -242,7 +242,7 @@ export default function VenueManager() {
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all font-bold"
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-noctvm-caption font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all font-bold"
             title="Sort By"
           >
             <option value="name">Name</option>
@@ -279,7 +279,7 @@ export default function VenueManager() {
 
           <button 
             onClick={() => { setEditingVenue(null); setShowForm(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-[10px] font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
             title="Add Venue"
           >
             <PlusIcon className="w-3.5 h-3.5" />
@@ -289,7 +289,7 @@ export default function VenueManager() {
       </div>
 
       {(showForm || editingVenue) && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
+        <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
           <div className="w-full max-w-4xl my-auto">
             <VenueForm 
               initialData={editingVenue || undefined}
@@ -338,7 +338,7 @@ export default function VenueManager() {
                     sizes={viewMode === 'grid' ? "400px" : "80px"}
                   />
                   {isOwned && (
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-noctvm-violet backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest shadow-lg">
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-noctvm-violet backdrop-blur-md text-white text-noctvm-xs font-black uppercase tracking-widest shadow-lg">
                       My Venue
                     </div>
                   )}
@@ -354,7 +354,7 @@ export default function VenueManager() {
                         {venue.is_verified && <VerifiedBadge type={venue.badge} size="xs" />}
                       </div>
                       {venue.address && (
-                        <p className="text-[10px] text-noctvm-silver/50 truncate -mt-0.5 mb-1.5">{venue.address}</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/50 truncate -mt-0.5 mb-1.5">{venue.address}</p>
                       )}
                     </div>
                     
@@ -389,28 +389,28 @@ export default function VenueManager() {
 
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                          <span className="text-[9px] font-black text-white">{followCounts[venue.name] || 0}</span>
-                          <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Followers</span>
+                          <span className="text-noctvm-micro font-black text-white">{followCounts[venue.name] || 0}</span>
+                          <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50">Followers</span>
                        </div>
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
                           <UsersIcon className="w-2.5 h-2.5 text-noctvm-emerald" />
-                          <span className="text-[9px] font-black text-white">{venue.capacity || 'N/A'}</span>
-                          <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50">Capacity</span>
+                          <span className="text-noctvm-micro font-black text-white">{venue.capacity || 'N/A'}</span>
+                          <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50">Capacity</span>
                        </div>
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                          <span className="text-[9px] font-black text-white">{venue.upcoming_events}</span>
-                          <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50 ml-1">Upcoming</span>
+                          <span className="text-noctvm-micro font-black text-white">{venue.upcoming_events}</span>
+                          <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50 ml-1">Upcoming</span>
                        </div>
                     </div>
 
                   <div className={`flex flex-wrap gap-1.5 ${viewMode === 'grid' ? 'mb-5' : ''}`}>
                     {venue.genres.slice(0, 3).map((g: string) => (
-                      <span key={g} className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
+                      <span key={g} className="text-noctvm-xs font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
                         {g}
                       </span>
                     ))}
                     {venue.genres.length > 3 && (
-                      <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-white/5 text-noctvm-silver/40">
+                      <span className="text-noctvm-xs font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-white/5 text-noctvm-silver/40">
                         +{venue.genres.length - 3}
                       </span>
                     )}
@@ -425,7 +425,7 @@ export default function VenueManager() {
                     setExpandedVenue(next);
                     if (next) fetchReviews(next);
                   }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 border-t border-white/5 text-[10px] text-noctvm-silver hover:text-white transition-colors uppercase font-mono tracking-widest mt-auto"
+                  className="w-full flex items-center justify-between px-4 py-2.5 border-t border-white/5 text-noctvm-caption text-noctvm-silver hover:text-white transition-colors uppercase font-mono tracking-widest mt-auto"
                 >
                   <div className="flex items-center gap-2">
                     <StarRating rating={venue.rating || 0} />
@@ -453,18 +453,18 @@ export default function VenueManager() {
                                {review.profiles?.avatar_url ? (
                                  <Image src={review.profiles.avatar_url} alt="" width={32} height={32} className="object-cover" />
                                ) : (
-                                 <div className="w-full h-full flex items-center justify-center text-[10px]">👤</div>
+                                 <div className="w-full h-full flex items-center justify-center text-noctvm-caption">👤</div>
                                )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[11px] font-bold text-white uppercase tracking-tight">
+                                  <span className="text-noctvm-label font-bold text-white uppercase tracking-tight">
                                     {review.profiles?.display_name || review.profiles?.username || 'Anonymous'}
                                   </span>
                                   <StarRating rating={review.rating} />
                                 </div>
-                                <span className="text-[9px] text-noctvm-silver/40 font-mono italic">{timeAgoShort(review.created_at)}</span>
+                                <span className="text-noctvm-micro text-noctvm-silver/40 font-mono italic">{timeAgoShort(review.created_at)}</span>
                               </div>
                               <p className="text-xs text-noctvm-silver/80 leading-relaxed bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
                                 {review.text}
@@ -473,14 +473,14 @@ export default function VenueManager() {
                               <div className="flex items-center gap-3 mt-2 px-1">
                                 <button 
                                   onClick={() => handleDeleteReview(venue.name, review.id)}
-                                  className="text-[9px] text-noctvm-rose/50 hover:text-noctvm-rose font-bold uppercase tracking-widest transition-colors"
+                                  className="text-noctvm-micro text-noctvm-rose/50 hover:text-noctvm-rose font-bold uppercase tracking-widest transition-colors"
                                 >
                                   Delete
                                 </button>
                                 {!review.reply_text && (
                                   <button 
                                     onClick={() => setReplyInputs(prev => ({ ...prev, [review.id]: (prev[review.id] === undefined ? '' : undefined) as any }))}
-                                    className="text-[9px] text-noctvm-silver/40 hover:text-white font-bold uppercase tracking-widest transition-colors"
+                                    className="text-noctvm-micro text-noctvm-silver/40 hover:text-white font-bold uppercase tracking-widest transition-colors"
                                   >
                                     Reply
                                   </button>
@@ -490,9 +490,9 @@ export default function VenueManager() {
                               {review.reply_text && (
                                 <div className="mt-3 ml-4 border-l-2 border-noctvm-violet/30 pl-4 py-1">
                                   <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-black text-noctvm-violet uppercase tracking-widest">Venue Response</span>
+                                    <span className="text-noctvm-micro font-black text-noctvm-violet uppercase tracking-widest">Venue Response</span>
                                   </div>
-                                  <p className="text-[11px] text-noctvm-silver/60 italic leading-relaxed">
+                                  <p className="text-noctvm-label text-noctvm-silver/60 italic leading-relaxed">
                                     &quot;{review.reply_text}&quot;
                                   </p>
                                 </div>
@@ -509,7 +509,7 @@ export default function VenueManager() {
                                   />
                                   <button 
                                     onClick={() => handleReplyReview(venue.name, review.id)}
-                                    className="px-4 py-2 bg-noctvm-violet text-white rounded-xl text-[10px] font-bold uppercase tracking-widest"
+                                    className="px-4 py-2 bg-noctvm-violet text-white rounded-xl text-noctvm-caption font-bold uppercase tracking-widest"
                                   >
                                     Send
                                   </button>
@@ -522,7 +522,7 @@ export default function VenueManager() {
                     </div>
                   ) : (
                     <div className="p-8 text-center">
-                      <p className="text-[10px] text-noctvm-silver/30 uppercase font-mono tracking-widest italic">No reviews yet for this venue</p>
+                      <p className="text-noctvm-caption text-noctvm-silver/30 uppercase font-mono tracking-widest italic">No reviews yet for this venue</p>
                     </div>
                   )}
                 </div>

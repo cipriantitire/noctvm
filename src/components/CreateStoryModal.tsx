@@ -250,7 +250,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                 <div className="text-center">
                   <p className="text-sm font-medium text-white">Portrait recommended · Any photo or video</p>
                   <p className="text-xs text-noctvm-silver mt-0.5">or <span className="text-noctvm-violet">browse files</span></p>
-                  <p className="text-[10px] text-noctvm-silver/40 mt-1">Disappears after 24 hours</p>
+                  <p className="text-noctvm-caption text-noctvm-silver/40 mt-1">Disappears after 24 hours</p>
                 </div>
               </div>
             )}
@@ -273,7 +273,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
               rows={2}
               className="flex-1 bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none resize-none"
             />
-            <span className="text-[9px] text-noctvm-silver/30 mt-2">{caption.length}/150</span>
+            <span className="text-noctvm-micro text-noctvm-silver/30 mt-2">{caption.length}/150</span>
           </div>
 
           {/* Tag venue */}
@@ -355,7 +355,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                     title={`Select ${e.title}`}
                   >
                     <span className="font-medium text-xs">{e.title}</span>
-                    <span className="text-[10px] text-noctvm-silver">{new Date(e.date).toLocaleDateString()} • {e.venue}</span>
+                    <span className="text-noctvm-caption text-noctvm-silver">{new Date(e.date).toLocaleDateString()} • {e.venue}</span>
                   </button>
                 ))}
               </div>

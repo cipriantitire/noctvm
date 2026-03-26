@@ -22,7 +22,7 @@ export const PocketModal = ({ isOpen, onClose, title, children }: PocketModalPro
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-modal"
           />
           
           {/* Modal Container */}
@@ -31,7 +31,7 @@ export const PocketModal = ({ isOpen, onClose, title, children }: PocketModalPro
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto z-[101] bg-noctvm-midnight border-t border-white/10 rounded-t-[32px] overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto z-modal bg-noctvm-midnight border-t border-white/10 rounded-t-[32px] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02]">

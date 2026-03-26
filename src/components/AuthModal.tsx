@@ -146,7 +146,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         {/* Divider */}
         <div className="flex items-center gap-3 mb-5">
           <div className="flex-1 h-px bg-noctvm-border"></div>
-          <span className="text-[10px] text-noctvm-silver uppercase tracking-wider">or continue with email</span>
+          <span className="text-noctvm-caption text-noctvm-silver uppercase tracking-wider">or continue with email</span>
           <div className="flex-1 h-px bg-noctvm-border"></div>
         </div>
 

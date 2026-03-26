@@ -1,8 +1,10 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import NextImage from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useSettings } from '@/hooks/useSettings';
 import { GENRE_FILTERS } from './FilterBar';
 import { 
   BellIcon, 
@@ -43,7 +45,7 @@ function BackButton({ onBack, label }: { onBack: () => void, label: string }) {
 function FormInput({ label, value, onChange, placeholder = '', type = 'text', title }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string, type?: string, title?: string }) {
   return (
     <div className="space-y-1.5 text-left">
-      <label className="text-[10px] font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
+      <label className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
       <input
         type={type}
         value={value}
@@ -59,7 +61,7 @@ function FormInput({ label, value, onChange, placeholder = '', type = 'text', ti
 function FormTextarea({ label, value, onChange, rows = 3 }: { label: string, value: string, onChange: (v: string) => void, rows?: number }) {
   return (
     <div className="space-y-1.5 text-left">
-      <label className="text-[10px] font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
+      <label className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
       <textarea
         rows={rows}
         value={value}
@@ -74,7 +76,7 @@ function FormTextarea({ label, value, onChange, rows = 3 }: { label: string, val
 function FormSelect({ label, value, onChange, options, title }: { label: string, value: string, onChange: (v: string) => void, options: { value: string, label: string }[], title?: string }) {
   return (
     <div className="space-y-1.5 flex-1 text-left">
-      <label className="text-[10px] font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
+      <label className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -98,7 +100,7 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
     >
       <div>
         <p className="text-sm font-bold text-white">{label}</p>
-        {desc && <p className="text-[11px] text-noctvm-silver mt-0.5">{desc}</p>}
+        {desc && <p className="text-noctvm-label text-noctvm-silver mt-0.5">{desc}</p>}
       </div>
       <div className={`w-10 h-5 rounded-full transition-all relative ${enabled ? 'bg-noctvm-violet' : 'bg-noctvm-surface border border-noctvm-border'}`}>
         <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${enabled ? 'left-6' : 'left-1'}`} />
@@ -109,24 +111,33 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
 
 // ==================== MAIN SETTINGS HUB ====================
 
-export function SettingsPage({ onBack }: { onBack: () => void }) {
-  const { signOut } = useAuth();
-  const [view, setView] = useState<'hub' | 'edit' | 'privacy' | 'account' | 'activity' | 'notifications' | 'inventory'>('hub');
+export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => void, initialView?: string }) {
+  const { signOut, isOwner, isAdmin } = useAuth();
+  const [view, setView] = useState(initialView);
+  
   const menuItems = [
-    { id: 'edit',     label: 'Edit Profile',   desc: 'Bio, music, genres, socials', icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
-    { id: 'inventory',label: 'Inventory',      desc: 'Premium profile effects',      icon: <LayoutListIcon className="w-5 h-5 text-noctvm-emerald" /> },
-    { id: 'privacy',  label: 'Privacy',        desc: 'Visibility & interactions',    icon: <ShieldIcon className="w-5 h-5 text-noctvm-emerald" /> },
-    { id: 'account',  label: 'Account',        desc: 'Email, data, security',        icon: <UserIcon className="w-5 h-5 text-noctvm-silver" /> },
-    { id: 'notifications', label: 'Notifications', desc: 'Alerts & preferences',      icon: <CogIcon className="w-5 h-5 text-noctvm-silver" /> },
-    { id: 'activity', label: 'Activity Log',   desc: 'History of your actions',      icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
+    { id: 'edit',          label: 'Edit Profile',    desc: 'Avatar, bio, music, socials', icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
+    { id: 'account',       label: 'Account',         desc: 'Email, password, security',   icon: <UserIcon className="w-5 h-5 text-noctvm-silver" /> },
+    { id: 'privacy',       label: 'Privacy',         desc: 'Visibility & interactions',   icon: <ShieldIcon className="w-5 h-5 text-noctvm-emerald" /> },
+    { id: 'notifications', label: 'Notifications',  desc: 'Alerts & preferences',        icon: <BellIcon className="w-5 h-5 text-noctvm-silver" /> },
+    { id: 'appearance',    label: 'Appearance',     desc: 'Theme & visual preferences',  icon: <GlobeIcon className="w-5 h-5 text-noctvm-violet" /> },
+    { id: 'blocked_muted', label: 'Blocked & Muted', desc: 'Restricted users',            icon: <ShieldIcon className="w-5 h-5 text-red-500" /> },
+    { id: 'inventory',     label: 'Inventory',       desc: 'Premium profile effects',     icon: <StarIcon className="w-5 h-5 text-noctvm-emerald" /> },
+    { id: 'activity',      label: 'Activity Log',    desc: 'Audit trail of events',       icon: <LayoutListIcon className="w-5 h-5 text-noctvm-violet" /> },
+    { id: 'add_location',  label: 'Add Location',    desc: 'List a new venue or club',   icon: <MapPinIcon className="w-5 h-5 text-noctvm-silver" /> },
+    { id: 'claim_location',label: 'Claim Location',  desc: 'Verify venue ownership',      icon: <ShieldIcon className="w-5 h-5 text-noctvm-silver" /> },
   ];
 
-  if (view === 'edit')     return <EditProfilePage onBack={() => setView('hub')} />;
-  if (view === 'inventory')return <InventoryPage onBack={() => setView('hub')} />;
-  if (view === 'privacy')  return <PrivacySettingsPage onBack={() => setView('hub')} />;
-  if (view === 'account')  return <ManageAccountPage onBack={() => setView('hub')} />;
-  if (view === 'notifications') return <NotificationSettingsPage onBack={() => setView('hub')} />;
-  if (view === 'activity') return <ActivityLogPage onBack={() => setView('hub')} />;
+  if (view === 'edit')           return <EditProfilePage onBack={() => setView('hub')} />;
+  if (view === 'inventory')      return <InventoryPage onBack={() => setView('hub')} />;
+  if (view === 'privacy')        return <PrivacySettingsPage onBack={() => setView('hub')} />;
+  if (view === 'account')        return <ManageAccountPage onBack={() => setView('hub')} />;
+  if (view === 'notifications')  return <NotificationSettingsPage onBack={() => setView('hub')} />;
+  if (view === 'appearance')     return <AppearanceSettingsPage onBack={() => setView('hub')} />;
+  if (view === 'blocked_muted')  return <BlockedMutedSettingsPage onBack={() => setView('hub')} />;
+  if (view === 'activity')       return <ActivityLogPage onBack={() => setView('hub')} />;
+  if (view === 'add_location')   return <AddLocationPage onBack={() => setView('hub')} />;
+  if (view === 'claim_location') return <ClaimLocationPage onBack={() => setView('hub')} />;
 
   return (
     <div className="max-w-lg mx-auto pb-24">
@@ -149,12 +160,21 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold text-white leading-tight">{item.label}</p>
-              <p className="text-[11px] text-noctvm-silver mt-0.5">{item.desc}</p>
+              <p className="text-noctvm-label text-noctvm-silver mt-0.5">{item.desc}</p>
             </div>
             <ChevronRightIcon className="w-4 h-4 text-noctvm-silver opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
           </button>
         ))}
       </div>
+
+      {(isOwner || isAdmin) && (
+        <Link
+          href="/design-system"
+          className="fixed bottom-24 right-6 z-50 px-4 py-2 bg-noctvm-violet text-white text-sm font-bold rounded-full shadow-lg border border-white/20 hover:scale-105 transition-transform"
+        >
+          🎨 Design System
+        </Link>
+      )}
 
       <div className="mt-12 pt-6 border-t border-noctvm-border">
         <button
@@ -165,7 +185,7 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-red-500">Log Out</p>
-              <p className="text-[11px] text-noctvm-silver mt-0.5">Sign out of your account</p>
+              <p className="text-noctvm-label text-noctvm-silver mt-0.5">Sign out of your account</p>
             </div>
             <svg className="w-5 h-5 text-red-500 opacity-50 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
           </div>
@@ -207,7 +227,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
         city,
         genres,
         music_link: musicUrl ? { type: musicType, url: musicUrl } : null,
-        social_links: socialLinks.filter(l => l.url),
+        social_links: socialLinks.filter((l: any) => l.url),
       })
       .eq('id', profile.id);
     
@@ -220,11 +240,11 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
   };
 
   const updateSocial = (platform: string, url: string) => {
-    setSocialLinks(prev => {
-      if (!url) return prev.filter(l => l.platform !== platform);
-      const existing = prev.find(l => l.platform === platform);
+    setSocialLinks((prev: any[]) => {
+      if (!url) return prev.filter((l: any) => l.platform !== platform);
+      const existing = prev.find((l: any) => l.platform === platform);
       if (existing) {
-        return prev.map(l => l.platform === platform ? { ...l, url } : l);
+        return prev.map((l: any) => l.platform === platform ? { ...l, url } : l);
       }
       return [...prev, { platform, url }];
     });
@@ -254,7 +274,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
 
         {/* Music */}
         <div className="pt-6 border-t border-white/5">
-          <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest mb-4 text-left">Music Presence</p>
+          <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest mb-4 text-left">Music Presence</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              <FormSelect label="Platform" value={musicType} onChange={setMusicType} options={[
                { value: 'spotify', label: 'Spotify' },
@@ -269,12 +289,12 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
         {/* Genres */}
         <div className="pt-6 border-t border-white/5 text-left">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest">Favorite Genres</p>
+            <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest">Favorite Genres</p>
             <div className="relative">
               <input 
                 type="text" 
                 placeholder="Search..." 
-                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white outline-none w-24 focus:w-32 focus:border-noctvm-violet/40 transition-all"
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-noctvm-caption text-white outline-none w-24 focus:w-32 focus:border-noctvm-violet/40 transition-all"
                 value={genreSearch}
                 onChange={(e) => setGenreSearch(e.target.value)}
               />
@@ -286,7 +306,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
                 <button
                   key={g}
                   onClick={() => setGenres(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${
+                  className={`px-3 py-1.5 rounded-full text-noctvm-caption font-bold transition-all border ${
                     genres.includes(g) 
                       ? 'bg-noctvm-violet border-noctvm-violet text-white shadow-glow' 
                       : 'bg-white/5 border-white/10 text-noctvm-silver hover:border-white/20'
@@ -297,7 +317,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
                 </button>
               ))
             ) : (
-              <p className="text-[10px] text-noctvm-silver/40">No genres found...</p>
+              <p className="text-noctvm-caption text-noctvm-silver/40">No genres found...</p>
             )}
           </div>
         </div>
@@ -305,12 +325,12 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
         {/* Socials */}
         <div className="pt-6 border-t border-white/5 text-left">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest">Social Connections</p>
+            <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest">Social Connections</p>
             {unusedPlatforms.length > 0 && (
               <div className="relative">
                 <button
                   onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] text-noctvm-silver hover:text-white hover:bg-white/10 transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-caption text-noctvm-silver hover:text-white hover:bg-white/10 transition-all active:scale-95"
                   title="Add a social media link"
                 >
                   <span>Add Social</span>
@@ -325,7 +345,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
                           updateSocial(p, ' '); // Temporary space to show it
                           setShowPlatformDropdown(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-[10px] text-noctvm-silver hover:text-white hover:bg-white/5 capitalize active:scale-95"
+                        className="w-full text-left px-3 py-2 text-noctvm-caption text-noctvm-silver hover:text-white hover:bg-white/5 capitalize active:scale-95"
                         title={`Add ${p} link`}
                       >
                         {p}
@@ -370,7 +390,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
               })
             ) : (
                 <div className="py-8 text-center bg-white/[0.02] border border-dashed border-white/5 rounded-xl">
-                    <p className="text-[10px] text-noctvm-silver/30">No social links added yet</p>
+                    <p className="text-noctvm-caption text-noctvm-silver/30">No social links added yet</p>
                 </div>
             )}
           </div>
@@ -405,11 +425,13 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
 }
 
 export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
-  const [mentions, setMentions] = useState('everyone');
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [showStats, setShowStats] = useState(true);
-  const [canComment, setCanComment] = useState('everyone');
-  const [canRemix, setCanRemix] = useState('everyone');
+  const { settings, updateSettings, loading } = useSettings();
+
+  if (loading) return (
+    <div className="max-w-xl mx-auto px-4 h-full flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
+    </div>
+  );
 
   return (
     <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
@@ -421,38 +443,38 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
       <div className="flex-1 overflow-y-auto pb-12 space-y-8 scrollbar-hide">
         {/* Profile Visibility */}
         <div className="space-y-4">
-          <p className="text-[10px] font-bold text-noctvm-emerald uppercase tracking-widest text-left">Discovery</p>
+          <p className="text-noctvm-caption font-bold text-noctvm-emerald uppercase tracking-widest text-left">Discovery</p>
           <ToggleSwitch 
-            enabled={isPrivate} 
-            onToggle={() => setIsPrivate(!isPrivate)} 
+            enabled={settings?.is_profile_private || false} 
+            onToggle={() => updateSettings({ is_profile_private: !settings?.is_profile_private })} 
             label="Private Profile" 
             desc="Only followers can see your posts and highlights" 
           />
           <ToggleSwitch 
-            enabled={showStats} 
-            onToggle={() => setShowStats(!showStats)} 
-            label="Show Stats" 
-            desc="Display your Posts, Network, and Activity counts publically" 
+            enabled={settings?.show_moonray_level || false} 
+            onToggle={() => updateSettings({ show_moonray_level: !settings?.show_moonray_level })} 
+            label="Show Moonray Rank" 
+            desc="Display your pocket rank publically on your profile" 
           />
         </div>
 
         {/* Interactions */}
         <div className="pt-6 border-t border-white/5 space-y-4">
-          <p className="text-[10px] font-bold text-noctvm-violet uppercase tracking-widest text-left">Interactions</p>
+          <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest text-left">Interactions</p>
           <FormSelect 
-            label="Who can mention you?" 
-            value={mentions} 
-            onChange={setMentions} 
+            label="Who can see your likes?" 
+            value={settings?.likes_visibility || 'public'} 
+            onChange={(v) => updateSettings({ likes_visibility: v as any })} 
             options={[
-              { value: 'everyone', label: 'Everyone' },
-              { value: 'following', label: 'People You Follow' },
+              { value: 'public', label: 'Everyone' },
+              { value: 'followers', label: 'People You Follow' },
               { value: 'none', label: 'No One' },
             ]} 
           />
           <FormSelect 
             label="Who can comment on posts?" 
-            value={canComment} 
-            onChange={setCanComment} 
+            value={settings?.comment_restrictions || 'everyone'} 
+            onChange={(v) => updateSettings({ comment_restrictions: v as any })} 
             options={[
               { value: 'everyone', label: 'Everyone' },
               { value: 'following', label: 'People You Follow' },
@@ -460,9 +482,9 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
             ]} 
           />
           <FormSelect 
-            label="Who can share/repost your content?" 
-            value={canRemix} 
-            onChange={setCanRemix} 
+            label="Who can tag you?" 
+            value={settings?.tag_restrictions || 'everyone'} 
+            onChange={(v) => updateSettings({ tag_restrictions: v as any })} 
             options={[
               { value: 'everyone', label: 'Everyone' },
               { value: 'following', label: 'People You Follow' },
@@ -471,23 +493,28 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
           />
         </div>
 
-        {/* Blocked Users */}
-        <div className="pt-6 border-t border-white/5 text-left">
-          <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-4">Safety</p>
-          <button className="w-full flex items-center justify-between p-4 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition-all text-left group">
-            <div>
-              <p className="text-sm font-bold text-red-500">Blocked Users</p>
-              <p className="text-[11px] text-noctvm-silver mt-0.5">Manage accounts you have restricted</p>
-            </div>
-            <ChevronRightIcon className="w-4 h-4 text-red-500/50 group-hover:translate-x-1 transition-transform" />
-          </button>
+        {/* Permissions */}
+        <div className="pt-6 border-t border-white/5 space-y-4">
+          <p className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-widest text-left">Permissions</p>
+          <ToggleSwitch 
+            enabled={settings?.location_access || false} 
+            onToggle={() => updateSettings({ location_access: !settings?.location_access })} 
+            label="Location Services" 
+            desc="Used for map discovery and distance calculation" 
+          />
+          <ToggleSwitch 
+            enabled={settings?.notif_access || false} 
+            onToggle={() => updateSettings({ notif_access: !settings?.notif_access })} 
+            label="Push Notifications" 
+            desc="Allow device notifications for social alerts" 
+          />
         </div>
       </div>
     </div>
   );
 }
 
-function ActivityLogPage({ onBack }: { onBack: () => void }) {
+export function ActivityLogPage({ onBack }: { onBack: () => void }) {
   const { profile } = useAuth();
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -538,7 +565,7 @@ function ActivityLogPage({ onBack }: { onBack: () => void }) {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
             <div className="w-10 h-10 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-noctvm-violet">Retrieving Timeline...</p>
+            <p className="text-noctvm-caption font-bold uppercase tracking-[0.2em] text-noctvm-violet">Retrieving Timeline...</p>
           </div>
         ) : activities.length === 0 ? (
           <div className="text-center py-24 text-noctvm-silver/30">
@@ -548,7 +575,7 @@ function ActivityLogPage({ onBack }: { onBack: () => void }) {
         ) : (
           <div className="space-y-6 relative">
             <div className="absolute left-6 top-2 bottom-2 w-px bg-white/5" />
-            {activities.map((a, i) => (
+            {activities.map((a: any, i: number) => (
               <div key={a.id + i} className="flex gap-6 group">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all z-10 ${
                   a.type === 'post' ? 'bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/30' : 'bg-noctvm-midnight/50 text-noctvm-silver border border-white/5'
@@ -556,8 +583,8 @@ function ActivityLogPage({ onBack }: { onBack: () => void }) {
                   {a.type === 'post' ? <GridIcon className="w-5 h-5" /> : <ShieldIcon className="w-5 h-5" />}
                 </div>
                 <div className="flex-1 pt-1 border-b border-white/[0.03] pb-6 last:border-0">
-                  <p className="text-[13px] text-white/90 leading-relaxed font-medium">{a.message}</p>
-                  <p className="text-[10px] text-noctvm-silver/40 mt-1.5 font-bold uppercase tracking-wider">{new Date(a.created_at).toLocaleDateString()} • {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-xs text-white/90 leading-relaxed font-medium">{a.message}</p>
+                  <p className="text-noctvm-caption text-noctvm-silver/40 mt-1.5 font-bold uppercase tracking-wider">{new Date(a.created_at).toLocaleDateString()} • {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             ))}
@@ -569,8 +596,13 @@ function ActivityLogPage({ onBack }: { onBack: () => void }) {
 }
 
 export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
-  const [pushNotifs, setPushNotifs] = useState(true);
-  const [emailNotifs, setEmailNotifs] = useState(true);
+  const { settings, updateSettings, loading } = useSettings();
+
+  if (loading) return (
+    <div className="max-w-xl mx-auto px-4 h-full flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
+    </div>
+  );
 
   return (
     <div className="max-w-xl mx-auto px-4">
@@ -579,8 +611,30 @@ export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
       
       <div className="space-y-6">
         <div className="space-y-2">
-           <ToggleSwitch enabled={pushNotifs} onToggle={() => setPushNotifs(!pushNotifs)} label="Social Activity" desc="Follows, mentions, and shares" />
-           <ToggleSwitch enabled={emailNotifs} onToggle={() => setEmailNotifs(!emailNotifs)} label="Marketing & Tips" desc="New features and venue discovery" />
+           <ToggleSwitch 
+             enabled={settings?.notify_likes || false} 
+             onToggle={() => updateSettings({ notify_likes: !settings?.notify_likes })} 
+             label="Likes" 
+             desc="Notify when someone likes your posts or stories" 
+           />
+           <ToggleSwitch 
+             enabled={settings?.notify_comments || false} 
+             onToggle={() => updateSettings({ notify_comments: !settings?.notify_comments })} 
+             label="Comments" 
+             desc="Notify when someone comments on your post" 
+           />
+           <ToggleSwitch 
+             enabled={settings?.notify_followers || false} 
+             onToggle={() => updateSettings({ notify_followers: !settings?.notify_followers })} 
+             label="New Followers" 
+             desc="Notify when someone follows your channel" 
+           />
+           <ToggleSwitch 
+             enabled={settings?.notify_events || false} 
+             onToggle={() => updateSettings({ notify_events: !settings?.notify_events })} 
+             label="Event Reminders" 
+             desc="Notifications for events you have saved" 
+           />
         </div>
       </div>
     </div>
@@ -606,7 +660,7 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
       <div className="flex-1 overflow-y-auto pb-12 space-y-4 scrollbar-hide">
         <div className="p-4 rounded-2xl bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight border border-noctvm-violet/30 mb-6">
           <p className="text-xs font-bold text-noctvm-violet uppercase tracking-widest mb-1">Your Stash</p>
-          <p className="text-[11px] text-noctvm-silver leading-relaxed">Customize your presence with premium gear unlocked from the Boutique.</p>
+          <p className="text-noctvm-label text-noctvm-silver leading-relaxed">Customize your presence with premium gear unlocked from the Boutique.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3">
@@ -614,7 +668,7 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
             <div key={effect.id} className="p-4 rounded-xl bg-noctvm-surface border border-white/5 opacity-50 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-white">{effect.name}</p>
-                <p className="text-[10px] text-noctvm-silver font-bold uppercase tracking-widest mt-0.5">{effect.price}</p>
+                <p className="text-noctvm-caption text-noctvm-silver font-bold uppercase tracking-widest mt-0.5">{effect.price}</p>
               </div>
               {effect.locked && <ShieldIcon className="w-4 h-4 text-noctvm-silver/30" />}
             </div>
@@ -628,22 +682,246 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
 }
 
 export function ManageAccountPage({ onBack }: { onBack: () => void }) {
+  const { profile } = useAuth();
+  const [email, setEmail] = useState(profile?.email || '');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+  const handleUpdateEmail = async () => {
+    setLoading(true);
+    setMessage(null);
+    const { error } = await supabase.auth.updateUser({ email });
+    if (error) {
+      setMessage({ text: error.message, type: 'error' });
+    } else {
+      setMessage({ text: 'Check your email for confirmation link.', type: 'success' });
+    }
+    setLoading(false);
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!password) return;
+    setLoading(true);
+    setMessage(null);
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      setMessage({ text: error.message, type: 'error' });
+    } else {
+      setMessage({ text: 'Password updated successfully.', type: 'success' });
+      setPassword('');
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className="max-w-xl mx-auto px-4">
-      <BackButton onBack={onBack} label="Settings" />
-      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Account Portal</h3>
-      <div className="space-y-4">
-        <div className="p-6 rounded-2xl bg-noctvm-surface/40 border border-noctvm-border">
-          <p className="text-[10px] font-bold text-noctvm-silver uppercase tracking-widest mb-4">Identity</p>
+    <div className="max-w-xl mx-auto px-4 pb-24 h-full flex flex-col">
+      <div className="pt-2">
+        <BackButton onBack={onBack} label="Settings" />
+        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Account Portal</h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto space-y-8 scrollbar-hide">
+        {message && (
+          <div className={`p-4 rounded-xl text-xs font-bold uppercase tracking-wider ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+            {message.text}
+          </div>
+        )}
+
+        <div className="p-6 rounded-2xl bg-noctvm-surface/40 border border-noctvm-border space-y-6">
+          <p className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-widest">Identity</p>
           <div className="space-y-4">
-            <FormInput label="Email Address" value="user@example.com" onChange={() => {}} title="Email is managed via Auth" />
-            <button className="text-[11px] font-bold text-noctvm-violet hover:underline">Change Password</button>
+            <FormInput label="Email Address" value={email} onChange={setEmail} />
+            <button 
+              onClick={handleUpdateEmail}
+              disabled={loading || email === profile?.email}
+              className="px-6 py-2 rounded-xl bg-noctvm-violet text-white text-xs font-bold hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+            >
+              Update Email
+            </button>
           </div>
         </div>
 
-        <button className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/10 transition-all text-left">
-          Request Data Export
+        <div className="p-6 rounded-2xl bg-noctvm-surface/40 border border-noctvm-border space-y-6">
+          <p className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-widest">Security</p>
+          <div className="space-y-4">
+            <FormInput label="New Password" type="password" value={password} onChange={setPassword} placeholder="Min 6 characters" />
+            <button 
+              onClick={handleUpdatePassword}
+              disabled={loading || !password}
+              className="px-6 py-2 rounded-xl bg-noctvm-midnight border border-noctvm-border text-white text-xs font-bold hover:border-noctvm-violet/40 transition-all active:scale-95 disabled:opacity-50"
+            >
+              Update Password
+            </button>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-white/5 flex flex-col gap-3">
+          <button className="w-full p-4 rounded-xl bg-noctvm-surface/40 border border-noctvm-border text-noctvm-silver text-xs font-bold hover:text-white transition-all text-left flex justify-between items-center group">
+            <span>Request Data Export</span>
+            <ChevronRightIcon className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-all" />
+          </button>
+          
+          <button className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/10 transition-all text-left flex justify-between items-center group">
+            <span>Delete Account</span>
+            <ChevronRightIcon className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-all" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
+  const { settings, updateSettings, loading } = useSettings();
+
+  const themes = [
+    { id: 'dark', label: 'Dark Mode', desc: 'Midnight aesthetic, easy on eyes', color: 'bg-[#050505]' },
+    { id: 'light', label: 'Light Mode', desc: 'Solarized print aesthetic', color: 'bg-white' },
+    { id: 'system', label: 'System Default', desc: 'Sync with device settings', color: 'bg-gradient-to-br from-[#050505] to-white' },
+  ];
+
+  if (loading) return null;
+
+  return (
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
+      <div className="pt-2">
+        <BackButton onBack={onBack} label="Settings" />
+        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Appearance</h3>
+      </div>
+
+      <div className="flex-1 space-y-6">
+        <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest text-left">Theme Preference</p>
+        <div className="grid grid-cols-1 gap-3">
+          {themes.map(t => (
+            <button
+              key={t.id}
+              onClick={() => updateSettings({ theme: t.id as any })}
+              className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 transform active:scale-[0.98] text-left group ${
+                settings?.theme === t.id 
+                  ? 'bg-noctvm-violet/10 border-noctvm-violet shadow-[0_0_20px_rgba(139,92,246,0.1)]' 
+                  : 'bg-noctvm-surface/40 border-noctvm-border hover:border-noctvm-violet/30'
+              }`}
+            >
+              <div className={`w-12 h-12 rounded-xl border border-white/5 ${t.color}`} />
+              <div className="flex-1">
+                <p className={`text-sm font-bold ${settings?.theme === t.id ? 'text-white' : 'text-noctvm-silver'}`}>{t.label}</p>
+                <p className="text-noctvm-label text-noctvm-silver/50 mt-0.5">{t.desc}</p>
+              </div>
+              {settings?.theme === t.id && (
+                <div className="w-6 h-6 rounded-full bg-noctvm-violet flex items-center justify-center animate-in zoom-in duration-300">
+                  <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
+  const [tab, setTab] = useState<'blocked' | 'muted'>('blocked');
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (tab === 'blocked') {
+      const { data } = await supabase
+        .from('user_blocks')
+        .select('id, blocked:profiles!user_blocks_blocked_id_fkey(id, display_name, username, avatar_url)')
+        .eq('blocker_id', user.id);
+      setUsers(data?.map(d => d.blocked) || []);
+    } else {
+      const { data } = await supabase
+        .from('user_mutes')
+        .select('id, muted:profiles!user_mutes_muted_id_fkey(id, display_name, username, avatar_url)')
+        .eq('muter_id', user.id);
+      setUsers(data?.map(d => d.muted) || []);
+    }
+    setLoading(false);
+  }, [tab]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleUnrestrict = async (targetId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (tab === 'blocked') {
+      await supabase.from('user_blocks').delete().eq('blocker_id', user.id).eq('blocked_id', targetId);
+    } else {
+      await supabase.from('user_mutes').delete().eq('muter_id', user.id).eq('muted_id', targetId);
+    }
+    fetchUsers();
+  };
+
+  return (
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
+      <div className="pt-2">
+        <BackButton onBack={onBack} label="Settings" />
+        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Safety Controls</h3>
+      </div>
+
+      <div className="flex bg-noctvm-midnight/50 p-1 rounded-xl border border-white/5 mb-6">
+        <button 
+          onClick={() => setTab('blocked')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${tab === 'blocked' ? 'bg-noctvm-surface text-white shadow-lg border border-noctvm-border' : 'text-noctvm-silver'}`}
+        >
+          Blocked Users
         </button>
+        <button 
+          onClick={() => setTab('muted')}
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${tab === 'muted' ? 'bg-noctvm-surface text-white shadow-lg border border-noctvm-border' : 'text-noctvm-silver'}`}
+        >
+          Muted Users
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto pb-12 scrollbar-hide">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-8 h-8 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center py-24 text-noctvm-silver/30 border-2 border-dashed border-white/5 rounded-2xl">
+            <ShieldIcon className="w-12 h-12 mx-auto mb-4 opacity-10" />
+            <p className="text-xs font-medium">No one {tab === 'blocked' ? 'blocked' : 'muted'} yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {users.map((u: any) => (
+              <div key={u.id} className="flex items-center gap-4 p-4 rounded-xl bg-noctvm-surface/40 border border-noctvm-border">
+                <div className="w-10 h-10 rounded-full bg-noctvm-midnight overflow-hidden relative">
+                  <NextImage 
+                    src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`} 
+                    alt={u.display_name} 
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-white leading-tight">{u.display_name}</p>
+                  <p className="text-xs text-noctvm-silver mt-0.5">@{u.username}</p>
+                </div>
+                <button 
+                  onClick={() => handleUnrestrict(u.id)}
+                  className="px-4 py-1.5 rounded-lg border border-white/10 text-noctvm-silver text-xs font-bold hover:text-white hover:border-white/20 transition-all"
+                >
+                  Un{tab === 'blocked' ? 'block' : 'mute'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

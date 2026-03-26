@@ -45,7 +45,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             ) : (
               <Icon className={`w-6 h-6 ${activeTab === tab ? 'scale-110' : ''} transition-transform`} />
             )}
-            <span className={`text-[10px] font-medium truncate max-w-[52px] ${activeTab === tab ? 'text-white' : ''}`}>
+            <span className={`text-noctvm-caption font-medium truncate max-w-[52px] ${activeTab === tab ? 'text-white' : ''}`}>
               {tab === 'profile' ? profileLabel : label}
             </span>
           </button>

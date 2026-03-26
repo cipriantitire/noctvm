@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
@@ -13,14 +15,8 @@ import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
 import UserProfilePage from '@/components/UserProfilePage';
 import SearchBar from '@/components/SearchBar';
-import { 
-  EditProfilePage, 
-  PrivacySettingsPage, 
-  InventoryPage, 
-  NotificationSettingsPage, 
-  AddLocationPage, 
-  ClaimLocationPage 
-} from '@/components/ProfilePages';
+import { SettingsPage } from '@/components/ProfilePages';
+import ProfileSidebar from '@/components/ProfileSidebar';
 import AuthModal from '@/components/AuthModal';
 import EventModal from '@/components/EventModal';
 import CreatePostModal from '@/components/CreatePostModal';
@@ -282,15 +278,17 @@ export default function Home() {
   // ── Profile sub-page resolver ─────────────────────────────────────────────
   const backToMenu = () => setProfileView('account-menu');
   const profileSubContent: Record<string, React.ReactNode> = {
-    'edit-profile': <EditProfilePage onBack={backToMenu} />,
-    'manage-account': <PrivacySettingsPage onBack={backToMenu} />,
-    'inventory': <InventoryPage onBack={backToMenu} />,
-    'add-location': <AddLocationPage onBack={backToMenu} />,
-    'claim-location': <ClaimLocationPage onBack={backToMenu} />,
-    'app-settings': <NotificationSettingsPage onBack={backToMenu} />,
+    'account-menu':    <SettingsPage onBack={() => setProfileView('profile')} />,
+    'edit-profile':    <SettingsPage onBack={() => setProfileView('profile')} initialView="edit" />,
+    'manage-account':  <SettingsPage onBack={() => setProfileView('profile')} initialView="privacy" />,
+    'inventory':       <SettingsPage onBack={() => setProfileView('profile')} initialView="inventory" />,
+    'add-location':    <SettingsPage onBack={() => setProfileView('profile')} initialView="add_location" />,
+    'claim-location':  <SettingsPage onBack={() => setProfileView('profile')} initialView="claim_location" />,
+    'app-settings':    <SettingsPage onBack={() => setProfileView('profile')} initialView="notifications" />,
   };
 
   const isProfileSubPage = [
+    'account-menu',
     'edit-profile',
     'manage-account',
     'inventory',
@@ -400,7 +398,8 @@ export default function Home() {
                     <select
                       value={activeCity}
                       onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
-                      className="bg-transparent text-[11px] text-noctvm-silver font-mono capitalize focus:outline-none cursor-pointer appearance-none pr-4"
+                      className="bg-transparent text-noctvm-label text-noctvm-silver font-mono capitalize focus:outline-none cursor-pointer appearance-none pr-4"
+                      aria-label="Select City"
                     >
                       <option value="bucuresti" className="bg-noctvm-black">București</option>
                       <option value="constanta" className="bg-noctvm-black">Constanța</option>
@@ -539,7 +538,6 @@ export default function Home() {
                   />
               </div>
             )}
-
             {/* ── Pocket / Moonrays Tab ────────────────────────── */}
             {activeTab === 'pocket' && (
               <div key="pocket" className="animate-in fade-in duration-500">
@@ -566,73 +564,7 @@ export default function Home() {
                   />
                 )}
 
-                {/* Account menu (old profile menu, now behind the cogwheel) */}
-                {profileView === 'account-menu' && (
-                    <div className="space-y-6 h-full max-w-lg mx-auto tab-content">
-                    <div className="flex items-center gap-3 animate-fade-in mb-6">
-                      <button
-                        onClick={() => setProfileView('profile')}
-                        className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M15 18l-6-6 6-6" />
-                        </svg>
-                      </button>
-                      <h2 className="font-heading text-lg font-bold text-white">Settings</h2>
-                    </div>
-
-                    {/* Avatar + name summary */}
-                    {user && (
-                      <div className="flex items-center gap-3 p-4 bg-noctvm-surface rounded-xl border border-noctvm-border animate-fade-in-up">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {profile?.avatar_url ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-lg font-bold text-white">
-                              {(profile?.display_name || 'N')[0].toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white">{profile?.display_name || 'Night Owl'}</p>
-                          <p className="text-xs text-noctvm-silver">@{profile?.username || 'nightowl'}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Menu items */}
-                    <div className="space-y-2 animate-fade-in-up stagger-3">
-                      {accountMenuItems.map((item) => (
-                        <button
-                          key={item.label}
-                          onClick={() => setProfileView(item.key)}
-                          className="w-full flex items-center gap-3 p-4 bg-noctvm-surface rounded-xl border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-left group hover-lift"
-                        >
-                          <div className="w-10 h-10 rounded-lg bg-noctvm-midnight flex items-center justify-center text-noctvm-silver group-hover:text-noctvm-violet transition-colors">
-                            {item.icon}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-white">{item.label}</p>
-                            <p className="text-[11px] text-noctvm-silver">{item.desc}</p>
-                          </div>
-                          <svg className="w-4 h-4 text-noctvm-silver/40 ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                        </button>
-                      ))}
-                    </div>
-
-                    {user && (
-                      <button
-                        onClick={() => { signOut(); setProfileView('profile'); }}
-                        className="w-full mt-2 py-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors text-red-400 text-sm font-medium animate-fade-in-up stagger-4"
-                      >
-                        Log Out
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Sub-pages (manage account, add location, etc.) */}
+                {/* Profile Sub-pages (including Settings Hub) */}
                 {isProfileSubPage && profileSubContent[profileView]}
               </>
             )}
@@ -650,12 +582,20 @@ export default function Home() {
           />
         )}
 
+        {activeTab === 'profile' && profileView === 'profile' && user && (
+          <ProfileSidebar 
+            userId={user.id} 
+            activeCity={activeCity}
+          />
+        )}
+
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-        {/* Notifications Panel */}
         <NotificationsPanel 
           isOpen={isNotificationsOpen} 
           onClose={() => setIsNotificationsOpen(false)} 
         />
+        
+
       </div>
     </>
   );

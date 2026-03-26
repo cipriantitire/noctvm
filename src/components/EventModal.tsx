@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type MouseEvent } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import VerifiedBadge from './VerifiedBadge';
+import { Badge, Button, GlassPanel, IconButton } from '@/components/ui';
 
 interface EventModalProps {
   event: NoctEvent | null;
@@ -153,7 +154,7 @@ export default function EventModal({
     {/* Image lightbox */}
     {lightboxOpen && (
       <div
-        className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 cursor-zoom-out"
+        className="fixed inset-0 z-sheet flex items-center justify-center bg-black/95 cursor-zoom-out"
         onClick={() => setLightboxOpen(false)}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -164,12 +165,14 @@ export default function EventModal({
           onClick={e => e.stopPropagation()}
           onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
         />
-        <button
+        <IconButton
+          size="lg"
+          aria-label="Close image preview"
           onClick={() => setLightboxOpen(false)}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+          className="absolute top-4 right-4 text-white"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-        </button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        </IconButton>
       </div>
     )}
 
@@ -181,8 +184,9 @@ export default function EventModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={handleClose} />
 
       {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
-      <div
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60 border border-white/10 frosted-glass-modal frosted-noise`}
+      <GlassPanel
+        variant="modal"
+        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60`}
         style={{ zIndex: (zIndex || 200) + 1 }}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
@@ -197,14 +201,14 @@ export default function EventModal({
             onClick={() => (event.image_url || true) && setLightboxOpen(true)}
             onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
           />
-          {/* Close button */}
-          <button
+          <IconButton
             onClick={handleClose}
             title="Close modal"
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all z-10"
+            aria-label="Close modal"
+            className="absolute top-4 right-4 z-10"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          </button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </IconButton>
         </div>
 
         {/* Absolute floating elements positioned relative to modal but outside hero container to avoid clipping shadows */}
@@ -242,7 +246,7 @@ export default function EventModal({
             <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/10 z-10">
               <StarIcon className="w-3.5 h-3.5 text-noctvm-gold" />
               <span className="text-sm font-bold text-noctvm-gold">{event.rating}</span>
-              {event.reviews && <span className="text-[10px] text-noctvm-silver/60">({event.reviews} reviews)</span>}
+              {event.reviews && <span className="text-noctvm-caption text-noctvm-silver/60">({event.reviews} reviews)</span>}
             </div>
           )}
 
@@ -251,9 +255,7 @@ export default function EventModal({
           {/* Genres */}
           <div className="flex flex-wrap gap-1.5">
             {event.genres.map(genre => (
-              <span key={genre} className="px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold bg-white/5 text-noctvm-silver/70 border border-white/5 tracking-wide">
-                {genre}
-              </span>
+              <Badge key={genre} variant="genre">{genre}</Badge>
             ))}
           </div>
 
@@ -330,19 +332,27 @@ export default function EventModal({
 
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
-          <a
-            href={badgeLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-noctvm-violet to-purple-500 text-white font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-noctvm-violet/30"
-          >
-            <TicketIcon className="w-4 h-4" />
-            Get Tickets on {sourceBadge.label}
-          </a>
-          <p className="text-center text-[10px] text-noctvm-silver/40 mt-2">Opens {sourceBadge.label} in a new tab</p>
+          {badgeLink ? (
+            <Button
+              href={badgeLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="primary"
+              size="md"
+              onClick={(e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
+              className="w-full"
+            >
+              <TicketIcon className="w-4 h-4" />
+              Get Tickets on {sourceBadge.label}
+            </Button>
+          ) : (
+            <p className="text-center text-sm text-noctvm-silver/50 py-3">No outbound link for this event.</p>
+          )}
+          {badgeLink && (
+            <p className="text-center text-noctvm-caption text-noctvm-silver/40 mt-2">Opens {sourceBadge.label} in a new tab</p>
+          )}
         </div>
-      </div>
+      </GlassPanel>
     </div>
     </>
   );

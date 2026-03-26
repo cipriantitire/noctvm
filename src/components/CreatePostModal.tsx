@@ -394,7 +394,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, onOpen
                     title={`Select ${e.title}`}
                   >
                     <span className="font-medium">{e.title}</span>
-                    <span className="text-[10px] text-noctvm-silver">{new Date(e.date).toLocaleDateString()} • {e.venue}</span>
+                    <span className="text-noctvm-caption text-noctvm-silver">{new Date(e.date).toLocaleDateString()} • {e.venue}</span>
                   </button>
                 ))}
               </div>

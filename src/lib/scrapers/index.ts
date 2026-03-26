@@ -13,6 +13,8 @@ import { scrapeEventbook }    from './eventbook';
 import { scrapeControlClub }  from './controlclub';
 import { ScrapedEvent }       from './types';
 import { isValidVenueName }  from './utils';
+import { withSentryScraper } from '../sentry-utils';
+import * as Sentry           from '@sentry/nextjs';
 
 type Source = 'zilesinopti' | 'iabilet' | 'onevent' | 'ambilet' | 'livetickets' | 'ra' | 'eventbook' | 'controlclub';
 
@@ -154,9 +156,11 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
   const settled = await Promise.allSettled(
     scrapersToRun.map(async ([source, fn]) => {
-      const sourceSettings = settingsMap.get(source) || {};
-      const events = await fn(sourceSettings);
-      return { source, events };
+      return await withSentryScraper(source, async () => {
+        const sourceSettings = settingsMap.get(source) || {};
+        const events = await fn(sourceSettings);
+        return { source, events };
+      });
     }),
   );
 

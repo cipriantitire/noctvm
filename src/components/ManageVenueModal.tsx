@@ -88,7 +88,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-4 lg:p-8">
+    <div className="fixed inset-0 z-overlay flex items-center justify-center p-0 sm:p-4 lg:p-8">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-xl animate-fade-in" 
@@ -115,7 +115,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                 Manage {venue?.name || 'Venue'}
                 {venue?.is_verified && <VerifiedBadge type={venue.badge} size="xs" />}
               </h2>
-              <p className="text-[10px] text-noctvm-silver/50 font-mono uppercase tracking-widest">Ownership Verified</p>
+              <p className="text-noctvm-caption text-noctvm-silver/50 font-mono uppercase tracking-widest">Ownership Verified</p>
             </div>
           </div>
           <button 
@@ -133,7 +133,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-noctvm-caption font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
                 activeTab === tab 
                   ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' 
                   : 'text-noctvm-silver/40 hover:text-noctvm-silver hover:bg-white/5'
@@ -149,7 +149,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-8 h-8 border-2 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin" />
-              <p className="text-[10px] text-noctvm-silver font-mono uppercase tracking-widest animate-pulse">Syncing Data...</p>
+              <p className="text-noctvm-caption text-noctvm-silver font-mono uppercase tracking-widest animate-pulse">Syncing Data...</p>
             </div>
           ) : venue ? (
             <div className="space-y-6 animate-fade-in">
@@ -159,22 +159,22 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center group hover:border-noctvm-violet/30 transition-colors">
                       <span className="text-xl font-black text-white group-hover:text-noctvm-violet transition-colors">{stats?.followers}</span>
-                      <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">Followers</span>
+                      <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">Followers</span>
                     </div>
                     <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center group hover:border-noctvm-emerald/30 transition-colors">
                       <span className="text-xl font-black text-white group-hover:text-noctvm-emerald transition-colors">{stats?.upcoming_events}</span>
-                      <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">Events</span>
+                      <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">Events</span>
                     </div>
                     <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center group hover:border-noctvm-gold/30 transition-colors">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xl font-black text-white group-hover:text-noctvm-gold transition-colors">{stats?.rating.toFixed(1)}</span>
                         <StarIcon className="w-4 h-4 text-noctvm-gold mb-1" />
                       </div>
-                      <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">{stats?.review_count} Reviews</span>
+                      <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">{stats?.review_count} Reviews</span>
                     </div>
                     <div className="p-4 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center group hover:border-purple-400/30 transition-colors">
                       <span className="text-xl font-black text-white group-hover:text-purple-400 transition-colors">1.2k</span>
-                      <span className="text-[8px] uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">Check-ins</span>
+                      <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50 mt-1">Check-ins</span>
                     </div>
                   </div>
 
@@ -186,7 +186,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white uppercase tracking-tight">Edit Venue Profile</p>
-                        <p className="text-[10px] text-noctvm-silver/60">Update info, images, & contact</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/60">Update info, images, & contact</p>
                       </div>
                     </button>
 
@@ -196,7 +196,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white uppercase tracking-tight">Create Event</p>
-                        <p className="text-[10px] text-noctvm-silver/60">Schedule a new social or party</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/60">Schedule a new social or party</p>
                       </div>
                     </button>
 
@@ -206,7 +206,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white uppercase tracking-tight">View Reviews</p>
-                        <p className="text-[10px] text-noctvm-silver/60">Manage & reply to feedback</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/60">Manage & reply to feedback</p>
                       </div>
                     </button>
 
@@ -216,14 +216,14 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white uppercase tracking-tight">Manage Team</p>
-                        <p className="text-[10px] text-noctvm-silver/60">Add admins or staff roles</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/60">Add admins or staff roles</p>
                       </div>
                     </button>
                   </div>
 
                   {/* Quick Info Box */}
                   <div className="p-6 rounded-[2.5rem] bg-noctvm-midnight/50 border border-white/5 space-y-4">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/40 px-1">Venue Details</h3>
+                    <h3 className="text-noctvm-caption font-black uppercase tracking-widest text-noctvm-silver/40 px-1">Venue Details</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div className="flex items-center gap-3">
                          <MapPinIcon className="w-4 h-4 text-noctvm-violet" />
@@ -249,7 +249,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                   </div>
                   <h4 className="text-sm font-bold text-white uppercase tracking-tight">Event Management Coming Soon</h4>
                   <p className="text-xs text-noctvm-silver/60 max-w-xs mx-auto">Soon you&apos;ll be able to schedule, edit and promote your events directly from here.</p>
-                  <button className="px-6 py-2.5 rounded-xl bg-noctvm-violet text-white text-[10px] font-bold uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
+                  <button className="px-6 py-2.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
                     Go to Dashboard
                   </button>
                 </div>
@@ -267,26 +267,26 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
 
               {activeTab === 'settings' && (
                 <div className="space-y-4">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/40 px-1">Venue Settings</h3>
+                  <h3 className="text-noctvm-caption font-black uppercase tracking-widest text-noctvm-silver/40 px-1">Venue Settings</h3>
                   <div className="space-y-2">
                     <button className="w-full flex items-center justify-between p-4 rounded-3xl bg-white/5 border border-white/5 hover:border-noctvm-violet/30 transition-all text-left group">
                       <div>
                         <p className="text-sm font-bold text-white uppercase tracking-tight">Visibility</p>
-                        <p className="text-[10px] text-noctvm-silver/60">Public · Searchable on Map</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/60">Public · Searchable on Map</p>
                       </div>
                       <ChevronRightIcon className="w-4 h-4 text-noctvm-silver/30 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button className="w-full flex items-center justify-between p-4 rounded-3xl bg-white/5 border border-white/5 hover:border-noctvm-violet/30 transition-all text-left group">
                       <div>
                         <p className="text-sm font-bold text-white uppercase tracking-tight">Verification</p>
-                        <p className="text-[10px] text-noctvm-emerald/80 font-bold">✓ Active · Gold Badge</p>
+                        <p className="text-noctvm-caption text-noctvm-emerald/80 font-bold">✓ Active · Gold Badge</p>
                       </div>
                       <ChevronRightIcon className="w-4 h-4 text-noctvm-silver/30 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button className="w-full flex items-center justify-between p-4 rounded-3xl bg-white/5 border border-white/5 hover:border-red-500/30 transition-all text-left group">
                       <div>
                         <p className="text-sm font-bold var(--noctvm-rose) uppercase tracking-tight text-red-400">Transfer Ownership</p>
-                        <p className="text-[10px] text-noctvm-silver/60">Transfer to another verified user</p>
+                        <p className="text-noctvm-caption text-noctvm-silver/60">Transfer to another verified user</p>
                       </div>
                       <ChevronRightIcon className="w-4 h-4 text-noctvm-silver/30 group-hover:translate-x-1 transition-transform" />
                     </button>
@@ -305,7 +305,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
         <div className="p-6 border-t border-white/5 bg-white/5 flex justify-end gap-3">
           <button 
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver text-[10px] font-bold uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all"
+            className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver text-noctvm-caption font-bold uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all"
           >
             Done
           </button>

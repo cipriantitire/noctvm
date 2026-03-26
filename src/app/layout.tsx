@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Providers from "./providers";
+
+export const dynamic = 'force-dynamic';
 import "./globals.css";
 import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google';
 
@@ -73,6 +75,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+      <head>
+      </head>
       <body className="font-body bg-noctvm-black text-white min-h-screen">
         <Providers>{children}</Providers>
         

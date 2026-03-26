@@ -90,11 +90,11 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
           <h3 className="text-lg font-bold tracking-tight text-white uppercase">
             {initialData?.id ? 'Edit Venue' : 'Add New Venue'}
           </h3>
-          <p className="text-[9px] font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Venue Management</p>
+          <p className="text-noctvm-micro font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Venue Management</p>
         </div>
         <div className="flex gap-2">
           {initialData?.id && (
-            <div className={`px-3 py-1 rounded-lg text-[8px] font-bold uppercase tracking-widest border transition-all ${
+            <div className={`px-3 py-1 rounded-lg text-noctvm-xs font-bold uppercase tracking-widest border transition-all ${
                 formData.is_verified 
                   ? 'bg-noctvm-emerald/10 text-noctvm-emerald border-noctvm-emerald/20' 
                   : 'bg-white/5 text-noctvm-silver/40 border-white/10'
@@ -107,7 +107,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
         <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue Name</label>
+          <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue Name</label>
           <input
             required
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise text-sm"
@@ -117,11 +117,11 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
           />
         </div>
         <div className="space-y-1.5 relative">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue Logo (URL)</label>
+          <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue Logo (URL)</label>
           <div className="relative group/upload">
             <input
               title="Venue Logo URL"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-[35%] py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-[35%] py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-noctvm-micro text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
               placeholder="https://..."
               value={formData.logo_url || ''}
               onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
@@ -130,7 +130,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="absolute right-1 top-1 bottom-1 w-[32%] bg-noctvm-violet/20 hover:bg-noctvm-violet/40 border border-noctvm-violet/30 rounded-lg text-[8px] font-black uppercase tracking-widest text-noctvm-violet transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="absolute right-1 top-1 bottom-1 w-[32%] bg-noctvm-violet/20 hover:bg-noctvm-violet/40 border border-noctvm-violet/30 rounded-lg text-noctvm-xs font-black uppercase tracking-widest text-noctvm-violet transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {uploading ? (
                 <div className="w-2 h-2 border border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
@@ -153,7 +153,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
         <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">City</label>
+          <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">City</label>
           <div className="relative">
             <select
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white appearance-none frosted-noise cursor-pointer uppercase text-sm"
@@ -170,7 +170,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
           </div>
         </div>
         <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Capacity</label>
+          <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Capacity</label>
           <input
             type="number"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono font-bold text-sm text-white frosted-noise"
@@ -182,14 +182,14 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
       </div>
 
       <div className="space-y-3 relative z-10">
-        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Genres</label>
+        <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Genres</label>
         <div className="flex flex-wrap gap-1.5">
           {['Techno', 'House', 'Experimental', 'Electronic', 'Rock', 'Jazz', 'Live Music', 'Art'].map((genre) => (
             <button
               key={genre}
               type="button"
               onClick={() => handleGenreChange(genre)}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all duration-300 ${
+              className={`px-3 py-1.5 rounded-lg text-noctvm-micro font-bold uppercase tracking-widest border transition-all duration-300 ${
                 formData.genres?.includes(genre)
                   ? 'bg-noctvm-violet text-white border-noctvm-violet shadow-lg shadow-noctvm-violet/20'
                   : 'bg-white/5 text-noctvm-silver border-white/10 hover:border-white/30 hover:text-white'
@@ -202,10 +202,10 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
       </div>
 
       <div className="space-y-1.5 relative z-10">
-        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Gallery (URLs)</label>
+        <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Gallery (URLs)</label>
         <textarea
           rows={1}
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all resize-none font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all resize-none font-mono text-noctvm-micro text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
           placeholder="https://..."
           value={(formData as any).gallery?.join(', ') || ''}
           onChange={(e) => setFormData({ ...formData, [ 'gallery' as any ]: e.target.value.split(',').map(s => s.trim()) })}
@@ -213,7 +213,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
       </div>
 
       <div className="space-y-1.5 relative z-10">
-        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Description</label>
+        <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Description</label>
         <textarea
           rows={3}
           className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus:border-noctvm-violet/50 outline-none transition-all resize-none font-medium text-xs text-white/80 placeholder:text-white/10 frosted-noise leading-relaxed"
@@ -227,14 +227,14 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
         <button
           type="button"
           onClick={onCancel}
-          className="px-5 py-2 text-noctvm-silver hover:text-white transition-all font-bold text-[9px] uppercase tracking-widest"
+          className="px-5 py-2 text-noctvm-silver hover:text-white transition-all font-bold text-noctvm-micro uppercase tracking-widest"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95 shadow-lg shadow-noctvm-violet/20"
+          className="px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95 shadow-lg shadow-noctvm-violet/20"
         >
           {loading ? <span>Saving...</span> : (initialData?.id ? 'Save Changes' : 'Create Venue')}
         </button>

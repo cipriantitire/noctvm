@@ -6,6 +6,8 @@ import { NoctEvent, Venue } from '@/lib/types';
 import { logActivity } from '@/lib/activity';
 import { TicketIcon, LinkIcon, UploadIcon } from '@/components/icons';
 import { uploadOptimizedImage } from '@/lib/image-optimization';
+import { Badge, Button, Field, GlassPanel, Input, TextArea, inputBaseClassName } from '@/components/ui';
+import { cn } from '@/lib/cn';
 
 interface EventFormProps {
   venues: Venue[];
@@ -89,40 +91,42 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
     }
   };
 
+  const selectClass = cn(
+    inputBaseClassName,
+    "appearance-none cursor-pointer font-bold tracking-tight"
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-noctvm-black border border-white/10 rounded-3xl frosted-noise shadow-2xl relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/5 to-transparent pointer-events-none"></div>
+    <GlassPanel variant="noise" className="group">
+      <form onSubmit={handleSubmit} className="space-y-6 p-6 relative overflow-hidden rounded-noctvm-xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/5 to-transparent pointer-events-none" />
       
       <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
         <div>
           <h3 className="text-lg font-bold tracking-tight text-white uppercase">
             {initialData?.id ? 'Edit Event' : 'Create New Event'}
           </h3>
-          <p className="text-[9px] font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Event Management</p>
+          <p className="text-noctvm-micro font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Event Management</p>
         </div>
         {initialData?.featured && (
-          <div className="px-2 py-0.5 rounded-lg bg-noctvm-violet/10 text-noctvm-violet text-[8px] font-bold border border-noctvm-violet/20 uppercase tracking-widest">
-            Featured
-          </div>
+          <Badge variant="featured">Featured</Badge>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Event Title</label>
-          <input
+        <Field id="event-title" label="Event Title">
+          <Input
+            id="event-title"
             required
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise text-sm"
             placeholder="Title..."
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Venue</label>
+        </Field>
+        <Field label="Venue">
           <div className="relative">
             <select
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white appearance-none frosted-noise cursor-pointer text-sm"
+              className={selectClass}
               value={formData.venue}
               onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
               title="Select Venue"
@@ -135,27 +139,30 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
-        </div>
+        </Field>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Date</label>
-          <input
+        <Field id="event-date" label="Date">
+          <Input
+            id="event-date"
             type="date"
             required
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold text-white uppercase tracking-tighter frosted-noise text-sm"
+            className="uppercase tracking-tighter"
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             title="Set Date"
           />
-        </div>
+        </Field>
         <div className="space-y-1.5 relative">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Poster (URL)</label>
+          <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Poster (URL)</label>
           <div className="relative group/upload">
             <input
               title="Poster Image URL"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-[35%] py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+              className={cn(
+                inputBaseClassName,
+                "pl-4 pr-[35%] font-mono text-noctvm-micro text-white/60 uppercase tracking-widest"
+              )}
               placeholder="https://..."
               value={formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
@@ -164,7 +171,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="absolute right-1 top-1 bottom-1 w-[32%] bg-noctvm-violet/20 hover:bg-noctvm-violet/40 border border-noctvm-violet/30 rounded-lg text-[8px] font-black uppercase tracking-widest text-noctvm-violet transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="absolute right-1 top-1 bottom-1 w-[32%] bg-noctvm-violet/20 hover:bg-noctvm-violet/40 border border-noctvm-violet/30 rounded-lg text-noctvm-xs font-black uppercase tracking-widest text-noctvm-violet transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {uploading ? (
                 <div className="w-2 h-2 border border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
@@ -186,14 +193,17 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1 flex items-center gap-1.5">
-            <TicketIcon className="w-2.5 h-2.5" />
-            Ticket Provider
-          </label>
+        <Field
+          label={
+            <span className="flex items-center gap-1.5">
+              <TicketIcon className="w-2.5 h-2.5" />
+              Ticket Provider
+            </span>
+          }
+        >
           <div className="relative">
             <select
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white appearance-none frosted-noise cursor-pointer text-sm"
+              className={selectClass}
               value={formData.ticket_provider || 'none'}
               onChange={(e) => setFormData({ ...formData, ticket_provider: e.target.value as any })}
               title="Select Ticket Provider"
@@ -210,44 +220,44 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1 flex items-center gap-1.5">
-            <LinkIcon className="w-2.5 h-2.5" />
-            Direct Ticket Link
-          </label>
-          <input
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+        </Field>
+        <Field
+          label={
+            <span className="flex items-center gap-1.5">
+              <LinkIcon className="w-2.5 h-2.5" />
+              Direct Ticket Link
+            </span>
+          }
+        >
+          <Input
+            className="font-mono text-noctvm-micro text-white/60 uppercase tracking-widest font-normal"
             placeholder="https://iabilet.ro/..."
             value={formData.ticket_url || ''}
             onChange={(e) => setFormData({ ...formData, ticket_url: e.target.value })}
           />
-        </div>
+        </Field>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Official Event URL</label>
-          <input
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-mono text-[9px] text-white/60 uppercase tracking-widest placeholder:text-white/10 frosted-noise"
+        <Field label="Official Event URL">
+          <Input
+            className="font-mono text-noctvm-micro text-white/60 uppercase tracking-widest font-normal"
             placeholder="https://facebook.com/events/..."
             value={formData.event_url}
             onChange={(e) => setFormData({ ...formData, event_url: e.target.value })}
           />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Price Label</label>
-          <input
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:border-noctvm-violet/50 outline-none transition-all font-bold tracking-tight text-white placeholder:text-white/10 frosted-noise text-sm"
+        </Field>
+        <Field label="Price Label">
+          <Input
             placeholder="e.g. 50 RON or Free"
             value={formData.price || ''}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
           />
-        </div>
+        </Field>
       </div>
 
       <div className="space-y-3 relative z-10">
-        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Genres</label>
+        <label className="text-noctvm-micro text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Genres</label>
         <div className="flex flex-wrap gap-1.5">
           {[
             'Techno', 'House', 'Melodic', 'Psytrance', 'Minimal', 'Tech House', 'Hard Techno',
@@ -258,7 +268,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               key={genre}
               type="button"
               onClick={() => handleGenreChange(genre)}
-              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all duration-300 ${
+              className={`px-3 py-1.5 rounded-lg text-noctvm-micro font-bold uppercase tracking-widest border transition-all duration-300 ${
                 formData.genres?.includes(genre)
                   ? 'bg-noctvm-violet text-white border-noctvm-violet shadow-lg shadow-noctvm-violet/20'
                   : 'bg-white/5 text-noctvm-silver border-white/10 hover:border-white/30 hover:text-white'
@@ -270,33 +280,25 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
         </div>
       </div>
 
-      <div className="space-y-1.5 relative z-10">
-        <label className="text-[9px] text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Description</label>
-        <textarea
+      <Field id="event-description" label="Description" className="relative z-10">
+        <TextArea
+          id="event-description"
           rows={3}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus:border-noctvm-violet/50 outline-none transition-all resize-none font-medium text-xs text-white/80 placeholder:text-white/10 frosted-noise leading-relaxed"
           placeholder="Lineup, special info..."
           value={formData.description || ''}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
-      </div>
+      </Field>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-white/5 relative z-10">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-5 py-2 text-noctvm-silver hover:text-white transition-all font-bold text-[9px] uppercase tracking-widest"
-        >
+        <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95 shadow-lg shadow-noctvm-violet/20"
-        >
+        </Button>
+        <Button type="submit" variant="submit" disabled={loading}>
           {loading ? <span>Saving...</span> : (initialData?.id ? 'Save Event' : 'Create Event')}
-        </button>
+        </Button>
       </div>
     </form>
+    </GlassPanel>
   );
 }

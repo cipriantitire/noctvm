@@ -113,7 +113,7 @@ export default function EventManager() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
       <div className="w-10 h-10 border-4 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
-      <p className="text-noctvm-silver font-mono text-[10px] uppercase tracking-widest animate-pulse">Loading Events...</p>
+      <p className="text-noctvm-silver font-mono text-noctvm-caption uppercase tracking-widest animate-pulse">Loading Events...</p>
     </div>
   );
 
@@ -135,7 +135,7 @@ export default function EventManager() {
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all"
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-noctvm-caption font-mono uppercase tracking-widest focus:border-noctvm-violet/50 outline-none text-noctvm-silver cursor-pointer hover:bg-white/10 transition-all"
             title="Sort By"
           >
             <option value="date">Date</option>
@@ -177,7 +177,7 @@ export default function EventManager() {
 
           <button 
             onClick={() => { setEditingEvent(null); setShowForm(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-[10px] font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
             title="Create Event"
           >
             <PlusIcon className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export default function EventManager() {
       </div>
 
       {(showForm || editingEvent) && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
+        <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
           <div className="w-full max-w-4xl my-auto">
             <EventForm 
               venues={venues}
@@ -240,7 +240,7 @@ export default function EventManager() {
               />
               {event.is_promoted && (
                 <div className={`absolute top-2 right-2 bg-noctvm-emerald/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-glow-sm ${
-                  viewMode === 'grid' ? 'text-[9px]' : 'text-[7px]'
+                  viewMode === 'grid' ? 'text-noctvm-micro' : 'text-[7px]'
                 }`}>
                   Promoted
                 </div>
@@ -259,11 +259,11 @@ export default function EventManager() {
                   <div className={`flex flex-wrap gap-x-4 gap-y-1 ${viewMode === 'grid' ? 'mb-6' : ''}`}>
                     <div className="flex items-center gap-1.5">
                       <MapPinIcon className="w-3 h-3 text-noctvm-violet/60" />
-                      <span className="text-[10px] font-bold text-white/70 truncate">@{event.venue}</span>
+                      <span className="text-noctvm-caption font-bold text-white/70 truncate">@{event.venue}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CalendarIcon className="w-3 h-3 text-noctvm-emerald/60" />
-                      <span className="text-[10px] font-mono text-noctvm-silver tracking-tight">{event.date}</span>
+                      <span className="text-noctvm-caption font-mono text-noctvm-silver tracking-tight">{event.date}</span>
                     </div>
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export default function EventManager() {
       </div>
       {/* Global Fallback Settings Modal */}
       {isAdmin && showSettings && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
             onClick={() => setShowSettings(false)}
@@ -341,7 +341,7 @@ export default function EventManager() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Global Fallback</h3>
-                  <p className="text-[10px] font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Asset Management</p>
+                  <p className="text-noctvm-caption font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Asset Management</p>
                 </div>
                 <button 
                   title="Close Settings" 
@@ -372,21 +372,21 @@ export default function EventManager() {
                       <div className="w-10 h-10 rounded-full bg-noctvm-violet flex items-center justify-center shadow-lg shadow-noctvm-violet/40">
                         <UploadIcon className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-white">Update Image</span>
+                      <span className="text-noctvm-micro font-black uppercase tracking-widest text-white">Update Image</span>
                     </>
                   )}
                 </button>
               </div>
 
               <div className="space-y-4">
-                <p className="text-[9px] leading-relaxed text-noctvm-silver/50 font-medium text-center px-2 italic">
+                <p className="text-noctvm-micro leading-relaxed text-noctvm-silver/50 font-medium text-center px-2 italic">
                   &ldquo;Seen when an event lacks a poster or has a dead link. Keep it branded.&rdquo;
                 </p>
                 
                 <button 
                   onClick={() => fallbackFileRef.current?.click()}
                   disabled={uploadingFallback}
-                  className="w-full py-3.5 rounded-xl bg-noctvm-violet text-white text-[10px] font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 disabled:opacity-50"
                 >
                   {uploadingFallback ? 'Uploading...' : 'Upload New Design'}
                 </button>

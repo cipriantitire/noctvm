@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui';
 
 interface ShareSheetProps {
   isOpen: boolean;
@@ -95,18 +96,8 @@ const PLATFORMS = [
 ];
 
 export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl = '' }: ShareSheetProps) {
-  const sheetRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const shareUrl = postUrl || window.location.href;
   const filteredFriends = MOCK_FRIENDS.filter(f =>
@@ -137,33 +128,14 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Sheet */}
-      <div
-        ref={sheetRef}
-        className="relative w-full max-w-lg bg-noctvm-midnight border border-noctvm-border rounded-t-2xl pb-[env(safe-area-inset-bottom)] animate-slide-up"
-        style={{ maxHeight: '80vh' }}
-      >
-        {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-noctvm-border" />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-noctvm-border">
-          <span className="text-sm font-semibold text-white">Share</span>
-          <button onClick={onClose} className="w-7 h-7 rounded-full bg-noctvm-surface flex items-center justify-center text-noctvm-silver hover:text-white transition-colors">
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>Share</SheetTitle>
+        </SheetHeader>
 
         {/* Search */}
-        <div className="px-4 py-3">
+        <div className="px-1 py-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-noctvm-surface rounded-xl border border-noctvm-border">
             <svg className="w-4 h-4 text-noctvm-silver flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -179,7 +151,7 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
         </div>
 
         {/* Friends grid */}
-        <div className="px-4 pb-3">
+        <div className="px-1 pb-3">
           <div className="grid grid-cols-4 gap-3">
             {filteredFriends.slice(0, 8).map((friend) => (
               <button
@@ -190,17 +162,17 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
                 <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${friend.color} flex items-center justify-center ring-2 ring-transparent group-hover:ring-noctvm-violet/40 transition-all`}>
                   <span className="text-base font-bold text-white">{friend.initial}</span>
                 </div>
-                <span className="text-[10px] text-noctvm-silver truncate w-full text-center">{friend.name}</span>
+                <span className="text-noctvm-caption text-noctvm-silver truncate w-full text-center">{friend.name}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-noctvm-border mx-4 mb-3" />
+        <div className="h-px bg-noctvm-border mx-0 mb-3" />
 
         {/* Platform row */}
-        <div className="px-4 pb-6 overflow-x-auto scrollbar-hide">
+        <div className="px-1 pb-6 overflow-x-auto scrollbar-hide">
           <div className="flex gap-4 min-w-max">
             {PLATFORMS.map((platform) => (
               <button
@@ -211,14 +183,14 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
                 <div className={`w-12 h-12 rounded-2xl ${platform.bg} flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95`}>
                   {platform.icon}
                 </div>
-                <span className="text-[10px] text-noctvm-silver whitespace-nowrap">
+                <span className="text-noctvm-caption text-noctvm-silver whitespace-nowrap">
                   {platform.action === 'copy' && copiedLink ? '✓ Copied!' : platform.label}
                 </span>
               </button>
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

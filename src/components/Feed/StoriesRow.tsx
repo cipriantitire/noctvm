@@ -34,7 +34,7 @@ export function StoriesRow({
         {myEntry ? (
           <div className="relative flex-shrink-0">
             {showMyStoryDropdown && (
-              <div className="fixed inset-0 z-[99]" onClick={() => setShowMyStoryDropdown(false)} />
+              <div className="fixed inset-0 z-popover" onClick={() => setShowMyStoryDropdown(false)} />
             )}
             <button
               ref={myStoryBtnRef}
@@ -55,11 +55,11 @@ export function StoriesRow({
               <div className="absolute bottom-5 right-0 w-5 h-5 rounded-full bg-noctvm-violet border-2 border-noctvm-black flex items-center justify-center z-20">
                 <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
               </div>
-              <span className="text-[10px] text-noctvm-silver max-w-[60px] truncate">My Story</span>
+              <span className="text-noctvm-caption text-noctvm-silver max-w-[60px] truncate">My Story</span>
             </button>
             {showMyStoryDropdown && dropdownPos && (
               <div
-                className="fixed z-[100] frosted-glass rounded-xl shadow-xl overflow-hidden min-w-[140px]"
+                className="fixed z-modal frosted-glass rounded-xl shadow-xl overflow-hidden min-w-[140px]"
                 style={{ top: dropdownPos.top, left: dropdownPos.left, transform: 'translateX(-50%)' }}
               >
                 <button
@@ -95,7 +95,7 @@ export function StoriesRow({
             <div className="absolute bottom-5 right-0 w-5 h-5 rounded-full bg-noctvm-violet border-2 border-noctvm-black flex items-center justify-center z-20">
               <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             </div>
-            <span className="text-[9px] text-noctvm-silver">Add Story</span>
+            <span className="text-noctvm-micro text-noctvm-silver">Add Story</span>
           </div>
         )}
 
@@ -114,7 +114,7 @@ export function StoriesRow({
                 </div>
               )}
             </div>
-            <span className="text-[9px] text-noctvm-silver truncate max-w-[64px]">{su.name}</span>
+            <span className="text-noctvm-micro text-noctvm-silver truncate max-w-[64px]">{su.name}</span>
           </div>
         ))}
       </div>

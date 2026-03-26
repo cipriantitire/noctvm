@@ -56,7 +56,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center justify-end gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-            <span className="text-[10px] font-mono text-noctvm-silver uppercase tracking-widest">{profile?.role || 'User'}</span>
+            <span className="text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest">{profile?.role || 'User'}</span>
           </div>
         </div>
       </header>
@@ -70,13 +70,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex flex-col">
               <span className="font-heading text-xl font-black tracking-tighter leading-none">NOCTVM</span>
-              <span className="text-[9px] uppercase font-mono tracking-[0.2em] text-noctvm-silver opacity-50">Dashboard</span>
+              <span className="text-noctvm-micro uppercase font-mono tracking-[0.2em] text-noctvm-silver opacity-50">Dashboard</span>
             </div>
           </div>
         </div>
 
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar py-4">
-          <p className="px-4 text-[9px] uppercase font-mono tracking-widest text-noctvm-silver/40 mb-2">Main Navigation</p>
+          <p className="px-4 text-noctvm-micro uppercase font-mono tracking-widest text-noctvm-silver/40 mb-2">Main Navigation</p>
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -117,7 +117,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-black truncate tracking-tight uppercase text-white">{profile?.display_name || 'Admin'}</p>
-              <p className="text-[9px] text-noctvm-silver font-mono uppercase tracking-widest">
+              <p className="text-noctvm-micro text-noctvm-silver font-mono uppercase tracking-widest">
                 {profile?.role || 'User'}
               </p>
             </div>
@@ -151,7 +151,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <div className={`transition-transform duration-200 ${isActive ? 'scale-110 text-white' : ''}`}>
                   {React.cloneElement(item.icon as React.ReactElement, { className: "w-6 h-6" })}
                 </div>
-                <span className={`text-[10px] font-medium ${isActive ? 'text-white' : ''}`}>{item.label}</span>
+                <span className={`text-noctvm-caption font-medium ${isActive ? 'text-white' : ''}`}>{item.label}</span>
               </Link>
             );
           })}

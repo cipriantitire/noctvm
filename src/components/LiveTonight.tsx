@@ -22,8 +22,8 @@ export default function LiveTonight({
       <div className="absolute top-0 right-0 w-24 h-24 bg-noctvm-violet/5 rounded-full -mr-12 -mt-12 blur-2xl" />
       <div className="flex items-center gap-2 mb-2 relative z-10">
         <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse" />
-        <span className="text-[11px] font-semibold text-noctvm-emerald uppercase tracking-wider font-mono">Live Tonight</span>
-        <span className="text-[10px] text-noctvm-silver/50 ml-auto font-mono">{events.length} events</span>
+        <span className="text-noctvm-label font-semibold text-noctvm-emerald uppercase tracking-wider font-mono">Live Tonight</span>
+        <span className="text-noctvm-caption text-noctvm-silver/50 ml-auto font-mono">{events.length} events</span>
       </div>
       <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
         {events.slice(0, 5).map(event => (
@@ -43,8 +43,8 @@ export default function LiveTonight({
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
             <div className="p-1.5">
-              <p className="text-[10px] font-medium text-white line-clamp-1 group-hover/card:text-noctvm-violet transition-colors">{event.title}</p>
-              <p className="text-[9px] text-noctvm-silver/60 truncate">{event.venue}</p>
+              <p className="text-noctvm-caption font-medium text-white line-clamp-1 group-hover/card:text-noctvm-violet transition-colors">{event.title}</p>
+              <p className="text-noctvm-micro text-noctvm-silver/60 truncate">{event.venue}</p>
             </div>
           </button>
         ))}

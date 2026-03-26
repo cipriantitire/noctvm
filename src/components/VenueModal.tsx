@@ -154,7 +154,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
           <p className="text-noctvm-silver font-medium text-xs lg:text-sm mt-0.5">{info.address}</p>
           <div className="flex flex-wrap gap-1.5 mt-2 mb-4">
             {info.genres.map(g => (
-              <span key={g} className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
+              <span key={g} className="px-2.5 py-0.5 rounded-full text-noctvm-caption font-semibold bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
                 {g}
               </span>
             ))}
@@ -167,17 +167,17 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
       <div className="grid grid-cols-3 gap-3 mb-10">
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-white">{venueEvents.length}</p>
-          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Events</p>
+          <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Events</p>
         </div>
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-white">{info.capacity}</p>
-          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Capacity</p>
+          <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Capacity</p>
         </div>
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-noctvm-gold font-mono">
             {venue?.rating ? venue.rating.toFixed(1) : '0.0'}
           </p>
-          <p className="text-[10px] text-noctvm-silver/60 uppercase tracking-widest mt-1">Rating</p>
+          <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Rating</p>
         </div>
       </div>
 
@@ -186,7 +186,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
       {/* Gallery */}
       <div className="mb-10 relative group/gallery">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
+          <h3 className="text-noctvm-caption font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
           <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
             <button 
               onClick={() => scroll('left')}
@@ -216,7 +216,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="text-center group-hover:transform group-hover:scale-110 transition-transform relative z-10">
                   <span className="text-5xl font-bold text-white/10 group-hover:text-white/30 transition-colors uppercase tracking-tighter">{theme.icon}</span>
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-3">{theme.label}</p>
+                  <p className="text-noctvm-caption font-bold text-white/30 uppercase tracking-[0.2em] mt-3">{theme.label}</p>
                 </div>
               </div>
             </div>
