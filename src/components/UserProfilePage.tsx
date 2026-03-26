@@ -636,32 +636,48 @@ export default function UserProfilePage({
       <div className="pb-24">
         <AnimatePresence>
           {mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: '100%' }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-0 z-[100] bg-noctvm-midnight overflow-y-auto w-full h-full safe-top"
+              className="fixed inset-0 z-[300] bg-noctvm-midnight overflow-y-auto w-full h-full"
+              onKeyDown={(e) => { if (e.key === 'Escape') setMobileFeedView(false); }}
+              tabIndex={-1}
             >
-              <div className="flex items-center gap-3 p-4 border-b border-noctvm-border bg-noctvm-midnight/90 backdrop-blur-md sticky top-0 z-20">
-                <button 
-                  onClick={() => setMobileFeedView(false)} 
-                  title="Close feed"
-                  className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+              {/* Drag handle — pull down to dismiss */}
+              <div className="sticky top-0 z-20 bg-noctvm-midnight/90 backdrop-blur-md border-b border-noctvm-border">
+                <motion.div
+                  className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing touch-none"
+                  drag="y"
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={{ top: 0, bottom: 0.3 }}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.y > 80 || info.velocity.y > 400) setMobileFeedView(false);
+                  }}
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <div className="flex flex-col">
-                  <span className="text-xs font-black text-white tracking-[0.2em] uppercase">
-                    {activeTab === 'posts' ? 'Moments' : 
-                     activeTab === 'reposts' ? 'Reposts' :
-                     activeTab === 'saved' ? 'Saved' : 'Tagged'}
-                  </span>
-                  <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
-                    {targetProfile.display_name || targetProfile.username}
-                  </span>
+                  <div className="w-10 h-1 rounded-full bg-white/20" />
+                </motion.div>
+                <div className="flex items-center gap-3 px-4 pb-3">
+                  <button
+                    onClick={() => setMobileFeedView(false)}
+                    title="Close feed"
+                    className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black text-white tracking-[0.2em] uppercase">
+                      {activeTab === 'posts' ? 'Moments' :
+                       activeTab === 'reposts' ? 'Reposts' :
+                       activeTab === 'saved' ? 'Saved' : 'Tagged'}
+                    </span>
+                    <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
+                      {targetProfile.display_name || targetProfile.username}
+                    </span>
+                  </div>
                 </div>
               </div>
 
