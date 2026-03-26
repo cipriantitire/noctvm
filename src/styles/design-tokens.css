@@ -1,0 +1,122 @@
+/**
+ * NOCTVM design tokens — single source of truth for colors, radii, glass, and spacing.
+ * Tailwind theme maps to the RGB channel variables for opacity modifiers (e.g. bg-noctvm-violet/50).
+ *
+ * Canonical background black: #050505 (matches layout themeColor and Tailwind noctvm-black).
+ * Silver: #9CA3AF (unified; replaces older #8A8A8A drift).
+ */
+
+:root {
+  /* —— Core palette (hex aliases, backward compatible) —— */
+  --noctvm-black: #050505;
+  --noctvm-midnight: #1a0a2e;
+  --noctvm-violet: #7c3aed;
+  --noctvm-gold: #d4a843;
+  --noctvm-silver: #9ca3af;
+  --noctvm-emerald: #10b981;
+  --noctvm-surface: #0a0a0a;
+  --noctvm-surface-light: #111111;
+  --noctvm-border: #1a1a1a;
+
+  /* —— RGB channels for Tailwind alpha / modern rgb(var/...) —— */
+  --noctvm-black-rgb: 5 5 5;
+  --noctvm-midnight-rgb: 26 10 46;
+  --noctvm-violet-rgb: 124 58 237;
+  --noctvm-gold-rgb: 212 168 67;
+  --noctvm-silver-rgb: 156 163 175;
+  --noctvm-emerald-rgb: 16 185 129;
+  --noctvm-surface-rgb: 10 10 10;
+  --noctvm-surface-light-rgb: 17 17 17;
+  --noctvm-border-rgb: 26 26 26;
+
+  /* —— Semantic aliases —— */
+  --color-background: var(--noctvm-black);
+  --color-muted-foreground: var(--noctvm-silver);
+  --color-accent: var(--noctvm-violet);
+
+  /* —— Radius (aligns with common rounded-* usage) —— */
+  --radius-sm: 0.5rem; /* 8px — rounded-lg */
+  --radius-md: 0.75rem; /* 12px — rounded-xl */
+  --radius-lg: 1rem; /* 16px — rounded-2xl */
+  --radius-xl: 1.5rem; /* 24px — rounded-3xl */
+
+  /* —— Spacing scale (4px grid; optional for non-Tailwind CSS) —— */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+
+  /* —— Glass / frosted —— */
+  --glass-blur-md: 12px;
+  --glass-blur-lg: 16px;
+  --glass-blur-xl: 25px;
+  --glass-blur-header: 25px;
+  --glass-blur-modal: 12.8px;
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-subtle: rgba(255, 255, 255, 0.08);
+  --glass-bg-frosted: hsla(0, 0%, 100%, 0.07);
+  --glass-inset-highlight: rgba(255, 255, 255, 0.05);
+  --glass-shadow-outer: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --glass-shadow-violet-glow: 0 0 60px rgb(var(--noctvm-violet-rgb) / 0.06);
+  --glass-modal-bg: rgba(18, 18, 18, 0.88);
+
+  /* —— Semantic aliases for animate-ui / shadcn component compatibility —— */
+  --background: var(--noctvm-black);
+  --foreground: #ffffff;
+  --primary: var(--noctvm-violet);
+  --primary-foreground: #ffffff;
+  --secondary: var(--noctvm-surface-light);
+  --secondary-foreground: var(--noctvm-silver);
+  --accent: var(--noctvm-violet);
+  --accent-foreground: #ffffff;
+  --muted: var(--noctvm-surface);
+  --muted-foreground: var(--noctvm-silver);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: var(--noctvm-border);
+  --input: var(--noctvm-surface);
+  --ring: var(--noctvm-violet);
+  --card: var(--noctvm-surface);
+  --card-foreground: #ffffff;
+  --popover: var(--glass-bg-frosted);
+  --popover-foreground: #ffffff;
+  --sidebar: var(--noctvm-surface);
+  --sidebar-foreground: #ffffff;
+  --sidebar-accent: var(--noctvm-violet);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: var(--noctvm-border);
+  --sidebar-ring: var(--noctvm-violet);
+
+  /* —— Extended spacing scale —— */
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* —— Motion / duration tokens —— */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  /* —— Z-index scale —— */
+  --z-dropdown: 70;
+  --z-sheet: 80;
+  --z-popover: 90;
+  --z-modal: 100;
+  --z-modal-content: 105;
+  --z-overlay: 110;
+  --z-viewer: 200;
+  --z-viewer-controls: 201;
+  --z-editor: 250;
+  --z-toast: 200;
+
+  /* —— Overlay semantic tokens —— */
+  --overlay-subtle: rgba(0, 0, 0, 0.4);
+  --overlay-medium: rgba(0, 0, 0, 0.6);
+  --overlay-heavy: rgba(0, 0, 0, 0.8);
+}
