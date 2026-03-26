@@ -595,13 +595,7 @@ export default function Home() {
           onClose={() => setIsNotificationsOpen(false)} 
         />
         
-        {/* Temporary Dev Shortcut to Design System for Visual Editor */}
-        <Link 
-          href="/design-system" 
-          className="fixed bottom-24 left-6 z-50 px-4 py-2 bg-noctvm-violet text-white text-sm font-bold rounded-full shadow-lg border border-white/20 hover:scale-105 transition-transform"
-        >
-          🎨 Design System
-        </Link>
+
       </div>
     </>
   );

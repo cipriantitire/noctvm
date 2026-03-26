@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import NextImage from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/hooks/useSettings';
@@ -111,7 +112,7 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
 // ==================== MAIN SETTINGS HUB ====================
 
 export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => void, initialView?: string }) {
-  const { signOut } = useAuth();
+  const { signOut, isOwner, isAdmin } = useAuth();
   const [view, setView] = useState(initialView);
   
   const menuItems = [
@@ -165,6 +166,15 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
           </button>
         ))}
       </div>
+
+      {(isOwner || isAdmin) && (
+        <Link
+          href="/design-system"
+          className="fixed bottom-24 right-6 z-50 px-4 py-2 bg-noctvm-violet text-white text-sm font-bold rounded-full shadow-lg border border-white/20 hover:scale-105 transition-transform"
+        >
+          🎨 Design System
+        </Link>
+      )}
 
       <div className="mt-12 pt-6 border-t border-noctvm-border">
         <button
