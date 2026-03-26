@@ -1,7 +1,7 @@
 'use client';
 // Triggering preview build for mobile feed enhancement
 
-import React, { useState, useEffect, useCallback, Fragment } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,6 +77,7 @@ export default function UserProfilePage({
   const { user } = useAuth();
   const isOwner = user?.id === targetProfile.id;
   const dragControls = useDragControls();
+  const feedScrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
@@ -96,6 +97,15 @@ export default function UserProfilePage({
   const [viewerIndex, setViewerIndex] = useState(0);
   const [activeViewerPosts, setActiveViewerPosts] = useState<ProfilePost[]>([]);
   const [mobileFeedView, setMobileFeedView] = useState(false);
+
+  // Scroll to the clicked post once the sheet is open
+  useEffect(() => {
+    if (!mobileFeedView) return;
+    const el = document.getElementById(`post-${viewerIndex}`);
+    if (el && feedScrollRef.current) {
+      feedScrollRef.current.scrollTop = el.offsetTop;
+    }
+  }, [mobileFeedView, viewerIndex]);
 
   // ── Venue Management ──────────────────────────────────────────────────────
   const [managedVenues, setManagedVenues] = useState<VenueManagerRecord[]>([]);
@@ -645,8 +655,7 @@ export default function UserProfilePage({
                 setActiveViewerPosts(posts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
-                  setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
-                } else {
+                                  } else {
                   setViewerOpen(true); 
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
@@ -674,8 +683,7 @@ export default function UserProfilePage({
                 setActiveViewerPosts(reposts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
-                  setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
-                } else {
+                                  } else {
                   setViewerOpen(true); 
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
@@ -707,8 +715,7 @@ export default function UserProfilePage({
                   setActiveViewerPosts(savedPosts); setViewerIndex(i);
                   if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                     setMobileFeedView(true);
-                    setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
-                  } else {
+                                      } else {
                     setViewerOpen(true); 
                   }
                 }} 
@@ -739,8 +746,7 @@ export default function UserProfilePage({
                 setActiveViewerPosts(taggedPosts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
-                  setTimeout(() => { document.getElementById(`post-${i}`)?.scrollIntoView({ behavior: 'smooth' }); }, 100);
-                } else {
+                                  } else {
                   setViewerOpen(true); 
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
@@ -844,7 +850,7 @@ export default function UserProfilePage({
             </div>
           </div>
           {/* Scrollable content — separate from draggable container */}
-          <div className="flex-1 overflow-y-auto">
+          <div ref={feedScrollRef} className="flex-1 overflow-y-auto">
             <div className="flex flex-col gap-px bg-noctvm-border">
               {activeViewerPosts.map((post, i) => {
                 const feedPost = post.raw_row ? mapSupabasePost(post.raw_row) : null;
