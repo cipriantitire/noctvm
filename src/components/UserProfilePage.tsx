@@ -1,7 +1,7 @@
 'use client';
 // Triggering preview build for mobile feed enhancement
 
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import React, { useState, useEffect, useCallback, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -344,11 +344,11 @@ export default function UserProfilePage({
   // ── Render Helpers ─────────────────────────────────────────────────────────
 
   const initials = (targetProfile.display_name || targetProfile.username || 'N')[0].toUpperCase();
-  const tabs = [
-    { key: 'posts'   as const, icon: <GridIcon     className="w-5 h-5" /> },
-    { key: 'reposts' as const, icon: <RepostIcon   className="w-5 h-5" /> },
-    ...(isOwner ? [{ key: 'saved' as const, icon: <BookmarkIcon className="w-5 h-5" /> }] : []),
-    { key: 'tagged'  as const, icon: <TagIcon      className="w-5 h-5" /> },
+  const tabs: Array<{ key: 'posts' | 'reposts' | 'saved' | 'tagged'; Icon: React.ComponentType<{ className?: string }> }> = [
+    { key: 'posts',   Icon: GridIcon },
+    { key: 'reposts', Icon: RepostIcon },
+    ...(isOwner ? [{ key: 'saved' as const, Icon: BookmarkIcon }] : []),
+    { key: 'tagged',  Icon: TagIcon },
   ];
 
   return (
@@ -621,7 +621,7 @@ export default function UserProfilePage({
       {/* ── Tab Bar ───────────────────────────────────────────── */}
       <div className="border-t border-noctvm-border">
         <div className="flex">
-          {tabs.map(({ key, icon }) => (
+          {tabs.map(({ key, Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
@@ -629,7 +629,7 @@ export default function UserProfilePage({
                 activeTab === key ? 'border-white text-white' : 'border-transparent text-noctvm-silver'
               }`}
             >
-              {icon}
+              <Icon className="w-5 h-5" />
             </button>
           ))}
         </div>
