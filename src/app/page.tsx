@@ -549,8 +549,9 @@ export default function Home() {
             {activeTab === 'profile' && (
               <>
                 {/* Public profile (Instagram-style) */}
-                {profileView === 'profile' && (
+                {profileView === 'profile' && profile && (
                   <UserProfilePage
+                    targetProfile={profile}
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
                     onEditProfileClick={() => {

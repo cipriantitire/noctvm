@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import type { Profile } from '@/lib/supabase';
 import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon, MapPinIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
@@ -50,6 +51,7 @@ interface VenueManagerRecord {
 }
 
 interface UserProfilePageProps {
+  targetProfile: Profile;
   onOpenAuth: () => void;
   onSettingsClick: () => void;
   onEditProfileClick: () => void;
@@ -62,6 +64,7 @@ interface UserProfilePageProps {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function UserProfilePage({
+  targetProfile,
   onOpenAuth,
   onSettingsClick,
   onEditProfileClick,
@@ -70,7 +73,8 @@ export default function UserProfilePage({
   onEventClick,
   onManageVenue,
 }: UserProfilePageProps) {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
+  const isOwner = user?.id === targetProfile.id;
   const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
@@ -125,38 +129,36 @@ export default function UserProfilePage({
   // ── Data Fetching ─────────────────────────────────────────────────────────
 
   const fetchHighlights = useCallback(async () => {
-    if (!user) return;
     const { data } = await supabase
       .from('highlights')
       .select('id, name, color, cover_url')
-      .eq('user_id', user.id)
+      .eq('user_id', targetProfile.id)
       .order('created_at', { ascending: true });
     if (data) setHighlights(data as DbHighlight[]);
-  }, [user]);
+  }, [targetProfile.id]);
 
   const fetchPosts = useCallback(async () => {
-    if (!user) return;
     setLoadingPosts(true);
     try {
       // 1. Fetch own posts
       const { data: ownData } = await supabase
         .from('posts')
         .select('*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count')
-        .eq('user_id', user.id)
+        .eq('user_id', targetProfile.id)
         .order('created_at', { ascending: false });
-      
+
       // 2. Fetch reposted posts
       const { data: repostData } = await supabase
         .from('reposts')
         .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count)')
-        .eq('user_id', user.id)
+        .eq('user_id', targetProfile.id)
         .order('created_at', { ascending: false });
 
       // 3. Fetch tagged posts (mentions in caption or tagged_users array)
       const { data: taggedData } = await supabase
         .from('posts')
         .select('*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count')
-        .or(`caption.ilike.%@${profile?.username}%,tagged_users.cs.{"@${profile?.username}"}`)
+        .or(`caption.ilike.%@${targetProfile.username}%,tagged_users.cs.{"@${targetProfile.username}"}`)
         .order('created_at', { ascending: false });
 
       const ownPosts = (ownData || []).map(p => ({ 
@@ -190,10 +192,10 @@ export default function UserProfilePage({
     } finally {
       setLoadingPosts(false);
     }
-  }, [user, profile?.username]);
+  }, [targetProfile.id, targetProfile.username]);
 
   const fetchSavedPosts = useCallback(async () => {
-    if (!user) return;
+    if (!user || !isOwner) return;
     const { data } = await supabase
       .from('post_saves')
       .select('post_id, posts(*, profiles(display_name, username, avatar_url, is_verified, badge), likes_count, reposts_count)')
@@ -212,16 +214,15 @@ export default function UserProfilePage({
         })) as ProfilePost[];
       setSavedPosts(posts);
     }
-  }, [user]);
+  }, [user, isOwner]);
 
   const fetchManagedVenues = useCallback(async () => {
-    if (!user) return;
     const { data } = await supabase
       .from('venue_managers')
       .select('venue_id, role, venues(id, name, image_url, city)')
-      .eq('user_id', user.id);
+      .eq('user_id', targetProfile.id);
     if (data) setManagedVenues(data as any[]);
-  }, [user]);
+  }, [targetProfile.id]);
 
   useEffect(() => {
     fetchHighlights();
@@ -233,18 +234,17 @@ export default function UserProfilePage({
   // ── Stats Real-time ───────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!user) return;
     Promise.all([
-      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('target_id', user.id).eq('target_type', 'user'),
-      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', user.id).eq('target_type', 'user'),
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', targetProfile.id),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('target_id', targetProfile.id).eq('target_type', 'user'),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', targetProfile.id).eq('target_type', 'user'),
     ]).then(([postsRes, followersRes, followingRes]) => {
       setStatsData({
         posts: postsRes.count ?? 0,
         followers: followersRes.count ?? 0,
         following: followingRes.count ?? 0,
-        eventsAttended: profile?.events_attended ?? 0,
-        venuesVisited: profile?.venues_visited ?? 0
+        eventsAttended: targetProfile.events_attended ?? 0,
+        venuesVisited: targetProfile.venues_visited ?? 0
       });
     });
 
@@ -260,41 +260,39 @@ export default function UserProfilePage({
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user, profile?.events_attended, profile?.venues_visited]);
+  }, [targetProfile.id, targetProfile.events_attended, targetProfile.venues_visited]);
 
   // ── Stories Logic ──────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!user) return;
     supabase
       .from('stories')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', targetProfile.id)
       .gt('expires_at', new Date().toISOString())
       .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [targetProfile.id]);
 
   const fetchAndOpenMyStories = async () => {
-    if (!user || !onOpenStories) return;
+    if (!onOpenStories) return;
     const { data } = await supabase
       .from('stories')
       .select('id, image_url, caption, venue_name, event_id, event_title, created_at')
-      .eq('user_id', user.id)
+      .eq('user_id', targetProfile.id)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: true });
     if (!data || data.length === 0) return;
-    const initials = (profile?.display_name || profile?.username || 'N')[0].toUpperCase();
+    const storyInitials = (targetProfile.display_name || targetProfile.username || 'N')[0].toUpperCase();
     const storyUser: StoryUser = {
-      id: user.id,
-      name: profile?.display_name || profile?.username || 'Me',
-      avatar: initials,
-      avatarUrl: profile?.avatar_url ?? null,
+      id: targetProfile.id,
+      name: targetProfile.display_name || targetProfile.username || 'User',
+      avatar: storyInitials,
+      avatarUrl: targetProfile.avatar_url ?? null,
       hasNew: true,
       color: 'from-noctvm-violet to-purple-500',
       stories: data.map((s: any) => ({
         id: s.id,
-        user_id: user.id,
+        user_id: targetProfile.id,
         image_url: s.image_url,
         caption: s.caption,
         venue_name: s.venue_name,
@@ -343,31 +341,11 @@ export default function UserProfilePage({
 
   // ── Render Helpers ─────────────────────────────────────────────────────────
 
-  if (!user) {
-    return (
-      <div className="max-w-md mx-auto text-center py-16 tab-content animate-fade-in">
-        <div className="w-20 h-20 rounded-full bg-noctvm-surface border-2 border-noctvm-violet/30 flex items-center justify-center mx-auto mb-6">
-          <UserIcon className="w-10 h-10 text-noctvm-silver" />
-        </div>
-        <h2 className="font-heading text-xl font-bold text-white mb-2">Join NOCTVM</h2>
-        <p className="text-sm text-noctvm-silver mb-6">
-          Sign in to save events, follow venues, and connect with the nightlife community.
-        </p>
-        <button
-          onClick={onOpenAuth}
-          className="px-8 py-3 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors"
-        >
-          Sign In / Create Account
-        </button>
-      </div>
-    );
-  }
-
-  const initials = (profile?.display_name || profile?.username || 'N')[0].toUpperCase();
+  const initials = (targetProfile.display_name || targetProfile.username || 'N')[0].toUpperCase();
   const tabs = [
     { key: 'posts'   as const, icon: <GridIcon     className="w-5 h-5" /> },
     { key: 'reposts' as const, icon: <RepostIcon   className="w-5 h-5" /> },
-    { key: 'saved'   as const, icon: <BookmarkIcon className="w-5 h-5" /> },
+    ...(isOwner ? [{ key: 'saved' as const, icon: <BookmarkIcon className="w-5 h-5" /> }] : []),
     { key: 'tagged'  as const, icon: <TagIcon      className="w-5 h-5" /> },
   ];
 
@@ -375,18 +353,19 @@ export default function UserProfilePage({
     <motion.div 
       className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans"
       onPanEnd={(_, info) => {
-        // Detect right-to-left swipe (velocity < -500 or offset < -100)
-        if (info.offset.x < -100 || info.velocity.x < -500) {
+        if (isOwner && (info.offset.x < -100 || info.velocity.x < -500)) {
           setIsSavedEventsOpen(true);
         }
       }}
     >
-      <SavedEventsSheet 
-        userId={user?.id || ''} 
-        isOpen={isSavedEventsOpen} 
-        onClose={() => setIsSavedEventsOpen(false)} 
-        activeCity={profile?.city as any}
-      />
+      {isOwner && (
+        <SavedEventsSheet
+          userId={user?.id || ''}
+          isOpen={isSavedEventsOpen}
+          onClose={() => setIsSavedEventsOpen(false)}
+          activeCity={targetProfile.city as any}
+        />
+      )}
 
       {/* ── Profile Header ────────────────────────────────────── */}
       <div className="px-0 sm:px-4 pt-4 pb-8">
@@ -407,8 +386,8 @@ export default function UserProfilePage({
               >
                 <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
                   <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-midnight relative border border-white/5">
-                    {profile?.avatar_url ? (
-                      <NextImage src={profile.avatar_url} alt="" fill className="object-cover" unoptimized />
+                    {targetProfile.avatar_url ? (
+                      <NextImage src={targetProfile.avatar_url} alt="" fill className="object-cover" unoptimized />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/10">
                         <span className="text-4xl font-sans font-black text-white tracking-widest leading-none translate-y-[-2px]">{initials}</span>
@@ -423,27 +402,29 @@ export default function UserProfilePage({
             <div className="flex-1 flex flex-col justify-center min-w-0">
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                 <h2 className="text-3xl sm:text-4xl font-sans font-black text-white tracking-tight truncate leading-none">
-                  {profile?.display_name || 'Night Owl'}
+                  {targetProfile.display_name || 'Night Owl'}
                 </h2>
-                {profile?.badge && profile.badge !== 'none' && (
-                  <VerifiedBadge type={profile.badge} size="md" />
+                {targetProfile.badge && targetProfile.badge !== 'none' && (
+                  <VerifiedBadge type={targetProfile.badge} size="md" />
                 )}
-                {/* Mobile Saved Events Trigger */}
-                <button
-                  onClick={() => setIsSavedEventsOpen(true)}
-                  className="xl:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
-                  title="View Agenda"
-                >
-                  <CalendarIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-noctvm-violet rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(139,92,246,0.6)] animate-pulse" />
-                </button>
+                {/* Mobile Saved Events Trigger — owner only */}
+                {isOwner && (
+                  <button
+                    onClick={() => setIsSavedEventsOpen(true)}
+                    className="xl:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
+                    title="View Agenda"
+                  >
+                    <CalendarIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-noctvm-violet rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(139,92,246,0.6)] animate-pulse" />
+                  </button>
+                )}
               </div>
-              <p className="text-sm font-black text-noctvm-silver/40 uppercase tracking-[0.2em]">@{profile?.username || 'nightowl'}</p>
-              
-              {profile?.city && (
+              <p className="text-sm font-black text-noctvm-silver/40 uppercase tracking-[0.2em]">@{targetProfile.username}</p>
+
+              {targetProfile.city && (
                 <div className="flex items-center gap-2 mt-3 p-1 px-3 w-fit rounded-full bg-white/[0.03] border border-white/5">
                   <MapPinIcon className="w-3 h-3 text-noctvm-violet" />
-                  <span className="text-noctvm-micro text-noctvm-silver font-black uppercase tracking-widest">{profile.city}</span>
+                  <span className="text-noctvm-micro text-noctvm-silver font-black uppercase tracking-widest">{targetProfile.city}</span>
                 </div>
               )}
             </div>
@@ -487,31 +468,31 @@ export default function UserProfilePage({
 
         {/* Bio & Links area */}
         <div className="px-4 lg:px-0 mb-6">
-          {profile?.bio && (
-            <p className="text-xs text-noctvm-silver/80 leading-relaxed max-w-lg mb-4 italic font-medium">&quot;{profile.bio}&quot;</p>
+          {targetProfile.bio && (
+            <p className="text-xs text-noctvm-silver/80 leading-relaxed max-w-lg mb-4 italic font-medium">&quot;{targetProfile.bio}&quot;</p>
           )}
 
           <div className="flex flex-wrap gap-4 items-center">
             {/* Music Link */}
-            {profile?.music_link && (
+            {targetProfile.music_link && (
               <div className="flex items-center gap-2 p-2 px-3 rounded-full bg-noctvm-surface/50 border border-noctvm-border/50 hover:border-noctvm-violet/30 transition-all">
                 <MusicIcon className="w-3.5 h-3.5 text-noctvm-violet shadow-glow" />
-                <a 
-                  href={profile.music_link.url} 
-                  target="_blank" 
+                <a
+                  href={targetProfile.music_link.url}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-noctvm-caption font-mono font-bold text-white hover:text-noctvm-violet transition-colors flex items-center gap-1 uppercase tracking-wider"
                 >
-                  {profile.music_link.type}
+                  {targetProfile.music_link.type}
                   <svg className="w-2.5 h-2.5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
                 </a>
               </div>
             )}
 
             {/* Social Links */}
-            {profile?.social_links && profile.social_links.length > 0 && (
+            {targetProfile.social_links && targetProfile.social_links.length > 0 && (
               <div className="flex items-center gap-3">
-                {profile.social_links.map(link => {
+                {targetProfile.social_links.map(link => {
                   const Icon = link.platform === 'instagram' ? InstagramIcon :
                                link.platform === 'facebook' ? FacebookIcon :
                                link.platform === 'twitter' ? TwitterIcon :
@@ -528,9 +509,9 @@ export default function UserProfilePage({
           </div>
 
           {/* Genre Pills */}
-          {profile?.genres && profile.genres.length > 0 && (
+          {targetProfile.genres && targetProfile.genres.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-5">
-              {profile.genres.map(genre => (
+              {targetProfile.genres.map(genre => (
                 <span key={genre} className="px-3 py-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10 text-noctvm-micro font-mono font-bold text-noctvm-violet/80 uppercase tracking-widest">
                   #{genre}
                 </span>
@@ -541,7 +522,11 @@ export default function UserProfilePage({
 
         {/* Profile Action Buttons */}
         <div className="flex gap-2.5 px-4 lg:px-0">
-          <button onClick={onEditProfileClick} className="flex-1 py-3 rounded-xl bg-white text-black text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all shadow-xl shadow-white/5 active:scale-95">Edit Profile</button>
+          {isOwner ? (
+            <button onClick={onEditProfileClick} className="flex-1 py-3 rounded-xl bg-white text-black text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all shadow-xl shadow-white/5 active:scale-95">Edit Profile</button>
+          ) : (
+            <button onClick={onOpenAuth} className="flex-1 py-3 rounded-xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-95">Follow</button>
+          )}
           <button onClick={handleShareProfile} className="flex-1 py-3 rounded-xl bg-noctvm-surface border border-noctvm-border text-noctvm-label font-black uppercase tracking-wider text-white hover:bg-noctvm-surface/70 transition-all active:scale-95">
             {shareToast ? 'Address Copied' : 'Share Profile'}
           </button>
@@ -593,12 +578,14 @@ export default function UserProfilePage({
       {/* ── Story Highlights ──────────────────────────────────── */}
       <div className="border-t border-noctvm-border px-4 py-4">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pt-1 px-0.5">
-          <button onClick={() => setShowCreateHighlight(true)} className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group">
-            <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors">
-              <svg className="w-6 h-6 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
-            </div>
-            <span className="text-noctvm-micro text-noctvm-silver">New</span>
-          </button>
+          {isOwner && (
+            <button onClick={() => setShowCreateHighlight(true)} className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group">
+              <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors">
+                <svg className="w-6 h-6 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
+              </div>
+              <span className="text-noctvm-micro text-noctvm-silver">New</span>
+            </button>
+          )}
 
           {highlights.map((hl) => (
             <div key={hl.id} className="flex flex-col items-center gap-1 flex-shrink-0 relative group">
@@ -613,13 +600,15 @@ export default function UserProfilePage({
                   </div>
                 </div>
               </button>
-               <button 
-                 onClick={(e) => deleteHighlight(hl.id, e)} 
-                 className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
-                 title="Delete Highlight"
-               >
-                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 18L18 6M6 6l12 12" /></svg>
-               </button>
+               {isOwner && (
+                 <button
+                   onClick={(e) => deleteHighlight(hl.id, e)}
+                   className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                   title="Delete Highlight"
+                 >
+                   <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 18L18 6M6 6l12 12" /></svg>
+                 </button>
+               )}
               <span className="text-noctvm-micro text-noctvm-silver truncate max-w-[4rem] text-center">{hl.name}</span>
             </div>
           ))}
@@ -671,7 +660,7 @@ export default function UserProfilePage({
                      activeTab === 'saved' ? 'Saved' : 'Tagged'}
                   </span>
                   <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
-                    {profile?.display_name || profile?.username}
+                    {targetProfile.display_name || targetProfile.username}
                   </span>
                 </div>
               </div>
@@ -728,7 +717,7 @@ export default function UserProfilePage({
               <div className="col-span-3 py-16 text-center text-noctvm-silver">
                 <GridIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
                 <p className="text-sm font-medium">No posts shared yet</p>
-                <button onClick={onOpenCreatePost} className="mt-4 px-4 py-2 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-xs font-bold">Share Your First Post</button>
+                {isOwner && <button onClick={onOpenCreatePost} className="mt-4 px-4 py-2 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-xs font-bold">Share Your First Post</button>}
               </div>
             )}
           </div>
@@ -840,13 +829,13 @@ export default function UserProfilePage({
         initialIndex={viewerIndex}
         isOpen={viewerOpen}
         onClose={() => setViewerOpen(false)}
-        profileName={profile?.display_name || profile?.username || 'User'}
-        profileAvatar={profile?.avatar_url ?? null}
+        profileName={targetProfile.display_name || targetProfile.username || 'User'}
+        profileAvatar={targetProfile.avatar_url ?? null}
         profileInitial={initials}
       />
 
       {/* ── Profile Create Post FAB ──────────────────────────────── */}
-      {onOpenCreatePost && (
+      {isOwner && onOpenCreatePost && (
         <button
           onClick={onOpenCreatePost}
           className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-600 shadow-lg shadow-noctvm-violet/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border border-noctvm-violet/30"
