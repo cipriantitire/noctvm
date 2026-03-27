@@ -56,8 +56,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ["var(--font-syne)", "sans-serif"],
-        body: ["var(--font-dm-sans)", "sans-serif"],
+        heading: ["var(--font-freshid)", "sans-serif"],
+        body: ["var(--font-satoshi)", "sans-serif"],
         mono: ["var(--font-jetbrains-mono)", "monospace"],
       },
       fontSize: {

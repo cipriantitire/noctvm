@@ -3,18 +3,40 @@ import Providers from "./providers";
 
 export const dynamic = 'force-dynamic';
 import "./globals.css";
-import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google';
+import { JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 
-const syne = Syne({
-  subsets: ['latin'],
+const freshid = localFont({
+  src: [
+    { path: '../../public/fonts/freshid/FreshidCondensed-ExtraLight.otf', weight: '200', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-ExtLtIta.otf',  weight: '200', style: 'italic' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-Light.otf',      weight: '300', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-LightItalic.otf',weight: '300', style: 'italic' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-Regular.otf',    weight: '400', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-RegIta.otf',     weight: '400', style: 'italic' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-Medium.otf',     weight: '500', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-MediumItalic.otf',weight: '500', style: 'italic' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-SemiBold.otf',   weight: '600', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-SemBdIta.otf',   weight: '600', style: 'italic' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-Bold.otf',       weight: '700', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-BoldItalic.otf', weight: '700', style: 'italic' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-ExtraBold.otf',  weight: '800', style: 'normal' },
+    { path: '../../public/fonts/freshid/FreshidCondensed-ExtBdIta.otf',   weight: '800', style: 'italic' },
+  ],
+  variable: '--font-freshid',
   display: 'swap',
-  variable: '--font-syne',
 });
 
-const dmSans = DM_Sans({
-  subsets: ['latin'],
+const satoshi = localFont({
+  src: [
+    { path: '../../public/fonts/satoshi/Satoshi-Light.woff2',      weight: '300', style: 'normal' },
+    { path: '../../public/fonts/satoshi/Satoshi-Regular.woff2',    weight: '400', style: 'normal' },
+    { path: '../../public/fonts/satoshi/Satoshi-Medium.woff2',     weight: '500', style: 'normal' },
+    { path: '../../public/fonts/satoshi/Satoshi-Bold.woff2',       weight: '700', style: 'normal' },
+    { path: '../../public/fonts/satoshi/Satoshi-Black.woff2',      weight: '900', style: 'normal' },
+  ],
+  variable: '--font-satoshi',
   display: 'swap',
-  variable: '--font-dm-sans',
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -74,7 +96,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`dark ${freshid.variable} ${satoshi.variable} ${jetbrainsMono.variable}`}>
       <head>
       </head>
       <body className="font-body bg-noctvm-black text-white min-h-screen">
