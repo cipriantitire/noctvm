@@ -28,6 +28,7 @@ export interface ProfilePost {
   liked?: boolean;
   venue?: { name: string; tagged: boolean };
   event?: { title: string };
+  tags?: string[];
   tagged_users?: string[];
   raw_row?: any;
 }
@@ -85,6 +86,18 @@ export default function PostViewerModal({
   const [reposting, setReposting] = useState(false);
 
   const post = posts[index];
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // Reset index when modal opens
   useEffect(() => {
@@ -286,7 +299,7 @@ export default function PostViewerModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-viewer flex items-center justify-center">
+    <div className="fixed inset-0 z-viewer flex items-center justify-center overflow-hidden">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity animate-fade-in" onClick={onClose} />
 
@@ -340,13 +353,16 @@ export default function PostViewerModal({
         {/* Left: Image Side */}
         <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
           {post.image_url ? (
-            <Image 
-              src={post.image_url} 
-              alt="Post media" 
-              fill 
-              className="object-contain"
-              unoptimized
-            />
+            <div className="w-full h-full relative">
+              <Image 
+                src={post.image_url} 
+                alt="Post media" 
+                fill 
+                className="object-contain lg:object-contain"
+                unoptimized
+                priority
+              />
+            </div>
           ) : (
              <div className="w-full h-full bg-gradient-to-br from-noctvm-violet/20 to-purple-900/40 p-12 flex items-center justify-center">
                 <p className="text-noctvm-silver text-center italic text-lg leading-relaxed">{post.caption}</p>
@@ -362,7 +378,7 @@ export default function PostViewerModal({
                  title={`View ${post.venue.name}`}
                >
                  <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
-                   <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
+                   <Image src={getVenueLogo(post.venue.name, venueLogosMap?.[post.venue.name])} alt="" fill className="object-cover" />
                  </div>
                  <span className="text-noctvm-caption font-bold text-white pr-1">{post.venue.name}</span>
                </button>
@@ -405,7 +421,7 @@ export default function PostViewerModal({
         <div className="w-full lg:w-[400px] xl:w-[450px] border-l border-white/5 flex flex-col bg-noctvm-surface flex-shrink-0">
           
           {/* Header */}
-          <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3 relative shrink-0 min-h-[60px]">
+          <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3 relative shrink-0 min-h-[60px] z-20">
              <div className="w-[36px] h-[36px] min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-full border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 bg-noctvm-midnight relative">
                 {profileAvatar ? (
                   <Image
@@ -448,6 +464,19 @@ export default function PostViewerModal({
                   <p className="text-xs text-white/90 leading-relaxed break-words">
                      {post.caption}
                   </p>
+                  {/* Hashtag Buttons */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {post.tags.map(tag => (
+                        <span 
+                          key={tag} 
+                          className="px-2.5 py-1 rounded bg-noctvm-violet/10 text-noctvm-micro font-black text-noctvm-violet/60 hover:text-noctvm-violet hover:bg-noctvm-violet/20 cursor-pointer transition-all uppercase tracking-widest border border-noctvm-violet/5 active:scale-95"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                </div>
              )}
                <div className="pt-2">

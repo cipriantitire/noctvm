@@ -298,15 +298,18 @@ export function FeedItem({
 
 
 
-          {post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {post.tags.map(tag => (
-                <span key={tag} className="text-noctvm-micro font-black text-noctvm-violet/40 hover:text-noctvm-violet cursor-pointer transition-colors uppercase tracking-widest">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
+           {post.tags.length > 0 && (
+             <div className="flex flex-wrap gap-1.5 mt-2.5">
+               {post.tags.map(tag => (
+                 <span 
+                   key={tag} 
+                   className="px-2 py-0.5 rounded-md bg-noctvm-violet/10 text-[10px] font-black text-noctvm-violet/60 hover:text-noctvm-violet hover:bg-noctvm-violet/20 cursor-pointer transition-all uppercase tracking-widest border border-noctvm-violet/10 active:scale-95"
+                 >
+                   #{tag}
+                 </span>
+               ))}
+             </div>
+           )}
 
           {/* Desktop inline comment section */}
           {showComments && (
@@ -357,6 +360,7 @@ export function FeedItem({
             reposted: post.reposted || false,
             venue: post.venue,
             event: post.event,
+            tags: post.tags,
             tagged_users: post.taggedUsers || []
           }]}
           initialIndex={0}
@@ -366,6 +370,7 @@ export function FeedItem({
           profileName={post.user.name}
           profileInitial={post.user.avatar}
           profileBadge={post.user.badge}
+          venueLogosMap={venueLogosMap}
         />,
         document.body
       )}
