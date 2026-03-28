@@ -151,7 +151,7 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     // Proactive external price fetching if price is missing
     if (!price && ticket_url) {
       try {
-        if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('iabilet.ro')) {
+        if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('iabilet.ro') || ticket_url.includes('ambilet.ro')) {
           const extHtml = await fetchHtml(ticket_url);
           const { extractPriceFromHtml } = await import('./utils');
           const extPrice = extractPriceFromHtml(extHtml);

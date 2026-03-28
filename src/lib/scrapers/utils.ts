@@ -513,15 +513,23 @@ export function extractPriceFromHtml(html: string): string | null {
   const wcPriceMatches = Array.from(html.matchAll(
     /woocommerce-Price-amount[^>]*>\s*<bdi>\s*([\d.,]+)\s*(?:&nbsp;)?\s*<span[^>]*woocommerce-Price-currencySymbol[^>]*>([^<]+)<\/span>/gi
   ));
-  if (wcPriceMatches.length > 0) {
-    const wcPrices = wcPriceMatches
+  
+  // Ambilet sometimes uses explicit classes for their side widgets
+  const sideWidgetMatches = Array.from(html.matchAll(
+    /class=["'][^"']*(?:price|pret_bilet|bilet-pret|ticket-price)[^"']*["'][^>]*>[\s\S]{0,100}?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)/gi
+  ));
+
+  const combinedWcAndSide = [...wcPriceMatches, ...sideWidgetMatches];
+
+  if (combinedWcAndSide.length > 0) {
+    const rawPrices = combinedWcAndSide
       .map(m => parseFloat(m[1].replace(',', '.')))
-      .filter(p => !isNaN(p) && p > 0)
+      .filter(p => !isNaN(p) && p > 0 && p < 5000)
       .sort((a, b) => a - b);
     
-    if (wcPrices.length > 0) {
-      const unique = Array.from(new Set(wcPrices));
-      const currency = wcPriceMatches[0][2]?.trim() || 'RON';
+    if (rawPrices.length > 0) {
+      const unique = Array.from(new Set(rawPrices));
+      const currency = combinedWcAndSide[0][2]?.trim() || 'RON';
       const currLabel = currency.toLowerCase() === 'lei' ? 'RON' : currency;
       if (unique.length === 1) {
         return unique[0] === 0 ? 'Free' : `${unique[0]} ${currLabel}`;
@@ -755,10 +763,18 @@ export async function parseDetailPage(
       if (htmlPrice && htmlPrice !== 'Free') {
         price = htmlPrice;
       } else {
-        // Detailed fallback for RA/Eventbook/Livetickets price widgets
-        const raPattern = html.match(/(?:Tickets from|Cost|Pret|Preț|Prices?)\s*(?:<\/div>|:|\s)*\s*(?:RON|lei|LEI)?\s*(\d+(?:[.,]\d+)?)/i);
+        // Look for RA/widget specific formats first to avoid matching generic words like 'Cost'
+        // Precise RA DOM path: #AddTickets > ul > li.ticket-wrapper
+        const raDomPattern = html.match(/id=["']AddTickets["'][^>]*>[\s\S]{0,1000}?class=["'][^"']*ticket-wrapper[^"']*["'][^>]*>[\s\S]{0,300}?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)?/i) ||
+                             html.match(/class=["'][^"']*ticket-wrapper[^"']*["'][^>]*>[\s\S]{0,300}?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)?/i);
+
+        const specificWidgetPattern = html.match(/(?:Tickets from|Bilete de la)\s*(?:<\/div>|:|\s)*\s*(?:RON|lei|LEI)?\s*(\d+(?:[.,]\d+)?)/i);
+        const genericRaPattern = html.match(/(?:Pret|Preț|Cost|Prices?)\s*(?:<\/div>|:|\s)*\s*(?:RON|lei|LEI)?\s*(\d+(?:[.,]\d+)?)/i);
         const genericPattern = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)/i);
-        if (raPattern) price = `${raPattern[1]} RON`;
+
+        if (raDomPattern) price = `${raDomPattern[1]} RON`;
+        else if (specificWidgetPattern) price = `${specificWidgetPattern[1]} RON`;
+        else if (genericRaPattern) price = `${genericRaPattern[1]} RON`;
         else if (genericPattern) price = `${genericPattern[1]} RON`;
         else price = htmlPrice || price;
       }
