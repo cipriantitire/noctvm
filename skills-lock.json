@@ -1,10 +1,30 @@
 {
   "version": 1,
   "skills": {
+    "css-expert": {
+      "source": "RightNow-AI/openfang",
+      "sourceType": "github",
+      "computedHash": "36b6d2641998855df9cc4cdc9c19e83481db716b74a6d246ae3f50dcd216f123"
+    },
+    "responsive-design": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "1c756f7e216c16c91be788a0f64ae5d94451b5ffe076a1e120f671e2a3c9bd3e"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "f54f39ce967af3a4bba1f662c3600f0253467508d5fbbc7c545c67e102da2253"
+    },
     "using-superpowers": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "computedHash": "91a4d2ccb9432dfd4d3654f6ebd97875adab301d3d77f84e590169ba397760e3"
+    },
+    "web-component-design": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "324d0ef35018b21b37e4d7b07336894824527e06b3a8bfa0496a0c5648c626c4"
     }
   }
 }

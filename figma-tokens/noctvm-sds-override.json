@@ -1,0 +1,649 @@
+{
+  "sds": {
+    "color": {
+      "background": {
+        "default": {
+          "default": {
+            "value": "#050505",
+            "description": "App background — void black",
+            "type": "color"
+          },
+          "secondary": {
+            "value": "#0A0A0A",
+            "description": "Surface — obsidian",
+            "type": "color"
+          },
+          "tertiary": {
+            "value": "#111111",
+            "description": "Surface light — smoke",
+            "type": "color"
+          }
+        },
+        "brand": {
+          "default": {
+            "value": "#7C3AED",
+            "description": "Brand primary — ultraviolet",
+            "type": "color"
+          },
+          "secondary": {
+            "value": "#8B5CF6",
+            "description": "Brand hover — violet",
+            "type": "color"
+          },
+          "tertiary": {
+            "value": "#1A1A1A",
+            "description": "Selected/active bg — ash",
+            "type": "color"
+          }
+        },
+        "neutral": {
+          "default": {
+            "value": "#1A1A1A",
+            "description": "Neutral bg — ash",
+            "type": "color"
+          },
+          "secondary": {
+            "value": "#2A2A2A",
+            "description": "Neutral hover — concrete",
+            "type": "color"
+          },
+          "tertiary": {
+            "value": "#2A2A2A",
+            "description": "Neutral active — concrete",
+            "type": "color"
+          }
+        },
+        "positive": {
+          "default": {
+            "value": "#10B981",
+            "description": "Success bg — emerald",
+            "type": "color"
+          }
+        },
+        "negative": {
+          "default": {
+            "value": "#EF4444",
+            "description": "Error bg — signal red",
+            "type": "color"
+          }
+        },
+        "warning": {
+          "default": {
+            "value": "#D4A843",
+            "description": "Warning bg — gold",
+            "type": "color"
+          }
+        }
+      },
+      "border": {
+        "default": {
+          "default": {
+            "value": "#1A1A1A",
+            "description": "Default border",
+            "type": "color"
+          },
+          "secondary": {
+            "value": "#2A2A2A",
+            "description": "Secondary border",
+            "type": "color"
+          }
+        },
+        "brand": {
+          "default": {
+            "value": "#7C3AED",
+            "description": "Brand border — ultraviolet",
+            "type": "color"
+          }
+        },
+        "neutral": {
+          "default": {
+            "value": "#1A1A1A",
+            "description": "Neutral border",
+            "type": "color"
+          },
+          "secondary": {
+            "value": "#2A2A2A",
+            "description": "Neutral secondary border — concrete",
+            "type": "color"
+          }
+        },
+        "positive": {
+          "default": {
+            "value": "#10B981",
+            "description": "Success border",
+            "type": "color"
+          }
+        },
+        "negative": {
+          "default": {
+            "value": "#EF4444",
+            "description": "Error border",
+            "type": "color"
+          }
+        }
+      },
+      "text": {
+        "default": {
+          "default": {
+            "value": "#E8E4DF",
+            "description": "Body text — bone",
+            "type": "color"
+          },
+          "secondary": {
+            "value": "#8A8A8A",
+            "description": "Muted text — steel",
+            "type": "color"
+          },
+          "tertiary": {
+            "value": "#4A4A4A",
+            "description": "Disabled text",
+            "type": "color"
+          }
+        },
+        "brand": {
+          "on-brand": {
+            "value": "#FFFFFF",
+            "description": "Text on brand bg",
+            "type": "color"
+          },
+          "on-brand-secondary": {
+            "value": "#E8E4DF",
+            "description": "Active nav item text",
+            "type": "color"
+          },
+          "default": {
+            "value": "#A78BFA",
+            "description": "Brand text — orchid",
+            "type": "color"
+          }
+        },
+        "destructive": {
+          "default": {
+            "value": "#EF4444",
+            "description": "Error text — signal",
+            "type": "color"
+          }
+        },
+        "success": {
+          "default": {
+            "value": "#10B981",
+            "description": "Success text — emerald",
+            "type": "color"
+          }
+        },
+        "warning": {
+          "default": {
+            "value": "#D4A843",
+            "description": "Warning text — gold",
+            "type": "color"
+          }
+        }
+      },
+      "icon": {
+        "default": {
+          "default": {
+            "value": "#8A8A8A",
+            "description": "Default icon — steel",
+            "type": "color"
+          }
+        },
+        "brand": {
+          "default": {
+            "value": "#7C3AED",
+            "description": "Brand icon — ultraviolet",
+            "type": "color"
+          }
+        }
+      }
+    },
+    "typography": {
+      "body": {
+        "font-family": {
+          "value": "DM Sans",
+          "description": "Body font family",
+          "type": "fontFamilies"
+        },
+        "size": {
+          "medium": {
+            "value": "14px",
+            "description": "Body medium size",
+            "type": "fontSizes"
+          },
+          "small": {
+            "value": "12px",
+            "description": "Body small size (label/caption)",
+            "type": "fontSizes"
+          },
+          "large": {
+            "value": "16px",
+            "description": "Body large size",
+            "type": "fontSizes"
+          }
+        },
+        "font-weight": {
+          "regular": {
+            "value": "400",
+            "description": "Body regular weight",
+            "type": "fontWeights"
+          },
+          "medium": {
+            "value": "500",
+            "description": "Body medium weight",
+            "type": "fontWeights"
+          },
+          "strong": {
+            "value": "700",
+            "description": "Body bold weight",
+            "type": "fontWeights"
+          }
+        }
+      },
+      "heading": {
+        "font-family": {
+          "value": "Syne",
+          "description": "Heading/display font",
+          "type": "fontFamilies"
+        },
+        "font-weight": {
+          "default": {
+            "value": "700",
+            "description": "Heading bold",
+            "type": "fontWeights"
+          },
+          "light": {
+            "value": "400",
+            "description": "Heading regular",
+            "type": "fontWeights"
+          }
+        }
+      },
+      "mono": {
+        "font-family": {
+          "value": "JetBrains Mono",
+          "description": "Mono / system font",
+          "type": "fontFamilies"
+        },
+        "font-weight": {
+          "regular": {
+            "value": "400",
+            "description": "Mono regular weight",
+            "type": "fontWeights"
+          }
+        }
+      }
+    },
+    "size": {
+      "space": {
+        "100": {
+          "value": "4px",
+          "type": "spacing"
+        },
+        "200": {
+          "value": "8px",
+          "type": "spacing"
+        },
+        "300": {
+          "value": "12px",
+          "type": "spacing"
+        },
+        "400": {
+          "value": "16px",
+          "type": "spacing"
+        },
+        "600": {
+          "value": "24px",
+          "type": "spacing"
+        },
+        "800": {
+          "value": "32px",
+          "type": "spacing"
+        },
+        "1000": {
+          "value": "40px",
+          "type": "spacing"
+        },
+        "1200": {
+          "value": "48px",
+          "type": "spacing"
+        },
+        "1600": {
+          "value": "64px",
+          "type": "spacing"
+        },
+        "2000": {
+          "value": "80px",
+          "type": "spacing"
+        },
+        "4000": {
+          "value": "160px",
+          "type": "spacing"
+        }
+      },
+      "radius": {
+        "100": {
+          "value": "4px",
+          "type": "borderRadius"
+        },
+        "200": {
+          "value": "8px",
+          "description": "sm — rounded-lg",
+          "type": "borderRadius"
+        },
+        "300": {
+          "value": "12px",
+          "description": "md — rounded-xl",
+          "type": "borderRadius"
+        },
+        "400": {
+          "value": "16px",
+          "description": "lg — rounded-2xl",
+          "type": "borderRadius"
+        },
+        "600": {
+          "value": "24px",
+          "description": "xl — rounded-3xl",
+          "type": "borderRadius"
+        },
+        "full": {
+          "value": "9999px",
+          "description": "pill / full round",
+          "type": "borderRadius"
+        }
+      },
+      "stroke": {
+        "border": {
+          "value": "1px",
+          "type": "borderWidth"
+        },
+        "focus": {
+          "value": "2px",
+          "type": "borderWidth"
+        }
+      }
+    }
+  },
+  "noctvm": {
+    "color": {
+      "void": {
+        "value": "#050505",
+        "description": "Deepest black",
+        "type": "color"
+      },
+      "obsidian": {
+        "value": "#0A0A0A",
+        "description": "Surface",
+        "type": "color"
+      },
+      "smoke": {
+        "value": "#111111",
+        "description": "Surface light",
+        "type": "color"
+      },
+      "ash": {
+        "value": "#1A1A1A",
+        "description": "Subtle bg",
+        "type": "color"
+      },
+      "concrete": {
+        "value": "#2A2A2A",
+        "description": "Hover bg",
+        "type": "color"
+      },
+      "steel": {
+        "value": "#8A8A8A",
+        "description": "Muted text",
+        "type": "color"
+      },
+      "bone": {
+        "value": "#E8E4DF",
+        "description": "Body text",
+        "type": "color"
+      },
+      "chalk": {
+        "value": "#F5F3F0",
+        "description": "Near-white",
+        "type": "color"
+      },
+      "white": {
+        "value": "#FFFFFF",
+        "description": "Pure white",
+        "type": "color"
+      },
+      "ultraviolet": {
+        "value": "#7C3AED",
+        "description": "Brand primary",
+        "type": "color"
+      },
+      "violet": {
+        "value": "#8B5CF6",
+        "description": "Brand hover",
+        "type": "color"
+      },
+      "orchid": {
+        "value": "#A78BFA",
+        "description": "Brand light",
+        "type": "color"
+      },
+      "lavender": {
+        "value": "#C4B5FD",
+        "description": "Brand pale",
+        "type": "color"
+      },
+      "magenta": {
+        "value": "#DB2777",
+        "description": "Accent magenta",
+        "type": "color"
+      },
+      "fuchsia": {
+        "value": "#E879A0",
+        "description": "Accent fuchsia",
+        "type": "color"
+      },
+      "neon": {
+        "value": "#C026D3",
+        "description": "Neon purple",
+        "type": "color"
+      },
+      "emerald": {
+        "value": "#10B981",
+        "description": "Success / emerald",
+        "type": "color"
+      },
+      "gold": {
+        "value": "#D4A843",
+        "description": "Gold / prestige",
+        "type": "color"
+      },
+      "signal": {
+        "value": "#EF4444",
+        "description": "Error / alert",
+        "type": "color"
+      },
+      "midnight": {
+        "value": "#1A0A2E",
+        "description": "Deep violet bg",
+        "type": "color"
+      }
+    },
+    "glass": {
+      "bg": {
+        "value": "rgba(255,255,255,0.07)",
+        "description": "Frosted glass background",
+        "type": "color"
+      },
+      "bg-modal": {
+        "value": "rgba(18,18,18,0.88)",
+        "description": "Modal glass bg",
+        "type": "color"
+      },
+      "border": {
+        "value": "rgba(255,255,255,0.10)",
+        "description": "Glass border",
+        "type": "color"
+      },
+      "border-subtle": {
+        "value": "rgba(255,255,255,0.08)",
+        "description": "Subtle glass border",
+        "type": "color"
+      },
+      "inset-highlight": {
+        "value": "rgba(255,255,255,0.05)",
+        "description": "Glass inset sheen",
+        "type": "color"
+      },
+      "blur-md": {
+        "value": "12px",
+        "description": "Standard glass blur",
+        "type": "other"
+      },
+      "blur-lg": {
+        "value": "16px",
+        "description": "Large glass blur",
+        "type": "other"
+      },
+      "blur-xl": {
+        "value": "25px",
+        "description": "Header/modal blur",
+        "type": "other"
+      }
+    },
+    "radius": {
+      "sm": {
+        "value": "8px",
+        "type": "borderRadius"
+      },
+      "md": {
+        "value": "12px",
+        "type": "borderRadius"
+      },
+      "lg": {
+        "value": "16px",
+        "type": "borderRadius"
+      },
+      "xl": {
+        "value": "24px",
+        "type": "borderRadius"
+      }
+    },
+    "duration": {
+      "fast": {
+        "value": "150ms",
+        "type": "other"
+      },
+      "normal": {
+        "value": "300ms",
+        "type": "other"
+      },
+      "slow": {
+        "value": "500ms",
+        "type": "other"
+      }
+    },
+    "z": {
+      "dropdown": {
+        "value": "70",
+        "type": "other"
+      },
+      "sheet": {
+        "value": "80",
+        "type": "other"
+      },
+      "popover": {
+        "value": "90",
+        "type": "other"
+      },
+      "modal": {
+        "value": "100",
+        "type": "other"
+      },
+      "overlay": {
+        "value": "110",
+        "type": "other"
+      },
+      "viewer": {
+        "value": "200",
+        "type": "other"
+      },
+      "editor": {
+        "value": "250",
+        "type": "other"
+      },
+      "toast": {
+        "value": "200",
+        "type": "other"
+      }
+    },
+    "typography": {
+      "size": {
+        "hero": {
+          "value": "48px",
+          "type": "fontSizes"
+        },
+        "h1": {
+          "value": "36px",
+          "type": "fontSizes"
+        },
+        "h2": {
+          "value": "24px",
+          "type": "fontSizes"
+        },
+        "h3": {
+          "value": "18px",
+          "type": "fontSizes"
+        },
+        "body-lg": {
+          "value": "16px",
+          "type": "fontSizes"
+        },
+        "body": {
+          "value": "14px",
+          "type": "fontSizes"
+        },
+        "label": {
+          "value": "12px",
+          "type": "fontSizes"
+        },
+        "caption": {
+          "value": "10px",
+          "type": "fontSizes"
+        },
+        "micro": {
+          "value": "9px",
+          "type": "fontSizes"
+        }
+      }
+    },
+    "overlay": {
+      "subtle": {
+        "value": "rgba(0,0,0,0.4)",
+        "type": "color"
+      },
+      "medium": {
+        "value": "rgba(0,0,0,0.6)",
+        "type": "color"
+      },
+      "heavy": {
+        "value": "rgba(0,0,0,0.8)",
+        "type": "color"
+      }
+    },
+    "glow": {
+      "violet": {
+        "value": "0 0 20px rgba(124,58,237,0.3)",
+        "description": "Violet glow shadow",
+        "type": "boxShadow"
+      },
+      "gold": {
+        "value": "0 0 20px rgba(212,168,67,0.3)",
+        "description": "Gold glow shadow",
+        "type": "boxShadow"
+      }
+    }
+  },
+  "$metadata": {
+    "tokenSetOrder": [
+      "sds",
+      "noctvm"
+    ]
+  }
+}

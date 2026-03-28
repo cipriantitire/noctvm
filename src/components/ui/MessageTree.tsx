@@ -56,6 +56,7 @@ const TreeGridItem = ({
 }: TreeGridProps) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div className="grid grid-cols-[24px_minmax(0,1fr)] w-full relative animate-fade-in group/node">
@@ -63,18 +64,9 @@ const TreeGridItem = ({
       {/* 
         MAIN THREAD VERTICAL LINE 
         Only draw it if we have replies and the thread is not collapsed.
-        It sits safely inside the left 24px column, passing behind the content.
-        Z-index is 0 so the opaque child wrappers paint over it.
+        This now only spans from the avatar down to where the replies section begins.
+        The per-child elbow containers draw their own vertical continuation segments.
       */}
-      {!isCollapsed && node.replies && node.replies.length > 0 && (
-        <div 
-          className="absolute top-[28px] bottom-0 left-0 w-[24px] flex justify-center z-0 cursor-pointer pointer-events-auto group/line"
-          onClick={() => setIsCollapsed(true)}
-          title="Collapse thread"
-        >
-          <div className="w-[2px] h-full bg-noctvm-silver/10 group-hover/line:bg-noctvm-silver/30 transition-colors" />
-        </div>
-      )}
 
       {/* HEADER: AVATAR & META */}
       <div 
@@ -115,7 +107,16 @@ const TreeGridItem = ({
         <>
           {/* BODY */}
           <div className="contents">
-            <div className="z-0 pointer-events-none" />
+            {/* Left column stem — always clickable to collapse this node. Visible line only when replies exist. */}
+            <div 
+              className="relative cursor-pointer"
+              onClick={() => setIsCollapsed(true)}
+              title="Collapse"
+            >
+              {node.replies && node.replies.length > 0 && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-[hsl(240_5%_26%)]" />
+              )}
+            </div>
             
             {/* Body text goes into 1fr column. WE ADD ml-3 HERE too, so it aligns with the username! */}
             <div className="min-w-0 ml-3 mt-1 pb-1 relative z-10">
@@ -146,12 +147,16 @@ const TreeGridItem = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-xs text-white/80 leading-relaxed pr-8 relative group/body">
+                <div 
+                  className="text-xs text-white/80 leading-relaxed pr-8 relative group/body"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                >
                   {node.content}
 
                   {/* Popover Options on Hover */}
-                  {!editingId && (onEdit || onDelete) && (
-                    <div className={`absolute right-0 top-0 group/menu transition-all z-20 opacity-0 group-hover/node:opacity-100`}>
+                  {!editingId && (onEdit || onDelete) && node.isOwner !== false && (
+                    <div className={`absolute right-0 top-0 group/menu transition-all z-20 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                       <button 
                         onClick={() => setShowOptions(!showOptions)}
                         className={`p-1 transition-colors ${showOptions ? 'text-white' : 'text-noctvm-silver/40 hover:text-white'}`}
@@ -190,7 +195,16 @@ const TreeGridItem = ({
 
           {/* ACTIONS ROW */}
           <div className="contents">
-            <div className="z-0 pointer-events-none" />
+            {/* Left column stem — always clickable to collapse this node. Visible line only when replies exist. */}
+            <div 
+              className="relative cursor-pointer"
+              onClick={() => setIsCollapsed(true)}
+              title="Collapse"
+            >
+              {node.replies && node.replies.length > 0 && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-[hsl(240_5%_26%)]" />
+              )}
+            </div>
             <div className="min-w-0 ml-3 pb-3 relative z-10">
               {!editingId && (
                 <div className="flex items-center gap-4">
@@ -242,28 +256,34 @@ const TreeGridItem = ({
 
           {/* REPLIES */}
           {node.replies && node.replies.length > 0 && (
-             <div className="contents hover:[&>.elbow>div]:border-noctvm-silver/30">
+             <div className="contents">
                {node.replies.map((reply, index) => {
                  const isLast = index === node.replies!.length - 1;
                  return (
                    <React.Fragment key={reply.id}>
                      
                      {/* 
-                       THE ELBOW 
-                       - Sits in the parent's 24px left column.
-                       - If it is the last child, we make the container opaque (bg-noctvm-background). 
-                         Because this container naturally stretches the entire height of the right column (the nested child),
-                         this perfectly masks out the main thread line underneath it exactly from this point onwards!
+                       THE ELBOW
+                       Each child draws its own vertical + horizontal connector.
+                       - Non-last children: vertical line runs full height (top to bottom)
+                         connecting to the next sibling below.
+                       - Last child: vertical line only runs from top to the elbow
+                         junction point (12px), then stops. No masking needed.
+                       The elbow curve connects the vertical to the child.
+                       All lines are 100% opaque to prevent overlap artifacts.
                      */}
-                     <div className={`elbow relative w-[24px] pointer-events-none z-10 ${isLast ? 'bg-noctvm-background' : 'bg-transparent'}`}>
-                       {/* The actual elbow curve. It starts in the center of the 24px column (right: 0, w: 13) and curves down. */}
-                       <div className="absolute right-0 top-0 w-[13px] h-[12px] border-l-[2px] border-b-[2px] border-noctvm-silver/10 rounded-bl-[12px] transition-colors" />
+                     <div className="elbow relative w-[24px] pointer-events-none z-10">
+                       {/* Vertical continuation — only non-last children need this to connect to the next sibling */}
+                       {!isLast && (
+                         <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-[hsl(240_5%_26%)]" />
+                       )}
+                       {/* L-shaped elbow: border-l is the vertical stroke through the elbow height, border-b is the horizontal arm */}
+                       <div className="absolute right-0 top-0 w-[13px] h-[12px] border-l-[2px] border-b-[2px] border-[hsl(240_5%_26%)] rounded-bl-[12px]" />
                      </div>
                      
                      {/* 
-                       THE CHILD 
-                       - NO 'ml' margin here! We want this flushed perfectly with the left column so the Elbow connects!
-                       - We add pb-3 to give natural vertical spacing to the next reply.
+                       THE CHILD
+                       Flushed with the left column so the elbow connects cleanly.
                      */}
                      <div className="min-w-0 pb-3">
                        <TreeGridItem 

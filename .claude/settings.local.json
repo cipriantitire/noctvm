@@ -59,7 +59,9 @@
       "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-create-view",
       "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-update-page",
       "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-create-pages",
-      "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-move-pages"
+      "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-move-pages",
+      "Bash(find C:/Users/cipri/NOCTVM/src -path *[handle]* -name *.tsx -o -path */[handle]/* -name *.tsx)",
+      "Bash(node scripts/export-figma-tokens.mjs)"
     ]
   }
 }
