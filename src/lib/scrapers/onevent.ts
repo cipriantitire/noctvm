@@ -78,8 +78,38 @@ export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
       console.log(`[onevent] ${city}: ${htmlUrls.length} HTML URLs (JSON-LD skipped — unreliable on listing pages)`);
 
       const events = await batchFetch(htmlUrls, city, { limit: 30, batchSize: 10, allowedCities });
-      console.log(`[onevent] ${city}: kept ${events.length} music events`);
-      allEvents.push(...events);
+      
+      // Deduplicate locally because onevent frequently posts the exact same event
+      // under different URLs with slightly varying titles and null/"Venue TBC" venues
+      const uniqueEvents: ScrapedEvent[] = [];
+      for (const e of events) {
+        const isDuplicate = uniqueEvents.some(u => {
+          if (u.date !== e.date) return false;
+          // Exact text match check first before fuzzy
+          if (u.title === e.title) return true;
+          
+          // Fuzzy word overlap check for differently styled titles
+          // e.g. "Concert Live București – Ardor de Primăvară cu AMBRA" vs "Concert -Ardor de Primavera♥️-AMBRA"
+          const getWords = (s: string) => s.toLowerCase().replace(/[^\w\săâîșț]/gi, '').split(/\s+/).filter(w => w.length > 2);
+          const wordsA = getWords(e.title);
+          const wordsB = getWords(u.title);
+          
+          const intersection = wordsA.filter(w => wordsB.includes(w)).length;
+          const minLen = Math.min(wordsA.length, wordsB.length);
+          
+          // 60% overlap logic
+          return minLen > 0 && (intersection / minLen) >= 0.6;
+        });
+
+        if (!isDuplicate) {
+          uniqueEvents.push(e);
+        } else {
+          console.log(`[onevent] Dropped internal duplicate: "${e.title}"`);
+        }
+      }
+
+      console.log(`[onevent] ${city}: kept ${uniqueEvents.length} music events`);
+      allEvents.push(...uniqueEvents);
     } catch (err) {
       console.warn(`[onevent] failed for ${url}:`, err);
     }
