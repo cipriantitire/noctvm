@@ -83,7 +83,7 @@ export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
       // under different URLs with slightly varying titles and null/"Venue TBC" venues
       const uniqueEvents: ScrapedEvent[] = [];
       for (const e of events) {
-        const isDuplicate = uniqueEvents.some(u => {
+        const existingIdx = uniqueEvents.findIndex(u => {
           if (u.date !== e.date) return false;
           // Exact text match check first before fuzzy
           if (u.title === e.title) return true;
@@ -101,10 +101,21 @@ export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
           return minLen > 0 && (intersection / minLen) >= 0.6;
         });
 
-        if (!isDuplicate) {
+        if (existingIdx === -1) {
           uniqueEvents.push(e);
         } else {
-          console.log(`[onevent] Dropped internal duplicate: "${e.title}"`);
+          // We found a duplicate. Swap them if the new one is "better" (e.g. has a real venue vs Venue TBC)
+          const u = uniqueEvents[existingIdx];
+          const hasRealVenue = (v: string) => v && !v.includes('TBC') ? 2 : 0;
+          const uScore = hasRealVenue(u.venue) + (u.ticket_url ? 1 : 0) + (u.image_url ? 1 : 0);
+          const eScore = hasRealVenue(e.venue) + (e.ticket_url ? 1 : 0) + (e.image_url ? 1 : 0);
+          
+          if (eScore > uScore) {
+            console.log(`[onevent] Replaced internal duplicate with better version: "${e.title}" (better venue/attributes than "${u.title}")`);
+            uniqueEvents[existingIdx] = e;
+          } else {
+            console.log(`[onevent] Dropped internal duplicate: "${e.title}"`);
+          }
         }
       }
 
