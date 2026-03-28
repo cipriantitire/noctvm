@@ -67,7 +67,7 @@ function PrestigeCard({ compact = false }: { compact?: boolean }) {
             </p>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <Badge variant="outlined" className="text-noctvm-gold border-noctvm-gold/40 bg-noctvm-gold/10 text-sm px-3 py-1">
+            <Badge variant="outline" className="text-noctvm-gold border-noctvm-gold/40 bg-noctvm-gold/10 text-sm px-3 py-1">
               {MOCK_POCKET.rank}
             </Badge>
             <p className="text-[#8A8A8A] text-[10px]">🌙 Rank</p>

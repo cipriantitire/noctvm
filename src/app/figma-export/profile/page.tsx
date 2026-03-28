@@ -124,7 +124,7 @@ function MobileView() {
         <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/5">
           <span className="text-noctvm-gold text-xs">🌙</span>
           <span className="text-[#E8E4DF] text-xs font-medium">{MOCK_USER.moonrays.toLocaleString()} Moonrays</span>
-          <Badge variant="outlined" className="ml-auto text-noctvm-gold border-noctvm-gold/30 bg-noctvm-gold/10">
+          <Badge variant="outline" className="ml-auto text-noctvm-gold border-noctvm-gold/30 bg-noctvm-gold/10">
             {MOCK_USER.rank}
           </Badge>
         </div>
@@ -226,7 +226,7 @@ function DesktopView() {
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-noctvm-gold/10 border border-noctvm-gold/20">
                 <span className="text-noctvm-gold text-sm">🌙</span>
                 <span className="text-noctvm-gold text-sm font-bold">{MOCK_USER.moonrays.toLocaleString()} Moonrays</span>
-                <Badge variant="outlined" className="text-noctvm-gold border-noctvm-gold/30">{MOCK_USER.rank}</Badge>
+                <Badge variant="outline" className="text-noctvm-gold border-noctvm-gold/30">{MOCK_USER.rank}</Badge>
               </div>
             </div>
             <Tabs tabs={profileTabs} activeTab={tab} onChange={setTab} />

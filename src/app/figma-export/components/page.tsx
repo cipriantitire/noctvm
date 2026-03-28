@@ -156,9 +156,8 @@ export default function ComponentsExportPage() {
             <IconButton size="lg"><CogIcon className="w-5 h-5" /></IconButton>
           </Row>
           <Row label="variants">
-            <IconButton variant="ghost"><MoonIcon className="w-4 h-4" /></IconButton>
-            <IconButton variant="outline"><SearchIcon className="w-4 h-4" /></IconButton>
-            <IconButton variant="solid"><BellIcon className="w-4 h-4" /></IconButton>
+            <IconButton variant="overlay"><MoonIcon className="w-4 h-4" /></IconButton>
+            <IconButton variant="plain"><SearchIcon className="w-4 h-4" /></IconButton>
           </Row>
         </Section>
 
@@ -169,7 +168,7 @@ export default function ComponentsExportPage() {
             <Button variant="outline" size="sm">Events</Button>
             <Button variant="outline" size="sm">Venues</Button>
           </ButtonGroup>
-          <ButtonGroup variant="primary">
+          <ButtonGroup>
             <Button variant="primary" size="sm">Day</Button>
             <Button variant="primary" size="sm">Week</Button>
             <Button variant="primary" size="sm">Month</Button>
@@ -256,8 +255,8 @@ export default function ComponentsExportPage() {
         <Section title="Divider">
           <div className="w-64 flex flex-col gap-4">
             <Divider />
-            <Divider label="or" />
-            <Divider variant="gradient" />
+            <Divider />
+            <Divider />
           </div>
         </Section>
 
@@ -298,7 +297,7 @@ export default function ComponentsExportPage() {
 
         {/* ──────────────────────────────────────────────── PAGINATION */}
         <Section title="Pagination">
-          <Pagination total={10} current={3} onChange={() => {}} />
+          <Pagination total={10} page={3} onChange={() => {}} />
         </Section>
 
         {/* ──────────────────────────────────────────────── PROGRESS */}
@@ -338,10 +337,10 @@ export default function ComponentsExportPage() {
         {/* ────────────────────────────────────────────── STORY PROGRESS */}
         <Section title="StoryProgressBar">
           <div className="w-72">
-            <StoryProgressBar count={5} active={2} progress={0.6} />
+            <StoryProgressBar totalStories={5} currentIndex={2} progress={0.6} />
           </div>
           <div className="w-72">
-            <StoryProgressBar count={3} active={0} progress={1} />
+            <StoryProgressBar totalStories={3} currentIndex={0} progress={1} />
           </div>
         </Section>
 
@@ -351,8 +350,8 @@ export default function ComponentsExportPage() {
             <Field label="Email">
               <Input placeholder="you@noctvm.app" type="email" />
             </Field>
-            <Field label="With error" error="This field is required">
-              <Input placeholder="Enter value" error />
+            <Field label="With error">
+              <Input placeholder="Enter value" />
             </Field>
             <Field label="Disabled">
               <Input placeholder="Disabled" disabled />
@@ -608,13 +607,13 @@ export default function ComponentsExportPage() {
         <Section title="Listbox">
           <Listbox className="w-56">
             <ListboxSection title="Genre">
-              <ListboxItem value="techno">Techno</ListboxItem>
-              <ListboxItem value="house">House</ListboxItem>
-              <ListboxItem value="ambient">Ambient</ListboxItem>
+              <ListboxItem>Techno</ListboxItem>
+              <ListboxItem>House</ListboxItem>
+              <ListboxItem>Ambient</ListboxItem>
             </ListboxSection>
             <ListboxSection title="City">
-              <ListboxItem value="bucuresti">București</ListboxItem>
-              <ListboxItem value="constanta">Constanța</ListboxItem>
+              <ListboxItem>București</ListboxItem>
+              <ListboxItem>Constanța</ListboxItem>
             </ListboxSection>
           </Listbox>
         </Section>

@@ -62,7 +62,6 @@ function MobileView() {
             key={evt.id}
             event={evt}
             onClick={() => {}}
-            onVenueClick={() => {}}
           />
         ))}
       </div>
@@ -123,7 +122,6 @@ function DesktopView() {
               key={evt.id}
               event={evt}
               onClick={() => {}}
-              onVenueClick={() => {}}
             />
           ))}
         </div>
