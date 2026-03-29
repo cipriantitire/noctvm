@@ -253,7 +253,7 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
         if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('iabilet.ro') || ticket_url.includes('ambilet.ro')) {
           const extHtml = await fetchHtml(ticket_url);
           const { extractPriceFromHtml } = await import('./utils');
-          const extPrice = extractPriceFromHtml(extHtml);
+          const extPrice = extractPriceFromHtml(extHtml, ticket_url);
           if (extPrice && extPrice !== 'FREE') price = extPrice;
         }
       } catch (e) { /* ignore */ }
