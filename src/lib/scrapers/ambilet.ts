@@ -57,8 +57,8 @@ function extractEventUrls(html: string): string[] {
 
 export async function scrapeAmbilet(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
-  const limit = Math.max(20, Math.min(settings?.scan_depth ?? 120, 300));
-  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 10));
+  const limit = Math.max(20, Math.min(settings?.scan_depth ?? 60, 80));
+  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 6));
 
   for (const { url, city } of LIST_URLS) {
     try {

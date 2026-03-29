@@ -72,8 +72,8 @@ function extractHtmlUrls(html: string): string[] {
 
 export async function scrapeIabilet(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
-  const limit = Math.max(30, Math.min(settings?.scan_depth ?? 100, 300));
-  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 10));
+  const limit = Math.max(30, Math.min(settings?.scan_depth ?? 60, 60));
+  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 6));
 
   for (const { url, city, allowedCities } of LIST_URLS) {
     try {

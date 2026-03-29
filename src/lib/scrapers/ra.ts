@@ -530,7 +530,7 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
 
   const [bucharest, romania] = await Promise.all([
     fetchForArea(BUCHAREST_AREA_ID, 'Bucharest', 60),
-    fetchForArea(ROMANIA_AREA_ID, 'Constanta', Math.max(30, settings?.limit ?? 40))
+    fetchForArea(ROMANIA_AREA_ID, 'Constanta', Math.max(20, settings?.limit ?? 30))
   ]);
 
   // Filter romania events for only those that mention Constanta in venue or description

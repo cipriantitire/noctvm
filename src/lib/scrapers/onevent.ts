@@ -69,8 +69,8 @@ function extractHtmlUrls(html: string): string[] {
 
 export async function scrapeOnevent(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
-  const limit = Math.max(25, Math.min(settings?.scan_depth ?? 150, 350));
-  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 10, 12));
+  const limit = Math.max(25, Math.min(settings?.scan_depth ?? 80, 120));
+  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 8, 10));
 
   for (const { url, city, allowedCities } of LIST_URLS) {
     try {
