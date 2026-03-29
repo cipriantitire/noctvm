@@ -187,30 +187,30 @@ const HARD_BLOCK_TERMS = [
   'educativ', 'educational', 'clasa a', 'cambridge', 'scoala', 'gradinita',
   'balet', 'ballet', 'lectii', 'festival',
   'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'palatul sutu',
-  'expozitia', 'vernisaj', 'show de comedie', 'show comedie', 'comedie pentru', 'comedie corporatisti',
+  'expozitia', 'vernisaj', 
+  // Theatre & Comedy
+  'show de comedie', 'show comedie', 'comedie pentru', 'comedie corporatisti', 'stand-up', 'standup', 'stand up', 'comedy show', 'improv',
   'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
   'teatru de vara', 'teatrul de vara', 'teatru vara', 'teatru aer liber',
-  'piesa de teatru', 'teatru cu', 'joc de rol', 'magie pentru',
-  'magician', 'clovn', 'ursitoare', 'animatori',
+  'piesa de teatru', 'teatru cu', 'joc de rol', 'teatru', 'theatre',
+  'actori:', 'regia:', 'distributia:', 'reprezentatie',
+  // Magic
+  'magie pentru', 'magician', 'clovn', 'ursitoare', 'animatori', 'circ', 'circus', 'magie', 'magic show',
+  // Salsa / Latin specific blocked terms
   'salsa revolution', 'salsa congress',
 ];
 
 /** Soft blocks — dropped unless a strong music term is also present. */
 const SOFT_BLOCK_TERMS = [
-  'teatru', 'theatre', 'piesa de teatru', 'spectacol de teatru',
-  'actori:', 'regia:', 'distributia:', 'reprezentatie',
   'opera ', 'operă', 'simfon', 'filarmon', 'orchester', 'cor ', 'fanfara',
-  'stand-up', 'standup', 'stand up', 'comedy show', 'improv', 'comedie pentru', 'show de comedie',
-  'targ', 'târg', 'expo ', 'expozitie', 'expozitia', 'expoziție', 'vernisaj', 'vernissage', 'bazar',
+  'targ', 'târg', 'expo ', 'expozitie', 'expozitia', 'expoziție', 'bazar',
   'sport', 'atletism', 'maraton', 'match', 'meci', 'fotbal', 'tenis',
   'cinema', 'film ', ' film', 'movie', 'proiectie',
   'culinar', 'cooking', 'tasting', 'degustare', 'degustari',
   'yoga', 'wellness', 'meditatie', 'meditație',
   'conferinta', 'conferința', 'conference', 'business', 'forum', 'summit',
-  'circ', 'circus', 'magie', 'magic show', 'lectura', 'simulare',
-  'training', 'curs', 'cursuri', 'workshop', 'seminar', 'atelier',
+  'lectura', 'simulare', 'training', 'curs', 'cursuri', 'workshop', 'seminar', 'atelier',
   'prezentare', 'lansare carte', 'book launch', 'dezvoltare',
-  'vernisaj', 'muzeul', 'palatul sutu', 'expozitia',
   // Automotive / off-road events (not music)
   'off-road', 'offroad', '4x4', 'automobilism', 'rally', 'curse auto', 'motorsport',
 ];
@@ -218,7 +218,7 @@ const SOFT_BLOCK_TERMS = [
 const STRONG_MUSIC_TERMS = [
   'live set', 'dj set', 'rave', 'club night',
   'techno', 'house', 'trance', 'drum and bass', 'dnb', 'edm', 'electronic', 'underground',
-  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock ', 'metal', 'punk', 'alternativ',
+  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock', 'metal', 'punk', 'alternativ',
   'disco', 'funk', 'soul', 'reggae', 'clubbing', 'dancefloor',
   'manele', 'manea',
 ];
@@ -232,12 +232,22 @@ export function guessGenres(title: string, desc: string): string[] | null {
 
   const t = normalize(title) + ' ' + normalize(desc);
 
-  // Hard blocks: use the normalized helper to match both ways
+  // Helper for word-boundary matching (prevents "terapie" matching "rap")
+  const hasTerm = (term: string) => {
+    const escaped = normalize(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // If term explicitly contains leading/trailing spaces in the definition, just use .includes
+    if (term.startsWith(' ') || term.endsWith(' ')) {
+      return t.includes(normalize(term));
+    }
+    return new RegExp(`\\b${escaped}\\b`).test(t);
+  };
+
+  // Hard blocks: aggressive inclusion match is fine for blocks (e.g. "teatrul" blocks "teatru")
   if (HARD_BLOCK_TERMS.some(term => t.includes(normalize(term)))) return null;
 
   // Soft blocks
   const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalize(term)));
-  const isStrongMusic  = STRONG_MUSIC_TERMS.some(sm => t.includes(normalize(sm)));
+  const isStrongMusic = STRONG_MUSIC_TERMS.some(sm => hasTerm(sm));
 
   if (isSoftBlocked && !isStrongMusic) return null;
 
@@ -250,7 +260,7 @@ export function guessGenres(title: string, desc: string): string[] | null {
     'Hip-Hop':      ['hip-hop', 'hip hop', 'hiphop', 'rap', 'trap', 'grime'],
     'Manele':       ['manele', 'manea', 'maneliada', 'manelist'],
     'Jazz':         ['jazz', 'blues', 'soul', 'funk'],
-    'Rock':         ['rock ', ' rock', 'alternative', 'indie', 'punk', 'grunge'],
+    'Rock':         ['rock', 'alternative', 'indie', 'punk', 'grunge'],
     'Metal':        ['metal', 'hardcore', 'doom', 'sludge', 'deathcore'],
     'Drum & Bass':  ['dnb', 'drum and bass', 'drum & bass', 'jungle', 'liquid'],
     'Live Music':   ['live band', 'concert', 'live music', 'lansare album', 'recital', 'eveniment muzical', 'live act'],
@@ -262,12 +272,11 @@ export function guessGenres(title: string, desc: string): string[] | null {
   };
 
   for (const [genre, keywords] of Object.entries(mapping)) {
-    if (keywords.some(k => t.includes(k))) found.add(genre);
+    if (keywords.some(k => hasTerm(k))) found.add(genre);
   }
 
   if (found.size === 0) {
-    // Only match as Electronic if it's clearly a party term, NOT just the word "club" 
-    // which appears in many venue names (Doors Club, booking, etc)
+    // Only match as Electronic if it's clearly a party term
     if (/\b(party|night|rave|dancefloor|discoteca|clubbing|afterparty|nightlife)\b/.test(t)) {
       found.add('Electronic');
     } else if (isStrongMusic) {
