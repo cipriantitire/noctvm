@@ -121,9 +121,9 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     const description = clean(og['og:description'] || og['description'] || '') || null;
     const image_url = og['og:image'] || '';
 
-    // Genre filter — Control Club is a music venue so most events pass
-    const genres = guessGenres(stub.title, description ?? '');
-    if (!genres) return null;
+    // Control Club is trusted source; keep events even if generic genre heuristics are uncertain.
+    // This prevents valid venue events from being dropped by aggressive global filters.
+    const genres = guessGenres(stub.title, description ?? '') || ['Live Music'];
 
     // Price detection — try sources in priority order
     let price: string | null = null;
