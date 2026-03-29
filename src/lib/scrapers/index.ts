@@ -116,6 +116,17 @@ function normalizeForDedupeLoose(s: string): string {
     .trim();
 }
 
+function normalizeInTensionToken(s: string): string {
+  if (!s) return '';
+  return s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(?:in\s*tension|intension|in-tension)\b/g, 'intension')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 interface ScrapeResult {
   source: Source;
   count: number;
@@ -652,7 +663,12 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
           
           // Fuzzy match: if titles are nearly identical or one is a significant substring of the other
           // We use 6 chars as a minimum for substring matching to avoid short false positives
+          const normTitleLoose = normalizeInTensionToken(event.title);
+          const leaderTitleLoose = normalizeInTensionToken(leader.title);
+
           const isRelated = normTitle === leaderTitle || 
+                           // Explicit alias bridge for inTension/intension variants
+                           (normTitleLoose.includes('intension') && leaderTitleLoose.includes('intension')) ||
                            (normTitle.length > 6 && leaderTitle.includes(normTitle)) ||
                            (leaderTitle.length > 6 && normTitle.includes(leaderTitle)) ||
                            // Prefix match: if both titles share the same first 10+ chars, they're likely the same event
@@ -725,17 +741,23 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   }
 
   // ── Stale-source garbage collection ──────────────────────────────────────────
-  // Delete events from active sources whose updated_at predates this run.
-  // Exception: never delete SOLD OUT events — they have historical value
-  // and may not be re-listed by the source after selling out.
+  // Defensive policy: do NOT wipe all future rows from a source if one scrape run
+  // returns fewer items (temporary parser drift or provider outage).
+  // Only remove rows that are either:
+  // 1) already in the past, OR
+  // 2) very old and untouched for a long grace period.
+  // Exception: never delete SOLD OUT events — they have historical value.
   const activeSourcesWithEvents = results.filter(r => r.count > 0).map(r => r.source);
+  const staleGraceDays = 14;
+  const staleCutoffIso = new Date(Date.now() - staleGraceDays * 24 * 60 * 60 * 1000).toISOString();
   for (const src of activeSourcesWithEvents) {
     const { error: staleErr } = await supabase
       .from('events')
       .delete()
       .eq('source', src)
       .lt('updated_at', runStart)
-      .neq('price', 'SOLD OUT');  // Preserve SOLD OUT events
+      .neq('price', 'SOLD OUT')
+      .or(`date.lt.${today},updated_at.lt.${staleCutoffIso}`);
     if (staleErr) console.warn(`[orchestrator] stale cleanup error for ${src}:`, staleErr.message);
   }
   const activeCount = activeSourcesWithEvents.length;
