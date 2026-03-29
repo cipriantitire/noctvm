@@ -256,7 +256,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       if (s === 'ambilet') return 6;
       return 1;
     };
-    group.sort((a: DedupeRow, b: DedupeRow) => priority(b.source) - priority(a.source));
+    group.sort((a: DedupeRow, b: DedupeRow) => priority(b.source, b.venue) - priority(a.source, a.venue));
 
     const best: DedupeRow = { ...group[0] };
     

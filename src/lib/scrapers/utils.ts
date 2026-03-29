@@ -242,8 +242,8 @@ export function guessGenres(title: string, desc: string): string[] | null {
     return new RegExp(`\\b${escaped}\\b`).test(t);
   };
 
-  // Hard blocks: aggressive inclusion match is fine for blocks (e.g. "teatrul" blocks "teatru")
-  if (HARD_BLOCK_TERMS.some(term => t.includes(normalize(term)))) return null;
+  // Hard blocks: use word-boundary matching like soft blocks and music terms
+  if (HARD_BLOCK_TERMS.some(term => hasTerm(term))) return null;
 
   // Soft blocks
   const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalize(term)));
