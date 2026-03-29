@@ -322,6 +322,27 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     if (cleanErr) console.warn(`[orchestrator] cleanup error for "${term}":`, cleanErr.message);
   }
 
+  // Also cleanup by DESCRIPTION, because some iabilet children's events have neutral titles
+  // (e.g. "Dumbo cel isteț") but contain clear children's/theatre markers in full body text.
+  const HARD_BLOCK_DESC_TERMS = [
+    'pentru copii',
+    'spectacol copii',
+    'teatru interactiv',
+    'teatru pentru',
+    'festival de paște pentru întreaga familie',
+    'festival de paste pentru intreaga familie',
+    'pentru intreaga familie',
+    'copii',
+    'teatru',
+  ];
+  for (const term of HARD_BLOCK_DESC_TERMS) {
+    const { error: cleanErr } = await supabase
+      .from('events')
+      .delete()
+      .ilike('description', `%${term}%`);
+    if (cleanErr) console.warn(`[orchestrator] cleanup error (description) for "${term}":`, cleanErr.message);
+  }
+
   // ── Normalize venue city values (Constanța with ț → Constanta without) ──────
   await supabase.from('venues').update({ city: 'Constanta' }).eq('city', 'Constanța');
 

@@ -270,7 +270,6 @@ export function guessGenres(title: string, desc: string): string[] | null {
     'Trance':       ['trance', 'psytrance', 'psy trance', 'goa'],
     'Reggae':       ['reggae', 'dancehall', 'ska', 'dub'],
     'Party':        ['party', 'clubbing', 'nightlife', 'dancing', 'club night', 'dj performance'],
-    'Festival':     ['festival', 'fest ', ' fest', 'open air', 'outdoor concert'],
   };
 
   for (const [genre, keywords] of Object.entries(mapping)) {
@@ -495,6 +494,15 @@ export function isValidVenueName(name: string): boolean {
  * Tries common content containers in priority order.
  */
 export function extractDescriptionFromHtml(html: string): string | null {
+  // iabilet: full body content lives under #details; XPath provided by user points inside this container.
+  // Take a bounded chunk starting at #details so nested div structure doesn't break regex extraction.
+  const detailsIdx = html.search(/id=["']details["']/i);
+  if (detailsIdx >= 0) {
+    const detailsChunk = html.slice(detailsIdx, detailsIdx + 12_000);
+    const text = clean(detailsChunk);
+    if (text.length > 80) return text.slice(0, 1500);
+  }
+
   // Ordered list of selectors to try (id/class based, regex-extracted)
   const patterns: RegExp[] = [
     // iabilet: <div id="details" ...>
@@ -878,7 +886,13 @@ export async function parseDetailPage(
     const { title, venueHint } = splitTitleVenue(rawName);
 
     const rawDesc = String(b.description ?? og['og:description'] ?? og['description'] ?? '');
-    const description = clean(rawDesc) || extractDescriptionFromHtml(html) || null;
+    const cleanedRawDesc = clean(rawDesc);
+    const htmlDesc = extractDescriptionFromHtml(html);
+    // Prefer richer HTML body description when available, but never lose JSON-LD/OG text.
+    const description =
+      htmlDesc && htmlDesc.length > cleanedRawDesc.length
+        ? htmlDesc
+        : cleanedRawDesc || htmlDesc || null;
 
     // Venue: JSON-LD location.name > title "@Venue" hint > HTML itemprop/class > "Venue TBC"
     // Skip location.name if it looks like a street address (some sites set it to the street address)
@@ -1000,8 +1014,13 @@ export async function parseDetailPage(
   const date = dateStr ? parseDate(dateStr) : null;
   if (!date || date < today) return null;
 
-  const ogDesc = clean(og['og:description'] ?? og['description'] ?? '') || null;
-  const genres = guessGenres(ogTitle, ogDesc ?? '');
+  const ogDesc = clean(og['og:description'] ?? og['description'] ?? '');
+  const htmlDescFallback = extractDescriptionFromHtml(html);
+  const finalDesc =
+    htmlDescFallback && htmlDescFallback.length > ogDesc.length
+      ? htmlDescFallback
+      : ogDesc || htmlDescFallback || null;
+  const genres = guessGenres(ogTitle, finalDesc ?? '');
   if (!genres) return null;
 
   // Venue strategy: JSON-LD location fragment → title "@Venue" hint → " – Venue" → HTML
@@ -1026,7 +1045,7 @@ export async function parseDetailPage(
     venue,
     date,
     time: sdRaw ? extractTime(sdRaw) : null,
-    description: ogDesc,
+    description: finalDesc,
     image_url: og['og:image'] ?? '',
     event_url: url,
     ticket_url: extractTicketsFromHtml(html),
