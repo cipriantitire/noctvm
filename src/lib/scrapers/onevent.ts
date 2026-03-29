@@ -19,7 +19,16 @@ const LIST_URLS = [
   {
     url: 'https://www.onevent.ro/constanta/music/',
     city: 'Constanta',
-    allowedCities: ['constanta', 'constanța', 'mamaia', 'eforie', 'neptun', 'mangalia'],
+    allowedCities: [
+      'constanta', 'constanța', 'mamaia',
+      'eforie', 'eforie nord', 'eforie sud',
+      'neptun', 'mangalia',
+      'navodari', 'năvodari',
+      'costinesti', 'costinești',
+      'vama veche', '2 mai',
+      'venus', 'saturn', 'olimp', 'jupiter',
+      'techirghiol',
+    ],
   },
 ];
 const BASE_URL = 'https://www.onevent.ro';
