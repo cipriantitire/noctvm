@@ -131,10 +131,8 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     if (isSoldOut) {
       price = 'SOLD OUT';
     } else {
-      // Look for standard money strings in the HTML like "50 lei" or "50 RON"
-      const descPriceRegex = /(\d+(?:[.,]\d+)?)\s*(?:lei|RON)/i;
-      const match = html.match(descPriceRegex);
-      if (match) price = `${Math.round(parseFloat(match[1].replace(',', '.')))} RON`;
+      const { extractPriceFromHtml } = await import('./utils');
+      price = extractPriceFromHtml(html);
     }
 
     // Try to extract ticket link. Prioritize RA link from the .buttons area as requested by user.

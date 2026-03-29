@@ -511,11 +511,6 @@ function extractVenueFromHtml(html: string): string {
 
 /** Scrape a price from raw HTML text as a last resort. Supports ranges and "Free". */
 export function extractPriceFromHtml(html: string): string | null {
-  // Check for explicit "Free" mentions
-  if (/\b(?:free entry|intrare libera|intrare liberă|gratuit|entree gratuite)\b/i.test(html)) {
-    return 'Free';
-  }
-
   // ── WooCommerce price extraction (ambilet.ro uses this) ──────────────────
   // Targets <span class="woocommerce-Price-amount"><bdi>50,00 <span ...>lei</span></bdi></span>
   // This is much more reliable than generic number hunting.
@@ -528,7 +523,12 @@ export function extractPriceFromHtml(html: string): string | null {
     /class=["'][^"']*(?:price|pret_bilet|bilet-pret|ticket-price)[^"']*["'][^>]*>[\s\S]{0,100}?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)/gi
   ));
 
-  const combinedWcAndSide = [...wcPriceMatches, ...sideWidgetMatches];
+  // Additional check for basic paragraph formats like <p>50 lei</p> often used by Ambilet / ControlClub DOM
+  const basicTagMatches = Array.from(html.matchAll(
+    /<(?:p|span|div)[^>]*>\s*(?:<input[^>]*>\s*)?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)[^<]*<\/(?:p|span|div)>/gi
+  ));
+
+  const combinedWcAndSide = [...wcPriceMatches, ...sideWidgetMatches, ...basicTagMatches];
 
   if (combinedWcAndSide.length > 0) {
     const rawPrices = combinedWcAndSide
@@ -605,7 +605,9 @@ export function extractPriceFromHtml(html: string): string | null {
   }
 
   // Explicit check for "Free" or "Gratuit" in text if no numbers found
-  if (/\b(free|gratuit|intrare libera|liberă)\b/i.test(html)) return 'Free';
+  if (/\b(?:free entry|intrare libera|intrare liberă|gratuit|entree gratuite)\b/i.test(html)) {
+    return 'Free';
+  }
 
   return null;
 }

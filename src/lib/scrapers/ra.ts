@@ -169,13 +169,13 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     let ticket_url: string | null = null;
     // Look for links or spans with href containing "Tickets" or known seller names
     // RA renders these as <span href="...">Tickets</span> or <span>2nite</span>
-    const promoTicketRegex = /<(?:a|span)[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>(?:Tickets|2nite|iabilet|Eventbook|Livetickets)<\/(?:a|span)>/i;
+    const promoTicketRegex = /<(?:a|span)[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>(?:Tickets|2nite|iabilet|Eventbook|Livetickets|Control)<\/(?:a|span)>/i;
     const promoMatch = html.match(promoTicketRegex);
     if (promoMatch) {
       ticket_url = promoMatch[1];
     } else {
       // Sometimes it's nested: <a href="..."><span ...>Tickets</span></a>
-      const nestedPromoRegex = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>[\s\S]*?(?:Tickets|2nite|iabilet|Eventbook|Livetickets)[\s\S]*?<\/a>/i;
+      const nestedPromoRegex = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>[\s\S]*?(?:Tickets|2nite|iabilet|Eventbook|Livetickets|Control)[\s\S]*?<\/a>/i;
       const nestedMatch = html.match(nestedPromoRegex);
       if (nestedMatch) {
         ticket_url = nestedMatch[1];
@@ -235,7 +235,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
       if (ticket_url.includes('2nite.ro')) {
         const p = await extract2nitePrice(ticket_url);
         if (p) price = p;
-      } else if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro')) {
+      } else if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('control-club.ro')) {
         try {
           const extHtml = await fetchHtml(ticket_url);
           const extPrice = extractPriceFromHtml(extHtml);
@@ -390,7 +390,8 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
             pl.url.toLowerCase().includes('iabilet.ro') ||
             pl.url.toLowerCase().includes('eventbook.ro') ||
             pl.url.toLowerCase().includes('livetickets.ro') ||
-            pl.url.toLowerCase().includes('2nite.ro')
+            pl.url.toLowerCase().includes('2nite.ro') ||
+            pl.url.toLowerCase().includes('control-club.ro')
           );
           if (gqlTicketLink) ticket_url = gqlTicketLink.url;
 
@@ -451,7 +452,8 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
             pl.url.toLowerCase().includes('eventbook.ro') ||
             pl.url.toLowerCase().includes('livetickets.ro') ||
             pl.url.toLowerCase().includes('entertix.ro') ||
-            pl.url.toLowerCase().includes('2nite.ro')
+            pl.url.toLowerCase().includes('2nite.ro') ||
+            pl.url.toLowerCase().includes('control-club.ro')
           );
           if (gqlTicketLink) dev.ticket_url = gqlTicketLink.url;
 
@@ -509,7 +511,7 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
             if (turl.includes('2nite.ro')) {
               const p = await extract2nitePrice(turl);
               if (p) dev.price = p;
-            } else if (turl.includes('eventbook.ro') || turl.includes('livetickets.ro')) {
+            } else if (turl.includes('eventbook.ro') || turl.includes('livetickets.ro') || turl.includes('control-club.ro')) {
               try {
                 const extHtml = await fetchHtml(turl);
                 const extPrice = extractPriceFromHtml(extHtml);
