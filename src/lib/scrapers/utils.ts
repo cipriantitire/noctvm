@@ -200,6 +200,10 @@ const HARD_BLOCK_TERMS = [
   'magie pentru', 'magician', 'clovn', 'ursitoare', 'animatori', 'circ', 'circus', 'magie', 'magic show',
   // Salsa / Latin specific blocked terms
   'salsa revolution', 'salsa congress',
+  // Social/party games (non-nightlife music)
+  'suspecti la party', 'suspecți la party', 'murder mystery', 'board game', 'boardgames', 'social game', 'games night',
+  // Family/kids festivals
+  'pentru intreaga familie', 'pentru întreaga familie', 'family fest', 'festival de paște pentru întreaga familie',
 ];
 
 /** Soft blocks — dropped unless a strong music term is also present. */

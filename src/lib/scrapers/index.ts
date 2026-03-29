@@ -106,6 +106,16 @@ function normalizeVenue(venueName: string, eventTitle: string): string {
   return base;
 }
 
+function normalizeForDedupeLoose(s: string): string {
+  if (!s) return '';
+  return s.toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[|:;,.@()[\]{}/\\_•*–—!?&+#~'\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 interface ScrapeResult {
   source: Source;
   count: number;
@@ -332,6 +342,11 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'festival de paște pentru întreaga familie',
     'festival de paste pentru intreaga familie',
     'pentru intreaga familie',
+    'suspecți la party',
+    'suspecti la party',
+    'murder mystery',
+    'board game',
+    'social game',
     'copii',
     'teatru',
   ];
@@ -441,6 +456,26 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     supabase.from('events').update({ venue: 'Doors Club' }).eq('venue', 'Club Doors'),
   ]);
 
+  // Remove events outside our target cities (Bucharest/Constanta) that still slip in from aggregators.
+  // We intentionally check both title and venue text to catch rows like
+  // "Concert caritabil de priscene" with venue "Casa de Cultură a Studenților Cluj".
+  const OUT_OF_SCOPE_CITY_TERMS = [
+    'cluj', 'cluj-napoca',
+    'iasi', 'iași',
+    'timisoara', 'timișoara',
+    'brasov', 'brașov',
+    'sibiu',
+    'oradea',
+  ];
+  for (const term of OUT_OF_SCOPE_CITY_TERMS) {
+    const [{ error: evErr }, { error: venueErr }] = await Promise.all([
+      supabase.from('events').delete().ilike('title', `%${term}%`),
+      supabase.from('events').delete().ilike('venue', `%${term}%`),
+    ]);
+    if (evErr) console.warn(`[orchestrator] out-of-scope cleanup error (title:${term}):`, evErr.message);
+    if (venueErr) console.warn(`[orchestrator] out-of-scope cleanup error (venue:${term}):`, venueErr.message);
+  }
+
   // ── Pre-clean ALL stale "Venue TBC" rows ─────────────────────────────────────
   // Delete every "Venue TBC" row before upserting — any event that still can't
   // resolve a venue will be re-inserted as "Venue TBC" in this run's upsert.
@@ -537,9 +572,49 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     .gte('date', today);
 
   if (allUpcoming && allUpcoming.length > 0) {
+    // Pass 0: remove strict duplicates first (same source + same event_url + same date)
+    {
+      const seenStrict = new Map<string, any>();
+      const strictDeleteIds: string[] = [];
+      for (const row of allUpcoming) {
+        const strictKey = `${row.source}|${row.event_url ?? ''}|${row.date}`;
+        if (!row.event_url) continue;
+        const prev = seenStrict.get(strictKey);
+        if (!prev) {
+          seenStrict.set(strictKey, row);
+          continue;
+        }
+        const prevNorm = normalizeForDedupeLoose(prev.venue ?? '');
+        const currNorm = normalizeForDedupeLoose(row.venue ?? '');
+        // Prefer the non-TBA/non-null venue variant
+        const prevBad = prevNorm === 'tba' || prevNorm.startsWith('tba ');
+        const currBad = currNorm === 'tba' || currNorm.startsWith('tba ');
+        if (prevBad && !currBad) {
+          strictDeleteIds.push(prev.id);
+          seenStrict.set(strictKey, row);
+        } else {
+          strictDeleteIds.push(row.id);
+        }
+      }
+      if (strictDeleteIds.length > 0) {
+        for (let i = 0; i < strictDeleteIds.length; i += 20) {
+          const batch = strictDeleteIds.slice(i, i + 20);
+          const { error: strictErr } = await supabase.from('events').delete().in('id', batch);
+          if (strictErr) console.warn('[orchestrator] strict dedupe delete error:', strictErr.message);
+        }
+      }
+    }
+
+    // Re-read after strict dedupe so clustering works on fresh set
+    const { data: allUpcoming2 } = await supabase
+      .from('events')
+      .select('id, title, venue, date, time, source, ticket_url, event_url')
+      .gte('date', today);
+    const rowsForSweep = allUpcoming2 || allUpcoming;
+
     // Group by VENUE + DATE first (broad filter)
     const venueDateGroups = new Map<string, any[]>();
-    for (const row of allUpcoming) {
+    for (const row of rowsForSweep) {
       // Use normalizeVenue to ensure different aliases of same venue end up in same bucket
       const vNorm = normalizeVenue(row.venue, row.title);
       const key = `${vNorm}|${row.date}`;

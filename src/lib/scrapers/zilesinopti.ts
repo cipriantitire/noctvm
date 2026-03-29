@@ -19,20 +19,31 @@ const LIST_URLS = [
   { url: 'https://zilesinopti.ro/muzica/', city: 'Bucharest' },
 ];
 
+const TITLE_BLOCK_TERMS = [
+  'priscene',
+  'caritabil de priscene',
+  'pentru copii',
+  'teatru',
+  'familie',
+];
+
 /** Collect event stubs from the listing-page HTML kzn-sw-item cards. */
 function collectStubsFromHtml(html: string): Array<{ title: string; url: string; rawDate: string }> {
   const stubs: Array<{ title: string; url: string; rawDate: string }> = [];
   const seen = new Set<string>();
 
   // kzn-sw-item — The Events Calendar superwidget card
-  const cardRe = /<div[^>]*class="[^"]*kzn-sw-item[^"]*"[^>]*>([\s\S]*?)(?=<div[^>]*class="[^"]*kzn-sw-item|$)/gi;
+  // Parent: class='kzn-sw-item' (exact, single or double quotes in raw HTML)
+  // Children: class="kzn-sw-item-imagine ...", class="kzn-sw-item-text ..." etc.
+  // Lookahead must be EXACT match (no suffix) so it doesn't stop at child divs
+  const cardRe = /<div\s+class=["']kzn-sw-item["'][^>]*>([\s\S]*?)(?=<div\s+class=["']kzn-sw-item["']|$)/gi;
   let m;
   while ((m = cardRe.exec(html)) !== null) {
     const block = m[1];
 
     // Only accept /evenimente/ detail page URLs — hard-reject everything else
-    const linkM = block.match(/href="(https?:\/\/zilesinopti\.ro\/evenimente\/[^"?#]+)"/i)
-      ?? block.match(/href="(\/evenimente\/[^"?#]+)"/i);
+    const linkM = block.match(/href=["'](https?:\/\/zilesinopti\.ro\/evenimente\/[^"'?#]+)["']/i)
+      ?? block.match(/href=["'](\/evenimente\/[^"'?#]+)["']/i);
     if (!linkM) continue;
     const url = linkM[1].startsWith('http') ? linkM[1] : `${BASE_URL}${linkM[1]}`;
     if (!/\/evenimente\//.test(url)) continue;
@@ -40,13 +51,15 @@ function collectStubsFromHtml(html: string): Array<{ title: string; url: string;
     seen.add(url);
 
     // Title
-    const titleM = block.match(/class="[^"]*kzn-sw-item-titlu[^"]*"[^>]*>([\s\S]*?)<\/\w+>/i)
+    const titleM = block.match(/class=["'][^"']*kzn-sw-item-titlu[^"']*["'][^>]*>([\s\S]*?)<\/\w+>/i)
       ?? block.match(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/i);
     const title = clean(titleM?.[1] ?? '');
     if (!title || title.length < 3) continue;
+    const lowTitle = title.toLowerCase();
+    if (TITLE_BLOCK_TERMS.some(term => lowTitle.includes(term))) continue;
 
     // Raw date from card (refined later by the detail page JSON-LD)
-    const dateM = block.match(/class="[^"]*kzn-one-event-date[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    const dateM = block.match(/class=["'][^"']*kzn-one-event-date[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
     const rawDate = clean(dateM?.[1] ?? '');
 
     stubs.push({ title, url, rawDate });

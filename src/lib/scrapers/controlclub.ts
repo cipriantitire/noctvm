@@ -81,7 +81,7 @@ function parseListingPage(html: string): EventStub[] {
     // Look for BUY TICKETS href after this event's slug but before the next slug
     let ticketUrl: string | null = null;
     const ticketRe = new RegExp(
-      `slug=${slugEscaped}[\\s\\S]{0,1000}?href=["'](https?://[^"']*(?:iabilet|ambilet)[^"']+)["']`,
+      `slug=${slugEscaped}[\\s\\S]{0,1000}?href=["'](https?://[^"']*(?:iabilet|ambilet|eventbook|bilete\\.emagic|livetickets)[^"']+)["']`,
       'i'
     );
     const ticketMatch = html.match(ticketRe);
@@ -210,7 +210,7 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
 
               if (!stub.ticketUrl) {
                 const linkMatch = bottomChunk.match(
-                  /href=["'](https?:\/\/(?:www\.)?(?:ambilet|iabilet)[^"']+)["']/i
+                  /href=["'](https?:\/\/(?:www\.)?(?:ambilet|iabilet|eventbook|bilete\.emagic|livetickets)[^"']+)["']/i
                 );
                 if (linkMatch) ticketFromBottom = linkMatch[1];
               }
@@ -231,17 +231,20 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
       }
     }
 
-    // Try to extract ticket link. Prioritize RA link from the .buttons area as requested by user.
+    // Ticket link priority:
+    // 1) explicit external seller links (from listing/detail),
+    // 2) generic ticket extraction from page,
+    // 3) RA link as fallback.
     let ticket_url: string | null = null;
     const raLinkMatch = html.match(/href=["'](https?:\/\/ra\.co\/events\/\d+)["']/i);
-    if (raLinkMatch) {
-      ticket_url = raLinkMatch[1];
-    } else if (stub.ticketUrl) {
+    if (stub.ticketUrl) {
       ticket_url = stub.ticketUrl;
     } else if (ticketFromBottom) {
       ticket_url = ticketFromBottom;
     } else {
-      ticket_url = extractTicketsFromHtml(html);
+      const extracted = extractTicketsFromHtml(html);
+      if (extracted) ticket_url = extracted;
+      else if (raLinkMatch) ticket_url = raLinkMatch[1];
     }
 
     // Proactive external price fetching if price is missing

@@ -31,6 +31,19 @@ const EXCLUDED_SLUGS = new Set([
   'bilete-timisoara', 'bilete-iasi', 'bilete-brasov', 'bilete-sibiu',
 ]);
 
+// Slug fragments that definitively mark non-music events — skip before fetching
+const SLUG_BLOCK_TERMS = [
+  'pentru-copii', 'copii', 'teatru-interactiv', 'teatru-pentru', 'spectacol-copii',
+  'teatru', 'theatre', 'piesa-de-teatru', 'balet', 'ballet',
+  'stand-up', 'standup', 'comedy', 'comedie',
+  'opera', 'simfonie', 'filarmon',
+  'cinema', 'film', 'proiectie',
+  'yoga', 'wellness', 'culinar', 'cooking', 'targ', 'expozitie',
+  'marionete', 'papusi', 'animatie', 'circ', 'circus', 'magie', 'magician',
+  // Family / social-game content
+  'family-fest', 'familie', 'suspecti-la-party',
+];
+
 /** Supplementary: extract event hrefs from raw HTML (for non-JS-rendered pages). */
 function extractHtmlUrls(html: string): string[] {
   const seen = new Set<string>();
@@ -41,6 +54,7 @@ function extractHtmlUrls(html: string): string[] {
     const slug = m[2];
     if (EXCLUDED_SLUGS.has(`bilete-${slug}`)) continue;
     if (slug.split('-').length < 2) continue;
+    if (SLUG_BLOCK_TERMS.some(term => slug.includes(term))) continue;
     const full = (m[1].startsWith('http') ? m[1] : `${BASE_URL}${m[1]}`).replace(/\/$/, '') + '/';
     if (!seen.has(full)) { seen.add(full); urls.push(full); }
   }
@@ -59,8 +73,12 @@ export async function scrapeIabilet(): Promise<ScrapedEvent[]> {
       // Supplementary: static hrefs in HTML
       const htmlUrls = extractHtmlUrls(html);
 
-      // Merge, deduplicate
-      const allUrls = Array.from(new Set([...ldUrls, ...htmlUrls]));
+      // Merge, deduplicate, slug-filter
+      const allUrls = Array.from(new Set([...ldUrls, ...htmlUrls]))
+        .filter(u => {
+          const slug = u.replace(/\/$/, '').split('/').pop() ?? '';
+          return !SLUG_BLOCK_TERMS.some(term => slug.includes(term));
+        });
       console.log(`[iabilet] ${city}: ${ldUrls.length} JSON-LD + ${htmlUrls.length} HTML = ${allUrls.length} candidate URLs`);
 
       // Pass allowedCities so events from wrong Romanian cities (Baia Mare, Bacau…) are rejected

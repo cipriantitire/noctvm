@@ -26,6 +26,8 @@ const SLUG_BLOCK = [
   'teatru', 'teatro', 'copii', 'marionete', 'papusi', 'balet', 'ballet',
   'opera', 'simfonie', 'filarmon', 'stand-up', 'standup', 'comedy',
   'cinema', 'film', 'yoga', 'culinar', 'cooking', 'targ', 'expozitie',
+  // Family / social-game events
+  'family', 'familie', 'suspecti-la-party', 'board-game', 'boardgame', 'murder-mystery',
 ];
 
 /** Extract unique event detail URLs from the listing page HTML. */
