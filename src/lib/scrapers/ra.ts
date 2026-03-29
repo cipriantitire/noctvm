@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml, extractPriceFromHtml } from './utils';
+import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml, extractPriceFromHtml, extractDescriptionFromHtml, cleanJsonLdText } from './utils';
 
 /**
  * Extract ticket price(s) from a 2nite.ro event page.
@@ -157,7 +157,9 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
 
     // Description
     const descMatch = html.match(/"description"\s*:\s*"([^"]+)"/);
-    const description = clean(descMatch?.[1] || '');
+    const jsonDesc = cleanJsonLdText(descMatch?.[1] || '');
+    const htmlDesc = extractDescriptionFromHtml(html) || '';
+    const description = htmlDesc.length > jsonDesc.length ? htmlDesc : jsonDesc;
 
     // CHECK FOR SOLD OUT - Strict word boundary check
     let isSoldOut = false;

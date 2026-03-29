@@ -507,6 +507,65 @@ export function extractDescriptionFromHtml(html: string): string | null {
     if (text.length > 80) return text.slice(0, 1500);
   }
 
+  // zilesinopti: description is typically in the main entry/article content area.
+  // User XPath points into the article body section under the event page layout.
+  // Anchor near "entry-content" / "single-post-content" / event-specific wrappers.
+  const zilesinoptiPatterns: RegExp[] = [
+    /<div[^>]+class=["'][^"']*(?:entry-content|single-post-content|event-content|post-content)[^"']*["'][^>]*>([\s\S]{120,12000}?)<\/div>/i,
+    /<section[^>]*>\s*<div[^>]*>\s*<div[^>]*>\s*<div[^>]*>\s*<div[^>]*>([\s\S]{120,12000}?)<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/section>/i,
+  ];
+  for (const re of zilesinoptiPatterns) {
+    const m = html.match(re);
+    if (m) {
+      const text = clean(m[1]);
+      if (text.length > 80) return text.slice(0, 1500);
+    }
+  }
+
+  // ambilet: long description is usually in the content column of the single event page.
+  // User XPath points to /main/main/.../div[4]/div/div[1]/div[2].
+  const ambiletPatterns: RegExp[] = [
+    /<main[^>]*>[\s\S]{0,3000}?<main[^>]*>[\s\S]{0,12000}?<div[^>]*class=["'][^"']*flex\s+flex-col\s+gap-y-4[^"']*["'][^>]*>[\s\S]{0,12000}?<div[^>]*class=["'][^"']*(?:prose|content|description|event-content)[^"']*["'][^>]*>([\s\S]{80,12000}?)<\/div>/i,
+    /<div[^>]+class=["'][^"']*(?:single-product|product-main|event-main|event-description|entry-content)[^"']*["'][^>]*>([\s\S]{120,12000}?)<\/div>/i,
+  ];
+  for (const re of ambiletPatterns) {
+    const m = html.match(re);
+    if (m) {
+      const text = clean(m[1]);
+      if (text.length > 80) return text.slice(0, 1500);
+    }
+  }
+
+  // RA: event detail body text is often inside main content sections/lists and not always in JSON-LD.
+  // User XPath points under section[3] ... div[2]/ul/li[1]/div/span.
+  const raPatterns: RegExp[] = [
+    /<section[^>]*>[\s\S]{0,6000}?<ul[^>]*>[\s\S]{0,6000}?<li[^>]*>[\s\S]{0,2000}?<div[^>]*>[\s\S]{0,1500}?<span[^>]*>([\s\S]{40,2000}?)<\/span>/i,
+    /<div[^>]+class=["'][^"']*(?:event-content|event-description|listing-content|content-body)[^"']*["'][^>]*>([\s\S]{60,6000}?)<\/div>/i,
+  ];
+  for (const re of raPatterns) {
+    const m = html.match(re);
+    if (m) {
+      const text = clean(m[1]);
+      if (text.length > 40) return text.slice(0, 1500);
+    }
+  }
+
+  // Generic fallback for sites where long description is split across many nested nodes.
+  // Prefer chunks that contain strong description markers and enough text density.
+  const markerChunks: RegExp[] = [
+    /<section[^>]*>([\s\S]{200,12000}?)<\/section>/i,
+    /<article[^>]*>([\s\S]{200,14000}?)<\/article>/i,
+    /<main[^>]*>([\s\S]{200,16000}?)<\/main>/i,
+  ];
+  for (const re of markerChunks) {
+    const m = html.match(re);
+    if (!m) continue;
+    const txt = clean(m[1]);
+    if (txt.length > 200 && /(?:line[- ]?up|tickets?|bilete|descriere|description|artist|concert|live|club)/i.test(txt)) {
+      return txt.slice(0, 1500);
+    }
+  }
+
   // Ordered list of selectors to try (id/class based, regex-extracted)
   const patterns: RegExp[] = [
     // iabilet: <div id="details" ...>
@@ -832,6 +891,20 @@ export function extractTicketsFromHtml(html: string): string | null {
   return validMatches.find(m => m.length > 25) ?? (validMatches.length > 0 ? validMatches[0] : null);
 }
 
+function decodeUnicodeEscapes(s: string): string {
+  if (!s) return s;
+  return s
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\\//g, '/')
+    .replace(/\\n/g, ' ')
+    .replace(/\\r/g, ' ')
+    .replace(/\\t/g, ' ');
+}
+
+export function cleanJsonLdText(s: string | null | undefined): string {
+  return clean(decodeUnicodeEscapes(s ?? ''));
+}
+
 // ── Deep-fetch core ───────────────────────────────────────────────────────────
 
 /**
@@ -890,7 +963,7 @@ export async function parseDetailPage(
     const { title, venueHint } = splitTitleVenue(rawName);
 
     const rawDesc = String(b.description ?? og['og:description'] ?? og['description'] ?? '');
-    const cleanedRawDesc = clean(rawDesc);
+    const cleanedRawDesc = cleanJsonLdText(rawDesc);
     const htmlDesc = extractDescriptionFromHtml(html);
     // Prefer richer HTML body description when available, but never lose JSON-LD/OG text.
     const description =
@@ -1018,7 +1091,7 @@ export async function parseDetailPage(
   const date = dateStr ? parseDate(dateStr) : null;
   if (!date || date < today) return null;
 
-  const ogDesc = clean(og['og:description'] ?? og['description'] ?? '');
+  const ogDesc = cleanJsonLdText(og['og:description'] ?? og['description'] ?? '');
   const htmlDescFallback = extractDescriptionFromHtml(html);
   const finalDesc =
     htmlDescFallback && htmlDescFallback.length > ogDesc.length

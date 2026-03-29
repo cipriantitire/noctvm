@@ -218,6 +218,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     return s.toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\b(?:bucuresti|bucharest|constanta|constanța|cluj\s*napoca|cluj)\b/g, ' ')
+      .replace(/\b(?:concert\s+caritabil|music\s+for\s+autism|festival\s+de\s+paste|festival\s+de\s+pa[șs]te)\b/g, ' ')
+      .replace(/\b(?:\d+\s+ani|anniversary|aniversare)\b/g, ' ')
       .replace(/^(pw|ctrl|control|extra|live|concert|party|alt jazz)\s*[-•x]*\s*/i, '') // Strip common prefixes
       .replace(/[|:;,.@()[\]{}/\\_•*–—!?&+#~'-]/g, ' ')  // Strip ALL punctuation including !?& (regression fix)
       .replace(/\s+/g, '') // Strip all spaces for strict core match
