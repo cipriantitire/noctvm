@@ -98,12 +98,19 @@ function normalizeVenue(venueName: string, eventTitle: string): string {
   const alias = VENUE_ALIASES[lower];
   const base = alias ?? cleaned;
 
+  // Remove trailing city suffixes from venue names to improve cross-source dedupe
+  // e.g. "Natural High București" vs "Natural High"
+  const cityStripped = base
+    .replace(/\s*[-–—,]?\s*(bucuresti|bucurești|bucharest|constanta|constanța)\s*$/i, '')
+    .trim();
+  const normalizedBase = cityStripped || base;
+
   // Title-aware overrides (e.g. Sala Luceafarul → Encore Club for Japanese acts)
   for (const { titlePattern, wrongVenue, correctVenue } of VENUE_TITLE_OVERRIDES) {
-    if (titlePattern.test(eventTitle) && wrongVenue.test(base)) return correctVenue;
+    if (titlePattern.test(eventTitle) && wrongVenue.test(normalizedBase)) return correctVenue;
   }
 
-  return base;
+  return normalizedBase;
 }
 
 function normalizeForDedupeLoose(s: string): string {
