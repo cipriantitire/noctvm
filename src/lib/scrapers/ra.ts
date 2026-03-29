@@ -186,7 +186,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     let price: string | null = null;
     
     // Pattern A: Internal RA Tickets (Iframe) - HIGHEST PRIORITY
-    // Example: <iframe ... src="/widget/event/2337785/embedtickets?..." ...></iframe>
+    // Example: <iframe ... src="/widget/event/2337785/embedtickets??" ...></iframe>
     const iframeRegex = /<iframe[^>]+src=["'](\/widget\/event\/\d+\/embedtickets[^"']+)["']/i;
     const iframeMatch = html.match(iframeRegex);
     if (iframeMatch) {
@@ -200,7 +200,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
             .map(m => parseFloat(m[1].replace(',', '.')))
             .filter(n => !isNaN(n))
             .sort((a, b) => a - b);
-
+        
           if (numericPrices.length > 0) {
             const min = Math.round(numericPrices[0]);
             const max = Math.round(numericPrices[numericPrices.length - 1]);
@@ -216,7 +216,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
         console.warn(`[ra] Failed to fetch tickets iframe for ${url}`, err);
       }
     }
-
+    
     // Pattern B: Description Parsing (e.g., "50 lei • door deal")
     if (!price && !isSoldOut) {
       const descPriceRegex = /(\d+(?:[.,]\d+)?)\s*(?:lei|RON|EUR|€)/i;
@@ -229,25 +229,11 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
         }
       }
     }
-
-    // Pattern C: External Scraping (Eventbook/Livetickets/2nite)
-    if (!price && !isSoldOut && ticket_url) {
-      if (ticket_url.includes('2nite.ro')) {
-        const p = await extract2nitePrice(ticket_url);
-        if (p) price = p;
-      } else if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('control-club.ro')) {
-        try {
-          const extHtml = await fetchHtml(ticket_url);
-          const extPrice = extractPriceFromHtml(extHtml);
-          if (extPrice && extPrice !== 'FREE') {
-            price = extPrice;
-          }
-        } catch (e) {
-          // Ignore external fetch errors
-        }
-      }
-    }
-
+    
+    // REMOVED: Pattern C: External Scraping (Eventbook/Livetickets/2nite)
+    // Reason: External site scraping should be handled by dedicated scrapers, not RA scraper
+    // The deduplication layer will merge data from RA and venue-specific scrapers
+    
     // Pattern D: "Cost" label followed by a value
     if (!price && !isSoldOut) {
       // Example: <span ...>Cost</span></div><span ...>90</span>
@@ -258,7 +244,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
         price = isNaN(val) ? costMatch[1] : `${Math.round(val)} RON`;
       }
     }
-
+    
     // Pattern E: Fallback price from generic pattern
     if (!price && !isSoldOut) {
       const genericPriceMatch = html.match(/(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)/i);
@@ -266,7 +252,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
         price = `${Math.round(parseFloat(genericPriceMatch[1].replace(',', '.')))} RON`;
       }
     }
-
+    
     if (isSoldOut) price = 'SOLD OUT';
 
     const genres = guessGenres(title, description);

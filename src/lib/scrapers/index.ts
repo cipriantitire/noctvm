@@ -236,8 +236,18 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
   const unique: DedupeRow[] = [];
   for (const group of Array.from(groups.values())) {
-    // Sort by source priority (ra is best, then iabilet, livetickets, onevent, etc)
-    const priority = (s: string) => {
+    // Sort by source priority with venue-aware boosting
+    const priority = (s: string, venue: string = '') => {
+      // Venue-specific scrapers get highest priority for their own venues
+      if (s === 'controlclub' && venue.toLowerCase().includes('control club')) return 20;
+      if (s === 'livetickets' && venue.toLowerCase().includes('livetickets')) return 20;
+      if (s === 'ambilet' && venue.toLowerCase().includes('ambilet')) return 20;
+      if (s === 'eventbook' && venue.toLowerCase().includes('eventbook')) return 20;
+      if (s === 'onevent' && venue.toLowerCase().includes('onevent')) return 20;
+      if (s === 'zilesinopti' && venue.toLowerCase().includes('zilesinopti')) return 20;
+      if (s === 'iabilet' && venue.toLowerCase().includes('iabilet')) return 20;
+      
+      // Existing priority logic for non-venue-specific cases
       if (s === 'controlclub') return 10; // Direct venue — always wins for its own events
       if (s === 'livetickets') return 10; // Keep parity with livetickets
       if (s === 'ra') return 9;           // RA fills in metadata where venue lacks it

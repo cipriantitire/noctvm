@@ -509,106 +509,187 @@ function extractVenueFromHtml(html: string): string {
   return 'Venue TBC';
 }
 
-/** Scrape a price from raw HTML text as a last resort. Supports ranges and "Free". */
-export function extractPriceFromHtml(html: string): string | null {
-  // ── WooCommerce price extraction (ambilet.ro uses this) ──────────────────
-  // Targets <span class="woocommerce-Price-amount"><bdi>50,00 <span ...>lei</span></bdi></span>
-  // This is much more reliable than generic number hunting.
-  const wcPriceMatches = Array.from(html.matchAll(
-    /woocommerce-Price-amount[^>]*>\s*<bdi>\s*([\d.,]+)\s*(?:&nbsp;)?\s*<span[^>]*woocommerce-Price-currencySymbol[^>]*>([^<]+)<\/span>/gi
-  ));
-  
-  // Ambilet sometimes uses explicit classes for their side widgets
-  const sideWidgetMatches = Array.from(html.matchAll(
-    /class=["'][^"']*(?:price|pret_bilet|bilet-pret|ticket-price)[^"']*["'][^>]*>[\s\S]{0,100}?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)/gi
-  ));
+interface PriceProvider {
+  extract: (html: string, url?: string) => string | null;
+  priority: number;
+}
 
-  // Additional check for basic paragraph formats like <p>50 lei</p> often used by Ambilet / ControlClub DOM
-  const basicTagMatches = Array.from(html.matchAll(
-    /<(?:p|span|div)[^>]*>\s*(?:<input[^>]*>\s*)?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)[^<]*<\/(?:p|span|div)>/gi
-  ));
+// Site-specific price providers
+const priceProviders: Record<string, PriceProvider> = {
+  // WooCommerce price extraction (used by ambilet.ro and others)
+  wooCommerce: {
+    extract: (html: string): string | null => {
+      // Targets <span class="woocommerce-Price-amount"><bdi>50,00 <span ...>lei</span></bdi></span>
+      const wcPriceMatches = Array.from(html.matchAll(
+        /woocommerce-Price-amount[^>]*>\s*<bdi>\s*([\d.,]+)\s*(?:&nbsp;)?\s*<span[^>]*woocommerce-Price-currencySymbol[^>]*>([^<]+)<\/span>/gi
+      ));
+      
+      // Ambilet sometimes uses explicit classes for their side widgets
+      const sideWidgetMatches = Array.from(html.matchAll(
+        /class=["'][^"']*(?:price|pret_bilet|bilet-pret|ticket-price)[^"']*["'][^>]*>[\s\S]{0,100}?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)/gi
+      ));
 
-  const combinedWcAndSide = [...wcPriceMatches, ...sideWidgetMatches, ...basicTagMatches];
+      // Additional check for basic paragraph formats like <p>50 lei</p> often used by Ambilet / ControlClub DOM
+      const basicTagMatches = Array.from(html.matchAll(
+        /<(?:p|span|div)[^>]*>\s*(?:<input[^>]*>\s*)?(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)[^<]*<\/(?:p|span|div)>/gi
+      ));
 
-  if (combinedWcAndSide.length > 0) {
-    const rawPrices = combinedWcAndSide
-      .map(m => parseFloat(m[1].replace(',', '.')))
-      .filter(p => !isNaN(p) && p > 0 && p < 5000)
-      .sort((a, b) => a - b);
-    
-    if (rawPrices.length > 0) {
-      const unique = Array.from(new Set(rawPrices));
-      const currency = combinedWcAndSide[0][2]?.trim() || 'RON';
-      const currLabel = currency.toLowerCase() === 'lei' ? 'RON' : currency;
-      if (unique.length === 1) {
-        return unique[0] === 0 ? 'Free' : `${unique[0]} ${currLabel}`;
+      const combinedWcAndSide = [...wcPriceMatches, ...sideWidgetMatches, ...basicTagMatches];
+
+      if (combinedWcAndSide.length > 0) {
+        const rawPrices = combinedWcAndSide
+          .map(m => parseFloat(m[1].replace(',', '.')))
+          .filter(p => !isNaN(p) && p > 0 && p < 5000)
+          .sort((a, b) => a - b);
+       
+        if (rawPrices.length > 0) {
+          const unique = Array.from(new Set(rawPrices));
+          const currency = combinedWcAndSide[0][2]?.trim() || 'RON';
+          const currLabel = currency.toLowerCase() === 'lei' ? 'RON' : currency;
+          if (unique.length === 1) {
+            return unique[0] === 0 ? 'Free' : `${unique[0]} ${currLabel}`;
+          }
+          const min = unique[0];
+          const max = unique[unique.length - 1];
+          if (min === 0 && max === 0) return 'Free';
+          if (min === 0) return `Free - ${max} ${currLabel}`;
+          return `${min} - ${max} ${currLabel}`;
+        }
       }
-      const min = unique[0];
-      const max = unique[unique.length - 1];
-      if (min === 0 && max === 0) return 'Free';
-      if (min === 0) return `Free - ${max} ${currLabel}`;
-      return `${min} - ${max} ${currLabel}`;
-    }
-  }
-
-  // ── Generic regex price extraction ───────────────────────────────────────
-  // Stricter price regex: prioritize prefix or common price patterns
-  // Increase digit limit to 1-5 to handle premium/festival tickets
-  const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)\s*:?\s*)?(?:(?:\d{1,5}(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$)\s*(?:\d{1,5}(?:[.,]\d+)?))/gi));
-  
-  const prices = priceMatches
-    .map(m => {
-      const matchText = m[0];
-      const hasPrefix = /(Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)/i.test(matchText);
-      const numMatch = matchText.match(/\d+(?:[.,]\d+)?/);
-      const val = numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
       
-      // If it doesn't have a specific price prefix, be more skeptical of very small numbers (often stray text)
-      if (val !== null && !hasPrefix && val < 5) return null; // Likely a quantity or day, not a price
-      
-      return val;
-    })
-    .filter((p): p is number => p !== null && !isNaN(p) && p > 0 && p < 15000); // 15,000 RON upper bound for festivals
-
-  if (prices.length > 0) {
-    const sorted = Array.from(new Set(prices)).sort((a, b) => a - b);
-    if (sorted.length === 1) return `${sorted[0]} RON`;
-    
-    // If we have multiple matches, prioritize those with explicit price prefixes
-    // to avoid junk ranges from stray numbers (e.g., "1 - 714")
-    const prefixed = priceMatches
-      .filter(m => /(Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)/i.test(m[0]))
-      .map(m => {
-        const numMatch = m[0].match(/\d+(?:[.,]\d+)?/);
-        return numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
-      })
-      .filter((p): p is number => p !== null && !isNaN(p) && p > 0);
-
-    if (prefixed.length > 0) {
-      const sortedPrefixed = Array.from(new Set(prefixed)).sort((a, b) => a - b);
-      if (sortedPrefixed.length === 1) return `${sortedPrefixed[0]} RON`;
-      return `${sortedPrefixed[0]} - ${sortedPrefixed[sortedPrefixed.length - 1]} RON`;
-    }
-
-    // Ratio-based sanity check: if the range is suspiciously wide (max/min > 15)
-    // and no prices had explicit labels, it's likely junk numbers from page elements
-    // (e.g. input value="1", data-product_id="831747")
-    const min = sorted[0];
-    const max = sorted[sorted.length - 1];
-    if (max / min > 15) {
-      // Range is suspiciously wide — reject it as likely containing stray numbers
-      // Return only the most common/middle value as single price, or null
       return null;
-    }
+    },
+    priority: 10
+  },
+  
+  // Control Club specific price extraction
+  controlClub: {
+    extract: (html: string): string | null => {
+      // Control Club often has prices in specific formats
+      // Look for price elements in their typical locations
+      const pricePatterns = [
+        // Pattern: <span class="price">50 lei</span>
+        /class=["'][^"']*price[^"']*["'][^>]*>\s*(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)/gi,
+        // Pattern: <div class="ticket-price">50 lei</div>
+        /class=["'][^"']*ticket-price[^"']*["'][^>]*>\s*(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI)/gi,
+        // Pattern: <p>50 lei</p> or similar
+        /<(?:p|div|span)[^>]*>\s*(\d+(?:[.,]\d+)?)\s*(?:RON|lei|LEI|EUR|€)\s*<\/(?:p|div|span)>/gi
+      ];
+      
+      let allPrices: number[] = [];
+      
+      for (const pattern of pricePatterns) {
+        const matches = Array.from(html.matchAll(pattern));
+        for (const match of matches) {
+          const val = parseFloat(match[1].replace(',', '.'));
+          if (!isNaN(val) && val > 0 && val < 5000) {
+            allPrices.push(val);
+          }
+        }
+      }
+      
+      if (allPrices.length > 0) {
+        const unique = Array.from(new Set(allPrices)).sort((a, b) => a - b);
+        if (unique.length === 1) {
+          return unique[0] === 0 ? 'Free' : `${unique[0]} RON`;
+        }
+        const min = unique[0];
+        const max = unique[unique.length - 1];
+        if (min === 0 && max === 0) return 'Free';
+        if (min === 0) return `Free - ${max} RON`;
+        return `${min} - ${max} RON`;
+      }
+      
+      return null;
+    },
+    priority: 10
+  },
+  
+  // Generic fallback provider
+  generic: {
+    extract: (html: string): string | null => {
+      // ── Generic regex price extraction ───────────────────────────────────────
+      // Stricter price regex: prioritize prefix or common price patterns
+      // Increase digit limit to 1-5 to handle premium/festival tickets
+      const priceMatches = Array.from(html.matchAll(/(?:(?:Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)\s*:?\s*)?(?:(?:\d{1,5}(?:[.,]\d+)?)\s*(?:RON|lei|ron|LEI|EUR|€|USD|\$)\b)|(?:(?:RON|lei|ron|LEI|EUR|€|USD|\$)\s*(?:\d{1,5}(?:[.,]\d+)?))/gi));
+       
+      const prices = priceMatches
+        .map(m => {
+          const matchText = m[0];
+          const hasPrefix = /(Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)/i.test(matchText);
+          const numMatch = matchText.match(/\d+(?:[.,]\d+)?/);
+          const val = numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
+          
+          // If it doesn't have a specific price prefix, be more skeptical of very small numbers (often stray text)
+          if (val !== null && !hasPrefix && val < 5) return null; // Likely a quantity or day, not a price
+          
+          return val;
+        })
+        .filter((p): p is number => p !== null && !isNaN(p) && p > 0 && p < 15000); // 15,000 RON upper bound for festivals
 
-    return `${sorted[0]} - ${sorted[sorted.length - 1]} RON`;
+      if (prices.length > 0) {
+        const sorted = Array.from(new Set(prices)).sort((a, b) => a - b);
+        if (sorted.length === 1) return `${sorted[0]} RON`;
+        
+        // If we have multiple matches, prioritize those with explicit price prefixes
+        // to avoid junk ranges from stray numbers (e.g., "1 - 714")
+        const prefixed = priceMatches
+          .filter(m => /(Tickets from|Cost|Pret|de la|Preț|Bilete|Bilet)/i.test(m[0]))
+          .map(m => {
+            const numMatch = m[0].match(/\d+(?:[.,]\d+)?/);
+            return numMatch ? parseFloat(numMatch[0].replace(',', '.')) : null;
+          })
+          .filter((p): p is number => p !== null && !isNaN(p) && p > 0);
+
+        if (prefixed.length > 0) {
+          const sortedPrefixed = Array.from(new Set(prefixed)).sort((a, b) => a - b);
+          if (sortedPrefixed.length === 1) return `${sortedPrefixed[0]} RON`;
+          return `${sortedPrefixed[0]} - ${sortedPrefixed[sortedPrefixed.length - 1]} RON`;
+        }
+
+        // Ratio-based sanity check: if the range is suspiciously wide (max/min > 15)
+        // and no prices had explicit labels, it's likely junk numbers from page elements
+        // (e.g. input value="1", data-product_id="831747")
+        const min = sorted[0];
+        const max = sorted[sorted.length - 1];
+        if (max / min > 15) {
+          // Range is suspiciously wide — reject it as likely containing stray numbers
+          // Return only the most common/middle value as single price, or null
+          return null;
+        }
+
+        return `${sorted[0]} - ${sorted[sorted.length - 1]} RON`;
+      }
+      
+      return null;
+    },
+    priority: 1
   }
+};
 
-  // Explicit check for "Free" or "Gratuit" in text if no numbers found
+/** Scrape a price from raw HTML text as a last resort. Supports ranges and "Free". */
+export function extractPriceFromHtml(html: string, url?: string): string | null {
+  // Try site-specific providers first
+  const providerResults: Array<{price: string | null; priority: number; provider: string}> = [];
+  
+  for (const [providerKey, provider] of Object.entries(priceProviders)) {
+    const price = provider.extract(html, url);
+    if (price) {
+      providerResults.push({price, priority: provider.priority, provider: providerKey});
+    }
+  }
+  
+  // Return highest priority result
+  if (providerResults.length > 0) {
+    providerResults.sort((a, b) => b.priority - a.priority);
+    return providerResults[0].price;
+  }
+  
+  // Only then check for "Free" as absolute last resort
   if (/\b(?:free entry|intrare libera|intrare liberă|gratuit|entree gratuite)\b/i.test(html)) {
     return 'Free';
   }
-
+  
   return null;
 }
 
