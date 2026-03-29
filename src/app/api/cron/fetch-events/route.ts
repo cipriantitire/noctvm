@@ -24,12 +24,18 @@ export async function POST(req: NextRequest) {
 
   // ── Run scrapers ──────────────────────────────────────────────────────────
   try {
-    const summary = await fetchAndUpsertEvents();
+    const body = await req.json().catch(() => ({}));
+    const sourceFromQuery = req.nextUrl.searchParams.get('source') || undefined;
+    const sourceFromBody = typeof body?.source === 'string' ? body.source : undefined;
+    const targetSource = sourceFromQuery || sourceFromBody;
+
+    const summary = await fetchAndUpsertEvents(targetSource);
 
     console.log('[cron/fetch-events] done:', JSON.stringify(summary));
 
     return NextResponse.json({
       ok: true,
+      source: targetSource ?? 'all',
       ...summary,
     });
   } catch (err) {
