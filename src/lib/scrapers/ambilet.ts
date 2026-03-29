@@ -55,8 +55,10 @@ function extractEventUrls(html: string): string[] {
   return urls;
 }
 
-export async function scrapeAmbilet(): Promise<ScrapedEvent[]> {
+export async function scrapeAmbilet(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
+  const limit = Math.max(20, Math.min(settings?.scan_depth ?? 120, 300));
+  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 10));
 
   for (const { url, city } of LIST_URLS) {
     try {
@@ -64,7 +66,7 @@ export async function scrapeAmbilet(): Promise<ScrapedEvent[]> {
       const eventUrls = extractEventUrls(html);
       console.log(`[ambilet] ${city}: ${eventUrls.length} candidate URLs (slug-filtered)`);
 
-      const events = await batchFetch(eventUrls, city, { limit: 30, batchSize: 5 });
+      const events = await batchFetch(eventUrls, city, { limit, batchSize });
       console.log(`[ambilet] ${city}: kept ${events.length} music events`);
       allEvents.push(...events);
     } catch (err) {

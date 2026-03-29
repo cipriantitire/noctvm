@@ -58,8 +58,10 @@ function extractHtmlUrls(html: string): string[] {
   return urls;
 }
 
-export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
+export async function scrapeOnevent(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
+  const limit = Math.max(25, Math.min(settings?.scan_depth ?? 150, 350));
+  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 10, 12));
 
   for (const { url, city, allowedCities } of LIST_URLS) {
     try {
@@ -77,7 +79,7 @@ export async function scrapeOnevent(): Promise<ScrapedEvent[]> {
       const htmlUrls = extractHtmlUrls(html);
       console.log(`[onevent] ${city}: ${htmlUrls.length} HTML URLs (JSON-LD skipped — unreliable on listing pages)`);
 
-      const events = await batchFetch(htmlUrls, city, { limit: 30, batchSize: 10, allowedCities });
+      const events = await batchFetch(htmlUrls, city, { limit, batchSize, allowedCities });
       
       // Deduplicate locally because onevent frequently posts the exact same event
       // under different URLs with slightly varying titles and null/"Venue TBC" venues

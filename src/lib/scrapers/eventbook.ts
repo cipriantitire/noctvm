@@ -49,8 +49,10 @@ function extractHtmlUrls(html: string): string[] {
   return urls;
 }
 
-export async function scrapeEventbook(): Promise<ScrapedEvent[]> {
+export async function scrapeEventbook(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
+  const limit = Math.max(25, Math.min(settings?.scan_depth ?? 150, 300));
+  const batchSize = Math.max(2, Math.min(settings?.concurrency ?? 4, 8));
 
   for (const { url, city, allowedCities } of LIST_URLS) {
     try {
@@ -61,7 +63,7 @@ export async function scrapeEventbook(): Promise<ScrapedEvent[]> {
       const allUrls  = Array.from(new Set([...ldUrls, ...htmlUrls]));
       console.log(`[eventbook] ${city}: ${ldUrls.length} JSON-LD + ${htmlUrls.length} HTML = ${allUrls.length} URLs`);
 
-      const events = await batchFetch(allUrls, city, { limit: 25, batchSize: 4, allowedCities });
+      const events = await batchFetch(allUrls, city, { limit, batchSize, allowedCities });
       console.log(`[eventbook] ${city}: kept ${events.length} music events`);
       allEvents.push(...events);
     } catch (err) {

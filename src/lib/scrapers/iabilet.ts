@@ -61,8 +61,10 @@ function extractHtmlUrls(html: string): string[] {
   return urls;
 }
 
-export async function scrapeIabilet(): Promise<ScrapedEvent[]> {
+export async function scrapeIabilet(settings?: { scan_depth?: number; concurrency?: number }): Promise<ScrapedEvent[]> {
   const allEvents: ScrapedEvent[] = [];
+  const limit = Math.max(30, Math.min(settings?.scan_depth ?? 100, 300));
+  const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 10));
 
   for (const { url, city, allowedCities } of LIST_URLS) {
     try {
@@ -82,7 +84,7 @@ export async function scrapeIabilet(): Promise<ScrapedEvent[]> {
       console.log(`[iabilet] ${city}: ${ldUrls.length} JSON-LD + ${htmlUrls.length} HTML = ${allUrls.length} candidate URLs`);
 
       // Pass allowedCities so events from wrong Romanian cities (Baia Mare, Bacau…) are rejected
-      const events = await batchFetch(allUrls, city, { limit: 30, batchSize: 5, allowedCities });
+      const events = await batchFetch(allUrls, city, { limit, batchSize, allowedCities });
       console.log(`[iabilet] ${city}: kept ${events.length} music events`);
       allEvents.push(...events);
     } catch (err) {
