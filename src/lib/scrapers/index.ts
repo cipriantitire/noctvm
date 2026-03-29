@@ -312,6 +312,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'pentru copii', 'spectacol copii', 'atelier copii',
     'copii', 'marionete', 'papusi', 'păpuși',
     'educativ', 'balet', 'ballet',
+    'teatru',
   ];
   for (const term of HARD_BLOCK_TITLE_TERMS) {
     const { error: cleanErr } = await supabase
