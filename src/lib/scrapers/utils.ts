@@ -185,7 +185,9 @@ const HARD_BLOCK_TERMS = [
   'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi',
   'copii', 'marionete', 'papusi', 'copilasi', 'bebelusi', 'parinti', 'mamici',
   'educativ', 'educational', 'clasa a', 'cambridge', 'scoala', 'gradinita',
-  'balet', 'ballet', 'lectii', 'festival',
+  'balet', 'ballet', 'lectii',
+  'festival de film', 'festival culinar', 'festival de gastronomie', 'festival de arta', 'festival de arte',
+  'festival de ceramica', 'festival de carte', 'festival literar',
   'muzeul', 'muzeu', 'muzeale', 'comunismul', 'realismul socialist', 'ceramica', 'palatul sutu',
   'expozitia', 'vernisaj', 
   // Theatre & Comedy
@@ -218,7 +220,7 @@ const SOFT_BLOCK_TERMS = [
 const STRONG_MUSIC_TERMS = [
   'live set', 'dj set', 'rave', 'club night',
   'techno', 'house', 'trance', 'drum and bass', 'dnb', 'edm', 'electronic', 'underground',
-  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock', 'metal', 'punk', 'alternativ',
+  'hip-hop', 'hip hop', 'hiphop', 'jazz', 'blues', 'rock music', 'rock band', 'rock concert', 'rock night', 'metal', 'punk', 'alternativ',
   'disco', 'funk', 'soul', 'reggae', 'clubbing', 'dancefloor',
   'manele', 'manea',
 ];
@@ -268,7 +270,7 @@ export function guessGenres(title: string, desc: string): string[] | null {
     'Trance':       ['trance', 'psytrance', 'psy trance', 'goa'],
     'Reggae':       ['reggae', 'dancehall', 'ska', 'dub'],
     'Party':        ['party', 'clubbing', 'nightlife', 'dancing', 'club night', 'dj performance'],
-    // Festival removed intentionally — handled separately
+    'Festival':     ['festival', 'fest ', ' fest', 'open air', 'outdoor concert'],
   };
 
   for (const [genre, keywords] of Object.entries(mapping)) {
@@ -489,6 +491,31 @@ export function isValidVenueName(name: string): boolean {
 }
 
 /**
+ * Extract a text description from HTML body when JSON-LD/OG meta description is absent.
+ * Tries common content containers in priority order.
+ */
+export function extractDescriptionFromHtml(html: string): string | null {
+  // Ordered list of selectors to try (id/class based, regex-extracted)
+  const patterns: RegExp[] = [
+    // iabilet: <div id="details" ...>
+    /<div[^>]+id=["']details["'][^>]*>([\s\S]{30,3000}?)<\/div>\s*<\/div>/i,
+    // itemprop="description"
+    /itemprop=["']description["'][^>]*>([\s\S]{30,2000}?)<\/(?:div|p|section)>/i,
+    // common class names
+    /<div[^>]+class=["'][^"']*(?:event-description|description-text|event-detail|event-body|event-content)[^"']*["'][^>]*>([\s\S]{30,2000}?)<\/div>/i,
+  ];
+
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m) {
+      const text = clean(m[1]);
+      if (text.length > 30) return text.slice(0, 1500);
+    }
+  }
+  return null;
+}
+
+/**
  * Try to extract a venue name from HTML when JSON-LD location.name is absent.
  * Tries: itemprop="location", JSON fragment, common class names.
  */
@@ -565,71 +592,40 @@ const priceProviders: Record<string, PriceProvider> = {
   // Ambilet specific price extraction
   ambilet: {
     extract: (html: string): string | null => {
-      // Ambilet uses a specific structure for price display
-      // Based on user feedback: look for price elements in specific containers
-      
-      // Look for the main price container structure
-      const mainContainerPattern = /<div[^>]*id=["']content["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*main["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*flex\s+flex-col\s+gap-y-4["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*flex-none\s+w-1\/2\s+mobile\:w-full["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*sticky\s+flex\s+flex-col\s+bg-white\s+border\s+border-solid\s+gap-y-2\s+top-20\s+border-slate-200\s+mobile\:relative\s+mobile\:top-0["'][^>]*>/i;
-      
-      const mainContainerMatch = html.match(mainContainerPattern);
-      if (mainContainerMatch && mainContainerMatch.index !== undefined) {
-        // Get the content after the main container
-        const afterMainContainer = html.substring(mainContainerMatch.index + mainContainerMatch[0].length);
-        
-        // Look for price in first child (nth-child(1))
-        const firstChildPattern = /<div[^>]*class=["'][^"']*flex\s+flex-col\s+justify-start\s+flex-none\s+w-1\/2\s+mobile\:flex-1\s+mobile\:w-full["'][^>]*>[\s\S]*?<div[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i;
-        const firstChildMatch = afterMainContainer.match(firstChildPattern);
-        if (firstChildMatch) {
-          const val = parseFloat(firstChildMatch[1].replace(',', '.'));
-          if (!isNaN(val) && val > 0 && val < 5000) {
-            return `${val} RON`;
-          }
-        }
-        
-        // Look for price in second child (nth-child(2))
-        const secondChildPattern = /<div[^>]*class=["'][^"']*flex\s+flex-col\s+justify-start\s+flex-none\s+w-1\/2\s+mobile\:flex-1\s+mobile\:w-full["'][^>]*>[\s\S]*?<div[^>]*>[\s\S]*?<div[^>]*>[\s\S]*?<p[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i;
-        const secondChildMatch = afterMainContainer.match(secondChildPattern);
-        if (secondChildMatch) {
-          const val = parseFloat(secondChildMatch[1].replace(',', '.'));
-          if (!isNaN(val) && val > 0 && val < 5000) {
-            return `${val} RON`;
-          }
-        }
-        
-        // Also look for any price patterns in the main container area
-        const pricePatterns = [
-          // Pattern: <span>50 lei</span> or similar
-          /(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
-          // Pattern: preceded by text like "Price:" or "Cost:"
-          /(?:Price|Cost|Preț|Tarifă)[:.]?\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
-          // Pattern: in button text or similar
-          /[>]\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)\s*</
-        ];
-        
-        for (const pattern of pricePatterns) {
-          const matches = Array.from(afterMainContainer.matchAll(pattern));
-          if (matches.length > 0) {
-            const prices = matches
-              .map(m => parseFloat(m[1].replace(',', '.')))
-              .filter(p => !isNaN(p) && p > 0 && p < 5000)
-              .sort((a, b) => a - b);
-            
-            if (prices.length > 0) {
-              const unique = Array.from(new Set(prices));
-              if (unique.length === 1) {
-                return unique[0] === 0 ? 'Free' : `${unique[0]} RON`;
-              } else {
-                const min = unique[0];
-                const max = unique[unique.length - 1];
-                if (min === 0 && max === 0) return 'Free';
-                else if (min === 0) return `Free - ${max} RON`;
-                else return `${min} - ${max} RON`;
-              }
-            }
-          }
+      // Ambilet uses Tailwind utility classes (not semantic IDs), so we anchor on
+      // the "Cumpara bilet" buy-button which always appears in the sticky price sidebar.
+      // Price numbers appear in the ~800 chars leading up to that button.
+      const cumparaPos = html.search(/[Cc]ump[aă]r[aă]\s+bilet|[Aa]daug[aă]\s+[îi]n\s+co[șs]/);
+      if (cumparaPos > 0) {
+        const beforeBtn = html.slice(Math.max(0, cumparaPos - 800), cumparaPos);
+        const prices = Array.from(beforeBtn.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:lei|RON|LEI)/gi))
+          .map(m => parseFloat(m[1].replace(',', '.')))
+          .filter(p => !isNaN(p) && p >= 5 && p < 5000)
+          .sort((a, b) => a - b);
+
+        if (prices.length > 0) {
+          const unique = Array.from(new Set(prices));
+          if (unique.length === 1) return `${unique[0]} RON`;
+          return `${unique[0]} - ${unique[unique.length - 1]} RON`;
         }
       }
-      
+
+      // Fallback: scan for a sticky sidebar (Ambilet's right-column ticket widget)
+      const stickyIdx = html.search(/class=["'][^"']*\bsticky\b[^"']*bg-white[^"']*["']/i);
+      if (stickyIdx >= 0) {
+        const stickyChunk = html.slice(stickyIdx, stickyIdx + 1500);
+        const prices = Array.from(stickyChunk.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:lei|RON|LEI)/gi))
+          .map(m => parseFloat(m[1].replace(',', '.')))
+          .filter(p => !isNaN(p) && p >= 5 && p < 5000)
+          .sort((a, b) => a - b);
+
+        if (prices.length > 0) {
+          const unique = Array.from(new Set(prices));
+          if (unique.length === 1) return `${unique[0]} RON`;
+          return `${unique[0]} - ${unique[unique.length - 1]} RON`;
+        }
+      }
+
       return null;
     },
     priority: 15 // Higher priority than wooCommerce for ambilet.ro sites
@@ -758,8 +754,9 @@ export function extractPriceFromHtml(html: string, url?: string): string | null 
     return providerResults[0].price;
   }
   
-  // Only then check for "Free" as absolute last resort
-  if (/\b(?:free entry|intrare libera|intrare liberă|gratuit|entree gratuite)\b/i.test(html)) {
+  // Only then check for "Free" as absolute last resort — require entry-specific phrasing
+  // (avoid false positives from "livrare gratuita", "garantie gratuita" in page footers)
+  if (/\b(?:free entry|intrare liber[aă]|bilet gratuit|bilete gratuite|intrare gratuit[aă]|entree gratuite)\b/i.test(html)) {
     return 'Free';
   }
   
@@ -881,7 +878,7 @@ export async function parseDetailPage(
     const { title, venueHint } = splitTitleVenue(rawName);
 
     const rawDesc = String(b.description ?? og['og:description'] ?? og['description'] ?? '');
-    const description = clean(rawDesc) || null;
+    const description = clean(rawDesc) || extractDescriptionFromHtml(html) || null;
 
     // Venue: JSON-LD location.name > title "@Venue" hint > HTML itemprop/class > "Venue TBC"
     // Skip location.name if it looks like a street address (some sites set it to the street address)

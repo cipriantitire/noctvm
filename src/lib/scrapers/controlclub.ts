@@ -81,7 +81,7 @@ function parseListingPage(html: string): EventStub[] {
     // Look for BUY TICKETS href after this event's slug but before the next slug
     let ticketUrl: string | null = null;
     const ticketRe = new RegExp(
-      `slug=${slugEscaped}[\\s\\S]{0,1000}?href=["'](https?://[^"']*iabilet[^"']+)["']`,
+      `slug=${slugEscaped}[\\s\\S]{0,1000}?href=["'](https?://[^"']*(?:iabilet|ambilet)[^"']+)["']`,
       'i'
     );
     const ticketMatch = html.match(ticketRe);
@@ -125,57 +125,104 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     const genres = guessGenres(stub.title, description ?? '');
     if (!genres) return null;
 
-    // Price detection inside the HTML description content
+    // Price detection — try sources in priority order
     let price: string | null = null;
+    let ticketFromBottom: string | null = null;
     const isSoldOut = stub.title.includes('[SOLD OUT]');
     if (isSoldOut) {
       price = 'SOLD OUT';
     } else {
-      // Try to extract price from specific Control Club detail page selectors
-      // Based on user feedback: body > div:nth-child(4) > div > div > div > div.event-top > div.bottom
-      const priceContainerMatch = html.match(/<div[^>]*class=["'][^"']*event-top[^"']*["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*bottom[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
-      if (priceContainerMatch) {
-        const priceContainer = priceContainerMatch[1];
-        // Look for price patterns in the container
-        const pricePatterns = [
-          // Pattern: <span>50 lei</span> or similar
-          /(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
-          // Pattern: preceded by text like "Price:" or "Cost:"
-          /(?:Price|Cost|Preț|Tarifă)[:.]?\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
-          // Pattern: in button text or similar
-          /[>]\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)\s*</
-        ];
-        
-        for (const pattern of pricePatterns) {
-          const matches = Array.from(priceContainer.matchAll(pattern));
-          if (matches.length > 0) {
-            const prices = matches
-              .map(m => parseFloat(m[1].replace(',', '.')))
-              .filter(p => !isNaN(p) && p > 0 && p < 5000)
-              .sort((a, b) => a - b);
-            
-            if (prices.length > 0) {
-              const unique = Array.from(new Set(prices));
-              if (unique.length === 1) {
-                price = unique[0] === 0 ? 'Free' : `${unique[0]} RON`;
-              } else {
-                const min = unique[0];
-                const max = unique[unique.length - 1];
-                if (min === 0 && max === 0) price = 'Free';
-                else if (min === 0) price = `Free - ${max} RON`;
-                else price = `${min} - ${max} RON`;
+      // ── 1. FREE ENTRY / DOOR TICKET tags in server HTML ──────────────────────
+      // <span class="tag black ">FREE ENTRY</span> is present in raw server HTML
+      if (/FREE\s+ENTRY/i.test(html)) {
+        price = 'Free';
+      } else if (/DOOR\s+TICKET/i.test(html)) {
+        price = 'Door';
+      } else if (/intrare\s+liber[aă]|intrare\s+gratu[ií]t[aă]?/i.test(html.slice(0, 50000))) {
+        price = 'Free';
+      }
+
+      // ── 2. buy_tickets.php API — prices are JS-injected, not in server HTML ──
+      // Extract data-performance-id and call the API directly
+      if (!price) {
+        const perfIdMatch = html.match(/data-performance-id=["'](\d+)["']/i);
+        if (perfIdMatch) {
+          try {
+            const perfId = perfIdMatch[1];
+            const apiResp = await fetch('https://www.control-club.ro/php/buy_tickets.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: `performance_id=${perfId}`,
+              signal: AbortSignal.timeout(8000),
+            });
+            if (apiResp.ok) {
+              const data = await apiResp.json() as {
+                price?: string;
+                display_text?: string;
+                price_categories?: Array<{ price?: string; currency?: string }>;
+              };
+
+              if (data.price_categories && data.price_categories.length > 0) {
+                const prices = data.price_categories
+                  .map(c => parseFloat(c.price ?? ''))
+                  .filter(p => !isNaN(p) && p > 0 && p < 5000)
+                  .sort((a, b) => a - b);
+                if (prices.length > 0) {
+                  const unique = Array.from(new Set(prices));
+                  price = unique.length === 1
+                    ? `${unique[0]} RON`
+                    : `${unique[0]} - ${unique[unique.length - 1]} RON`;
+                }
+              } else if (data.price) {
+                const p = parseFloat(data.price);
+                if (!isNaN(p) && p > 0) price = `${p} RON`;
               }
-              break;
+            }
+          } catch { /* ignore API errors */ }
+        }
+      }
+
+      // ── 3. div.event-top > div.bottom chunk scan (fallback for older pages) ──
+      if (!price) {
+        const eventTopIdx = html.search(/<div[^>]*class=["'][^"']*\bevent-top\b[^"']*["'][^>]*>/i);
+        if (eventTopIdx >= 0) {
+          const eventTopChunk = html.slice(eventTopIdx, eventTopIdx + 3000);
+          const bottomIdx = eventTopChunk.search(/<div[^>]*class=["'][^"']*\bbottom\b[^"']*["'][^>]*>/i);
+          if (bottomIdx >= 0) {
+            const bottomChunk = eventTopChunk.slice(bottomIdx, bottomIdx + 1500);
+
+            if (/intrare\s+liber[aă]|intrare\s+gratu[ií]t[aă]?|gratuit[aă]?\s+entry|free\s+entry/i.test(bottomChunk)) {
+              price = 'Free';
+            } else {
+              const priceAmounts = Array.from(
+                bottomChunk.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:lei|RON|EUR|€)/gi)
+              )
+                .map(m => parseFloat(m[1].replace(',', '.')))
+                .filter(p => !isNaN(p) && p > 0 && p < 5000)
+                .sort((a, b) => a - b);
+
+              if (priceAmounts.length > 0) {
+                const unique = Array.from(new Set(priceAmounts));
+                price = unique.length === 1
+                  ? `${unique[0]} RON`
+                  : `${unique[0]} - ${unique[unique.length - 1]} RON`;
+              }
+
+              if (!stub.ticketUrl) {
+                const linkMatch = bottomChunk.match(
+                  /href=["'](https?:\/\/(?:www\.)?(?:ambilet|iabilet)[^"']+)["']/i
+                );
+                if (linkMatch) ticketFromBottom = linkMatch[1];
+              }
             }
           }
         }
       }
-      
-      // Fallback to generic price extraction if specific selectors didn't work
-      if (!price || price === 'Free') {
+
+      // ── 4. Generic fallback ───────────────────────────────────────────────────
+      if (!price) {
         const { extractPriceFromHtml } = await import('./utils');
         const htmlPrice = extractPriceFromHtml(html);
-        // If HTML gives a non-Free price, prefer it over the suspicious JSON-LD "Free"
         if (htmlPrice && htmlPrice !== 'Free') {
           price = htmlPrice;
         } else {
@@ -191,6 +238,8 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
       ticket_url = raLinkMatch[1];
     } else if (stub.ticketUrl) {
       ticket_url = stub.ticketUrl;
+    } else if (ticketFromBottom) {
+      ticket_url = ticketFromBottom;
     } else {
       ticket_url = extractTicketsFromHtml(html);
     }
