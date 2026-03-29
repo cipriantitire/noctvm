@@ -131,8 +131,57 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     if (isSoldOut) {
       price = 'SOLD OUT';
     } else {
-      const { extractPriceFromHtml } = await import('./utils');
-      price = extractPriceFromHtml(html);
+      // Try to extract price from specific Control Club detail page selectors
+      // Based on user feedback: body > div:nth-child(4) > div > div > div > div.event-top > div.bottom
+      const priceContainerMatch = html.match(/<div[^>]*class=["'][^"']*event-top[^"']*["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*bottom[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+      if (priceContainerMatch) {
+        const priceContainer = priceContainerMatch[1];
+        // Look for price patterns in the container
+        const pricePatterns = [
+          // Pattern: <span>50 lei</span> or similar
+          /(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
+          // Pattern: preceded by text like "Price:" or "Cost:"
+          /(?:Price|Cost|Preț|Tarifă)[:.]?\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
+          // Pattern: in button text or similar
+          /[>]\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)\s*</
+        ];
+        
+        for (const pattern of pricePatterns) {
+          const matches = Array.from(priceContainer.matchAll(pattern));
+          if (matches.length > 0) {
+            const prices = matches
+              .map(m => parseFloat(m[1].replace(',', '.')))
+              .filter(p => !isNaN(p) && p > 0 && p < 5000)
+              .sort((a, b) => a - b);
+            
+            if (prices.length > 0) {
+              const unique = Array.from(new Set(prices));
+              if (unique.length === 1) {
+                price = unique[0] === 0 ? 'Free' : `${unique[0]} RON`;
+              } else {
+                const min = unique[0];
+                const max = unique[unique.length - 1];
+                if (min === 0 && max === 0) price = 'Free';
+                else if (min === 0) price = `Free - ${max} RON`;
+                else price = `${min} - ${max} RON`;
+              }
+              break;
+            }
+          }
+        }
+      }
+      
+      // Fallback to generic price extraction if specific selectors didn't work
+      if (!price || price === 'Free') {
+        const { extractPriceFromHtml } = await import('./utils');
+        const htmlPrice = extractPriceFromHtml(html);
+        // If HTML gives a non-Free price, prefer it over the suspicious JSON-LD "Free"
+        if (htmlPrice && htmlPrice !== 'Free') {
+          price = htmlPrice;
+        } else {
+          price = htmlPrice || price;
+        }
+      }
     }
 
     // Try to extract ticket link. Prioritize RA link from the .buttons area as requested by user.

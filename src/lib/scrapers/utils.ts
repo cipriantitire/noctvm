@@ -242,8 +242,8 @@ export function guessGenres(title: string, desc: string): string[] | null {
     return new RegExp(`\\b${escaped}\\b`).test(t);
   };
 
-  // Hard blocks: use word-boundary matching like soft blocks and music terms
-  if (HARD_BLOCK_TERMS.some(term => hasTerm(term))) return null;
+  // Hard blocks: aggressive inclusion match is fine for blocks (e.g. "teatrul" blocks "teatru")
+  if (HARD_BLOCK_TERMS.some(term => t.includes(normalize(term)))) return null;
 
   // Soft blocks
   const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalize(term)));
@@ -560,6 +560,79 @@ const priceProviders: Record<string, PriceProvider> = {
       return null;
     },
     priority: 10
+  },
+  
+  // Ambilet specific price extraction
+  ambilet: {
+    extract: (html: string): string | null => {
+      // Ambilet uses a specific structure for price display
+      // Based on user feedback: look for price elements in specific containers
+      
+      // Look for the main price container structure
+      const mainContainerPattern = /<div[^>]*id=["']content["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*main["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*flex\s+flex-col\s+gap-y-4["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*flex-none\s+w-1\/2\s+mobile\:w-full["'][^>]*>[\s\S]*?<div[^>]*class=["'][^"']*sticky\s+flex\s+flex-col\s+bg-white\s+border\s+border-solid\s+gap-y-2\s+top-20\s+border-slate-200\s+mobile\:relative\s+mobile\:top-0["'][^>]*>/i;
+      
+      const mainContainerMatch = html.match(mainContainerPattern);
+      if (mainContainerMatch && mainContainerMatch.index !== undefined) {
+        // Get the content after the main container
+        const afterMainContainer = html.substring(mainContainerMatch.index + mainContainerMatch[0].length);
+        
+        // Look for price in first child (nth-child(1))
+        const firstChildPattern = /<div[^>]*class=["'][^"']*flex\s+flex-col\s+justify-start\s+flex-none\s+w-1\/2\s+mobile\:flex-1\s+mobile\:w-full["'][^>]*>[\s\S]*?<div[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i;
+        const firstChildMatch = afterMainContainer.match(firstChildPattern);
+        if (firstChildMatch) {
+          const val = parseFloat(firstChildMatch[1].replace(',', '.'));
+          if (!isNaN(val) && val > 0 && val < 5000) {
+            return `${val} RON`;
+          }
+        }
+        
+        // Look for price in second child (nth-child(2))
+        const secondChildPattern = /<div[^>]*class=["'][^"']*flex\s+flex-col\s+justify-start\s+flex-none\s+w-1\/2\s+mobile\:flex-1\s+mobile\:w-full["'][^>]*>[\s\S]*?<div[^>]*>[\s\S]*?<div[^>]*>[\s\S]*?<p[^>]*>[\s\S]*?(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i;
+        const secondChildMatch = afterMainContainer.match(secondChildPattern);
+        if (secondChildMatch) {
+          const val = parseFloat(secondChildMatch[1].replace(',', '.'));
+          if (!isNaN(val) && val > 0 && val < 5000) {
+            return `${val} RON`;
+          }
+        }
+        
+        // Also look for any price patterns in the main container area
+        const pricePatterns = [
+          // Pattern: <span>50 lei</span> or similar
+          /(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
+          // Pattern: preceded by text like "Price:" or "Cost:"
+          /(?:Price|Cost|Preț|Tarifă)[:.]?\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)/i,
+          // Pattern: in button text or similar
+          /[>]\s*(\d+(?:[.,]\d+)?)\s*(?:lei|lei|RON|EUR|€)\s*</
+        ];
+        
+        for (const pattern of pricePatterns) {
+          const matches = Array.from(afterMainContainer.matchAll(pattern));
+          if (matches.length > 0) {
+            const prices = matches
+              .map(m => parseFloat(m[1].replace(',', '.')))
+              .filter(p => !isNaN(p) && p > 0 && p < 5000)
+              .sort((a, b) => a - b);
+            
+            if (prices.length > 0) {
+              const unique = Array.from(new Set(prices));
+              if (unique.length === 1) {
+                return unique[0] === 0 ? 'Free' : `${unique[0]} RON`;
+              } else {
+                const min = unique[0];
+                const max = unique[unique.length - 1];
+                if (min === 0 && max === 0) return 'Free';
+                else if (min === 0) return `Free - ${max} RON`;
+                else return `${min} - ${max} RON`;
+              }
+            }
+          }
+        }
+      }
+      
+      return null;
+    },
+    priority: 15 // Higher priority than wooCommerce for ambilet.ro sites
   },
   
   // Control Club specific price extraction
