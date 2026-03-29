@@ -184,7 +184,7 @@ export function clean(text: string | null | undefined): string {
 const HARD_BLOCK_TERMS = [
   'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi',
   'copii', 'marionete', 'papusi', 'copilasi', 'bebelusi', 'parinti', 'mamici',
-  'educativ', 'educational', 'clasa a', 'cambridge', 'scoala', 'gradinita',
+  'educativ', 'educational', 'clasa a', 'cambridge', 'gradinita',
   'balet', 'ballet', 'lectii',
   'festival de film', 'festival culinar', 'festival de gastronomie', 'festival de arta', 'festival de arte',
   'festival de ceramica', 'festival de carte', 'festival literar',
@@ -193,7 +193,7 @@ const HARD_BLOCK_TERMS = [
   // Theatre & Comedy
   'show de comedie', 'show comedie', 'comedie pentru', 'comedie corporatisti', 'stand-up', 'standup', 'stand up', 'comedy show', 'improv',
   'teatru interactiv', 'teatru pentru', 'spectacol de teatru',
-  'teatru de vara', 'teatrul de vara', 'teatru vara', 'teatru aer liber',
+  'teatru de vara', 'teatrul de vara', 'teatru vara', 'teatru aer liber', 'teatrul',
   'piesa de teatru', 'teatru cu', 'joc de rol', 'teatru', 'theatre',
   'actori:', 'regia:', 'distributia:', 'reprezentatie',
   // Magic
@@ -215,7 +215,7 @@ const SOFT_BLOCK_TERMS = [
   'culinar', 'cooking', 'tasting', 'degustare', 'degustari',
   'yoga', 'wellness', 'meditatie', 'meditație',
   'conferinta', 'conferința', 'conference', 'business', 'forum', 'summit',
-  'lectura', 'simulare', 'training', 'curs', 'cursuri', 'workshop', 'seminar', 'atelier',
+  'lectura', 'simulare', 'training', 'curs', 'cursuri', 'workshop', 'seminar', 'atelier', 'scoala',
   'prezentare', 'lansare carte', 'book launch', 'dezvoltare',
   // Automotive / off-road events (not music)
   'off-road', 'offroad', '4x4', 'automobilism', 'rally', 'curse auto', 'motorsport',
@@ -248,14 +248,25 @@ export function guessGenres(title: string, desc: string): string[] | null {
     return new RegExp(`\\b${escaped}\\b`).test(t);
   };
 
-  // Hard blocks: aggressive inclusion match is fine for blocks (e.g. "teatrul" blocks "teatru")
-  if (HARD_BLOCK_TERMS.some(term => t.includes(normalize(term)))) return null;
+  // Hard blocks: use boundary-aware matching to avoid false positives like
+  // "circ" matching "circuit". For punctuation terms, fall back to includes.
+  const hasHardBlock = (term: string) => {
+    const normalizedTerm = normalize(term);
+    if (!normalizedTerm) return false;
+    if (/[^a-z0-9\s-]/i.test(normalizedTerm)) {
+      return t.includes(normalizedTerm);
+    }
+    const escaped = normalizedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`\\b${escaped}\\b`).test(t);
+  };
+  if (HARD_BLOCK_TERMS.some(hasHardBlock)) return null;
 
   // Soft blocks
   const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalize(term)));
   const isStrongMusic = STRONG_MUSIC_TERMS.some(sm => hasTerm(sm));
+  const hasMusicIntentInTitle = /\b(concert|live|dj|party|festival|tour|showcase|album|trupa|band)\b/.test(normalize(title));
 
-  if (isSoftBlocked && !isStrongMusic) return null;
+  if (isSoftBlocked && !isStrongMusic && !hasMusicIntentInTitle) return null;
 
   const found = new Set<string>();
   const mapping: Record<string, string[]> = {
@@ -499,12 +510,31 @@ export function isValidVenueName(name: string): boolean {
  */
 export function extractDescriptionFromHtml(html: string): string | null {
   // iabilet: full body content lives under #details; XPath provided by user points inside this container.
-  // Take a bounded chunk starting at #details so nested div structure doesn't break regex extraction.
+  // Extract only the tab body around #details (short-desc + event-detail), not arbitrary trailing HTML.
   const detailsIdx = html.search(/id=["']details["']/i);
   if (detailsIdx >= 0) {
-    const detailsChunk = html.slice(detailsIdx, detailsIdx + 12_000);
-    const text = clean(detailsChunk);
-    if (text.length > 80) return text.slice(0, 1500);
+    const afterDetails = html.slice(detailsIdx, detailsIdx + 20_000);
+    // Prefer expanded detail content
+    const eventDetailMatch = afterDetails.match(
+      /<div[^>]*class=["'][^"']*event-detail[^"']*["'][^>]*>([\s\S]{80,12000}?)<\/div>/i,
+    );
+    if (eventDetailMatch) {
+      const txt = clean(eventDetailMatch[1]);
+      if (txt.length > 80) return txt.slice(0, 1500);
+    }
+
+    // Fallback: short description block
+    const shortDescMatch = afterDetails.match(
+      /<div[^>]*class=["'][^"']*short-desc[^"']*["'][^>]*>([\s\S]{40,3000}?)<\/div>/i,
+    );
+    if (shortDescMatch) {
+      const txt = clean(shortDescMatch[1]);
+      if (txt.length > 40) return txt.slice(0, 1000);
+    }
+
+    // Last resort within the local details slice
+    const text = clean(afterDetails);
+    if (text.length > 80) return text.slice(0, 1200);
   }
 
   // zilesinopti: description is typically in the main entry/article content area.
