@@ -1,8 +1,9 @@
 'use client';
 
-import { MoonIcon, EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon } from './icons';
+import { EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
@@ -21,13 +22,15 @@ interface SidebarProps {
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
   activeCity?: 'bucuresti' | 'constanta';
+  pushContent?: boolean;
 }
 
-export default function Sidebar({ 
-  activeTab = 'events', 
-  onTabChange = () => {}, 
+export default function Sidebar({
+  activeTab = 'events',
+  onTabChange = () => {},
   onSettingsClick,
-  onNotificationsClick 
+  onNotificationsClick,
+  pushContent = true,
 }: SidebarProps) {
   const { profile, user, isAdmin, isOwner } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
@@ -42,12 +45,28 @@ export default function Sidebar({
     <aside 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-200 ease-out py-6 overflow-hidden"
+      className={`hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen z-10 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-200 ease-out py-6 overflow-hidden ${pushContent ? 'sticky top-0' : 'absolute left-0 top-0'}`}
     >
-      {/* Moon Logo */}
-      <div className="flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-3 px-5 mb-10 w-full">
-        <MoonIcon className="w-8 h-8 text-noctvm-violet flex-shrink-0" />
-        <span className={labelCls + ' font-heading text-xl font-bold text-glow'}>NOCTVM</span>
+      {/* Logo */}
+      <div className="relative flex items-center justify-center px-4 mb-10 w-full h-10 flex-shrink-0">
+        {/* Collapsed: standalone moon mark */}
+        <Image
+          src="/images/logo.svg"
+          alt="NOCTVM"
+          width={28}
+          height={32}
+          className="absolute inset-0 m-auto object-contain opacity-100 group-hover/sidebar:opacity-0 transition-opacity duration-150"
+          priority
+        />
+        {/* Expanded: full type logo */}
+        <Image
+          src="/images/typelogo-inside.webp"
+          alt="NOCTVM"
+          width={148}
+          height={32}
+          className="absolute inset-0 m-auto object-contain opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75"
+          priority
+        />
       </div>
 
       {/* Nav icons - centered when collapsed, left-aligned when expanded */}
@@ -69,7 +88,7 @@ export default function Sidebar({
       </nav>
 
       {/* Bottom: Profile (Bottom-most) -> Notifications -> Settings -> Dashboard (Top-most of group) */}
-      <div className="px-3 w-full flex flex-col-reverse gap-1">
+      <div className="absolute bottom-6 left-0 right-0 px-3 flex flex-col-reverse gap-1">
         
         {/* Profile (Base Button) */}
         <button

@@ -14,11 +14,31 @@ const LIST_URLS = [
   {
     url: 'https://www.iabilet.ro/bilete-bucuresti/',
     city: 'Bucharest',
-    // iabilet's Bucharest listing includes national events — verify the JSON-LD city
+    allowedCities: ['bucuresti', 'bucharest', 'ilfov', 'sector'],
+  },
+  {
+    // Concerts-specific sub-page — avoids children/theatre events dominating the main listing
+    url: 'https://www.iabilet.ro/bilete-in-bucuresti/bilete-concerte/',
+    city: 'Bucharest',
     allowedCities: ['bucuresti', 'bucharest', 'ilfov', 'sector'],
   },
   {
     url: 'https://www.iabilet.ro/bilete-constanta/',
+    city: 'Constanta',
+    allowedCities: [
+      'constanta', 'constanța', 'mamaia',
+      'eforie', 'eforie nord', 'eforie sud',
+      'neptun', 'mangalia',
+      'navodari', 'năvodari',
+      'costinesti', 'costinești',
+      'vama veche', '2 mai',
+      'venus', 'saturn', 'olimp', 'jupiter',
+      'techirghiol',
+    ],
+  },
+  {
+    // Concerts-specific sub-page — catches events not surfaced on the main listing
+    url: 'https://www.iabilet.ro/bilete-in-constanta/bilete-concerte/',
     city: 'Constanta',
     allowedCities: [
       'constanta', 'constanța', 'mamaia',

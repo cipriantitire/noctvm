@@ -1,0 +1,7 @@
+[     107ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://ra.co/events/2101944:0
+[     488ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://ra.co/favicon.ico:0
+[    3606ms] [WARNING] Replace exitBeforeEnter with mode='wait' @ https://ra.co/_next/static/chunks/pages/_app-f11d50f15018765d.js:2
+[    4334ms] [ERROR] Failed to load resource: the server responded with a status of 402 () @ https://api.refiner.io/js-client/v1/c2721ec0-a343-11ed-afa5-3b9c83158f3c/ping:0
+[    5155ms] [WARNING] The following functions are deprecated: googletag.pubads().setTagForChildDirectedTreatment(), googletag.pubads().clearTagForChildDirectedTreatment(), googletag.pubads().setRequestNonPersonalizedAds(), and googletag.pubads().setTagForUnderAgeOfConsent(). Please use googletag.pubads().setPrivacySettings() instead. @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    5156ms] [WARNING] googletag.pubads().setCookieOptions() has been removed, and no longer has any effect. Consider migrating to Limited Ads. @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    5825ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0

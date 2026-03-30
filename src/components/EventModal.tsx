@@ -265,26 +265,33 @@ export default function EventModal({
           </h2>
 
           {/* Venue */}
-          {onVenueClick ? (
-            <button
-              onClick={(e) => { e.stopPropagation(); onVenueClick(event.venue); }}
-              className="flex items-center gap-1.5 text-noctvm-violet font-medium text-sm hover:underline text-left"
-            >
+          {(() => {
+            const v = event.venue ?? '';
+            const isTBA = v === 'TBA' || /^tba\b/i.test(v) || /secret\s+location/i.test(v) || /announced.*before/i.test(v);
+            const venueIcon = (
               <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                 <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
-              <span>{event.venue}</span>
-              {venueBadge !== 'none' && <VerifiedBadge type={venueBadge} size="xs" />}
-            </button>
-          ) : (
-            <p className="flex items-center gap-1.5 text-noctvm-violet font-medium text-sm">
-              <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-2.079 3.953-5.158 3.953-9.077A8.223 8.223 0 0012 2.25a8.223 8.223 0 00-8.22 7.97c0 3.92 2.01 6.998 3.954 9.077a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-              </svg>
-              <span>{event.venue}</span>
-              {venueBadge !== 'none' && <VerifiedBadge type={venueBadge} size="xs" />}
-            </p>
-          )}
+            );
+            if (!isTBA && onVenueClick) {
+              return (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onVenueClick(v); }}
+                  className="flex items-center gap-1.5 text-noctvm-violet font-medium text-sm hover:underline text-left"
+                >
+                  {venueIcon}
+                  <span>{v}</span>
+                  {venueBadge !== 'none' && <VerifiedBadge type={venueBadge} size="xs" />}
+                </button>
+              );
+            }
+            return (
+              <p className="flex items-center gap-1.5 text-noctvm-silver/60 font-medium text-sm">
+                {venueIcon}
+                <span>{isTBA ? 'TBA' : v}</span>
+              </p>
+            );
+          })()}
 
           {/* Date + Time */}
           <div className="flex items-center gap-3 text-noctvm-silver/80">

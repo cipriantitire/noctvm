@@ -61,7 +61,20 @@
       "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-create-pages",
       "mcp__c9356453-10f9-4aa2-b49a-4376c3e9ba07__notion-move-pages",
       "Bash(find C:/Users/cipri/NOCTVM/src -path *[handle]* -name *.tsx -o -path */[handle]/* -name *.tsx)",
-      "Bash(node scripts/export-figma-tokens.mjs)"
+      "Bash(node scripts/export-figma-tokens.mjs)",
+      "Bash(openclaw agents:*)",
+      "Bash(openclaw doctor:*)",
+      "Bash(openclaw cron:*)",
+      "Bash(openclaw channels:*)",
+      "Bash(openclaw --help)",
+      "Bash(openclaw message:*)",
+      "Bash(openclaw pairing:*)",
+      "Bash(\"/c/Users/cipri/.openclaw/agents/trend-scout/workspace/USER.md\":*)",
+      "Bash(curl -s \"https://api.telegram.org/bot8568053007:AAGhndqh6ISOpUDoTem-uglWzV4l-0ahXEo/getUpdates\")",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(u.get\\(''''message'''',{}\\).get\\(''''chat'''',{}\\)\\) for u in data.get\\(''''result'''',[]\\)]\")",
+      "Bash(python3 -c \":*)",
+      "Bash(head -5 python3 -c \":*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,'''':'''',str\\(v\\)[:150]\\) for k,v in list\\(d.items\\(\\)\\)[:20]]\")"
     ]
   }
 }

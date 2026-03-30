@@ -415,6 +415,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'altfel cluj',
     'LOG OUT',
     'secret location announced a few hours before',
+    'location announced a few hours before',
     'Royal Hall, 1 Piața Presei Libere, Bucharest, Romania',
     'Monumentul Răscoalei de la Bobâlna',
     'Băile Figa',
@@ -441,9 +442,20 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'altfel cluj',
     'LOG OUT',
     'secret location announced a few hours before',
+    'location announced a few hours before',
     'Royal Hall, 1 Piața Presei Libere, Bucharest, Romania',
     'Monumentul Răscoalei de la Bobâlna',
     'Băile Figa',
+    // TBA variants — all collapse to 'TBA' at upsert time
+    'TBA - Bucharest',
+    'TBA - Industrial Warehouse',
+    'TBA - Hare Garden',
+    'TBA - HALO EVENTS CENTER',
+    // Event names mistakenly used as venue names
+    'Ardor de Primăvară cu AMBRA',
+    'Odyssea Rock Fusion Festival 2026',
+    // Wrong-city venue stubs
+    'Casa de Cultură a Studenților Cluj',
     // Constanta duplicate stubs
     'Club Phoenix, Constanta',
     'Phoenix',
@@ -475,6 +487,22 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     supabase.from('events').update({ venue: 'Quantic' }).eq('venue', 'Quantic Club'),
     // Merge duplicate Doors rows (rename "Club Doors" → "Doors Club")
     supabase.from('events').update({ venue: 'Doors Club' }).eq('venue', 'Club Doors'),
+    // Venue merges — collapse variants to canonical names
+    supabase.from('events').update({ venue: 'Expirat Halele Carol' }).eq('venue', 'Expirat'),
+    supabase.from('events').update({ venue: 'Heavy Yard' }).eq('venue', 'HEAVY YARD & HEAVYSHOP'),
+    supabase.from('events').update({ venue: 'Natural High București' }).eq('venue', 'Natural High'),
+    supabase.from('events').update({ venue: 'Nook Club' }).eq('venue', 'Nook'),
+    supabase.from('events').update({ venue: 'Groove Alt Social Bar' }).eq('venue', 'Groove ALT SOCIAL BAR'),
+    supabase.from('events').update({ venue: 'Sala Dalles București' }).eq('venue', 'Sala Dalles'),
+    supabase.from('events').update({ venue: 'Momo Club' }).eq('venue', 'Momo Club • Zile și Nopți'),
+    supabase.from('events').update({ venue: 'The Place Mamaia' }).eq('venue', 'the place'),
+    supabase.from('events').update({ venue: 'Ego Club Mamaia' }).eq('venue', 'EGO Ballroom Mamaia'),
+    // TBA variants → canonical TBA (or resolved venue)
+    supabase.from('events').update({ venue: 'TBA' }).eq('venue', 'TBA - Bucharest'),
+    supabase.from('events').update({ venue: 'TBA' }).eq('venue', 'TBA - Industrial Warehouse'),
+    supabase.from('events').update({ venue: 'TBA' }).eq('venue', 'TBA - Hare Garden'),
+    supabase.from('events').update({ venue: 'Halo Events Center' }).eq('venue', 'TBA - HALO EVENTS CENTER'),
+    supabase.from('events').update({ venue: 'TBA' }).eq('venue', 'location announced a few hours before'),
   ]);
 
   // Remove events outside our target cities (Bucharest/Constanta) that still slip in from aggregators.

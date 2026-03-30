@@ -184,6 +184,9 @@ export function clean(text: string | null | undefined): string {
 const HARD_BLOCK_TERMS = [
   'pentru copii', 'spectacol copii', 'atelier copii', 'activitati copii', 'povestea celor', 'purcelusi',
   'copii', 'marionete', 'papusi', 'copilasi', 'bebelusi', 'parinti', 'mamici',
+  'for kids', 'for children', 'kids event', 'children event', 'family event',
+  'kids', 'children',
+  'young leaders', 'future leaders', 'leadership for',
   'educativ', 'educational', 'clasa a', 'cambridge', 'gradinita',
   'balet', 'ballet', 'lectii',
   'festival de film', 'festival culinar', 'festival de gastronomie', 'festival de arta', 'festival de arte',
@@ -198,6 +201,10 @@ const HARD_BLOCK_TERMS = [
   'actori:', 'regia:', 'distributia:', 'reprezentatie',
   // Magic
   'magie pentru', 'magician', 'clovn', 'ursitoare', 'animatori', 'circ', 'circus', 'magie', 'magic show',
+  // Romanian traditional folk (muzică populară) — not nightlife audience
+  'muzica populara', 'muzică populară', 'muzica populara romaneasca', 'cantece populare',
+  'lautareasca', 'lăutărească', 'folclor romanesc', 'folclor românesc', 'folclor',
+  'irina loghin',
   // Salsa / Latin specific blocked terms
   'salsa revolution', 'salsa congress',
   // Social/party games (non-nightlife music)

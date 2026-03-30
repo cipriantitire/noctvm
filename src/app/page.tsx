@@ -24,20 +24,21 @@ import CreateStoryModal from '@/components/CreateStoryModal';
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
-import { 
-  MoonIcon, 
-  UserIcon, 
-  EventsIcon, 
-  FeedIcon, 
-  PocketIcon, 
-  CogIcon, 
-  VenuesIcon, 
-  GridIcon, 
+import {
+  MoonIcon,
+  UserIcon,
+  EventsIcon,
+  FeedIcon,
+  PocketIcon,
+  CogIcon,
+  VenuesIcon,
+  GridIcon,
   BellIcon,
   EditIcon,
   ShieldIcon,
-  StarIcon 
+  StarIcon
 } from '@/components/icons';
+import Image from 'next/image';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
@@ -372,23 +373,30 @@ export default function Home() {
       )}
 
       {/* ── Main Layout ─────────────────────────────────────────── */}
-      <div className="flex h-screen bg-noctvm-black overflow-hidden">
+      <div className="relative flex h-screen bg-noctvm-black overflow-hidden">
         <Sidebar
           activeTab={activeTab}
           onTabChange={handleTabChange}
           onSettingsClick={handleSettingsClick}
           onNotificationsClick={() => setIsNotificationsOpen(true)}
           activeCity={activeCity}
+          pushContent={['events', 'venues'].includes(activeTab)}
         />
 
-        <main ref={mainRef} className="flex-1 min-h-screen overflow-y-auto">
+        <main ref={mainRef} className={`min-h-screen overflow-y-auto ${['events', 'venues'].includes(activeTab) ? 'flex-1' : 'flex-1 lg:ml-[72px]'}`}>
           {/* Mobile header */}
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
             <div className="grid grid-cols-3 items-center">
               {/* Left: Logo */}
-              <div className="flex items-center gap-2">
-                <MoonIcon className="w-6 h-6 text-noctvm-violet" />
-                <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
+              <div className="flex items-center">
+                <Image
+                  src="/images/typelogo-inside.webp"
+                  alt="NOCTVM"
+                  width={96}
+                  height={22}
+                  className="object-contain object-left"
+                  priority
+                />
               </div>
               
               {/* Middle: City Selector */}
