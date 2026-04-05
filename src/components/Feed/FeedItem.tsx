@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
@@ -30,6 +30,7 @@ interface FeedItemProps {
   onDelete: (id: string) => void;
   venueLogosMap: Record<string, string>;
   onFollow?: (userId: string) => void;
+  autoOpenPostId?: string | null;
 }
 
 export function FeedItem({
@@ -43,6 +44,7 @@ export function FeedItem({
   onDelete,
   venueLogosMap,
   onFollow,
+  autoOpenPostId = null,
 }: FeedItemProps) {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -52,6 +54,7 @@ export function FeedItem({
   const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
   const [commentPreview, setCommentPreview] = useState<{count: number, firstComment: any | null}>({ count: 0, firstComment: null });
+  const openedFromUrlRef = useRef(false);
   const isFollowing = post.user.isFollowing || false;
   const isOwnPost = user?.id === post.userId;
 
@@ -67,8 +70,58 @@ export function FeedItem({
       });
   }, [post.id]);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const currentPostId = params.get('post');
+
+      if (currentPostId === post.id) {
+        openedFromUrlRef.current = true;
+        setViewerOpen(true);
+        return;
+      }
+
+      openedFromUrlRef.current = false;
+      setViewerOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    handlePopState();
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [post.id]);
+
+  useEffect(() => {
+    if (autoOpenPostId !== post.id) {
+      if (openedFromUrlRef.current) {
+        openedFromUrlRef.current = false;
+        setViewerOpen(false);
+      }
+      return;
+    }
+
+    if (!openedFromUrlRef.current) {
+      openedFromUrlRef.current = true;
+      setViewerOpen(true);
+    }
+  }, [autoOpenPostId, post.id]);
+
+  const openViewer = () => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('post') !== post.id) {
+        params.set('tab', 'feed');
+        params.set('post', post.id);
+        window.history.pushState({ noctvm: 'post', postId: post.id }, '', `${window.location.pathname}?${params.toString()}`);
+      }
+    }
+
+    openedFromUrlRef.current = false;
+    setViewerOpen(true);
+  };
+
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/?post=${post.id}`;
+    const url = `${window.location.origin}/?tab=feed&post=${post.id}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -160,7 +213,7 @@ export function FeedItem({
         {/* Image */}
         <div 
           className={`aspect-square bg-gradient-to-br ${post.imageTheme.gradient} flex items-center justify-center relative overflow-hidden ${window.innerWidth >= 1024 ? 'cursor-pointer' : ''}`}
-          onClick={() => { if (window.innerWidth >= 1024) setViewerOpen(true); }}
+          onClick={() => { if (window.innerWidth >= 1024) openViewer(); }}
         >
           {post.imageUrl ? (
             <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} unoptimized />
@@ -365,7 +418,15 @@ export function FeedItem({
           }]}
           initialIndex={0}
           isOpen={viewerOpen}
-          onClose={() => setViewerOpen(false)}
+          onClose={() => {
+            if (window.location.search.includes('post=')) {
+              window.history.back();
+              return;
+            }
+
+            openedFromUrlRef.current = false;
+            setViewerOpen(false);
+          }}
           profileAvatar={post.user.avatarUrl}
           profileName={post.user.name}
           profileInitial={post.user.avatar}

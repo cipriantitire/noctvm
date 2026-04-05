@@ -229,7 +229,8 @@ export default function UserProfilePage({
   const [isSavedEventsOpen, setIsSavedEventsOpen] = useState(false);
 
   const handleShareProfile = async () => {
-    const url = window.location.href;
+    const cleanHandle = targetProfile.username.replace(/^@/, '');
+    const url = `${window.location.origin}/@${cleanHandle}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: 'NOCTVM', url });

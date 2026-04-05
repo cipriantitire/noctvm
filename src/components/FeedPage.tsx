@@ -17,9 +17,10 @@ interface FeedPageProps {
   onOpenCreateStory: () => void;
   onOpenStories: (users: StoryUser[], index: number) => void;
   activeCity?: 'bucuresti' | 'constanta';
+  initialPostId?: string | null;
 }
 
-export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories, activeCity = 'bucuresti' }: FeedPageProps) {
+export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateStory, onOpenStories, activeCity = 'bucuresti', initialPostId = null }: FeedPageProps) {
   const { user, profile } = useAuth();
   const [subTab, setSubTab] = useState<'explore' | 'following' | 'friends'>('following');
   const { explorePosts, followingPosts, friendsPosts, loading, fetchExplorePosts } = useFeedData(user, activeCity);
@@ -32,6 +33,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
 
   const [sharePostId, setSharePostId] = useState<string | null>(null);
   const [venueLogosMap, setVenueLogosMap] = useState<Record<string, string>>({});
+  const initialPostResolverRef = useRef<string | null>(null);
 
   useEffect(() => {
     const fetchLogos = async () => {
@@ -44,6 +46,32 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     };
     fetchLogos();
   }, []);
+
+  useEffect(() => {
+    if (!initialPostId) {
+      initialPostResolverRef.current = null;
+      return;
+    }
+
+    if (initialPostResolverRef.current === initialPostId) return;
+
+    if (followingPosts.some(post => post.id === initialPostId)) {
+      initialPostResolverRef.current = initialPostId;
+      setSubTab('following');
+      return;
+    }
+
+    if (friendsPosts.some(post => post.id === initialPostId)) {
+      initialPostResolverRef.current = initialPostId;
+      setSubTab('friends');
+      return;
+    }
+
+    if (explorePosts.some(post => post.id === initialPostId)) {
+      initialPostResolverRef.current = initialPostId;
+      setSubTab('explore');
+    }
+  }, [explorePosts, friendsPosts, followingPosts, initialPostId]);
   
   const toggleMyStoryDropdown = useCallback(() => {
     if (!showMyStoryDropdown && myStoryBtnRef.current) {
@@ -138,7 +166,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
       <ShareSheet
         isOpen={!!sharePostId}
         onClose={() => setSharePostId(null)}
-        postUrl={sharePostId ? `${window.location.origin}/?post=${sharePostId}` : ''}
+        postUrl={sharePostId ? `${window.location.origin}/?tab=feed&post=${sharePostId}` : ''}
       />
 
       <div className="flex justify-center gap-6 border-b border-noctvm-border mb-4">
@@ -182,6 +210,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             onRepost={handleRepost}
             onDelete={handleDeletePost}
             venueLogosMap={venueLogosMap}
+            autoOpenPostId={initialPostId}
           />
         ))}
 

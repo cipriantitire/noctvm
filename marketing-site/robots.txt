@@ -13,4 +13,4 @@ Allow: /
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://noctvm.com/sitemap.xml
+Sitemap: https://noctvm.app/sitemap.xml

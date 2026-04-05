@@ -49,6 +49,7 @@ export const metadata: Metadata = {
   title: "NOCTVM - The Living Memory of the Night",
   description: "Bucharest's premier nightlife platform. Curated events, underground venues, and the pure pulse of the city after dark.",
   manifest: "/manifest.json",
+  metadataBase: new URL('https://noctvm.app'),
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '48x48' },
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NOCTVM",
     description: "The Living Memory of the Night",
-    url: 'https://noctvm.com',
+    url: 'https://noctvm.app',
     siteName: 'NOCTVM',
     images: [
       {

@@ -290,7 +290,7 @@ export default function PostViewerModal({
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/?post=${post.id}`;
+    const url = `${window.location.origin}/?tab=feed&post=${post.id}`;
     if (navigator.share) {
       navigator.share({ url }).catch(() => {});
     } else {

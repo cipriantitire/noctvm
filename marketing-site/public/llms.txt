@@ -16,7 +16,7 @@ NOCTVM is a nightlife discovery and social platform for Bucharest, Romania.
 Bucharest (primary), Constanta (beta)
 
 ## Website
-https://noctvm.com
+https://noctvm.app
 
 ## Contact
 contact@noctvm.com

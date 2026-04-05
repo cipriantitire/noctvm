@@ -99,6 +99,7 @@
         /* Glassmorphism card */
         .glass-card {
             background: var(--glass-bg-frosted);
+            -webkit-backdrop-filter: blur(var(--glass-blur-md));
             backdrop-filter: blur(var(--glass-blur-md));
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
@@ -240,6 +241,7 @@
             width: 60px;
             height: 60px;
             background: var(--glass-bg-frosted);
+            -webkit-backdrop-filter: blur(var(--glass-blur-md));
             backdrop-filter: blur(var(--glass-blur-md));
             border: 1px solid var(--glass-border);
             border-radius: 50%;
@@ -538,7 +540,7 @@
             <p class="animate-fade-in-up animate-delay-1">
                 Join the growing community of night enthusiasts who use NOCTVM to discover, connect, and earn.
             </p>
-            <a href="https://noctvm.com" class="btn btn-primary btn-lg animate-fade-in-up animate-delay-2">
+            <a href="https://noctvm.app" class="btn btn-primary btn-lg animate-fade-in-up animate-delay-2">
                 Join NOCTVM - It's Free Forever
             </a>
             <p class="animate-fade-in-up animate-delay-3">
@@ -566,9 +568,9 @@
                         Instagram
                     </a>
                     <span> | </span>
-                    <a href="https://tiktok.com/@noctvm" target="_blank" rel="noopener noreferrer">
+                    <a href="https://tiktok.com/@noctvm" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok">
                         TikTok
-                    </span>
+                    </a>
                 </div>
             </div>
             <div class="footer-bottom">

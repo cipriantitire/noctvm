@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
    <url>
-      <loc>https://noctvm.com/</loc>
+      <loc>https://noctvm.app/</loc>
       <lastmod>2026-03-22</lastmod>
       <changefreq>daily</changefreq>
       <priority>1.0</priority>
    </url>
    <url>
-      <loc>https://noctvm.com/privacy</loc>
+      <loc>https://noctvm.app/privacy</loc>
       <lastmod>2026-03-22</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.8</priority>
    </url>
    <url>
-      <loc>https://noctvm.com/terms</loc>
+      <loc>https://noctvm.app/terms</loc>
       <lastmod>2026-03-22</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.8</priority>
    </url>
    <url>
-      <loc>https://noctvm.com/community</loc>
+      <loc>https://noctvm.app/community</loc>
       <lastmod>2026-03-22</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.8</priority>
    </url>
    <url>
-      <loc>https://noctvm.com/contact</loc>
+      <loc>https://noctvm.app/contact</loc>
       <lastmod>2026-03-22</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.8</priority>

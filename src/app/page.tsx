@@ -66,6 +66,42 @@ type ProfileView =
   | 'edit-profile'
   | 'inventory';
 
+type UrlState = {
+  tab: TabType;
+  eventId: string | null;
+  venueName: string | null;
+  postId: string | null;
+};
+
+function parseUrlState(search: string): UrlState {
+  const params = new URLSearchParams(search);
+  const tabParam = params.get('tab');
+  const postId = params.get('post');
+  const eventId = params.get('event');
+  const venueName = params.get('venue');
+  const tab = tabParam && ['events', 'feed', 'venues', 'pocket', 'profile'].includes(tabParam)
+    ? tabParam as TabType
+    : postId
+      ? 'feed'
+      : eventId
+        ? 'events'
+        : venueName
+          ? 'venues'
+          : 'events';
+
+  return { tab, eventId, venueName, postId };
+}
+
+function buildUrlStateUrl(state: UrlState): string {
+  const params = new URLSearchParams();
+  params.set('tab', state.tab);
+  if (state.postId) params.set('post', state.postId);
+  if (state.eventId) params.set('event', state.eventId);
+  if (state.venueName) params.set('venue', state.venueName);
+  const query = params.toString();
+  return query ? `${window.location.pathname}?${query}` : window.location.pathname;
+}
+
 export default function Home() {
   const { user, profile, signOut, isAdmin, isOwner } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
@@ -92,16 +128,73 @@ export default function Home() {
   const mainRef = useRef<HTMLElement>(null);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [pendingEventId, setPendingEventId] = useState<string | null>(null);
+  const [initialPostId, setInitialPostId] = useState<string | null>(null);
+  const bootstrappedHistoryRef = useRef(false);
+
+  const syncHistory = useCallback((state: UrlState, mode: 'push' | 'replace' = 'push') => {
+    if (typeof window === 'undefined') return;
+    const url = buildUrlStateUrl(state);
+    if (mode === 'replace') {
+      window.history.replaceState({ noctvm: 'app', ...state }, '', url);
+    } else {
+      window.history.pushState({ noctvm: 'app', ...state }, '', url);
+    }
+  }, []);
+
+  const applyUrlState = useCallback((state: UrlState) => {
+    setActiveTab(state.tab);
+    setInitialPostId(state.postId);
+    setPendingEventId(state.eventId);
+    setSelectedVenue(state.venueName);
+    if (state.tab !== 'profile') {
+      setProfileView('profile');
+    }
+    if (!state.eventId) {
+      setSelectedEvent(null);
+    }
+    if (!state.venueName) {
+      setVenueClosing(false);
+      setSelectedVenue(null);
+    }
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
-    // Deep linking support for tabs (e.g. ?tab=pocket)
-    const searchParams = new URLSearchParams(window.location.search);
-    const tab = searchParams.get('tab') as TabType;
-    if (tab && ['events', 'feed', 'venues', 'pocket', 'profile'].includes(tab)) {
-      setActiveTab(tab);
+    const initialState = parseUrlState(window.location.search);
+    applyUrlState(initialState);
+
+    if (!bootstrappedHistoryRef.current) {
+      bootstrappedHistoryRef.current = true;
+      const baseState: UrlState = {
+        tab: initialState.postId ? 'feed' : initialState.eventId ? 'events' : initialState.venueName ? 'venues' : initialState.tab,
+        eventId: null,
+        venueName: null,
+        postId: null,
+      };
+      const deepLinkPresent = !!(initialState.postId || initialState.eventId || initialState.venueName);
+      if (deepLinkPresent) {
+        const baseUrl = buildUrlStateUrl(baseState);
+        const deepUrl = buildUrlStateUrl(initialState);
+        window.history.replaceState({ noctvm: 'app', ...baseState }, '', baseUrl);
+        window.history.pushState({ noctvm: 'app', ...initialState }, '', deepUrl);
+      }
     }
+
+    const handlePopState = () => {
+      applyUrlState(parseUrlState(window.location.search));
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    if (!pendingEventId) return;
+    const allEvents = [...(dbEvents ?? []), ...SAMPLE_EVENTS];
+    const match = allEvents.find(event => event.id === pendingEventId);
+    if (match) setSelectedEvent(match);
+  }, [dbEvents, pendingEventId]);
 
   const handleOpenStories = useCallback((users: StoryUser[], index: number) => {
     setStoryUsers(users);
@@ -170,7 +263,8 @@ export default function Home() {
     setPreviousTab(activeTab);
     setActiveTab('profile');
     setProfileView('account-menu');
-  }, [activeTab]);
+    syncHistory({ tab: 'profile', eventId: null, venueName: null, postId: null });
+  }, [activeTab, syncHistory]);
 
   // Switch to a tab and reset profile view to 'profile'
   useEffect(() => {
@@ -193,7 +287,13 @@ export default function Home() {
   const handleTabChange = useCallback((tab: TabType) => {
     setActiveTab(tab);
     if (tab === 'profile') setProfileView('profile');
-  }, []);
+    setSelectedEvent(null);
+    setPendingEventId(null);
+    setSelectedVenue(null);
+    setVenueClosing(false);
+    setInitialPostId(null);
+    syncHistory({ tab, eventId: null, venueName: null, postId: null });
+  }, [syncHistory]);
 
   // Modal Z-Index Management (whichever open last on top)
   const [eventZIndex, setEventZIndex] = useState(200);
@@ -201,22 +301,31 @@ export default function Home() {
   const [maxZIndex, setMaxZIndex] = useState(200);
 
   const openVenue = useCallback((venue: string | null) => {
-    if (venue) {
-      const newZ = maxZIndex + 1;
-      setVenueZIndex(newZ);
-      setMaxZIndex(newZ);
+    if (!venue) {
+      setSelectedVenue(null);
+      return;
     }
+
+    const newZ = maxZIndex + 1;
+    setVenueZIndex(newZ);
+    setMaxZIndex(newZ);
     setSelectedVenue(venue);
-  }, [maxZIndex]);
+    syncHistory({ tab: activeTab, eventId: null, venueName: venue, postId: null });
+  }, [activeTab, maxZIndex, syncHistory]);
 
   const openEvent = useCallback((event: NoctEvent | null) => {
     if (event) {
       const newZ = maxZIndex + 1;
       setEventZIndex(newZ);
       setMaxZIndex(newZ);
+      setPendingEventId(event.id);
+      syncHistory({ tab: activeTab, eventId: event.id, venueName: null, postId: null });
+    } else if (typeof window !== 'undefined' && window.location.search.includes('event=')) {
+      window.history.back();
+      return;
     }
     setSelectedEvent(event);
-  }, [maxZIndex]);
+  }, [activeTab, maxZIndex, syncHistory]);
 
   const filteredEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -315,8 +424,19 @@ export default function Home() {
       {/* Note: Injected at root, uses z-[200] in component to sit above Venue Overlay z-[100] */}
       <EventModal
         event={selectedEvent}
-        onClose={() => openEvent(null)}
-        onVenueClick={(venueName) => { openEvent(null); openVenue(venueName); }}
+        onClose={() => {
+          if (typeof window !== 'undefined' && window.location.search.includes('event=')) {
+            window.history.back();
+            return;
+          }
+          setSelectedEvent(null);
+          setPendingEventId(null);
+        }}
+        onVenueClick={(venueName) => {
+          setSelectedEvent(null);
+          setPendingEventId(null);
+          openVenue(venueName);
+        }}
         onOpenAuth={() => setShowAuthModal(true)}
         zIndex={eventZIndex}
       />
@@ -359,12 +479,19 @@ export default function Home() {
             className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
               venueClosing ? 'animate-scale-out' : 'animate-scale-in'
             } border-0 sm:border border-white/10 frosted-glass-modal frosted-noise`}
-            onAnimationEnd={() => { if (venueClosing) { setVenueClosing(false); setSelectedVenue(null); } }}
+            onAnimationEnd={() => {
+              if (!venueClosing) return;
+              setVenueClosing(false);
+              setSelectedVenue(null);
+              if (typeof window !== 'undefined' && window.location.search.includes('venue=')) {
+                window.history.back();
+              }
+            }}
           >
             <VenueModal
               venueName={selectedVenue!}
-              onBack={() => openVenue(null)}
-              onClose={() => openVenue(null)}
+              onBack={handleCloseVenue}
+              onClose={handleCloseVenue}
               onEventClick={(e) => openEvent(e)}
               zIndex={venueZIndex}
             />
@@ -527,6 +654,7 @@ export default function Home() {
                   onOpenCreateStory={() => setShowCreateStory(true)}
                   onOpenStories={(users, index) => handleOpenStories(users, index)}
                   activeCity={activeCity}
+                  initialPostId={initialPostId}
                 />
               </div>
             )}
@@ -567,7 +695,7 @@ export default function Home() {
                     }}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
-                    onEventClick={(e) => setSelectedEvent(e)}
+                    onEventClick={(e) => openEvent(e)}
                     onManageVenue={(id) => setManagedVenueId(id)}
                   />
                 )}
