@@ -383,7 +383,13 @@ export default function GlobalSearchSheet({
         left: 0,
       };
   const sheetStyle = isDesktop
-    ? { zIndex: 401, position: 'fixed' as const, width: 'min(44rem, calc(100vw - 1rem))', height: '100dvh' }
+    ? {
+        zIndex: 401,
+        position: 'fixed' as const,
+        width: 'min(44rem, calc(100vw - 1rem))',
+        maxWidth: 'min(44rem, calc(100vw - 1rem))',
+        height: '100dvh',
+      }
     : { zIndex: 401, position: 'fixed' as const, top: mobileSheetTop, left: 0, right: 0, width: '100vw', height: mobileSheetHeight };
 
   const handleEventSelect = (event: SearchEventResult) => {
@@ -443,7 +449,7 @@ export default function GlobalSearchSheet({
                 placeholder="Search events, venues, people, settings..."
                 aria-label="Global search"
                 className="rounded-2xl border-white/10 bg-noctvm-black/90 py-4 pl-11 pr-10 text-sm placeholder:text-noctvm-silver/35 focus:border-noctvm-violet/40"
-                wrapperClassName="w-full"
+                wrapperClassName={isDesktop ? '!w-[calc(100%+2.5rem)]' : 'w-full'}
                 onKeyDown={(e) => {
                   if (e.key !== 'Enter') return;
                   const firstResult = (events[0] ?? venues[0] ?? users[0] ?? actions[0]) as SearchResult | undefined;
