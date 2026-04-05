@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar, { GENRE_FILTERS } from '@/components/FilterBar';
@@ -111,6 +112,7 @@ function buildUrlStateUrl(state: UrlState, pathname = window.location.pathname):
 
 function AppShell() {
   const { user, profile, signOut, isAdmin, isOwner } = useAuth();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
@@ -189,6 +191,10 @@ function AppShell() {
     setPublicProfileLoading(false);
     applyUrlState(parseUrlState(window.location.search));
   }, [applyUrlState]);
+
+  useEffect(() => {
+    syncRouteFromLocation();
+  }, [pathname, syncRouteFromLocation]);
 
   useEffect(() => {
     setIsClient(true);

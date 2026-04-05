@@ -7,6 +7,7 @@ import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/supabase';
+import { getUserFollowState, getUserFollowerCount, getUserFollowedIds, setUserFollowState } from '@/lib/userFollow';
 import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon, MapPinIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
@@ -239,16 +240,8 @@ export default function UserProfilePage({
     let cancelled = false;
 
     const fetchFollowState = async () => {
-      const { data } = await supabase
-        .from('follows')
-        .select('id')
-        .eq('follower_id', user.id)
-        .eq('following_id', targetProfile.id)
-        .eq('target_type', 'user')
-        .maybeSingle();
-
       if (!cancelled) {
-        setIsFollowingTarget(!!data);
+        setIsFollowingTarget(await getUserFollowState(user.id, targetProfile.id));
       }
     };
 
@@ -292,26 +285,7 @@ export default function UserProfilePage({
     }));
 
     try {
-      if (previousState) {
-        const { error } = await supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', user.id)
-          .eq('following_id', targetProfile.id)
-          .eq('target_type', 'user');
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('follows')
-          .insert({
-            follower_id: user.id,
-            following_id: targetProfile.id,
-            target_type: 'user',
-          });
-
-        if (error) throw error;
-      }
+      await setUserFollowState(user.id, targetProfile.id, nextState);
     } catch (error) {
       console.error('Error toggling follow:', error);
       setIsFollowingTarget(previousState);
@@ -450,13 +424,13 @@ export default function UserProfilePage({
   useEffect(() => {
     Promise.all([
       supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', targetProfile.id),
-      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', targetProfile.id).eq('target_type', 'user'),
-      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', targetProfile.id).eq('target_type', 'user'),
-    ]).then(([postsRes, followersRes, followingRes]) => {
+      getUserFollowerCount(targetProfile.id),
+      getUserFollowedIds(targetProfile.id),
+    ]).then(([postsRes, followersCount, followingIds]) => {
       setStatsData({
         posts: postsRes.count ?? 0,
-        followers: followersRes.count ?? 0,
-        following: followingRes.count ?? 0,
+        followers: followersCount,
+        following: followingIds.length,
         eventsAttended: targetProfile.events_attended ?? 0,
         venuesVisited: targetProfile.venues_visited ?? 0
       });

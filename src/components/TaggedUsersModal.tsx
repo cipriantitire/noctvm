@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import { getUserFollowState, setUserFollowState } from '@/lib/userFollow';
 
 interface TaggedUser {
   id: string;
@@ -22,6 +23,7 @@ interface TaggedUsersModalProps {
 
 export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUsersModalProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [users, setUsers] = useState<TaggedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,14 +52,7 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
           let isFollowing = false;
           
           if (user && user.id !== profile.id) {
-            const { data: followData } = await supabase
-              .from('follows')
-              .select('id')
-              .eq('follower_id', user.id)
-              .eq('following_id', profile.id)
-              .eq('target_type', 'user')
-              .maybeSingle();
-            isFollowing = !!followData;
+            isFollowing = await getUserFollowState(user.id, profile.id);
           }
           
           return {
@@ -91,26 +86,7 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
     )));
 
     try {
-      if (taggedUser.is_following) {
-        const { error } = await supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', user.id)
-          .eq('following_id', taggedUser.id)
-          .eq('target_type', 'user');
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('follows')
-          .insert({
-            follower_id: user.id,
-            following_id: taggedUser.id,
-            target_type: 'user',
-          });
-
-        if (error) throw error;
-      }
+      await setUserFollowState(user.id, taggedUser.id, nextIsFollowing);
     } catch (error) {
       console.error('Error toggling tagged follow:', error);
       setUsers(prev => prev.map((entry) => (
@@ -120,6 +96,12 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
       )));
     }
   }, [user]);
+
+  const openProfile = useCallback((handle: string) => {
+    const normalizedHandle = handle.replace(/^@/, '').trim();
+    onClose();
+    void router.push(`/@${encodeURIComponent(normalizedHandle)}`);
+  }, [onClose, router]);
 
   if (!isOpen) return null;
 
@@ -152,8 +134,9 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
               {users.map((u) => (
                 <div key={u.id} className="group flex items-center justify-between gap-3 p-3">
                   <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <Link
-                      href={`/@${encodeURIComponent(normalizeHandle(u.username) || u.id)}`}
+                    <button
+                      type="button"
+                      onClick={() => openProfile(normalizeHandle(u.username) || normalizeHandle(u.display_name) || u.id)}
                       className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-noctvm-border bg-noctvm-surface transition-transform hover:scale-[1.02]"
                       aria-label={`Open ${u.display_name}'s profile`}
                       title={`Open ${u.display_name}'s profile`}
@@ -162,21 +145,22 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
                         <Image src={u.avatar_url} alt={u.display_name} fill className="object-cover" unoptimized sizes="40px" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-noctvm-violet/20">
-                          <span className="text-sm font-bold text-noctvm-violet">{(u.display_name?.[0] || 'N').toUpperCase()}</span>
+                          <span className="text-sm font-bold text-noctvm-violet">{(u.display_name?.[0] || u.username?.[0] || 'N').toUpperCase()}</span>
                         </div>
                       )}
-                    </Link>
+                    </button>
 
                     <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/@${encodeURIComponent(normalizeHandle(u.username) || u.id)}`}
-                        className="block min-w-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
+                      <button
+                        type="button"
+                        onClick={() => openProfile(normalizeHandle(u.username) || normalizeHandle(u.display_name) || u.id)}
+                        className="block min-w-0 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
                         aria-label={`Open ${u.display_name}'s profile`}
                         title={`Open ${u.display_name}'s profile`}
                       >
                         <p className="truncate text-sm font-semibold leading-tight text-white">{u.display_name}</p>
                         <p className="truncate text-xs text-noctvm-silver">@{normalizeHandle(u.username)}</p>
-                      </Link>
+                      </button>
                     </div>
                   </div>
                   

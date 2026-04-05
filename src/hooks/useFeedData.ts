@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { FeedPost } from '@/types/feed';
 import { mapSupabasePost } from '../lib/feed-utils';
+import { getUserFollowedIds } from '@/lib/userFollow';
 
 export function useFeedData(user: any, activeCity: string) {
   const [explorePosts, setExplorePosts] = useState<FeedPost[]>([]);
@@ -32,12 +33,11 @@ export function useFeedData(user: any, activeCity: string) {
     setLoading(true);
     try {
       // 1. DATA PRE-FETCH
-      const [followsRes, venueFollowsRes] = await Promise.all([
-        supabase.from('follows').select('following_id').eq('follower_id', user.id).eq('target_type', 'user'),
+      const [followingIds, venueFollowsRes] = await Promise.all([
+        getUserFollowedIds(user.id),
         supabase.from('follows').select('target_id').eq('follower_id', user.id).eq('target_type', 'venue')
       ]);
 
-      const followingIds = (followsRes.data || []).map(f => f.following_id);
       const followedVenueNames = (venueFollowsRes.data || []).map(f => f.target_id);
 
       // Mutuality check for FRIENDS TABS
