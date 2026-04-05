@@ -160,6 +160,8 @@ export default function UserProfilePage({
   const { user } = useAuth();
   const isOwner = user?.id === targetProfile.id;
   const dragControls = useDragControls();
+  const [isFollowingTarget, setIsFollowingTarget] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const handleToggleLike = useCallback(async (post: import('@/types/feed').FeedPost) => {
     if (!user) return;
@@ -228,6 +230,35 @@ export default function UserProfilePage({
   // ── Saved Events Sheet state ──────────────────────────────────────────────
   const [isSavedEventsOpen, setIsSavedEventsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!user || isOwner) {
+      setIsFollowingTarget(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchFollowState = async () => {
+      const { data } = await supabase
+        .from('follows')
+        .select('id')
+        .eq('follower_id', user.id)
+        .eq('following_id', targetProfile.id)
+        .eq('target_type', 'user')
+        .maybeSingle();
+
+      if (!cancelled) {
+        setIsFollowingTarget(!!data);
+      }
+    };
+
+    void fetchFollowState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwner, targetProfile.id, user]);
+
   const handleShareProfile = async () => {
     const cleanHandle = targetProfile.username.replace(/^@/, '');
     const url = `${window.location.origin}/@${cleanHandle}`;
@@ -241,6 +272,57 @@ export default function UserProfilePage({
       setTimeout(() => setShareToast(false), 2000);
     }
   };
+
+  const handleToggleFollow = useCallback(async () => {
+    if (!user) {
+      onOpenAuth();
+      return;
+    }
+
+    if (isOwner) return;
+
+    const previousState = isFollowingTarget;
+    const nextState = !previousState;
+
+    setFollowLoading(true);
+    setIsFollowingTarget(nextState);
+    setStatsData(prev => ({
+      ...prev,
+      followers: Math.max(0, prev.followers + (nextState ? 1 : -1)),
+    }));
+
+    try {
+      if (previousState) {
+        const { error } = await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', user.id)
+          .eq('following_id', targetProfile.id)
+          .eq('target_type', 'user');
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('follows')
+          .insert({
+            follower_id: user.id,
+            following_id: targetProfile.id,
+            target_type: 'user',
+          });
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      setIsFollowingTarget(previousState);
+      setStatsData(prev => ({
+        ...prev,
+        followers: Math.max(0, prev.followers + (previousState ? 1 : -1)),
+      }));
+    } finally {
+      setFollowLoading(false);
+    }
+  }, [isFollowingTarget, isOwner, onOpenAuth, targetProfile.id, user]);
 
   // ── Data Fetching ─────────────────────────────────────────────────────────
 
@@ -368,7 +450,7 @@ export default function UserProfilePage({
   useEffect(() => {
     Promise.all([
       supabase.from('posts').select('id', { count: 'exact', head: true }).eq('user_id', targetProfile.id),
-      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('target_id', targetProfile.id).eq('target_type', 'user'),
+      supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', targetProfile.id).eq('target_type', 'user'),
       supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', targetProfile.id).eq('target_type', 'user'),
     ]).then(([postsRes, followersRes, followingRes]) => {
       setStatsData({
@@ -672,10 +754,11 @@ export default function UserProfilePage({
           ) : (
             <button
               type="button"
-              onClick={onOpenAuth}
-              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-95"
+              onClick={() => void handleToggleFollow()}
+              disabled={followLoading}
+              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-95 disabled:opacity-60"
             >
-              Follow
+              {followLoading ? '...' : (isFollowingTarget ? 'Following' : 'Follow')}
             </button>
           )}
           <button

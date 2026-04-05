@@ -47,7 +47,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
               .from('follows')
               .select('id')
               .eq('follower_id', user.id)
-              .eq('target_id', profile.id)
+              .eq('following_id', profile.id)
               .eq('target_type', 'user')
               .maybeSingle();
             isFollowing = !!followData;
@@ -91,7 +91,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
           .from('follows')
           .delete()
           .eq('follower_id', user.id)
-          .eq('target_id', likedUser.id)
+          .eq('following_id', likedUser.id)
           .eq('target_type', 'user');
 
         if (error) throw error;
@@ -100,7 +100,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
           .from('follows')
           .insert({
             follower_id: user.id,
-            target_id: likedUser.id,
+            following_id: likedUser.id,
             target_type: 'user',
           });
 

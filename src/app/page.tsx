@@ -46,6 +46,7 @@ import { useFrostedGlass } from '@/hooks/useFrostedGlass';
 import PocketPage from '@/components/PocketPage';
 import { useAuth } from '@/contexts/AuthContext';
 import ManageVenueModal from '@/components/ManageVenueModal';
+import type { Profile } from '@/lib/supabase';
 
 type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
@@ -108,7 +109,7 @@ function buildUrlStateUrl(state: UrlState): string {
   return query ? `${window.location.pathname}?${query}` : window.location.pathname;
 }
 
-export default function Home() {
+function AppShell() {
   const { user, profile, signOut, isAdmin, isOwner } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
@@ -136,6 +137,9 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
   const [pendingEventId, setPendingEventId] = useState<string | null>(null);
   const [initialPostId, setInitialPostId] = useState<string | null>(null);
+  const [publicProfileHandle, setPublicProfileHandle] = useState<string | null>(null);
+  const [publicProfile, setPublicProfile] = useState<Profile | null>(null);
+  const [publicProfileLoading, setPublicProfileLoading] = useState(false);
   const bootstrappedHistoryRef = useRef(false);
 
   const syncHistory = useCallback((state: UrlState, mode: 'push' | 'replace' = 'push') => {
@@ -167,6 +171,18 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/@')) {
+      const cleanHandle = decodeURIComponent(pathname.slice(2)).replace(/^@/, '').trim();
+      setPublicProfileLoading(true);
+      setPublicProfileHandle(cleanHandle || null);
+      setActiveTab('profile');
+      setProfileView('profile');
+    } else {
+      setPublicProfileHandle(null);
+      setPublicProfile(null);
+      setPublicProfileLoading(false);
+    }
     const initialState = parseUrlState(window.location.search);
     applyUrlState(initialState);
 
@@ -194,6 +210,58 @@ export default function Home() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!publicProfileHandle) {
+      setPublicProfile(null);
+      setPublicProfileLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const loadPublicProfile = async () => {
+      setActiveTab('profile');
+      setProfileView('profile');
+      setPublicProfileLoading(true);
+
+      try {
+        const { data: usernameMatch } = await supabase
+          .from('profiles')
+          .select('*')
+          .ilike('username', publicProfileHandle)
+          .maybeSingle();
+
+        let resolvedProfile = usernameMatch as Profile | null;
+
+        if (!resolvedProfile) {
+          const { data: displayNameMatch } = await supabase
+            .from('profiles')
+            .select('*')
+            .ilike('display_name', publicProfileHandle)
+            .maybeSingle();
+
+          resolvedProfile = displayNameMatch as Profile | null;
+        }
+
+        if (!cancelled) {
+          setPublicProfile(resolvedProfile);
+        }
+      } finally {
+        if (!cancelled) {
+          setPublicProfileLoading(false);
+        }
+      }
+    };
+
+    void loadPublicProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [publicProfileHandle]);
 
   useEffect(() => {
     if (!pendingEventId) return;
@@ -774,8 +842,31 @@ export default function Home() {
             {/* ── Profile Tab ─────────────────────────────────── */}
             {activeTab === 'profile' && (
               <>
+                {/* Public profile route or owner profile */}
+                {publicProfileLoading && publicProfileHandle && (
+                  <div className="mx-auto flex min-h-[40vh] max-w-2xl items-center justify-center text-noctvm-silver">
+                    Loading profile...
+                  </div>
+                )}
+
+                {publicProfile && (
+                  <UserProfilePage
+                    targetProfile={publicProfile}
+                    onOpenAuth={() => setShowAuthModal(true)}
+                    onSettingsClick={handleSettingsClick}
+                    onEditProfileClick={() => {
+                      setActiveTab('profile');
+                      setProfileView('edit-profile' as ProfileView);
+                    }}
+                    onOpenCreatePost={() => setShowCreatePost(true)}
+                    onOpenStories={(users, index) => handleOpenStories(users, index)}
+                    onEventClick={(e) => openEvent(e)}
+                    onManageVenue={(id) => setManagedVenueId(id)}
+                  />
+                )}
+
                 {/* Public profile (Instagram-style) */}
-                {user && profileView === 'profile' && profile && (
+                {!publicProfile && user && profileView === 'profile' && profile && (
                   <UserProfilePage
                     targetProfile={profile}
                     onOpenAuth={() => setShowAuthModal(true)}
@@ -792,9 +883,15 @@ export default function Home() {
                 )}
 
                 {/* Profile Sub-pages (including Settings Hub) */}
-                {user && isProfileSubPage && profileSubContent[profileView]}
+                {!publicProfile && user && isProfileSubPage && profileSubContent[profileView]}
 
-                {!user && renderAuthGate('profile')}
+                {!publicProfile && !user && renderAuthGate('profile')}
+
+                {publicProfileHandle && !publicProfileLoading && !publicProfile && (
+                  <div className="mx-auto flex min-h-[40vh] max-w-2xl items-center justify-center text-noctvm-silver">
+                    Profile not found.
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -811,7 +908,7 @@ export default function Home() {
           />
         )}
 
-        {activeTab === 'profile' && profileView === 'profile' && user && (
+        {activeTab === 'profile' && profileView === 'profile' && user && !publicProfile && (
           <ProfileSidebar 
             userId={user.id} 
             activeCity={activeCity}
@@ -828,4 +925,8 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+export default function Home() {
+  return <AppShell />;
 }
