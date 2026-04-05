@@ -12,6 +12,8 @@ export interface AvatarProps {
   ring?: AvatarRing;
   className?: string;
   onClick?: () => void;
+  showAddStoryButton?: boolean;
+  onAddStoryClick?: () => void;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -30,8 +32,11 @@ export default function Avatar({
   ring = 'none',
   className = '',
   onClick,
+  showAddStoryButton = false,
+  onAddStoryClick,
 }: AvatarProps) {
   const baseSizeClass = sizeClasses[size];
+  const addButtonSizeClass = size === 'sm' ? 'w-4 h-4' : size === 'md' ? 'w-5 h-5' : 'w-6 h-6';
 
   // Render the inner circle (image or fallback)
   const innerContent = src ? (
@@ -40,24 +45,10 @@ export default function Avatar({
     <span className="font-bold text-white uppercase">{fallback[0]}</span>
   );
 
-  // If no ring, just return a simple rounded div
-  if (ring === 'none') {
-    return (
-      <div
-        onClick={onClick}
-        className={`relative rounded-full overflow-hidden bg-noctvm-surface flex items-center justify-center border border-white/10 shrink-0 ${baseSizeClass} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} ${className}`}
-      >
-        {innerContent}
-      </div>
-    );
-  }
-
-  // Handle Rings (Story rings, live rings, etc.)
   let ringOuterClass = '';
-  let ringInnerPaddingClass = 'p-[2px]'; // Space between ring and avatar
 
   if (ring === 'story-unseen') {
-    ringOuterClass = 'bg-gradient-to-tr from-yellow-500 via-pink-500 to-noctvm-violet p-[2px] rounded-full';
+    ringOuterClass = 'bg-gradient-to-tr from-noctvm-violet via-purple-500 to-fuchsia-500 p-[2px] rounded-full';
   } else if (ring === 'story-seen') {
     ringOuterClass = 'bg-white/20 p-[1.5px] rounded-full';
   } else if (ring === 'highlight') {
@@ -69,11 +60,27 @@ export default function Avatar({
   return (
     <div
       onClick={onClick}
-      className={`relative shrink-0 flex items-center justify-center ${ringOuterClass} ${onClick ? 'cursor-pointer hover:scale-105 transition-transform' : ''} ${className}`}
+      className={`relative shrink-0 flex items-center justify-center ${baseSizeClass} ${ring === 'none' ? '' : ringOuterClass} ${onClick ? 'cursor-pointer hover:scale-105 transition-transform' : ''} ${className}`}
     >
-      <div className={`rounded-full overflow-hidden bg-black w-full h-full relative border border-black`}>
+      <div className={`rounded-full overflow-hidden bg-noctvm-surface w-full h-full relative ${ring === 'none' ? 'border border-transparent' : 'border border-white/10'}`}>
         {innerContent}
       </div>
+      {showAddStoryButton && (
+        <button
+          type="button"
+          aria-label="Add story"
+          title="Add story"
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddStoryClick?.();
+          }}
+          className={`absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded-full border-2 border-noctvm-black bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95 transition-transform ${addButtonSizeClass}`}
+        >
+          <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
