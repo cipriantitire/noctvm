@@ -16,16 +16,17 @@ import { FeedItem } from './Feed/FeedItem';
 import { mapSupabasePost } from '../lib/feed-utils';
 import PostViewerModal, { type ProfilePost } from './PostViewerModal';
 import VerifiedBadge from './VerifiedBadge';
-import { 
-  MusicIcon, 
-  InstagramIcon, 
-  FacebookIcon, 
-  TwitterIcon, 
-  SnapchatIcon, 
-  TikTokIcon, 
+import {
+  MusicIcon,
+  InstagramIcon,
+  FacebookIcon,
+  TwitterIcon,
+  SnapchatIcon,
+  TikTokIcon,
   GlobeIcon,
   CalendarIcon
 } from './icons';
+import { ArrowUpRight, Music2 } from 'lucide-react';
 import SavedEventsSheet from './SavedEventsSheet';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 
@@ -50,6 +51,89 @@ interface VenueManagerRecord {
     city: string;
   };
 }
+
+// ── socRow helpers ──────────────────────────────────────────────────────────
+
+function extractSocialLabel(platform: string, url: string): string {
+  // Guard: if it's not a real URL (legacy bare username stored), return as-is
+  const normalized = url.startsWith('http') ? url : `https://${url}`;
+  try {
+    const parsed = new URL(normalized);
+    if (platform === 'website') return parsed.hostname.replace(/^www\./, '');
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const last = parts[parts.length - 1] || parsed.hostname;
+    return last.replace(/^@/, '');
+  } catch {
+    return url;
+  }
+}
+
+function extractMusicLabel(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, '');
+    // Spotify: open.spotify.com/track/ID or /album/ID or /playlist/ID
+    if (host === 'open.spotify.com') {
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      // parts: ['track', 'ID'] → return ID
+      return parts[1] ?? parts[0] ?? 'spotify';
+    }
+    // YouTube Music: music.youtube.com/watch?v=ID
+    if (host === 'music.youtube.com') {
+      return parsed.searchParams.get('v') ?? 'youtube music';
+    }
+    // Regular YouTube — label will be fetched async; return ID as fallback
+    if (host === 'youtube.com' || host === 'youtu.be') {
+      const id = host === 'youtu.be'
+        ? parsed.pathname.split('/').filter(Boolean)[0]
+        : parsed.searchParams.get('v');
+      return id ?? 'youtube';
+    }
+    // SoundCloud or other — show hostname
+    return host;
+  } catch {
+    return url;
+  }
+}
+
+function MusicLinkRow({ link }: { link: { type: string; url: string; label?: string } }) {
+  const [title, setTitle] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    // Only fetch title for regular YouTube URLs
+    let isYouTube = false;
+    try {
+      const host = new URL(link.url).hostname.replace(/^www\./, '');
+      isYouTube = host === 'youtube.com' || host === 'youtu.be';
+    } catch { /* noop */ }
+
+    if (!isYouTube) return;
+    let cancelled = false;
+    fetch(`https://noembed.com/embed?url=${encodeURIComponent(link.url)}`)
+      .then(r => r.json())
+      .then(data => { if (!cancelled && data.title) setTitle(data.title); })
+      .catch(() => { /* silently fallback */ });
+    return () => { cancelled = true; };
+  }, [link.url]);
+
+  const label = link.label ?? title ?? extractMusicLabel(link.url);
+
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
+    >
+      <div className="w-6 h-6 rounded-[9px] bg-[#7C3AED25] border border-[#7C3AED40] flex items-center justify-center shrink-0">
+        <Music2 className="w-3 h-3 text-noctvm-violet" />
+      </div>
+      <span className="font-mono text-[11px] text-white">{label}</span>
+    </a>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 interface UserProfilePageProps {
   targetProfile: Profile;
@@ -417,166 +501,185 @@ export default function UserProfilePage({
       )}
 
       {/* ── Profile Header ────────────────────────────────────── */}
-      <div className="px-0 sm:px-4 pt-4 pb-8">
-        {/* Main Header Container: Desktop side-by-side, Mobile stacked */}
-        <div className="flex flex-col lg:flex-row gap-8 px-4 lg:px-0 mb-8">
-          
-          {/* Left Side: Identity */}
-          <div className="flex items-center gap-6 flex-1 min-w-0">
-            {/* Avatar block */}
-            <div className="relative flex-shrink-0">
-              <div
-                className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full p-0.5 relative ${
-                  hasActiveStories 
-                    ? 'bg-gradient-to-tr from-noctvm-violet via-purple-500 to-pink-500 animate-spin-slow cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.5)]' 
-                    : 'bg-white/10'
-                }`}
-                onClick={hasActiveStories ? fetchAndOpenMyStories : undefined}
-              >
-                <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-midnight relative border border-white/5">
-                    {targetProfile.avatar_url ? (
-                      <NextImage src={targetProfile.avatar_url} alt="" fill className="object-cover" unoptimized />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/10">
-                        <span className="text-4xl font-sans font-black text-white tracking-widest leading-none translate-y-[-2px]">{initials}</span>
-                      </div>
-                    )}
-                  </div>
+      <div className="px-4 pt-6 pb-8">
+
+        {/* Row 1: Avatar + Identity */}
+        <div className="flex items-start gap-5 mb-5">
+          {/* Avatar */}
+          <div className="relative flex-shrink-0">
+            <div
+              className={`w-32 h-32 rounded-full p-0.5 relative ${
+                hasActiveStories
+                  ? 'bg-gradient-to-tr from-noctvm-violet via-purple-500 to-pink-500 animate-spin-slow cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.5)]'
+                  : 'bg-white/10'
+              }`}
+              onClick={hasActiveStories ? fetchAndOpenMyStories : undefined}
+            >
+              <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
+                <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-midnight relative border border-white/5">
+                  {targetProfile.avatar_url ? (
+                    <NextImage src={targetProfile.avatar_url} alt="" fill className="object-cover" unoptimized />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/10">
+                      <span className="text-4xl font-sans font-black text-white tracking-widest leading-none">{initials}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Name + Nickname Block */}
-            <div className="flex-1 flex flex-col justify-center min-w-0">
-              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                <h2 className="text-3xl sm:text-4xl font-sans font-black text-white tracking-tight truncate leading-none">
-                  {targetProfile.display_name || 'Night Owl'}
-                </h2>
-                {targetProfile.badge && targetProfile.badge !== 'none' && (
-                  <VerifiedBadge type={targetProfile.badge} size="md" />
-                )}
-                {/* Mobile Saved Events Trigger — owner only */}
-                {isOwner && (
-                  <button
-                    onClick={() => setIsSavedEventsOpen(true)}
-                    className="xl:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
-                    title="View Agenda"
-                  >
-                    <CalendarIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-noctvm-violet rounded-full border-2 border-noctvm-black shadow-[0_0_8px_rgba(139,92,246,0.6)] animate-pulse" />
-                  </button>
-                )}
-              </div>
-              <p className="text-sm font-black text-noctvm-silver/40 uppercase tracking-[0.2em]">@{targetProfile.username}</p>
-
-              {targetProfile.city && (
-                <div className="flex items-center gap-2 mt-3 p-1 px-3 w-fit rounded-full bg-white/[0.03] border border-white/5">
-                  <MapPinIcon className="w-3 h-3 text-noctvm-violet" />
-                  <span className="text-noctvm-micro text-noctvm-silver font-black uppercase tracking-widest">{targetProfile.city}</span>
-                </div>
+          {/* Identity col: name + handle + location + bio */}
+          <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-2xl sm:text-3xl font-sans font-black text-white tracking-tight leading-none">
+                {targetProfile.display_name || 'Night Owl'}
+              </h2>
+              {targetProfile.badge && targetProfile.badge !== 'none' && (
+                <VerifiedBadge type={targetProfile.badge} size="md" />
+              )}
+              {/* Mobile Agenda trigger */}
+              {isOwner && (
+                <button
+                  onClick={() => setIsSavedEventsOpen(true)}
+                  type="button"
+                  className="xl:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
+                  title="View Agenda"
+                >
+                  <CalendarIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-noctvm-violet rounded-full border border-noctvm-black animate-pulse" />
+                </button>
               )}
             </div>
-          </div>
 
-          {/* Right Side: High-End Stats Grid (Moved to same row on Desktop) */}
-          <div className="w-full lg:w-[320px] grid grid-cols-2 gap-2">
-            {/* Card 1: Network (Followers) */}
-            <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center group hover:bg-white/[0.05] hover:border-noctvm-violet/30 transition-all cursor-default relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-12 h-12 bg-noctvm-violet/5 blur-xl group-hover:bg-noctvm-violet/10 transition-colors" />
-               <span className="text-2xl font-mono font-black text-noctvm-violet group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(139,92,246,0.3)]">{statsData.followers}</span>
-               <span className="text-noctvm-xs uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Network</span>
-            </div>
+            <p className="text-xs font-black text-noctvm-silver/50 uppercase tracking-[0.2em]">
+              @{targetProfile.username}
+            </p>
 
-            {/* Card 2: Activity (Events) */}
-            <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center group hover:bg-white/[0.05] hover:border-noctvm-emerald/30 transition-all cursor-default relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-12 h-12 bg-noctvm-emerald/5 blur-xl group-hover:bg-noctvm-emerald/10 transition-colors" />
-               <span className="text-2xl font-mono font-black text-noctvm-emerald group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{statsData.eventsAttended}</span>
-               <span className="text-noctvm-xs uppercase tracking-widest text-noctvm-silver/40 font-black mt-1">Activity</span>
-            </div>
+            {targetProfile.city && (
+              <div className="flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
+                <MapPinIcon className="w-3 h-3 text-noctvm-silver/60" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">
+                  {targetProfile.city}
+                </span>
+              </div>
+            )}
 
-            {/* Card 3: Social Proof (Following/Venues Combined) */}
-            <div className="col-span-2 bg-white/[0.02] border border-white/[0.03] rounded-2xl p-3 px-4 flex items-center justify-around group hover:bg-white/[0.04] transition-all">
-                <div className="text-center">
-                  <span className="block text-xs font-mono font-bold text-white/50">{statsData.following}</span>
-                  <span className="text-[7px] uppercase tracking-widest text-white/20 font-black">Following</span>
-                </div>
-                <div className="w-px h-6 bg-white/5" />
-                <div className="text-center">
-                  <span className="block text-xs font-mono font-bold text-white/50">{statsData.posts}</span>
-                  <span className="text-[7px] uppercase tracking-widest text-white/20 font-black">Moments</span>
-                </div>
-                <div className="w-px h-6 bg-white/5" />
-                <div className="text-center">
-                  <span className="block text-xs font-mono font-bold text-white/50">{statsData.venuesVisited}</span>
-                  <span className="text-[7px] uppercase tracking-widest text-white/20 font-black">Venues</span>
-                </div>
-            </div>
+            {targetProfile.bio && (
+              <p className="text-xs text-noctvm-silver/70 leading-relaxed italic font-medium mt-1">
+                &quot;{targetProfile.bio}&quot;
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Bio & Links area */}
-        <div className="px-4 lg:px-0 mb-6">
-          {targetProfile.bio && (
-            <p className="text-xs text-noctvm-silver/80 leading-relaxed max-w-lg mb-4 italic font-medium">&quot;{targetProfile.bio}&quot;</p>
-          )}
+        {/* Row 2: Stats */}
+        <div className="flex gap-2 mb-5">
+          {/* Grouped card: Posts / Followers / Following */}
+          <div className="flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center justify-around">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[22px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
+              <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Posts</span>
+            </div>
+            <div className="w-px h-6 bg-[#FFFFFF15]" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[22px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
+              <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Followers</span>
+            </div>
+            <div className="w-px h-6 bg-[#FFFFFF15]" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[22px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
+              <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Following</span>
+            </div>
+          </div>
 
-          <div className="flex flex-wrap gap-4 items-center">
-            {/* Music Link */}
-            {targetProfile.music_link && (
-              <div className="flex items-center gap-2 p-2 px-3 rounded-full bg-noctvm-surface/50 border border-noctvm-border/50 hover:border-noctvm-violet/30 transition-all">
-                <MusicIcon className="w-3.5 h-3.5 text-noctvm-violet shadow-glow" />
+          {/* Venues card */}
+          <div className="w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-violet/40 transition-all cursor-default">
+            <div className="absolute inset-0 bg-noctvm-violet/5 group-hover:bg-noctvm-violet/10 transition-colors" />
+            <span className="text-[22px] leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
+            <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Venues</span>
+          </div>
+
+          {/* Events card */}
+          <div className="w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-emerald/40 transition-all cursor-default">
+            <div className="absolute inset-0 bg-noctvm-emerald/5 group-hover:bg-noctvm-emerald/10 transition-colors" />
+            <span className="text-[22px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
+            <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Events</span>
+          </div>
+        </div>
+
+        {/* Row 3: socRow — vertical link stack */}
+        {(targetProfile.music_link || (targetProfile.social_links && targetProfile.social_links.length > 0)) && (
+          <div className="flex flex-col gap-1.5 mb-4 w-fit">
+            {targetProfile.social_links?.map(link => {
+              const isWebsite = link.platform === 'website';
+              const Icon = isWebsite ? ArrowUpRight
+                : link.platform === 'instagram' ? InstagramIcon
+                : link.platform === 'facebook' ? FacebookIcon
+                : link.platform === 'twitter' ? TwitterIcon
+                : link.platform === 'snapchat' ? SnapchatIcon
+                : link.platform === 'tiktok' ? TikTokIcon
+                : GlobeIcon;
+              const label = extractSocialLabel(link.platform, link.url);
+              return (
                 <a
-                  href={targetProfile.music_link.url}
+                  key={link.platform}
+                  href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-noctvm-caption font-mono font-bold text-white hover:text-noctvm-violet transition-colors flex items-center gap-1 uppercase tracking-wider"
+                  className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
                 >
-                  {targetProfile.music_link.type}
-                  <svg className="w-2.5 h-2.5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                  <div className="w-6 h-6 rounded-[9px] bg-[#111111] border border-[#1A1A1A] flex items-center justify-center shrink-0">
+                    <Icon className="w-3 h-3 text-noctvm-silver" />
+                  </div>
+                  <span className="font-mono text-[11px] text-white">{label}</span>
                 </a>
-              </div>
-            )}
-
-            {/* Social Links */}
-            {targetProfile.social_links && targetProfile.social_links.length > 0 && (
-              <div className="flex items-center gap-3">
-                {targetProfile.social_links.map(link => {
-                  const Icon = link.platform === 'instagram' ? InstagramIcon :
-                               link.platform === 'facebook' ? FacebookIcon :
-                               link.platform === 'twitter' ? TwitterIcon :
-                               link.platform === 'snapchat' ? SnapchatIcon :
-                               link.platform === 'tiktok' ? TikTokIcon : GlobeIcon;
-                  return (
-                    <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer" title={link.platform} className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-white/5 transition-all">
-                      <Icon className="w-4 h-4" />
-                    </a>
-                  );
-                })}
-              </div>
+              );
+            })}
+            {targetProfile.music_link && (
+              <MusicLinkRow link={targetProfile.music_link} />
             )}
           </div>
+        )}
 
-          {/* Genre Pills */}
-          {targetProfile.genres && targetProfile.genres.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-5">
-              {targetProfile.genres.map(genre => (
-                <span key={genre} className="px-3 py-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/10 text-noctvm-micro font-mono font-bold text-noctvm-violet/80 uppercase tracking-widest">
-                  #{genre}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Row 4: Genre pills */}
+        {targetProfile.genres && targetProfile.genres.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-5">
+            {targetProfile.genres.map(genre => (
+              <span
+                key={genre}
+                className="px-3 py-1 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20 text-[10px] font-mono font-bold text-noctvm-violet/90 uppercase tracking-widest"
+              >
+                #{genre}
+              </span>
+            ))}
+          </div>
+        )}
 
-        {/* Profile Action Buttons */}
-        <div className="flex gap-2.5 px-4 lg:px-0">
+        {/* Row 5: Action buttons */}
+        <div className="flex gap-2.5">
           {isOwner ? (
-            <button onClick={onEditProfileClick} className="flex-1 py-3 rounded-xl bg-white text-black text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all shadow-xl shadow-white/5 active:scale-95">Edit Profile</button>
+            <button
+              type="button"
+              onClick={onEditProfileClick}
+              className="flex-1 py-3 rounded-2xl bg-white text-black text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all active:scale-95"
+            >
+              Edit Profile
+            </button>
           ) : (
-            <button onClick={onOpenAuth} className="flex-1 py-3 rounded-xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-95">Follow</button>
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-95"
+            >
+              Follow
+            </button>
           )}
-          <button onClick={handleShareProfile} className="flex-1 py-3 rounded-xl bg-noctvm-surface border border-noctvm-border text-noctvm-label font-black uppercase tracking-wider text-white hover:bg-noctvm-surface/70 transition-all active:scale-95">
+          <button
+            type="button"
+            onClick={handleShareProfile}
+            className="flex-1 py-3 rounded-2xl bg-noctvm-surface border border-noctvm-border text-noctvm-label font-black uppercase tracking-wider text-white hover:bg-white/[0.06] transition-all active:scale-95"
+          >
             {shareToast ? 'Address Copied' : 'Share Profile'}
           </button>
         </div>
@@ -610,7 +713,8 @@ export default function UserProfilePage({
                       <p className="text-noctvm-caption text-noctvm-silver font-medium">{mv.role} • {mv.venues.city}</p>
                     </div>
                   </div>
-                  <button 
+                  <button
+                    type="button"
                     onClick={() => onManageVenue?.(mv.venue_id)}
                     className="p-2 rounded-lg bg-noctvm-violet/10 border border-noctvm-violet/20 text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all"
                     title="Manage Venue Settings"
@@ -628,7 +732,7 @@ export default function UserProfilePage({
       <div className="border-t border-noctvm-border px-4 py-4">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pt-1 px-0.5">
           {isOwner && (
-            <button onClick={() => setShowCreateHighlight(true)} className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group">
+            <button type="button" onClick={() => setShowCreateHighlight(true)} className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group">
               <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors">
                 <svg className="w-6 h-6 text-noctvm-silver group-hover:text-noctvm-violet transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 4v16m8-8H4"/></svg>
               </div>
@@ -638,7 +742,7 @@ export default function UserProfilePage({
 
           {highlights.map((hl) => (
             <div key={hl.id} className="flex flex-col items-center gap-1 flex-shrink-0 relative group">
-              <button onClick={() => openHighlight(hl)} className="focus:outline-none">
+              <button type="button" onClick={() => openHighlight(hl)} className="focus:outline-none">
                 <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${hl.color} p-[2px] transition-all group-hover:p-[1px]`}>
                   <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-black flex items-center justify-center relative">
                     {hl.cover_url ? (
@@ -651,6 +755,7 @@ export default function UserProfilePage({
               </button>
                {isOwner && (
                  <button
+                   type="button"
                    onClick={(e) => deleteHighlight(hl.id, e)}
                    className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
                    title="Delete Highlight"
@@ -670,6 +775,8 @@ export default function UserProfilePage({
           {tabs.map(({ key, Icon }) => (
             <button
               key={key}
+              type="button"
+              aria-label={key}
               onClick={() => setActiveTab(key)}
               className={`flex-1 flex justify-center py-3 border-b-2 transition-all ${
                 activeTab === key ? 'border-white text-white' : 'border-transparent text-noctvm-silver'
@@ -687,12 +794,12 @@ export default function UserProfilePage({
         {activeTab === 'posts' && !(mobileFeedView && typeof window !== 'undefined' && window.innerWidth < 1024) && (
           <div className="grid grid-cols-3 gap-0.5">
             {posts.map((post, i) => (
-              <button key={post.id} onClick={() => { 
+              <button type="button" key={post.id} onClick={() => {
                 setActiveViewerPosts(posts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
-                                  } else {
-                  setViewerOpen(true); 
+                } else {
+                  setViewerOpen(true);
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
@@ -706,7 +813,7 @@ export default function UserProfilePage({
               <div className="col-span-3 py-16 text-center text-noctvm-silver">
                 <GridIcon className="w-10 h-10 mx-auto mb-3 opacity-20" />
                 <p className="text-sm font-medium">No posts shared yet</p>
-                {isOwner && <button onClick={onOpenCreatePost} className="mt-4 px-4 py-2 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-xs font-bold">Share Your First Post</button>}
+                {isOwner && <button type="button" onClick={onOpenCreatePost} className="mt-4 px-4 py-2 rounded-lg bg-noctvm-violet/20 text-noctvm-violet text-xs font-bold">Share Your First Post</button>}
               </div>
             )}
           </div>
@@ -715,12 +822,12 @@ export default function UserProfilePage({
         {activeTab === 'reposts' && (
           <div className="grid grid-cols-3 gap-0.5">
             {reposts.map((post, i) => (
-              <button key={post.id} onClick={() => { 
+              <button type="button" key={post.id} onClick={() => {
                 setActiveViewerPosts(reposts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
-                                  } else {
-                  setViewerOpen(true); 
+                } else {
+                  setViewerOpen(true);
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
@@ -745,16 +852,17 @@ export default function UserProfilePage({
         {activeTab === 'saved' && (
           <div className="grid grid-cols-3 gap-0.5">
             {savedPosts.map((post, i) => (
-              <button 
-                key={post.id} 
-                onClick={() => { 
+              <button
+                type="button"
+                key={post.id}
+                onClick={() => {
                   setActiveViewerPosts(savedPosts); setViewerIndex(i);
                   if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                     setMobileFeedView(true);
-                                      } else {
-                    setViewerOpen(true); 
+                  } else {
+                    setViewerOpen(true);
                   }
-                }} 
+                }}
                 className="aspect-square bg-noctvm-surface relative group"
               >
                 {post.image_url ? (
@@ -778,12 +886,12 @@ export default function UserProfilePage({
         {activeTab === 'tagged' && (
           <div className="grid grid-cols-3 gap-0.5">
             {taggedPosts.map((post, i) => (
-              <button key={post.id} onClick={() => { 
+              <button type="button" key={post.id} onClick={() => {
                 setActiveViewerPosts(taggedPosts); setViewerIndex(i);
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   setMobileFeedView(true);
-                                  } else {
-                  setViewerOpen(true); 
+                } else {
+                  setViewerOpen(true);
                 }
               }} className="aspect-square bg-noctvm-surface relative group">
                 {post.image_url ? (
@@ -823,6 +931,7 @@ export default function UserProfilePage({
       {/* ── Profile Create Post FAB ──────────────────────────────── */}
       {isOwner && onOpenCreatePost && (
         <button
+          type="button"
           onClick={onOpenCreatePost}
           className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-600 shadow-lg shadow-noctvm-violet/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border border-noctvm-violet/30"
           title="Create Post"
@@ -856,15 +965,15 @@ export default function UserProfilePage({
         >
           {/* Header — drag from anywhere here to dismiss */}
           <div
-            className="flex-shrink-0 bg-noctvm-midnight/90 backdrop-blur-md border-b border-noctvm-border"
+            className="touch-none flex-shrink-0 bg-noctvm-midnight/90 backdrop-blur-md border-b border-noctvm-border"
             onPointerDown={(e) => dragControls.start(e)}
-            style={{ touchAction: 'none' }}
           >
             <div className="flex justify-center pt-2 pb-1">
               <div className="w-10 h-1 rounded-full bg-white/20" />
             </div>
             <div className="flex items-center gap-3 px-4 pb-3">
               <button
+                type="button"
                 onClick={() => setMobileFeedView(false)}
                 title="Close feed"
                 className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"

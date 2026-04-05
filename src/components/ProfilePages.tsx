@@ -1,5 +1,42 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+
+// ── Social link URL helpers ──────────────────────────────────────────────────
+
+const PLATFORM_BASE: Record<string, string> = {
+  instagram: 'https://instagram.com/',
+  facebook:  'https://facebook.com/',
+  twitter:   'https://twitter.com/',
+  tiktok:    'https://tiktok.com/@',
+  snapchat:  'https://snapchat.com/add/',
+};
+
+/** Given a raw input value (username or full URL), return a full https URL. */
+function buildSocialUrl(platform: string, value: string): string {
+  const v = value.trim();
+  if (!v) return '';
+  if (platform === 'website') {
+    return v.startsWith('http') ? v : `https://${v}`;
+  }
+  if (v.startsWith('http')) return v;
+  const base = PLATFORM_BASE[platform] ?? 'https://';
+  return base + v.replace(/^@/, '');
+}
+
+/** Extract a displayable username from a stored full URL for use in the input field. */
+function usernameFromUrl(platform: string, url: string): string {
+  if (platform === 'website') return url;
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const last = parts[parts.length - 1] ?? '';
+    return last.replace(/^@/, '');
+  } catch {
+    return url;
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -149,8 +186,7 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
           <button
             key={item.id}
             onClick={() => setView(item.id as any)}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-[40px] border border-white/5 hover:bg-white/[0.08] hover:border-noctvm-violet/30 transition-all duration-300 transform active:scale-[0.98] text-left group relative overflow-hidden"
-            style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.2, 0.64, 1)' }}
+            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-[40px] border border-white/5 hover:bg-white/[0.08] hover:border-noctvm-violet/30 transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.2,0.64,1)] active:scale-[0.98] text-left group relative overflow-hidden"
           >
             {/* Specular Highlight */}
             <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
@@ -227,7 +263,9 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
         city,
         genres,
         music_link: musicUrl ? { type: musicType, url: musicUrl } : null,
-        social_links: socialLinks.filter((l: any) => l.url),
+        social_links: socialLinks
+          .filter((l: any) => l.url && l.url.trim())
+          .map((l: any) => ({ ...l, url: buildSocialUrl(l.platform, l.url) })),
       })
       .eq('id', profile.id);
     
@@ -372,9 +410,9 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
                     </div>
                     <input
                       type="text"
-                      placeholder={`${p.charAt(0).toUpperCase() + p.slice(1)} URL`}
-                      value={link.url === ' ' ? '' : link.url}
-                      onChange={(e) => updateSocial(p, e.target.value)}
+                      placeholder={p === 'website' ? 'yoursite.com' : 'username'}
+                      value={link.url === ' ' ? '' : usernameFromUrl(p, link.url)}
+                      onChange={(e) => updateSocial(p, buildSocialUrl(p, e.target.value))}
                       className="w-full pl-12 pr-10 py-3 rounded-xl bg-noctvm-midnight/50 border border-white/5 focus:border-noctvm-violet/30 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/20"
                     />
                     <button 

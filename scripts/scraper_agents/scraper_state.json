@@ -1,0 +1,8 @@
+{
+    "status":  "idle",
+    "target_url":  "https://example.com/events",
+    "raw_data":  {
+
+                 },
+    "qa_feedback":  "The raw_data is empty. We need to scrape the title of the event from this page (https://example.com/events)."
+}

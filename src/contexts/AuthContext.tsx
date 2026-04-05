@@ -82,8 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         badge: 'verified',
         is_verified: true,
         referral_code: 'DEVMOON',
-        music_link: null,
-        social_links: null,
+        music_link: { type: 'soundcloud', url: 'https://soundcloud.com/nightowldev', label: 'Night Owl - Void Set' },
+        social_links: [
+          { platform: 'website', url: 'https://nightowldev.github.io' },
+          { platform: 'instagram', url: 'https://instagram.com/nightowldev' },
+        ],
         genres: ['Electronic', 'Techno'],
         events_attended: 42,
         venues_visited: 13,

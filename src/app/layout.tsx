@@ -103,7 +103,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         
         {/* Global SVG Filters for Glassmorphism */}
-        <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true" focusable="false">
+        <svg className="absolute w-0 h-0" aria-hidden="true" focusable="false">
           <filter id="displace">
             <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
