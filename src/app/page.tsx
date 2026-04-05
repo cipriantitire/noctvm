@@ -99,14 +99,14 @@ function parseUrlState(search: string): UrlState {
   return { tab, eventId, venueName, postId };
 }
 
-function buildUrlStateUrl(state: UrlState): string {
+function buildUrlStateUrl(state: UrlState, pathname = window.location.pathname): string {
   const params = new URLSearchParams();
   params.set('tab', state.tab);
   if (state.postId) params.set('post', state.postId);
   if (state.eventId) params.set('event', state.eventId);
   if (state.venueName) params.set('venue', state.venueName);
   const query = params.toString();
-  return query ? `${window.location.pathname}?${query}` : window.location.pathname;
+  return query ? `${pathname}?${query}` : pathname;
 }
 
 function AppShell() {
@@ -142,9 +142,9 @@ function AppShell() {
   const [publicProfileLoading, setPublicProfileLoading] = useState(false);
   const bootstrappedHistoryRef = useRef(false);
 
-  const syncHistory = useCallback((state: UrlState, mode: 'push' | 'replace' = 'push') => {
+  const syncHistory = useCallback((state: UrlState, mode: 'push' | 'replace' = 'push', pathnameOverride?: string) => {
     if (typeof window === 'undefined') return;
-    const url = buildUrlStateUrl(state);
+    const url = buildUrlStateUrl(state, pathnameOverride ?? window.location.pathname);
     if (mode === 'replace') {
       window.history.replaceState({ noctvm: 'app', ...state }, '', url);
     } else {
@@ -169,22 +169,32 @@ function AppShell() {
     }
   }, []);
 
-  useEffect(() => {
-    setIsClient(true);
+  const syncRouteFromLocation = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
     const pathname = window.location.pathname;
+
     if (pathname.startsWith('/@')) {
       const cleanHandle = decodeURIComponent(pathname.slice(2)).replace(/^@/, '').trim();
-      setPublicProfileLoading(true);
       setPublicProfileHandle(cleanHandle || null);
+      setPublicProfile(null);
+      setPublicProfileLoading(!!cleanHandle);
       setActiveTab('profile');
       setProfileView('profile');
-    } else {
-      setPublicProfileHandle(null);
-      setPublicProfile(null);
-      setPublicProfileLoading(false);
+      return;
     }
+
+    setPublicProfileHandle(null);
+    setPublicProfile(null);
+    setPublicProfileLoading(false);
+    applyUrlState(parseUrlState(window.location.search));
+  }, [applyUrlState]);
+
+  useEffect(() => {
+    setIsClient(true);
+    syncRouteFromLocation();
+
     const initialState = parseUrlState(window.location.search);
-    applyUrlState(initialState);
 
     if (!bootstrappedHistoryRef.current) {
       bootstrappedHistoryRef.current = true;
@@ -204,12 +214,12 @@ function AppShell() {
     }
 
     const handlePopState = () => {
-      applyUrlState(parseUrlState(window.location.search));
+      syncRouteFromLocation();
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [syncRouteFromLocation]);
 
   useEffect(() => {
     let cancelled = false;
@@ -370,6 +380,8 @@ function AppShell() {
   }, []);
 
   const handleTabChange = useCallback((tab: TabType) => {
+    const leavingPublicProfile = !!publicProfileHandle && tab !== 'profile';
+
     setActiveTab(tab);
     if (tab === 'profile') setProfileView('profile');
     setSelectedEvent(null);
@@ -377,11 +389,23 @@ function AppShell() {
     setSelectedVenue(null);
     setVenueClosing(false);
     setInitialPostId(null);
-    syncHistory({ tab, eventId: null, venueName: null, postId: null });
+
+    if (leavingPublicProfile) {
+      setPublicProfileHandle(null);
+      setPublicProfile(null);
+      setPublicProfileLoading(false);
+    }
+
+    syncHistory(
+      { tab, eventId: null, venueName: null, postId: null },
+      'push',
+      leavingPublicProfile ? '/' : undefined,
+    );
+
     if (!user && isAuthGatedTab(tab)) {
       setShowAuthModal(true);
     }
-  }, [syncHistory, user]);
+  }, [publicProfileHandle, syncHistory, user]);
 
   // Modal Z-Index Management (whichever open last on top)
   const [eventZIndex, setEventZIndex] = useState(200);

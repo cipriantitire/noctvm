@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
@@ -24,13 +25,15 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
   const [users, setUsers] = useState<TaggedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const normalizeHandle = useCallback((value: string) => value.replace(/^@/, '').trim(), []);
+
   useEffect(() => {
     if (!isOpen) return;
     
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const cleanHandles = handles.map(h => h.replace(/^@/, ''));
+        const cleanHandles = handles.map(h => normalizeHandle(h));
         if (cleanHandles.length === 0) {
           setUsers([]);
           return;
@@ -51,7 +54,7 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
               .from('follows')
               .select('id')
               .eq('follower_id', user.id)
-              .eq('target_id', profile.id)
+              .eq('following_id', profile.id)
               .eq('target_type', 'user')
               .maybeSingle();
             isFollowing = !!followData;
@@ -60,7 +63,7 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
           return {
             id: profile.id,
             display_name: profile.display_name || 'Night Owl',
-            username: profile.username || 'user',
+            username: normalizeHandle(profile.username || profile.display_name || 'user'),
             avatar_url: profile.avatar_url,
             is_following: isFollowing,
           };
@@ -75,7 +78,48 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
     };
     
     fetchUsers();
-  }, [handles, isOpen, user]);
+  }, [handles, isOpen, normalizeHandle, user]);
+
+  const handleToggleFollow = useCallback(async (taggedUser: TaggedUser) => {
+    if (!user || user.id === taggedUser.id) return;
+
+    const nextIsFollowing = !taggedUser.is_following;
+    setUsers(prev => prev.map((entry) => (
+      entry.id === taggedUser.id
+        ? { ...entry, is_following: nextIsFollowing }
+        : entry
+    )));
+
+    try {
+      if (taggedUser.is_following) {
+        const { error } = await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', user.id)
+          .eq('following_id', taggedUser.id)
+          .eq('target_type', 'user');
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('follows')
+          .insert({
+            follower_id: user.id,
+            following_id: taggedUser.id,
+            target_type: 'user',
+          });
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error toggling tagged follow:', error);
+      setUsers(prev => prev.map((entry) => (
+        entry.id === taggedUser.id
+          ? { ...entry, is_following: taggedUser.is_following }
+          : entry
+      )));
+    }
+  }, [user]);
 
   if (!isOpen) return null;
 
@@ -106,29 +150,46 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
           ) : (
             <div className="divide-y divide-noctvm-border/50">
               {users.map((u) => (
-                <div key={u.id} className="p-3 flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-noctvm-surface border border-noctvm-border overflow-hidden relative">
+                <div key={u.id} className="group flex items-center justify-between gap-3 p-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <Link
+                      href={`/@${encodeURIComponent(normalizeHandle(u.username) || u.id)}`}
+                      className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-noctvm-border bg-noctvm-surface transition-transform hover:scale-[1.02]"
+                      aria-label={`Open ${u.display_name}'s profile`}
+                      title={`Open ${u.display_name}'s profile`}
+                    >
                       {u.avatar_url ? (
-                        <Image src={u.avatar_url} alt={u.username} fill className="object-cover" unoptimized />
+                        <Image src={u.avatar_url} alt={u.display_name} fill className="object-cover" unoptimized sizes="40px" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/20">
-                          <span className="text-sm font-bold text-noctvm-violet">{u.display_name[0].toUpperCase()}</span>
+                        <div className="flex h-full w-full items-center justify-center bg-noctvm-violet/20">
+                          <span className="text-sm font-bold text-noctvm-violet">{(u.display_name?.[0] || 'N').toUpperCase()}</span>
                         </div>
                       )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white leading-tight">{u.display_name}</p>
-                      <p className="text-xs text-noctvm-silver">@{u.username}</p>
+                    </Link>
+
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/@${encodeURIComponent(normalizeHandle(u.username) || u.id)}`}
+                        className="block min-w-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
+                        aria-label={`Open ${u.display_name}'s profile`}
+                        title={`Open ${u.display_name}'s profile`}
+                      >
+                        <p className="truncate text-sm font-semibold leading-tight text-white">{u.display_name}</p>
+                        <p className="truncate text-xs text-noctvm-silver">@{normalizeHandle(u.username)}</p>
+                      </Link>
                     </div>
                   </div>
                   
                   {user && user.id !== u.id && (
-                    <button className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleFollow(u)}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       u.is_following 
                         ? 'bg-noctvm-surface text-white border border-noctvm-border hover:bg-noctvm-surface/70' 
                         : 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
-                    }`}>
+                    }`}
+                    >
                       {u.is_following ? 'Following' : 'Follow'}
                     </button>
                   )}
