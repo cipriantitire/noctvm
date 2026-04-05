@@ -100,16 +100,25 @@ function MusicLinkRow({ link }: { link: { type: string; url: string; label?: str
   const [title, setTitle] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    // Only fetch title for regular YouTube URLs
-    let isYouTube = false;
+    let fetchUrl = link.url;
+    let shouldFetch = false;
     try {
       const host = new URL(link.url).hostname.replace(/^www\./, '');
-      isYouTube = host === 'youtube.com' || host === 'youtu.be';
+      if (host === 'youtube.com' || host === 'youtu.be') {
+        shouldFetch = true;
+      } else if (host === 'music.youtube.com') {
+        // noembed works with regular youtube.com — convert the URL
+        const vid = new URL(link.url).searchParams.get('v');
+        if (vid) {
+          fetchUrl = `https://www.youtube.com/watch?v=${vid}`;
+          shouldFetch = true;
+        }
+      }
     } catch { /* noop */ }
 
-    if (!isYouTube) return;
+    if (!shouldFetch) return;
     let cancelled = false;
-    fetch(`https://noembed.com/embed?url=${encodeURIComponent(link.url)}`)
+    fetch(`https://noembed.com/embed?url=${encodeURIComponent(fetchUrl)}`)
       .then(r => r.json())
       .then(data => { if (!cancelled && data.title) setTitle(data.title); })
       .catch(() => { /* silently fallback */ });
@@ -125,8 +134,8 @@ function MusicLinkRow({ link }: { link: { type: string; url: string; label?: str
       rel="noopener noreferrer"
       className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
     >
-      <div className="w-6 h-6 rounded-[9px] bg-[#7C3AED25] border border-[#7C3AED40] flex items-center justify-center shrink-0">
-        <Music2 className="w-3 h-3 text-noctvm-violet" />
+      <div className="w-[30px] h-[30px] rounded-[9px] bg-[#7C3AED25] border border-[#7C3AED40] flex items-center justify-center shrink-0">
+        <Music2 className="w-3.5 h-3.5 text-noctvm-violet" />
       </div>
       <span className="font-mono text-[11px] text-white">{label}</span>
     </a>
@@ -578,17 +587,17 @@ export default function UserProfilePage({
           {/* Grouped card: Posts / Followers / Following */}
           <div className="flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center justify-around">
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[22px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
+              <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
               <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Posts</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[22px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
+              <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
               <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Followers</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[22px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
+              <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
               <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Following</span>
             </div>
           </div>
@@ -596,14 +605,14 @@ export default function UserProfilePage({
           {/* Venues card */}
           <div className="w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-violet/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-violet/5 group-hover:bg-noctvm-violet/10 transition-colors" />
-            <span className="text-[22px] leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
+            <span className="text-[20px] leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
             <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Venues</span>
           </div>
 
           {/* Events card */}
           <div className="w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-emerald/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-emerald/5 group-hover:bg-noctvm-emerald/10 transition-colors" />
-            <span className="text-[22px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
+            <span className="text-[20px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
             <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Events</span>
           </div>
         </div>
@@ -629,8 +638,8 @@ export default function UserProfilePage({
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
                 >
-                  <div className="w-6 h-6 rounded-[9px] bg-[#111111] border border-[#1A1A1A] flex items-center justify-center shrink-0">
-                    <Icon className="w-3 h-3 text-noctvm-silver" />
+                  <div className="w-[30px] h-[30px] rounded-[9px] bg-[#111111] border border-[#1A1A1A] flex items-center justify-center shrink-0">
+                    <Icon className="w-3.5 h-3.5 text-noctvm-silver" />
                   </div>
                   <span className="font-mono text-[11px] text-white">{label}</span>
                 </a>
