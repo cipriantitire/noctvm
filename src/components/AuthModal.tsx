@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, CANONICAL_PUBLIC_ORIGIN } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logActivity } from '@/lib/activity';
 
@@ -66,9 +66,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const handleOAuth = async (provider: 'google' | 'facebook') => {
     setError('');
+    const currentPath = `${window.location.pathname}${window.location.search}` || '/';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const redirectBase = isLocalhost ? window.location.origin : CANONICAL_PUBLIC_ORIGIN;
     const { error: oAuthError } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo: `${redirectBase}/auth/callback?next=${encodeURIComponent(currentPath)}`,
+      },
     });
     if (oAuthError) setError(oAuthError.message);
   };

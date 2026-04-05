@@ -73,6 +73,12 @@ type UrlState = {
   postId: string | null;
 };
 
+const AUTH_GATED_TABS: TabType[] = ['feed', 'pocket', 'profile'];
+
+function isAuthGatedTab(tab: TabType) {
+  return AUTH_GATED_TABS.includes(tab);
+}
+
 function parseUrlState(search: string): UrlState {
   const params = new URLSearchParams(search);
   const tabParam = params.get('tab');
@@ -262,9 +268,20 @@ export default function Home() {
   const handleSettingsClick = useCallback(() => {
     setPreviousTab(activeTab);
     setActiveTab('profile');
-    setProfileView('account-menu');
+    setProfileView('profile');
+    setSelectedEvent(null);
+    setPendingEventId(null);
+    setSelectedVenue(null);
+    setVenueClosing(false);
+    setInitialPostId(null);
     syncHistory({ tab: 'profile', eventId: null, venueName: null, postId: null });
-  }, [activeTab, syncHistory]);
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    setProfileView('account-menu');
+  }, [activeTab, syncHistory, user]);
 
   // Switch to a tab and reset profile view to 'profile'
   useEffect(() => {
@@ -293,7 +310,10 @@ export default function Home() {
     setVenueClosing(false);
     setInitialPostId(null);
     syncHistory({ tab, eventId: null, venueName: null, postId: null });
-  }, [syncHistory]);
+    if (!user && isAuthGatedTab(tab)) {
+      setShowAuthModal(true);
+    }
+  }, [syncHistory, user]);
 
   // Modal Z-Index Management (whichever open last on top)
   const [eventZIndex, setEventZIndex] = useState(200);
@@ -406,7 +426,74 @@ export default function Home() {
     'claim-location',
     'app-settings'
   ].includes(profileView);
-  const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage;
+  const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage && !!user;
+
+  useEffect(() => {
+    if (!user && activeTab === 'profile' && profileView !== 'profile') {
+      setProfileView('profile');
+    }
+  }, [activeTab, profileView, user]);
+
+  const authGateCopy: Record<Exclude<TabType, 'events' | 'venues'>, { title: string; subtitle: string; body: string; icon: typeof FeedIcon }> = {
+    feed: {
+      title: 'Feed locked',
+      subtitle: 'Sign in to read and post',
+      body: 'Your feed, stories, and sharing tools live behind your account so your activity stays tied to the right profile.',
+      icon: FeedIcon,
+    },
+    pocket: {
+      title: 'Pocket locked',
+      subtitle: 'Sign in to open your rewards',
+      body: 'Pocket balance, rewards, and saved perks are personalized. Sign in to continue where you left off.',
+      icon: PocketIcon,
+    },
+    profile: {
+      title: 'Profile locked',
+      subtitle: 'Sign in to access your account',
+      body: 'Your profile, settings, and saved venues are private to your account. Sign in to continue.',
+      icon: UserIcon,
+    },
+  };
+
+  const renderAuthGate = (tab: Exclude<TabType, 'events' | 'venues'>) => {
+    const gate = authGateCopy[tab];
+    const GateIcon = gate.icon;
+
+    return (
+      <section className="mx-auto flex min-h-[calc(100vh-12rem)] max-w-2xl flex-col items-center justify-center px-4 py-16 text-center">
+        <div className="relative mb-6 flex h-20 w-20 items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-noctvm-violet/20 blur-3xl" />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-noctvm-midnight/70 shadow-[0_0_40px_rgba(139,92,246,0.25)]">
+            <GateIcon className="h-8 w-8 text-noctvm-violet" />
+          </div>
+        </div>
+
+        <p className="text-noctvm-caption uppercase tracking-[0.35em] text-noctvm-silver/50">{gate.title}</p>
+        <h2 className="mt-3 font-heading text-3xl font-black text-white sm:text-4xl">{gate.subtitle}</h2>
+        <p className="mt-4 max-w-lg text-sm leading-6 text-noctvm-silver">{gate.body}</p>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowAuthModal(true)}
+            className="rounded-full bg-noctvm-violet px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-noctvm-violet/90"
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowAuthModal(false);
+              handleTabChange('events');
+            }}
+            className="rounded-full border border-noctvm-border bg-noctvm-surface px-6 py-3 text-sm font-semibold text-noctvm-silver transition-colors hover:text-white hover:bg-white/5"
+          >
+            Browse Events
+          </button>
+        </div>
+      </section>
+    );
+  };
 
   return (
     <>
@@ -457,7 +544,7 @@ export default function Home() {
       />
 
       {/* ── Feed Create Post FAB ──────────────────────────────────── */}
-      {activeTab === 'feed' && (
+      {activeTab === 'feed' && user && (
         <button
           onClick={() => setShowCreatePost(true)}
           className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 xl:right-[22rem] z-40 w-14 h-14 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-600 shadow-lg shadow-noctvm-violet/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border border-noctvm-violet/30"
@@ -648,14 +735,18 @@ export default function Home() {
             {/* ── Feed Tab ────────────────────────────────────── */}
             {activeTab === 'feed' && (
               <div className="tab-content">
-                <FeedPage
-                  onVenueClick={handleVenueClick}
-                  onOpenCreatePost={() => setShowCreatePost(true)}
-                  onOpenCreateStory={() => setShowCreateStory(true)}
-                  onOpenStories={(users, index) => handleOpenStories(users, index)}
-                  activeCity={activeCity}
-                  initialPostId={initialPostId}
-                />
+                {user ? (
+                  <FeedPage
+                    onVenueClick={handleVenueClick}
+                    onOpenCreatePost={() => setShowCreatePost(true)}
+                    onOpenCreateStory={() => setShowCreateStory(true)}
+                    onOpenStories={(users, index) => handleOpenStories(users, index)}
+                    activeCity={activeCity}
+                    initialPostId={initialPostId}
+                  />
+                ) : (
+                  renderAuthGate('feed')
+                )}
               </div>
             )}
 
@@ -676,7 +767,7 @@ export default function Home() {
             {/* ── Pocket / Moonrays Tab ────────────────────────── */}
             {activeTab === 'pocket' && (
               <div key="pocket" className="animate-in fade-in duration-500">
-                <PocketPage />
+                {user ? <PocketPage /> : renderAuthGate('pocket')}
               </div>
             )}
 
@@ -684,7 +775,7 @@ export default function Home() {
             {activeTab === 'profile' && (
               <>
                 {/* Public profile (Instagram-style) */}
-                {profileView === 'profile' && profile && (
+                {user && profileView === 'profile' && profile && (
                   <UserProfilePage
                     targetProfile={profile}
                     onOpenAuth={() => setShowAuthModal(true)}
@@ -701,14 +792,16 @@ export default function Home() {
                 )}
 
                 {/* Profile Sub-pages (including Settings Hub) */}
-                {isProfileSubPage && profileSubContent[profileView]}
+                {user && isProfileSubPage && profileSubContent[profileView]}
+
+                {!user && renderAuthGate('profile')}
               </>
             )}
           </div>
         </main>
 
         {/* Right panel */}
-        {(activeTab === 'events' || activeTab === 'feed' || activeTab === 'venues') && (
+        {(activeTab === 'events' || activeTab === 'venues' || (activeTab === 'feed' && user)) && (
           <RightPanel 
             onVenueClick={openVenue} 
             onEventClick={openEvent} 
