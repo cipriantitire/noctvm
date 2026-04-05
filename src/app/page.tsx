@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar, { GENRE_FILTERS } from '@/components/FilterBar';
@@ -23,6 +23,7 @@ import AuthModal from '@/components/AuthModal';
 import EventModal from '@/components/EventModal';
 import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
+import GlobalSearchSheet, { type GlobalSearchActionId } from '@/components/GlobalSearchSheet';
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
@@ -36,6 +37,7 @@ import {
   VenuesIcon, 
   GridIcon, 
   BellIcon,
+  SearchIcon,
   EditIcon,
   ShieldIcon,
   StarIcon 
@@ -61,12 +63,17 @@ type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 type ProfileView =
   | 'profile'
   | 'account-menu'
+  | 'account'
   | 'manage-account'
   | 'add-location'
   | 'claim-location'
   | 'app-settings'
   | 'edit-profile'
+  | 'appearance'
+  | 'blocked_muted'
   | 'inventory'
+  | 'notifications'
+  | 'privacy'
   | 'activity-log';
 
 type UrlState = {
@@ -114,10 +121,12 @@ function buildUrlStateUrl(state: UrlState, pathname = window.location.pathname):
 function AppShell() {
   const { user, profile, signOut, isAdmin, isOwner } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('events');
   const [activeCity, setActiveCity] = useState<'bucuresti' | 'constanta'>('bucuresti');
   const [activeGenres, setActiveGenres] = useState<string[]>(['All']);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
   const [activeGenreVenues, setActiveGenreVenues] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -342,15 +351,14 @@ function AppShell() {
 
   // Lock body scroll when overlay is active
   useEffect(() => {
-    if (selectedVenue || selectedEvent || showAuthModal || showCreatePost || showCreateStory || showStories) {
+    if (selectedVenue || selectedEvent || showAuthModal || showCreatePost || showCreateStory || showStories || isGlobalSearchOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-  }, [selectedVenue, selectedEvent, showAuthModal, showCreatePost, showCreateStory, showStories]);
+  }, [isGlobalSearchOpen, selectedVenue, selectedEvent, showAuthModal, showCreatePost, showCreateStory, showStories]);
 
-  // Switch to profile tab and show the account menu
-  const handleSettingsClick = useCallback(() => {
+  const openProfileSettingsView = useCallback((view: ProfileView) => {
     setPreviousTab(activeTab);
     setActiveTab('profile');
     setProfileView('profile');
@@ -360,13 +368,67 @@ function AppShell() {
     setVenueClosing(false);
     setInitialPostId(null);
     syncHistory({ tab: 'profile', eventId: null, venueName: null, postId: null });
+
     if (!user) {
       setShowAuthModal(true);
       return;
     }
 
-    setProfileView('account-menu');
+    setProfileView(view);
   }, [activeTab, syncHistory, user]);
+
+  // Switch to profile tab and show the account menu
+  const handleSettingsClick = useCallback(() => {
+    openProfileSettingsView('account-menu');
+  }, [openProfileSettingsView]);
+
+  const handleSearchAction = useCallback((action: GlobalSearchActionId) => {
+    setIsGlobalSearchOpen(false);
+
+    switch (action) {
+      case 'open-settings':
+        openProfileSettingsView('account-menu');
+        return;
+      case 'open-notifications':
+        setIsNotificationsOpen(true);
+        return;
+      case 'open-dashboard':
+        router.push('/dashboard');
+        return;
+      case 'edit-profile':
+        openProfileSettingsView('edit-profile');
+        return;
+      case 'account':
+        openProfileSettingsView('account');
+        return;
+      case 'privacy':
+        openProfileSettingsView('privacy');
+        return;
+      case 'notifications-settings':
+        openProfileSettingsView('notifications');
+        return;
+      case 'appearance':
+        openProfileSettingsView('appearance');
+        return;
+      case 'blocked_muted':
+        openProfileSettingsView('blocked_muted');
+        return;
+      case 'inventory':
+        openProfileSettingsView('inventory');
+        return;
+      case 'activity':
+        openProfileSettingsView('activity-log');
+        return;
+      case 'add_location':
+        openProfileSettingsView('add-location');
+        return;
+      case 'claim_location':
+        openProfileSettingsView('claim-location');
+        return;
+      default:
+        return;
+    }
+  }, [openProfileSettingsView, router]);
 
   // Switch to a tab and reset profile view to 'profile'
   useEffect(() => {
@@ -509,7 +571,12 @@ function AppShell() {
   const profileSubContent: Record<string, React.ReactNode> = {
     'account-menu':    <SettingsPage onBack={() => setProfileView('profile')} />,
     'edit-profile':    <SettingsPage onBack={() => setProfileView('profile')} initialView="edit" />,
+    'account':         <SettingsPage onBack={() => setProfileView('profile')} initialView="account" />,
     'manage-account':  <SettingsPage onBack={() => setProfileView('profile')} initialView="privacy" />,
+    'privacy':         <SettingsPage onBack={() => setProfileView('profile')} initialView="privacy" />,
+    'notifications':   <SettingsPage onBack={() => setProfileView('profile')} initialView="notifications" />,
+    'appearance':      <SettingsPage onBack={() => setProfileView('profile')} initialView="appearance" />,
+    'blocked_muted':   <SettingsPage onBack={() => setProfileView('profile')} initialView="blocked_muted" />,
     'inventory':       <SettingsPage onBack={() => setProfileView('profile')} initialView="inventory" />,
     'add-location':    <SettingsPage onBack={() => setProfileView('profile')} initialView="add_location" />,
     'claim-location':  <SettingsPage onBack={() => setProfileView('profile')} initialView="claim_location" />,
@@ -519,12 +586,17 @@ function AppShell() {
 
   const isProfileSubPage = [
     'account-menu',
+    'account',
     'edit-profile',
     'manage-account',
     'inventory',
     'add-location',
     'claim-location',
     'app-settings',
+    'appearance',
+    'blocked_muted',
+    'notifications',
+    'privacy',
     'activity-log'
   ].includes(profileView);
   const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage && !!user;
@@ -692,6 +764,7 @@ function AppShell() {
         <Sidebar
           activeTab={activeTab}
           onTabChange={handleTabChange}
+          onSearchClick={() => setIsGlobalSearchOpen(true)}
           onSettingsClick={handleSettingsClick}
           onNotificationsClick={() => setIsNotificationsOpen(true)}
           activeCity={activeCity}
@@ -715,12 +788,16 @@ function AppShell() {
               
               {/* Middle: City Selector */}
               <div className="flex justify-center">
-                <div className="flex items-center gap-1.5 opacity-80">
-                  <div className="relative">
+                <div className="flex items-center gap-2 opacity-80">
+                  <span
+                    aria-hidden="true"
+                    className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse shadow-[0_0_10px_rgba(16,185,129,0.6)] flex-shrink-0"
+                  />
+                  <div className="relative flex h-6 items-center">
                     <select
                       value={activeCity}
                       onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
-                      className="bg-transparent text-noctvm-label text-noctvm-silver font-mono capitalize focus:outline-none cursor-pointer appearance-none pr-4"
+                      className="h-6 bg-transparent text-noctvm-label text-noctvm-silver font-mono capitalize leading-none focus:outline-none cursor-pointer appearance-none pr-4"
                       aria-label="Select City"
                     >
                       <option value="bucuresti" className="bg-noctvm-black">București</option>
@@ -735,6 +812,13 @@ function AppShell() {
 
               {/* Right: Actions */}
               <div className="flex items-center gap-2 justify-end">
+                <button
+                  onClick={() => setIsGlobalSearchOpen(true)}
+                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  title="Search"
+                >
+                  <SearchIcon className="w-3.5 h-3.5" />
+                </button>
                 {(isAdmin || isOwner) && (
                   <Link 
                     href="/dashboard"
@@ -951,6 +1035,18 @@ function AppShell() {
         )}
 
         <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        <GlobalSearchSheet
+          open={isGlobalSearchOpen}
+          onOpenChange={setIsGlobalSearchOpen}
+          onEventSelect={openEvent}
+          onVenueSelect={openVenue}
+          onUserSelect={(username) => {
+            const cleanUsername = username.replace(/^@/, '').trim();
+            if (!cleanUsername) return;
+            router.push(`/@${cleanUsername}`);
+          }}
+          onActionSelect={handleSearchAction}
+        />
         <NotificationsPanel 
           isOpen={isNotificationsOpen} 
           onClose={() => setIsNotificationsOpen(false)} 

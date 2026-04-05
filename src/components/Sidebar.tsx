@@ -1,6 +1,6 @@
 'use client';
 
-import { EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon } from './icons';
+import { EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon, SearchIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -19,6 +19,7 @@ const NAV_ITEMS: { icon: React.FC<{ className?: string }>; label: string; tab: T
 interface SidebarProps {
   activeTab?: TabType;
   onTabChange?: (tab: TabType) => void;
+  onSearchClick?: () => void;
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
   activeCity?: 'bucuresti' | 'constanta';
@@ -28,6 +29,7 @@ interface SidebarProps {
 export default function Sidebar({
   activeTab = 'events',
   onTabChange = () => {},
+  onSearchClick = () => {},
   onSettingsClick,
   onNotificationsClick,
   pushContent = true,
@@ -126,6 +128,15 @@ export default function Sidebar({
               >
                 <BellIcon className="w-6 h-6 flex-shrink-0" />
                 <span className={labelCls}>Notifications</span>
+              </button>
+
+              {/* Search */}
+              <button
+                onClick={onSearchClick}
+                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+              >
+                <SearchIcon className="w-6 h-6 flex-shrink-0" />
+                <span className={labelCls}>Search</span>
               </button>
 
               {/* Settings */}

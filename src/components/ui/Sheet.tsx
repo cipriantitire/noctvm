@@ -40,17 +40,25 @@ function SheetContent({
   className,
   children,
   side = 'right',
+  overlayClassName,
+  overlayStyle,
+  glass = true,
+  showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: 'top' | 'right' | 'bottom' | 'left';
+  overlayClassName?: string;
+  overlayStyle?: React.CSSProperties;
+  glass?: boolean;
+  showCloseButton?: boolean;
 }) {
   return (
     <SheetPortal>
-      <SheetOverlay />
+      <SheetOverlay className={overlayClassName} style={overlayStyle} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          'frosted-glass-modal',
+          glass && 'frosted-glass-modal',
           'data-[state=open]:animate-in data-[state=closed]:animate-out fixed flex flex-col gap-4 shadow-2xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
           side === 'right' && 'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l border-noctvm-border sm:max-w-sm',
           side === 'left' && 'data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r border-noctvm-border sm:max-w-sm',
@@ -62,10 +70,12 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="absolute top-4 right-4 rounded-full p-1.5 text-noctvm-silver opacity-70 transition-opacity hover:opacity-100 hover:text-white focus:outline-none focus:ring-2 focus:ring-noctvm-violet disabled:pointer-events-none">
-          <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
+        {showCloseButton && (
+          <SheetPrimitive.Close className="absolute top-4 right-4 rounded-full p-1.5 text-noctvm-silver opacity-70 transition-opacity hover:opacity-100 hover:text-white focus:outline-none focus:ring-2 focus:ring-noctvm-violet disabled:pointer-events-none">
+            <XIcon className="size-4" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        )}
       </SheetPrimitive.Content>
     </SheetPortal>
   );
