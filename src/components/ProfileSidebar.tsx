@@ -21,6 +21,7 @@ function SavedEventItem({ event }: { event: NoctEvent }) {
 
   return (
     <button
+      type="button"
       onClick={() => window.open(event.event_url, '_blank')}
       className="w-full flex items-center gap-4 p-3 rounded-xl bg-noctvm-midnight/40 border border-white/5 hover:border-noctvm-violet/40 hover:bg-noctvm-midnight/60 transition-all duration-500 group text-left relative overflow-hidden"
     >
@@ -139,30 +140,22 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
               Agenda
             </h3>
             <h2 className="text-xl font-heading font-black text-white leading-none">
-              Live Feed
+              Saved Events
             </h2>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-[20px] font-mono font-black text-noctvm-violet leading-none">
-              {savedEvents.length.toString().padStart(2, '0')}
-            </span>
-            <span className="text-[8px] font-mono uppercase tracking-tighter text-noctvm-silver/30">
-              Saves
-            </span>
-          </div>
+          <span className="text-[22px] font-mono font-black text-noctvm-violet leading-none">
+            {savedEvents.length.toString().padStart(2, '0')}
+          </span>
         </div>
 
-        <div className="rounded-[2rem] p-1.5 bg-noctvm-midnight/40 border border-white/5 mb-8 group transition-all duration-700 hover:border-noctvm-violet/20">
-          <div className="rounded-[calc(1.8rem)] overflow-hidden h-[200px] relative border border-white/5 bg-noctvm-black/40">
-            <SidebarMap 
-              venues={venues}
-              events={displayEvents}
-              eventCounts={eventCounts}
-              activeCity={activeCity}
-              activeTab="profile"
-            />
-            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.5)] z-20" />
-          </div>
+        <div className="rounded-xl overflow-hidden mb-8 border border-noctvm-border h-[200px]">
+          <SidebarMap
+            venues={venues}
+            events={displayEvents}
+            eventCounts={eventCounts}
+            activeCity={activeCity}
+            activeTab="profile"
+          />
         </div>
 
         <div className={cn("mb-6 transition-all duration-300", showAll && "opacity-40 grayscale pointer-events-none")}>
@@ -173,7 +166,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
               setSelectedDate(date);
               if (showAll) setShowAll(false);
             }}
-            className="border-0 p-0 pointer-events-auto"
+            className="border-0 pointer-events-auto"
             modifiers={{
               hasEvent: eventDates
             }}

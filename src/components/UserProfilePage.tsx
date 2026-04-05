@@ -103,7 +103,7 @@ function MusicLinkRow({ link }: { link: { type: string; url: string; label?: str
     let shouldFetch = false;
     try {
       const host = new URL(link.url).hostname.replace(/^www\./, '');
-      shouldFetch = host === 'youtube.com' || host === 'youtu.be' || host === 'music.youtube.com';
+      shouldFetch = ['youtube.com', 'youtu.be', 'music.youtube.com', 'soundcloud.com', 'open.spotify.com'].includes(host);
     } catch { /* noop */ }
 
     if (!shouldFetch) return;
@@ -323,7 +323,7 @@ export default function UserProfilePage({
     } finally {
       setLoadingPosts(false);
     }
-  }, [targetProfile.id, targetProfile.username]);
+  }, [targetProfile.id, targetProfile.username, user]);
 
   const fetchSavedPosts = useCallback(async () => {
     if (!user || !isOwner) return;
@@ -573,9 +573,16 @@ export default function UserProfilePage({
         </div>
 
         {/* Row 2: Stats */}
-        <div className="flex gap-2 mb-5">
+        <div className="flex flex-wrap gap-2 mb-5">
+          {/* Events card */}
+          <div className="order-1 flex-1 basis-[calc(50%-4px)] lg:order-1 lg:flex-none lg:w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-emerald/40 transition-all cursor-default">
+            <div className="absolute inset-0 bg-noctvm-emerald/5 group-hover:bg-noctvm-emerald/10 transition-colors" />
+            <span className="text-[20px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
+            <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Events</span>
+          </div>
+
           {/* Grouped card: Posts / Followers / Following */}
-          <div className="flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center justify-around">
+          <div className="order-3 basis-full lg:order-2 lg:flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center justify-around">
             <div className="flex flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
               <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Posts</span>
@@ -593,17 +600,10 @@ export default function UserProfilePage({
           </div>
 
           {/* Venues card */}
-          <div className="w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-violet/40 transition-all cursor-default">
+          <div className="order-2 flex-1 basis-[calc(50%-4px)] lg:order-3 lg:flex-none lg:w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-violet/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-violet/5 group-hover:bg-noctvm-violet/10 transition-colors" />
             <span className="text-[20px] leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
             <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Venues</span>
-          </div>
-
-          {/* Events card */}
-          <div className="w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-emerald/40 transition-all cursor-default">
-            <div className="absolute inset-0 bg-noctvm-emerald/5 group-hover:bg-noctvm-emerald/10 transition-colors" />
-            <span className="text-[20px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
-            <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Events</span>
           </div>
         </div>
 

@@ -1,8 +1,9 @@
 'use client';
 
-import { MoonIcon, EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon } from './icons';
+import { EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIcon, GridIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
@@ -21,13 +22,15 @@ interface SidebarProps {
   onSettingsClick?: () => void;
   onNotificationsClick?: () => void;
   activeCity?: 'bucuresti' | 'constanta';
+  pushContent?: boolean;
 }
 
-export default function Sidebar({ 
-  activeTab = 'events', 
-  onTabChange = () => {}, 
+export default function Sidebar({
+  activeTab = 'events',
+  onTabChange = () => {},
   onSettingsClick,
-  onNotificationsClick 
+  onNotificationsClick,
+  pushContent = true,
 }: SidebarProps) {
   const { profile, user, isAdmin, isOwner } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
@@ -36,18 +39,34 @@ export default function Sidebar({
     ? (profile?.username || profile?.display_name || 'Profile')
     : 'Log In';
 
-  const labelCls = 'max-w-0 group-hover/sidebar:max-w-[160px] overflow-hidden opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75 whitespace-nowrap';
+  const labelCls = 'max-w-0 group-hover/sidebar:max-w-[160px] overflow-hidden opacity-0 group-hover/sidebar:opacity-100 translate-y-2 group-hover/sidebar:translate-y-0 transition-[opacity,transform,max-width] duration-200 delay-100 [transition-timing-function:cubic-bezier(0.45,0,0.55,1)] whitespace-nowrap';
 
   return (
     <aside 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen sticky top-0 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-200 ease-out py-6 overflow-hidden"
+      className={`hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen z-10 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-300 [transition-timing-function:cubic-bezier(0.45,0,0.55,1)] py-6 overflow-hidden ${pushContent ? 'sticky top-0' : 'absolute left-0 top-0'}`}
     >
-      {/* Moon Logo */}
-      <div className="flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-3 px-5 mb-10 w-full">
-        <MoonIcon className="w-8 h-8 text-noctvm-violet flex-shrink-0" />
-        <span className={labelCls + ' font-heading text-xl font-bold text-glow'}>NOCTVM</span>
+      {/* Logo */}
+      <div className="relative flex items-center justify-center px-4 mb-10 w-full h-10 flex-shrink-0">
+        {/* Collapsed: standalone moon mark */}
+        <Image
+          src="/images/logo.svg"
+          alt="NOCTVM"
+          width={28}
+          height={32}
+          className="absolute inset-0 m-auto object-contain opacity-100 group-hover/sidebar:opacity-0 transition-opacity duration-200 [transition-timing-function:cubic-bezier(0.45,0,0.55,1)]"
+          priority
+        />
+        {/* Expanded: full type logo */}
+        <Image
+          src="/images/typelogo-inside.webp"
+          alt="NOCTVM"
+          width={148}
+          height={32}
+          className="absolute inset-0 m-auto object-contain opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 delay-75 [transition-timing-function:cubic-bezier(0.45,0,0.55,1)]"
+          priority
+        />
       </div>
 
       {/* Nav icons - centered when collapsed, left-aligned when expanded */}
@@ -56,7 +75,7 @@ export default function Sidebar({
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
-            className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
+            className={`w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
               activeTab === tab
                 ? 'bg-noctvm-violet/10 text-white'
                 : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
@@ -69,18 +88,18 @@ export default function Sidebar({
       </nav>
 
       {/* Bottom: Profile (Bottom-most) -> Notifications -> Settings -> Dashboard (Top-most of group) */}
-      <div className="px-3 w-full flex flex-col-reverse gap-1">
+      <div className="absolute bottom-6 left-0 right-0 px-3 flex flex-col-reverse gap-1">
         
         {/* Profile (Base Button) */}
         <button
           onClick={() => onTabChange('profile')}
-          className={`w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 z-20 ${
+          className={`w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-all duration-150 z-20 ${
             activeTab === 'profile'
-              ? 'bg-noctvm-violet/10 text-white border border-noctvm-violet/20'
+              ? 'text-white group-hover/sidebar:bg-noctvm-violet/10 group-hover/sidebar:ring-1 group-hover/sidebar:ring-noctvm-violet/20 ring-1 ring-transparent'
               : 'bg-noctvm-black text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
           }`}
         >
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 ring-2 ring-noctvm-border overflow-hidden">
+          <div className={`w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 ring-2 overflow-hidden transition-all duration-200 ${activeTab === 'profile' ? 'ring-noctvm-violet/70 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'ring-noctvm-border'}`}>
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -97,13 +116,13 @@ export default function Sidebar({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.25, ease: [0.45, 0, 0.55, 1] }}
               className="flex flex-col-reverse gap-1 mb-1"
             >
               {/* Notifications */}
               <button
                 onClick={onNotificationsClick}
-                className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
               >
                 <BellIcon className="w-6 h-6 flex-shrink-0" />
                 <span className={labelCls}>Notifications</span>
@@ -112,7 +131,7 @@ export default function Sidebar({
               {/* Settings */}
               <button
                 onClick={onSettingsClick}
-                className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
               >
                 <CogIcon className="w-6 h-6 flex-shrink-0" />
                 <span className={labelCls}>Settings</span>
@@ -122,7 +141,7 @@ export default function Sidebar({
               {(isAdmin || isOwner) && (
                 <Link
                   href="/dashboard"
-                  className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-violet hover:bg-noctvm-violet/10"
+                  className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-violet hover:bg-noctvm-violet/10"
                 >
                   <GridIcon className="w-6 h-6 flex-shrink-0" />
                   <span className={labelCls}>Dashboard</span>
