@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,6 +21,7 @@ interface LikesModalProps {
 
 export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [likes, setLikes] = useState<LikedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Record<string, boolean>>({});
@@ -47,7 +48,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
               .from('follows')
               .select('id')
               .eq('follower_id', user.id)
-              .eq('following_id', profile.id)
+              .eq('target_id', profile.id)
               .eq('target_type', 'user')
               .maybeSingle();
             isFollowing = !!followData;
@@ -91,7 +92,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
           .from('follows')
           .delete()
           .eq('follower_id', user.id)
-          .eq('following_id', likedUser.id)
+          .eq('target_id', likedUser.id)
           .eq('target_type', 'user');
 
         if (error) throw error;
@@ -100,7 +101,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
           .from('follows')
           .insert({
             follower_id: user.id,
-            following_id: likedUser.id,
+            target_id: likedUser.id,
             target_type: 'user',
           });
 
@@ -126,6 +127,11 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
     const handle = (username || displayName || 'user').replace(/^@/, '').trim();
     return `/@${encodeURIComponent(handle)}`;
   }, []);
+
+  const handleOpenProfile = useCallback((username: string, displayName: string) => {
+    onClose();
+    router.push(getProfileHref(username, displayName));
+  }, [getProfileHref, onClose, router]);
 
   if (!isOpen) return null;
 
@@ -157,8 +163,9 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
             <div className="divide-y divide-noctvm-border/50">
               {likes.map((l) => (
                 <div key={l.id} className="p-3 flex items-center justify-between group">
-                  <Link
-                    href={getProfileHref(l.username, l.display_name)}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenProfile(l.username, l.display_name)}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left"
                     title={`View ${l.display_name}'s profile`}
                   >
@@ -177,7 +184,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
                       <p className="truncate text-sm font-semibold leading-tight text-white hover:text-noctvm-violet transition-colors">{l.display_name}</p>
                       <p className="truncate text-xs text-noctvm-silver">@{l.username}</p>
                     </div>
-                  </Link>
+                  </button>
                   
                   {user && user.id !== l.id && (
                     <button

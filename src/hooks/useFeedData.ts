@@ -41,12 +41,12 @@ export function useFeedData(user: any, activeCity: string) {
       const followedVenueNames = (venueFollowsRes.data || []).map(f => f.target_id);
 
       // Mutuality check for FRIENDS TABS
-      const { data: mutuals } = await supabase.from('follows').select('follower_id').in('follower_id', followingIds).eq('following_id', user.id).eq('target_type', 'user');
+      const { data: mutuals } = await supabase.from('follows').select('follower_id').in('follower_id', followingIds).eq('target_id', user.id).eq('target_type', 'user');
       const friendIds = (mutuals || []).map(f => f.follower_id);
 
       // Friends of Friends (for Explore)
-      const { data: fofRes } = await supabase.from('follows').select('following_id').in('follower_id', followingIds).eq('target_type', 'user');
-      const fofIds = Array.from(new Set((fofRes || []).map(f => f.following_id).filter(id => id !== user.id && !followingIds.includes(id))));
+      const { data: fofRes } = await supabase.from('follows').select('target_id').in('follower_id', followingIds).eq('target_type', 'user');
+      const fofIds = Array.from(new Set((fofRes || []).map(f => f.target_id).filter(id => id !== user.id && !followingIds.includes(id))));
 
       // 2. PARALLEL POST FETCHING
       // Construct a clean OR filter for following
