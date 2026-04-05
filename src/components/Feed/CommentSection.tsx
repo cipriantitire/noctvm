@@ -27,6 +27,7 @@ interface CommentSectionProps {
   initialComments?: any[];
   isCollapsed?: boolean;
   hideRootInput?: boolean;
+  storyRingByUserId?: Record<string, 'none' | 'story-unseen' | 'story-seen'>;
 }
 
 function timeAgo(dateStr: string): string {
@@ -41,19 +42,22 @@ function timeAgo(dateStr: string): string {
 /** Recursively convert the Supabase Comment tree into MessageTreeNode shape */
 function convertToMessageTreeNodes(
   comments: Comment[],
-  currentUserId: string | null
+  currentUserId: string | null,
+  storyRingByUserId?: Record<string, 'none' | 'story-unseen' | 'story-seen'>
 ): MessageTreeNode[] {
   return comments.map((c) => ({
     id: c.id,
+    authorId: c.user_id,
     authorName: c.user.display_name || c.user.username,
     authorHandle: `@${c.user.username}`,
     authorAvatar: c.user.avatar_url || undefined,
     authorFallback: (c.user.display_name || c.user.username || 'U')[0].toUpperCase(),
+    avatarRing: storyRingByUserId?.[c.user_id] ?? 'none',
     content: c.text,
     timestampStr: timeAgo(c.created_at),
     // Only show edit/delete controls on comments the current user owns
     isOwner: c.user_id === currentUserId,
-    replies: c.replies ? convertToMessageTreeNodes(c.replies, currentUserId) : [],
+    replies: c.replies ? convertToMessageTreeNodes(c.replies, currentUserId, storyRingByUserId) : [],
   }));
 }
 
@@ -64,6 +68,7 @@ export default function CommentSection({
   initialComments = [],
   isCollapsed = false,
   hideRootInput = false,
+  storyRingByUserId,
 }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -165,7 +170,7 @@ export default function CommentSection({
     }
   };
 
-  const treeData = convertToMessageTreeNodes(comments, currentUserId);
+  const treeData = convertToMessageTreeNodes(comments, currentUserId, storyRingByUserId);
 
   return (
     <div className={`mt-4 space-y-4 border-t border-white/5 pt-4 ${hideRootInput ? 'pb-4' : ''}`}>

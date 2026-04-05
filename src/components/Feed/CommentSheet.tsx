@@ -7,6 +7,7 @@ interface CommentSheetProps {
   postId: string;
   postOwnerId: string;
   currentUserId: string | null;
+  storyRingByUserId?: Record<string, 'none' | 'story-unseen' | 'story-seen'>;
   onClose: () => void;
 }
 
@@ -14,7 +15,7 @@ interface CommentSheetProps {
  * Full-screen bottom sheet for comments on mobile.
  * Slides up from the bottom, covers whole viewport with Radix Sheet handling pointer interactions.
  */
-export default function CommentSheet({ postId, postOwnerId, currentUserId, onClose }: CommentSheetProps) {
+export default function CommentSheet({ postId, postOwnerId, currentUserId, storyRingByUserId, onClose }: CommentSheetProps) {
 
   return (
     <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
@@ -30,6 +31,7 @@ export default function CommentSheet({ postId, postOwnerId, currentUserId, onClo
             postOwnerId={postOwnerId}
             currentUserId={currentUserId}
             isCollapsed={false}
+            storyRingByUserId={storyRingByUserId}
           />
         </div>
       </SheetContent>

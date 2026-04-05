@@ -973,6 +973,7 @@ function AppShell() {
                     targetProfile={publicProfile}
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
+                    onOpenCreateStory={() => setShowCreateStory(true)}
                     onOpenActivityLog={() => setProfileView('activity-log')}
                     onEditProfileClick={() => {
                       setActiveTab('profile');
@@ -991,6 +992,7 @@ function AppShell() {
                     targetProfile={profile}
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
+                    onOpenCreateStory={() => setShowCreateStory(true)}
                     onOpenActivityLog={() => setProfileView('activity-log')}
                     onEditProfileClick={() => {
                       setActiveTab('profile');

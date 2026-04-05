@@ -112,10 +112,10 @@ export default function StoriesShowcasePage() {
                   </div>
                </GlassPanel>
                <GlassPanel className="p-6 flex flex-col items-center gap-3 justify-center text-center">
-                  <Avatar fallback="U" size="lg" ring="none" />
+                  <Avatar fallback="U" size="lg" ring="story-seen" />
                   <div>
-                    <p className="text-white font-semibold text-sm">Viewed / Regular</p>
-                    <p className="text-xs text-noctvm-silver">Thin subtle border</p>
+                    <p className="text-white font-semibold text-sm">Viewed Story</p>
+                    <p className="text-xs text-noctvm-silver">Muted grey ring</p>
                   </div>
                </GlassPanel>
              </div>

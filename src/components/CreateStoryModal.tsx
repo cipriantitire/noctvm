@@ -151,6 +151,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
       });
       if (insertError) throw insertError;
       onStoryCreated?.();
+      window.dispatchEvent(new Event('noctvm:story-views-updated'));
       handleClose();
     } catch (err: unknown) {
       setError(

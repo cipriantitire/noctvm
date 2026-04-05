@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useFeedData } from '@/hooks/useFeedData';
@@ -10,6 +10,42 @@ import ShareSheet from './ShareSheet';
 import { EmptyState } from '@/components/ui';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import type { FeedPost } from '@/types/feed';
+
+const STORY_VIEW_STORAGE_KEY = 'noctvm:viewed-story-user-map';
+const LEGACY_STORY_VIEW_STORAGE_KEY = 'noctvm:viewed-story-user-ids';
+
+function readViewedStoryUserIds(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const raw = window.localStorage.getItem(STORY_VIEW_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORY_VIEW_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) {
+      const map = parsed.reduce<Record<string, number>>((accumulator, userId) => {
+        accumulator[userId] = Date.now();
+        return accumulator;
+      }, {});
+      window.localStorage.setItem(STORY_VIEW_STORAGE_KEY, JSON.stringify(map));
+      return map;
+    }
+
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function markViewedStoryUserIds(userIds: string[]) {
+  if (typeof window === 'undefined') return;
+
+  const nextIds = readViewedStoryUserIds();
+  const viewedAt = Date.now();
+  userIds.forEach(userId => {
+    nextIds[userId] = viewedAt;
+  });
+  window.localStorage.setItem(STORY_VIEW_STORAGE_KEY, JSON.stringify(nextIds));
+  window.dispatchEvent(new Event('noctvm:story-views-updated'));
+}
 
 interface FeedPageProps {
   onVenueClick: (venueName: string) => void;
@@ -35,6 +71,67 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   const [venueLogosMap, setVenueLogosMap] = useState<Record<string, string>>({});
   const initialPostResolverRef = useRef<string | null>(null);
 
+  const fetchLiveStories = useCallback(async () => {
+    const viewedStoryUserIds = readViewedStoryUserIds();
+
+    const { data } = await supabase
+      .from('stories')
+      .select('id, user_id, image_url, caption, venue_name, event_id, event_title, created_at, profiles(display_name, username, avatar_url)')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: true });
+
+    if (!data) {
+      setLiveStoryUsers([]);
+      return;
+    }
+
+    const groupedStories = new Map<string, StoryUser>();
+
+    data.forEach((row: any) => {
+      const profileRow = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+      const userId = row.user_id as string;
+      const existing = groupedStories.get(userId);
+
+      const story = {
+        id: row.id,
+        user_id: userId,
+        image_url: row.image_url,
+        caption: row.caption,
+        venue_name: row.venue_name,
+        event_id: row.event_id ?? null,
+        event_title: row.event_title ?? null,
+        created_at: row.created_at,
+      };
+
+      if (existing) {
+        existing.stories.push(story);
+        return;
+      }
+
+      groupedStories.set(userId, {
+        id: userId,
+        name: profileRow?.display_name || profileRow?.username || 'User',
+        avatar: (profileRow?.display_name || profileRow?.username || 'U')[0].toUpperCase(),
+        avatarUrl: profileRow?.avatar_url ?? null,
+        hasNew: false,
+        color: 'from-noctvm-violet via-purple-500 to-fuchsia-500',
+        stories: [story],
+      });
+    });
+
+    const storyUsers = Array.from(groupedStories.values()).map(storyUser => {
+      const latestStoryCreatedAt = storyUser.stories[storyUser.stories.length - 1]?.created_at ?? '';
+      const viewedAt = viewedStoryUserIds[storyUser.id] ?? 0;
+
+      return {
+        ...storyUser,
+        hasNew: new Date(latestStoryCreatedAt).getTime() > viewedAt,
+      };
+    });
+
+    setLiveStoryUsers(storyUsers);
+  }, []);
+
   useEffect(() => {
     const fetchLogos = async () => {
       const { data } = await supabase.from('venues').select('name, logo_url');
@@ -46,6 +143,19 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     };
     fetchLogos();
   }, []);
+
+  useEffect(() => {
+    void fetchLiveStories();
+  }, [fetchLiveStories]);
+
+  useEffect(() => {
+    const handleStoryViewsUpdated = () => {
+      void fetchLiveStories();
+    };
+
+    window.addEventListener('noctvm:story-views-updated', handleStoryViewsUpdated);
+    return () => window.removeEventListener('noctvm:story-views-updated', handleStoryViewsUpdated);
+  }, [fetchLiveStories]);
 
   useEffect(() => {
     if (!initialPostId) {
@@ -80,6 +190,23 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     }
     setShowMyStoryDropdown(v => !v);
   }, [showMyStoryDropdown]);
+
+  const handleOpenStories = useCallback((users: StoryUser[], index: number) => {
+    markViewedStoryUserIds(users.map(userStory => userStory.id));
+    setLiveStoryUsers(prev => prev.map(userStory => (
+      users.some(opened => opened.id === userStory.id)
+        ? { ...userStory, hasNew: false }
+        : userStory
+    )));
+    onOpenStories(users, index);
+  }, [onOpenStories]);
+
+  const storyRingByUserId = useMemo<Record<string, 'none' | 'story-unseen' | 'story-seen'>>(() => {
+    return liveStoryUsers.reduce<Record<string, 'none' | 'story-unseen' | 'story-seen'>>((map, storyUser) => {
+      map[storyUser.id] = storyUser.hasNew ? 'story-unseen' : 'story-seen';
+      return map;
+    }, {});
+  }, [liveStoryUsers]);
 
   const handleRepost = async (post: FeedPost) => {
     if (post.reposted) return;
@@ -186,7 +313,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
       <StoriesRow 
         user={profile}
         liveStoryUsers={liveStoryUsers}
-        onOpenStories={onOpenStories}
+        onOpenStories={handleOpenStories}
         onOpenCreateStory={onOpenCreateStory}
         showMyStoryDropdown={showMyStoryDropdown}
         setShowMyStoryDropdown={setShowMyStoryDropdown}
@@ -210,6 +337,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             onRepost={handleRepost}
             onDelete={handleDeletePost}
             venueLogosMap={venueLogosMap}
+            storyRingByUserId={storyRingByUserId}
             autoOpenPostId={initialPostId}
           />
         ))}

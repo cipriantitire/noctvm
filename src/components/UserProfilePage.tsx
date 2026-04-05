@@ -30,6 +30,7 @@ import {
 import { ArrowUpRight, Ban, Flag, MoreHorizontal, Music2, Share2, VolumeX } from 'lucide-react';
 import SavedEventsSheet from './SavedEventsSheet';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { Avatar } from '@/components/ui';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -37,6 +38,42 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui';
+
+const STORY_VIEW_STORAGE_KEY = 'noctvm:viewed-story-user-map';
+const LEGACY_STORY_VIEW_STORAGE_KEY = 'noctvm:viewed-story-user-ids';
+
+function readViewedStoryUserIds(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const raw = window.localStorage.getItem(STORY_VIEW_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORY_VIEW_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) {
+      const map = parsed.reduce<Record<string, number>>((accumulator, userId) => {
+        accumulator[userId] = Date.now();
+        return accumulator;
+      }, {});
+      window.localStorage.setItem(STORY_VIEW_STORAGE_KEY, JSON.stringify(map));
+      return map;
+    }
+
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function markViewedStoryUserIds(userIds: string[]) {
+  if (typeof window === 'undefined') return;
+
+  const nextIds = readViewedStoryUserIds();
+  const viewedAt = Date.now();
+  userIds.forEach(userId => {
+    nextIds[userId] = viewedAt;
+  });
+  window.localStorage.setItem(STORY_VIEW_STORAGE_KEY, JSON.stringify(nextIds));
+  window.dispatchEvent(new Event('noctvm:story-views-updated'));
+}
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -149,6 +186,7 @@ interface UserProfilePageProps {
   onOpenActivityLog?: () => void;
   onEditProfileClick: () => void;
   onOpenCreatePost?: () => void;
+  onOpenCreateStory?: () => void;
   onOpenStories?: (users: StoryUser[], index: number) => void;
   onEventClick: (event: NoctEvent) => void;
   onManageVenue?: (venueId: string) => void;
@@ -163,6 +201,7 @@ export default function UserProfilePage({
   onOpenActivityLog,
   onEditProfileClick,
   onOpenCreatePost,
+  onOpenCreateStory,
   onOpenStories,
   onEventClick,
   onManageVenue,
@@ -172,6 +211,7 @@ export default function UserProfilePage({
   const dragControls = useDragControls();
   const [isFollowingTarget, setIsFollowingTarget] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [hasViewedActiveStories, setHasViewedActiveStories] = useState(false);
 
   const handleToggleLike = useCallback(async (post: import('@/types/feed').FeedPost) => {
     if (!user) return;
@@ -509,14 +549,32 @@ export default function UserProfilePage({
 
   // ── Stories Logic ──────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    supabase
+  const refreshStoryMeta = useCallback(async () => {
+    const { data } = await supabase
       .from('stories')
-      .select('id', { count: 'exact', head: true })
+      .select('created_at')
       .eq('user_id', targetProfile.id)
       .gt('expires_at', new Date().toISOString())
-      .then(({ count }) => setHasActiveStories((count ?? 0) > 0));
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const hasStories = (data?.length ?? 0) > 0;
+    const latestStoryAt = hasStories ? new Date(data?.[0]?.created_at ?? 0).getTime() : 0;
+    const viewedAt = readViewedStoryUserIds()[targetProfile.id] ?? 0;
+    setHasActiveStories(hasStories);
+    setHasViewedActiveStories(hasStories && latestStoryAt <= viewedAt);
   }, [targetProfile.id]);
+
+  useEffect(() => {
+    void refreshStoryMeta();
+
+    const handleStoryRefresh = () => {
+      void refreshStoryMeta();
+    };
+
+    window.addEventListener('noctvm:story-views-updated', handleStoryRefresh);
+    return () => window.removeEventListener('noctvm:story-views-updated', handleStoryRefresh);
+  }, [refreshStoryMeta]);
 
   const fetchAndOpenMyStories = async () => {
     if (!onOpenStories) return;
@@ -527,6 +585,8 @@ export default function UserProfilePage({
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: true });
     if (!data || data.length === 0) return;
+    markViewedStoryUserIds([targetProfile.id]);
+    setHasViewedActiveStories(true);
     const storyInitials = (targetProfile.display_name || targetProfile.username || 'N')[0].toUpperCase();
     const storyUser: StoryUser = {
       id: targetProfile.id,
@@ -547,6 +607,21 @@ export default function UserProfilePage({
       })),
     };
     onOpenStories([storyUser], 0);
+  };
+
+  const storyRing = hasActiveStories
+    ? (hasViewedActiveStories ? 'story-seen' : 'story-unseen')
+    : 'none';
+
+  const handleAvatarClick = () => {
+    if (hasActiveStories) {
+      void fetchAndOpenMyStories();
+      return;
+    }
+
+    if (isOwner) {
+      onOpenCreateStory?.();
+    }
   };
 
   const openHighlight = async (hl: DbHighlight) => {
@@ -620,26 +695,17 @@ export default function UserProfilePage({
         <div className="flex items-start gap-5 mb-5">
           {/* Avatar */}
           <div className="relative flex-shrink-0">
-            <div
-              className={`w-32 h-32 rounded-full p-0.5 relative ${
-                hasActiveStories
-                  ? 'bg-gradient-to-tr from-noctvm-violet via-purple-500 to-pink-500 animate-spin-slow cursor-pointer shadow-[0_0_20px_rgba(139,92,246,0.5)]'
-                  : 'bg-white/10'
-              }`}
-              onClick={hasActiveStories ? fetchAndOpenMyStories : undefined}
-            >
-              <div className="w-full h-full rounded-full bg-noctvm-black p-0.5">
-                <div className="w-full h-full rounded-full overflow-hidden bg-noctvm-midnight relative border border-white/5">
-                  {targetProfile.avatar_url ? (
-                    <NextImage src={targetProfile.avatar_url} alt="" fill className="object-cover" unoptimized />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/10">
-                      <span className="text-4xl font-heading font-black text-white tracking-widest leading-none">{initials}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <Avatar
+              src={targetProfile.avatar_url}
+              alt={targetProfile.display_name || targetProfile.username || 'Profile'}
+              fallback={initials}
+              size="2xl"
+              ring={storyRing}
+              onClick={handleAvatarClick}
+              showAddStoryButton={isOwner}
+              onAddStoryClick={() => onOpenCreateStory?.()}
+              className={`w-32 h-32 ${hasActiveStories || isOwner ? 'cursor-pointer' : ''}`}
+            />
           </div>
 
           {/* Identity col: name + handle + location + bio */}

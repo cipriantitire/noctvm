@@ -18,6 +18,7 @@ import PostViewerModal from '../PostViewerModal';
 import EditPostModal from '../EditPostModal';
 import TaggedUsersModal from '../TaggedUsersModal';
 import LikesModal from '../LikesModal';
+import { Avatar } from '@/components/ui';
 
 interface FeedItemProps {
   post: FeedPost;
@@ -29,6 +30,7 @@ interface FeedItemProps {
   onRepost: (post: FeedPost) => void;
   onDelete: (id: string) => void;
   venueLogosMap: Record<string, string>;
+  storyRingByUserId?: Record<string, 'none' | 'story-unseen' | 'story-seen'>;
   onFollow?: (userId: string) => void;
   autoOpenPostId?: string | null;
 }
@@ -43,6 +45,7 @@ export function FeedItem({
   onRepost,
   onDelete,
   venueLogosMap,
+  storyRingByUserId,
   onFollow,
   autoOpenPostId = null,
 }: FeedItemProps) {
@@ -57,6 +60,7 @@ export function FeedItem({
   const openedFromUrlRef = useRef(false);
   const isFollowing = post.user.isFollowing || false;
   const isOwnPost = user?.id === post.userId;
+  const authorStoryRing = post.userId ? (storyRingByUserId?.[post.userId] ?? 'none') : 'none';
 
   // Fetch comment preview for this feed item
   useEffect(() => {
@@ -154,14 +158,17 @@ export function FeedItem({
         <div className="flex items-center gap-3 p-3">
           <Link
             href={authorLink}
-            className="w-9 h-9 rounded-full border border-noctvm-border flex items-center justify-center flex-shrink-0 overflow-hidden relative bg-noctvm-midnight hover:opacity-80 transition-opacity"
+            className="flex-shrink-0 hover:opacity-80 transition-opacity"
             title={`View ${post.user.name}'s profile`}
           >
-            {post.user.avatarUrl ? (
-              <Image src={post.user.avatarUrl} alt="" fill className="object-cover" unoptimized />
-            ) : (
-              <span className="text-xs font-bold text-white">{post.user.avatar}</span>
-            )}
+            <Avatar
+              src={post.user.avatarUrl}
+              alt={post.user.name}
+              fallback={post.user.avatar}
+              size="md"
+              ring={authorStoryRing}
+              className="w-9 h-9"
+            />
           </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
@@ -395,6 +402,7 @@ export function FeedItem({
           postId={post.id}
           postOwnerId={post.userId || ''}
           currentUserId={user?.id || null}
+          storyRingByUserId={storyRingByUserId}
           onClose={() => setShowMobileSheet(false)}
         />,
         document.body
@@ -432,6 +440,8 @@ export function FeedItem({
           profileInitial={post.user.avatar}
           profileBadge={post.user.badge}
           venueLogosMap={venueLogosMap}
+          storyRing={authorStoryRing}
+          storyRingByUserId={storyRingByUserId}
         />,
         document.body
       )}

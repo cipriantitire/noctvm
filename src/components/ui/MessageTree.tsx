@@ -5,11 +5,13 @@ import { Avatar } from '@/components/ui';
 
 export interface MessageTreeNode {
   id: string;
+  authorId?: string;
   authorName: string;
   authorHandle?: string;
   authorAvatar?: string;
   authorFallback?: string;
   authorBadge?: React.ReactNode;
+  avatarRing?: 'none' | 'story-unseen' | 'story-seen';
   content: string;
   timestampStr?: string;
   replies?: MessageTreeNode[];
@@ -79,6 +81,7 @@ const TreeGridItem = ({
             src={node.authorAvatar} 
             fallback={node.authorFallback || node.authorName[0]}
             size="sm"
+            ring={node.avatarRing || 'none'}
             className="w-[24px] h-[24px]"
           />
         </div>

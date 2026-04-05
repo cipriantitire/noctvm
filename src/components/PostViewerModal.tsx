@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
 import LikesModal from './LikesModal';
+import { Avatar } from '@/components/ui';
 
 import VerifiedBadge from './VerifiedBadge';
 import CommentSection from './Feed/CommentSection';
@@ -43,6 +44,8 @@ interface PostViewerModalProps {
   profileInitial?: string;
   profileBadge?: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
   venueLogosMap?: Record<string, string>;
+  storyRing?: 'none' | 'story-unseen' | 'story-seen';
+  storyRingByUserId?: Record<string, 'none' | 'story-unseen' | 'story-seen'>;
 }
 
 function timeAgo(dateStr: string): string {
@@ -64,6 +67,8 @@ export default function PostViewerModal({
   profileInitial,
   profileBadge = 'none',
   venueLogosMap = {},
+  storyRing = 'none',
+  storyRingByUserId,
 }: PostViewerModalProps) {
   const { user, profile } = useAuth();
   const [index, setIndex] = useState(initialIndex);
@@ -422,19 +427,14 @@ export default function PostViewerModal({
           
           {/* Header */}
           <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3 relative shrink-0 min-h-[60px] z-20">
-             <div className="w-[36px] h-[36px] min-w-[36px] min-h-[36px] max-w-[36px] max-h-[36px] rounded-full border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 bg-noctvm-midnight relative">
-                {profileAvatar ? (
-                  <Image
-                    src={profileAvatar}
-                    alt={profileName || 'Profile'}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <span className="text-xs font-bold text-white">{profileInitial || 'U'}</span>
-                )}
-             </div>
+             <Avatar
+               src={profileAvatar}
+               alt={profileName || 'Profile'}
+               fallback={profileInitial || 'U'}
+               size="md"
+               ring={storyRing}
+               className="w-9 h-9"
+             />
               <div className="flex-1 min-w-0">
                  <div className="flex items-center gap-1.5">
                     <button className="text-sm font-semibold text-white leading-tight truncate hover:text-noctvm-violet transition-colors">
@@ -486,6 +486,7 @@ export default function PostViewerModal({
                    currentUserId={user?.id || null}
                    isCollapsed={false}
                    hideRootInput={true}
+                     storyRingByUserId={storyRingByUserId}
                  />
                </div>
           </div>
