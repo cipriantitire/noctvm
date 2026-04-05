@@ -19,17 +19,53 @@ export default function ProfilePage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const cleanHandle = handle.startsWith('@') ? handle.slice(1) : handle;
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('username', cleanHandle)
-      .single()
-      .then(({ data }) => {
-        setTargetProfile(data as Profile | null);
-        setLoading(false);
-      });
-  }, [handle]);
+    let cancelled = false;
+
+    const cleanHandle = decodeURIComponent(handle).replace(/^@/, '').trim();
+
+    const loadProfile = async () => {
+      setLoading(true);
+
+      try {
+        const { data: usernameMatch } = await supabase
+          .from('profiles')
+          .select('*')
+          .ilike('username', cleanHandle)
+          .maybeSingle();
+
+        let resolvedProfile = usernameMatch as Profile | null;
+
+        if (!resolvedProfile) {
+          const { data: displayNameMatch } = await supabase
+            .from('profiles')
+            .select('*')
+            .ilike('display_name', cleanHandle)
+            .maybeSingle();
+
+          resolvedProfile = displayNameMatch as Profile | null;
+        }
+
+        if (cancelled) return;
+
+        setTargetProfile(resolvedProfile);
+
+        if (resolvedProfile?.username) {
+          const canonicalHandle = resolvedProfile.username.replace(/^@/, '');
+          if (canonicalHandle.toLowerCase() !== cleanHandle.toLowerCase()) {
+            router.replace(`/@${encodeURIComponent(canonicalHandle)}`);
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [handle, router]);
 
   if (loading) return <div className="min-h-screen bg-noctvm-black" />;
 
