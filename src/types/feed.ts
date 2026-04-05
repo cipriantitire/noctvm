@@ -25,7 +25,7 @@ export interface FeedPost {
   imageTheme: { gradient: string; scene: string };
   imageUrl: string | null;
   event?: {
-    id: string;
+    id: string | null;
     title: string;
     date: string | null;
     venue: string | null;

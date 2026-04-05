@@ -28,6 +28,8 @@ export function mapSupabasePost(row: any): FeedPost {
     'from-fuchsia-900 via-violet-950 to-black'
   ];
   const grad = gradients[Math.abs((row.id as string).charCodeAt(0)) % gradients.length];
+  const hasEventSnapshot = Boolean(row.event_id || row.event_title || row.event_date || row.event_venue);
+
   return {
     id: row.id as string,
     userId: row.user_id as string | null,
@@ -53,11 +55,11 @@ export function mapSupabasePost(row: any): FeedPost {
     saved: false,
     imageUrl: row.image_url,
     imageTheme: { gradient: grad, scene: '' },
-    event: row.event_id ? {
-      id: row.event_id,
-      title: row.event_title || 'Untitled Event',
-      date: row.event_date,
-      venue: row.event_venue
+    event: hasEventSnapshot ? {
+      id: (row.event_id as string | null) ?? null,
+      title: (row.event_title as string) || 'Untitled Event',
+      date: (row.event_date as string | null) ?? null,
+      venue: (row.event_venue as string | null) ?? null
     } : undefined
   };
 }

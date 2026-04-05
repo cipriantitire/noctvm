@@ -35,7 +35,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
   const [profileResults, setProfileResults] = useState<{ id: string; handle: string; name: string }[]>([]);
   
   const [eventSearch, setEventSearch] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<{ id: string; title: string; date: string; venue: string } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<{ id: string | null; title: string; date: string; venue: string } | null>(null);
   const [showEventSuggestions, setShowEventSuggestions] = useState(false);
   const [eventResults, setEventResults] = useState<{ id: string; title: string; date: string; venue: string }[]>([]);
   const [venueResults, setVenueResults] = useState<{ name: string; logo_url: string | null }[]>([]);
@@ -51,8 +51,13 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
         setSelectedVenue(data.venue_name || '');
         setTags(data.tags || []);
         setTaggedUsers(data.tagged_users || []);
-        if (data.event_id) {
-           setSelectedEvent({ id: data.event_id, title: data.event_title || '', date: data.event_date || '', venue: data.event_venue || '' });
+          if (data.event_id || data.event_title || data.event_date || data.event_venue) {
+            setSelectedEvent({
+             id: data.event_id || null,
+             title: data.event_title || '',
+             date: data.event_date || '',
+             venue: data.event_venue || ''
+            });
         }
       }
       setLoadingInitial(false);

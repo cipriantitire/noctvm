@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/supabase';
 import { getUserFollowState, getUserFollowerCount, getUserFollowedIds, setUserFollowState } from '@/lib/userFollow';
-import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon, MapPinIcon } from './icons';
+import { GridIcon, BookmarkIcon, TagIcon, UserIcon, RepostIcon, ShieldIcon, SettingsIcon, MapPinIcon, LayoutListIcon } from './icons';
 import type { StoryUser, RealStory } from './StoriesViewerModal';
 import CreateHighlightModal from './CreateHighlightModal';
 import EventCard from './EventCard';
@@ -27,9 +27,16 @@ import {
   GlobeIcon,
   CalendarIcon
 } from './icons';
-import { ArrowUpRight, Music2 } from 'lucide-react';
+import { ArrowUpRight, Ban, Flag, MoreHorizontal, Music2, Share2, VolumeX } from 'lucide-react';
 import SavedEventsSheet from './SavedEventsSheet';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -139,6 +146,7 @@ interface UserProfilePageProps {
   targetProfile: Profile;
   onOpenAuth: () => void;
   onSettingsClick: () => void;
+  onOpenActivityLog?: () => void;
   onEditProfileClick: () => void;
   onOpenCreatePost?: () => void;
   onOpenStories?: (users: StoryUser[], index: number) => void;
@@ -152,6 +160,7 @@ export default function UserProfilePage({
   targetProfile,
   onOpenAuth,
   onSettingsClick,
+  onOpenActivityLog,
   onEditProfileClick,
   onOpenCreatePost,
   onOpenStories,
@@ -255,14 +264,62 @@ export default function UserProfilePage({
   const handleShareProfile = async () => {
     const cleanHandle = targetProfile.username.replace(/^@/, '');
     const url = `${window.location.origin}/@${cleanHandle}`;
-    if (navigator.share) {
-      try {
+    try {
+      if (navigator.share) {
         await navigator.share({ title: 'NOCTVM', url });
-      } catch {}
-    } else {
-      await navigator.clipboard.writeText(url);
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
       setShareToast(true);
       setTimeout(() => setShareToast(false), 2000);
+    } catch {
+      // User cancelled or clipboard access was denied.
+    }
+  };
+
+  const handleReportProfile = () => {
+    const cleanHandle = targetProfile.username.replace(/^@/, '');
+    const url = `${window.location.origin}/@${cleanHandle}`;
+    const subject = encodeURIComponent(`Report profile: @${cleanHandle}`);
+    const body = encodeURIComponent(`Profile URL: ${url}\n\nReason:`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleBlockUser = async () => {
+    if (!user) {
+      onOpenAuth();
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('user_blocks')
+        .upsert({ blocker_id: user.id, blocked_id: targetProfile.id }, { onConflict: 'blocker_id,blocked_id' });
+
+      if (error) {
+        console.error('Error blocking user:', error);
+      }
+    } catch (error) {
+      console.error('Error blocking user:', error);
+    }
+  };
+
+  const handleMuteUser = async () => {
+    if (!user) {
+      onOpenAuth();
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('user_mutes')
+        .upsert({ muter_id: user.id, muted_id: targetProfile.id }, { onConflict: 'muter_id,muted_id' });
+
+      if (error) {
+        console.error('Error muting user:', error);
+      }
+    } catch (error) {
+      console.error('Error muting user:', error);
     }
   };
 
@@ -735,13 +792,58 @@ export default function UserProfilePage({
               {followLoading ? '...' : (isFollowingTarget ? 'Following' : 'Follow')}
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleShareProfile}
-            className="flex-1 py-3 rounded-2xl bg-noctvm-surface border border-noctvm-border text-noctvm-label font-black uppercase tracking-wider text-white hover:bg-white/[0.06] transition-all active:scale-95"
-          >
-            {shareToast ? 'Address Copied' : 'Share Profile'}
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Profile options"
+                title={shareToast ? 'Profile shared' : 'Profile options'}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 ${
+                  shareToast
+                    ? 'border-noctvm-violet/30 bg-noctvm-violet/10 text-white'
+                    : 'border-noctvm-border bg-noctvm-surface text-white hover:bg-white/[0.06]'
+                }`}
+              >
+                <MoreHorizontal className="h-5 w-5" />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" sideOffset={8} className="w-56">
+              {isOwner ? (
+                <>
+                  <DropdownMenuItem onClick={() => void handleShareProfile()}>
+                    <Share2 className="h-4 w-4" />
+                    <span>Share profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onOpenActivityLog?.()}>
+                    <LayoutListIcon className="h-4 w-4" />
+                    <span>Activity Log</span>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => void handleShareProfile()}>
+                    <Share2 className="h-4 w-4" />
+                    <span>Share</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleReportProfile} variant="destructive">
+                    <Flag className="h-4 w-4" />
+                    <span>Report</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => void handleBlockUser()} variant="destructive">
+                    <Ban className="h-4 w-4" />
+                    <span>Block</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => void handleMuteUser()} variant="destructive">
+                    <VolumeX className="h-4 w-4" />
+                    <span>Mute</span>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

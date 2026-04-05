@@ -27,7 +27,7 @@ function DropdownMenuContent({ className, sideOffset = 4, ...props }: React.Comp
           'frosted-glass',
           'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          'z-dropdown min-w-[8rem] overflow-hidden rounded-noctvm-md border-noctvm-border p-1 text-white shadow-md',
+          'z-[500] min-w-[8rem] overflow-hidden rounded-noctvm-md border-noctvm-border p-1 text-white shadow-md',
           className,
         )}
         {...props}
@@ -176,7 +176,7 @@ function DropdownMenuSubContent({ className, ...props }: React.ComponentProps<ty
         'frosted-glass',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-        'z-dropdown min-w-[8rem] overflow-hidden rounded-noctvm-md p-1 text-white shadow-lg',
+        'z-[500] min-w-[8rem] overflow-hidden rounded-noctvm-md p-1 text-white shadow-lg',
         className,
       )}
       {...props}

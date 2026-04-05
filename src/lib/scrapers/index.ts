@@ -748,27 +748,23 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   }
 
   // ── Stale-source garbage collection ──────────────────────────────────────────
-  // Defensive policy: do NOT wipe all future rows from a source if one scrape run
-  // returns fewer items (temporary parser drift or provider outage).
-  // Only remove rows that are either:
-  // 1) already in the past, OR
-  // 2) very old and untouched for a long grace period.
+  // Keep historical events searchable so people can still tag a weekend party
+  // after it has passed. Only prune rows that have been stale for a long time.
   // Exception: never delete SOLD OUT events — they have historical value.
   const activeSourcesWithEvents = results.filter(r => r.count > 0).map(r => r.source);
-  const staleGraceDays = 14;
-  const staleCutoffIso = new Date(Date.now() - staleGraceDays * 24 * 60 * 60 * 1000).toISOString();
+  const archiveRetentionDays = 365;
+  const archiveCutoffIso = new Date(Date.now() - archiveRetentionDays * 24 * 60 * 60 * 1000).toISOString();
   for (const src of activeSourcesWithEvents) {
     const { error: staleErr } = await supabase
       .from('events')
       .delete()
       .eq('source', src)
-      .lt('updated_at', runStart)
       .neq('price', 'SOLD OUT')
-      .or(`date.lt.${today},updated_at.lt.${staleCutoffIso}`);
+      .lt('updated_at', archiveCutoffIso);
     if (staleErr) console.warn(`[orchestrator] stale cleanup error for ${src}:`, staleErr.message);
   }
   const activeCount = activeSourcesWithEvents.length;
-  if (activeCount > 0) console.log(`[orchestrator] stale GC: cleaned events from ${activeCount} active source(s)`);
+  if (activeCount > 0) console.log(`[orchestrator] stale GC: retained recent history and pruned archived rows from ${activeCount} active source(s)`);
 
   const total = unique.length;
   const summary = { total, upserted, skipped_venues, results };

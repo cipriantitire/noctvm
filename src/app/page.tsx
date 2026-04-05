@@ -17,7 +17,7 @@ import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
 import UserProfilePage from '@/components/UserProfilePage';
 import SearchBar from '@/components/SearchBar';
-import { SettingsPage } from '@/components/ProfilePages';
+import { ActivityLogPage, SettingsPage } from '@/components/ProfilePages';
 import ProfileSidebar from '@/components/ProfileSidebar';
 import AuthModal from '@/components/AuthModal';
 import EventModal from '@/components/EventModal';
@@ -66,7 +66,8 @@ type ProfileView =
   | 'claim-location'
   | 'app-settings'
   | 'edit-profile'
-  | 'inventory';
+  | 'inventory'
+  | 'activity-log';
 
 type UrlState = {
   tab: TabType;
@@ -513,6 +514,7 @@ function AppShell() {
     'add-location':    <SettingsPage onBack={() => setProfileView('profile')} initialView="add_location" />,
     'claim-location':  <SettingsPage onBack={() => setProfileView('profile')} initialView="claim_location" />,
     'app-settings':    <SettingsPage onBack={() => setProfileView('profile')} initialView="notifications" />,
+    'activity-log':    <ActivityLogPage onBack={() => setProfileView('profile')} />,
   };
 
   const isProfileSubPage = [
@@ -522,7 +524,8 @@ function AppShell() {
     'inventory',
     'add-location',
     'claim-location',
-    'app-settings'
+    'app-settings',
+    'activity-log'
   ].includes(profileView);
   const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage && !!user;
 
@@ -884,6 +887,7 @@ function AppShell() {
                     targetProfile={publicProfile}
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
+                    onOpenActivityLog={() => setProfileView('activity-log')}
                     onEditProfileClick={() => {
                       setActiveTab('profile');
                       setProfileView('edit-profile' as ProfileView);
@@ -901,6 +905,7 @@ function AppShell() {
                     targetProfile={profile}
                     onOpenAuth={() => setShowAuthModal(true)}
                     onSettingsClick={handleSettingsClick}
+                    onOpenActivityLog={() => setProfileView('activity-log')}
                     onEditProfileClick={() => {
                       setActiveTab('profile');
                       setProfileView('edit-profile' as ProfileView);
