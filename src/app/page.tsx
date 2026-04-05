@@ -599,7 +599,9 @@ function AppShell() {
     'privacy',
     'activity-log'
   ].includes(profileView);
-  const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage && !!user;
+  const isOwnPublicProfile = !!publicProfile && !!user && publicProfile.id === user.id;
+  const canAccessProfileSubPages = !!user && (!publicProfile || isOwnPublicProfile);
+  const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage && canAccessProfileSubPages;
 
   useEffect(() => {
     if (!user && activeTab === 'profile' && profileView !== 'profile') {
@@ -966,7 +968,7 @@ function AppShell() {
                   </div>
                 )}
 
-                {publicProfile && (
+                {publicProfile && profileView === 'profile' && (
                   <UserProfilePage
                     targetProfile={publicProfile}
                     onOpenAuth={() => setShowAuthModal(true)}
@@ -1002,7 +1004,7 @@ function AppShell() {
                 )}
 
                 {/* Profile Sub-pages (including Settings Hub) */}
-                {!publicProfile && user && isProfileSubPage && profileSubContent[profileView]}
+                {canAccessProfileSubPages && isProfileSubPage && profileSubContent[profileView]}
 
                 {!publicProfile && !user && renderAuthGate('profile')}
 
@@ -1027,7 +1029,7 @@ function AppShell() {
           />
         )}
 
-        {activeTab === 'profile' && profileView === 'profile' && user && !publicProfile && (
+        {activeTab === 'profile' && profileView === 'profile' && user && canAccessProfileSubPages && (
           <ProfileSidebar 
             userId={user.id} 
             activeCity={activeCity}
