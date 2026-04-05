@@ -14,6 +14,7 @@ export interface AvatarProps {
   onClick?: () => void;
   showAddStoryButton?: boolean;
   onAddStoryClick?: () => void;
+  addStoryButtonSize?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -34,9 +35,28 @@ export default function Avatar({
   onClick,
   showAddStoryButton = false,
   onAddStoryClick,
+  addStoryButtonSize,
 }: AvatarProps) {
   const baseSizeClass = sizeClasses[size];
-  const addButtonSizeClass = size === 'sm' ? 'w-4 h-4' : size === 'md' ? 'w-5 h-5' : 'w-6 h-6';
+  const addButtonSizeClass = addStoryButtonSize === 'xl'
+    ? 'w-8 h-8'
+    : addStoryButtonSize === 'lg'
+      ? 'w-6 h-6'
+      : addStoryButtonSize === 'md'
+        ? 'w-5 h-5'
+        : addStoryButtonSize === 'sm'
+          ? 'w-4 h-4'
+          : size === 'sm'
+            ? 'w-4 h-4'
+            : size === 'md'
+              ? 'w-5 h-5'
+              : 'w-6 h-6';
+  const addButtonOffsetClass = addStoryButtonSize === 'xl' ? '-bottom-1 -right-1' : '-bottom-0.5 -right-0.5';
+  const addButtonIconClass = addStoryButtonSize === 'xl'
+    ? 'h-4 w-4'
+    : addStoryButtonSize === 'lg'
+      ? 'h-3 w-3'
+      : 'h-2.5 w-2.5';
 
   // Render the inner circle (image or fallback)
   const innerContent = src ? (
@@ -74,9 +94,9 @@ export default function Avatar({
             event.stopPropagation();
             onAddStoryClick?.();
           }}
-          className={`absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded-full border-2 border-noctvm-black bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95 transition-transform ${addButtonSizeClass}`}
+          className={`absolute ${addButtonOffsetClass} flex items-center justify-center rounded-full border-2 border-noctvm-black bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95 transition-transform ${addButtonSizeClass}`}
         >
-          <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+          <svg className={addButtonIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </button>

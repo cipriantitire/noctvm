@@ -704,6 +704,7 @@ export default function UserProfilePage({
               onClick={handleAvatarClick}
               showAddStoryButton={isOwner}
               onAddStoryClick={() => onOpenCreateStory?.()}
+              addStoryButtonSize="xl"
               className={`w-32 h-32 ${hasActiveStories || isOwner ? 'cursor-pointer' : ''}`}
             />
           </div>

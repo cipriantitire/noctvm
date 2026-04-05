@@ -707,7 +707,7 @@ function AppShell() {
       <CreatePostModal isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} onPostCreated={() => {}} onOpenAuth={() => setShowAuthModal(true)} activeCity={activeCity} />
 
       {/* ── Create Story Modal ──────────────────────────────────── */}
-      <CreateStoryModal isOpen={showCreateStory} onClose={() => setShowCreateStory(false)} onOpenAuth={() => setShowAuthModal(true)} activeCity={activeCity} />
+      <CreateStoryModal isOpen={showCreateStory} onClose={() => setShowCreateStory(false)} onOpenAuth={() => setShowAuthModal(true)} />
 
       {/* ── Stories Viewer Modal ──────────────────────────────────── */}
       <StoriesViewerModal
