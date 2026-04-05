@@ -297,6 +297,7 @@ export default function Home() {
     'claim-location',
     'app-settings'
   ].includes(profileView);
+  const isProfileSettingsView = activeTab === 'profile' && isProfileSubPage;
 
   return (
     <>
@@ -351,8 +352,7 @@ export default function Home() {
       {/* ── Venue Overlay ───────────────────────────────────────── */}
       {(selectedVenue || venueClosing) && (
         <div 
-          className="fixed inset-0 flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8"
-          style={{ zIndex: venueZIndex }}
+          className={`fixed inset-0 flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8 ${venueZIndex >= eventZIndex ? 'z-[210]' : 'z-[200]'}`}
         >
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
@@ -382,7 +382,7 @@ export default function Home() {
           activeCity={activeCity}
         />
 
-        <main ref={mainRef} className="flex-1 min-h-screen overflow-y-auto">
+        <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {/* Mobile header */}
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
             <div className="grid grid-cols-3 items-center">
@@ -447,7 +447,7 @@ export default function Home() {
             </div>
           </header>
 
-          <div className="w-full h-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6">
+          <div className={`w-full h-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6 ${isProfileSettingsView ? 'overflow-hidden' : ''}`}>
 
             {/* ── Events Tab ──────────────────────────────────── */}
             {activeTab === 'events' && (

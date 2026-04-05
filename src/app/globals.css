@@ -37,6 +37,32 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   font-family: var(--font-freshid), sans-serif;
 }
 
+.heading-syne {
+  font-family: var(--font-freshid), sans-serif;
+}
+
+.figma-lab-shell {
+  --figma-violet-rgb: 124 58 237;
+  border-color: rgb(var(--figma-violet-rgb) / 0.3);
+  box-shadow: 0 0 40px rgb(var(--figma-violet-rgb) / 0.05);
+  background-color: rgb(5 5 5 / 1);
+}
+
+.figma-lab-surface {
+  border-color: rgb(var(--figma-violet-rgb) / 0.2);
+  background-color: rgb(var(--figma-violet-rgb) / 0.05);
+}
+
+.figma-lab-button {
+  background-color: rgb(var(--figma-violet-rgb) / 0.2);
+  color: rgb(var(--figma-violet-rgb));
+  border: 1px solid rgb(var(--figma-violet-rgb) / 0.4);
+}
+
+.figma-lab-preview-text {
+  color: rgb(var(--figma-violet-rgb));
+}
+
 /* ========================= */
 /* SCROLLBAR                 */
 /* ========================= */

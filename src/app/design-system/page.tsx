@@ -14,7 +14,7 @@ export default function DesignSystemIntroPage() {
     <div className="space-y-8 animate-fade-in max-w-4xl">
       <div className="p-8 rounded-xl bg-gradient-to-br from-noctvm-violet/20 to-black border border-noctvm-violet/20 shadow-[0_0_50px_rgba(124,58,237,0.1)] relative overflow-hidden">
         <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
-        <h1 className="text-5xl font-black text-white mb-4 heading-syne tracking-widest uppercase relative z-10">
+        <h1 className="text-5xl font-black text-white mb-4 font-heading tracking-widest uppercase relative z-10">
           Component Library
         </h1>
         <p className="text-lg text-noctvm-silver leading-relaxed relative z-10 font-medium">

@@ -483,7 +483,7 @@ export default function UserProfilePage({
   return (
     <Fragment>
     <motion.div
-      className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-sans"
+      className="w-full lg:max-w-2xl lg:mx-auto tab-content animate-fade-in font-body"
       onPanEnd={(_, info) => {
         if (isOwner && (info.offset.x < -100 || info.velocity.x < -500)) {
           setIsSavedEventsOpen(true);
@@ -520,7 +520,7 @@ export default function UserProfilePage({
                     <NextImage src={targetProfile.avatar_url} alt="" fill className="object-cover" unoptimized />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/10">
-                      <span className="text-4xl font-sans font-black text-white tracking-widest leading-none">{initials}</span>
+                      <span className="text-4xl font-heading font-black text-white tracking-widest leading-none">{initials}</span>
                     </div>
                   )}
                 </div>
@@ -532,7 +532,7 @@ export default function UserProfilePage({
           <div className="flex-1 min-w-0 flex items-start justify-between gap-3 pt-1">
             <div className="min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-2xl sm:text-3xl font-sans font-black text-white tracking-tight leading-none">
+                <h2 className="text-2xl sm:text-3xl font-heading font-black text-white tracking-tight leading-none">
                   {targetProfile.display_name || 'Night Owl'}
                 </h2>
                 {targetProfile.badge && targetProfile.badge !== 'none' && (
@@ -581,24 +581,24 @@ export default function UserProfilePage({
           <div className="order-1 flex-1 basis-[calc(50%-4px)] lg:order-1 lg:flex-none lg:w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-emerald/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-emerald/5 group-hover:bg-noctvm-emerald/10 transition-colors" />
             <span className="text-[20px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
-            <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Events</span>
+            <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body relative">Events</span>
           </div>
 
           {/* Grouped card: Posts / Followers / Following */}
           <div className="order-3 basis-full lg:order-2 lg:flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center justify-around">
             <div className="flex flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
-              <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Posts</span>
+              <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Posts</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
             <div className="flex flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
-              <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Followers</span>
+              <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Followers</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
             <div className="flex flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
-              <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body">Following</span>
+              <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Following</span>
             </div>
           </div>
 
@@ -606,7 +606,7 @@ export default function UserProfilePage({
           <div className="order-2 flex-1 basis-[calc(50%-4px)] lg:order-3 lg:flex-none lg:w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-violet/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-violet/5 group-hover:bg-noctvm-violet/10 transition-colors" />
             <span className="text-[20px] leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
-            <span className="text-[8px] uppercase tracking-widest text-[#8A8A8A] font-semibold font-body relative">Venues</span>
+            <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body relative">Venues</span>
           </div>
         </div>
 

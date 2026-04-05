@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Badge,
   Button,
@@ -23,14 +23,20 @@ export default function DesignSystemContent() {
 
   // Figma Lab State
   const [testVioletRgb, setTestVioletRgb] = useState("124 58 237"); // default noctvm-violet-rgb
+  const figmaLabRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!figmaLabRef.current) return;
+    figmaLabRef.current.style.setProperty("--figma-violet-rgb", testVioletRgb);
+  }, [testVioletRgb]);
   
   const typeScale = [
-    { name: "Hero", size: "48px", weight: "800", font: "Syne", className: "font-heading text-5xl font-extrabold" },
-    { name: "H1", size: "36px", weight: "800", font: "Syne", className: "font-heading text-4xl font-extrabold" },
-    { name: "H2", size: "24px", weight: "700", font: "Syne", className: "font-heading text-2xl font-bold" },
-    { name: "H3", size: "18px", weight: "600", font: "Syne", className: "font-heading text-lg font-semibold" },
-    { name: "Body L", size: "16px", weight: "400", font: "DM Sans", className: "font-body text-base" },
-    { name: "Body M", size: "14px", weight: "400", font: "DM Sans", className: "font-body text-sm" },
+    { name: "Hero", size: "48px", weight: "800", font: "FreshID", className: "font-heading text-5xl font-extrabold" },
+    { name: "H1", size: "36px", weight: "800", font: "FreshID", className: "font-heading text-4xl font-extrabold" },
+    { name: "H2", size: "24px", weight: "700", font: "FreshID", className: "font-heading text-2xl font-bold" },
+    { name: "H3", size: "18px", weight: "600", font: "FreshID", className: "font-heading text-lg font-semibold" },
+    { name: "Body L", size: "16px", weight: "400", font: "Satoshi", className: "font-body text-base" },
+    { name: "Body M", size: "14px", weight: "400", font: "Satoshi", className: "font-body text-sm" },
     { name: "Label", size: "12px", weight: "400", font: "JetBrains Mono", className: "font-mono text-xs" },
     { name: "Tag", size: "10px", weight: "400", font: "JetBrains Mono", className: "font-mono text-noctvm-caption" },
     { name: "Micro", size: "9px", weight: "300", font: "JetBrains Mono", className: "font-mono text-noctvm-micro font-light" }
@@ -117,13 +123,9 @@ export default function DesignSystemContent() {
         <h2 className="font-heading text-xl font-semibold border-b border-noctvm-border pb-3 text-noctvm-violet">
           ✦ Figma Blend Lab
         </h2>
-        <div 
-          className="p-8 rounded-2xl border transition-colors duration-500" 
-          style={{ 
-            borderColor: `rgba(${testVioletRgb}, 0.3)`,
-            boxShadow: `0 0 40px rgba(${testVioletRgb}, 0.05)`,
-            backgroundColor: 'rgba(5, 5, 5, 1)' 
-          }}
+        <div
+          ref={figmaLabRef}
+          className="figma-lab-shell p-8 rounded-2xl border transition-colors duration-500"
         >
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-1 space-y-4">
@@ -143,29 +145,12 @@ export default function DesignSystemContent() {
               </p>
             </div>
             
-            <div 
-              className="flex-1 p-6 rounded-xl border flex flex-col justify-center items-center gap-4 transition-all"
-              style={{
-                borderColor: `rgba(${testVioletRgb}, 0.2)`,
-                backgroundColor: `rgba(${testVioletRgb}, 0.05)`
-              }}
-            >
-              <button 
-                className="px-6 py-2 rounded-lg font-bold text-sm transition-all"
-                style={{
-                  backgroundColor: `rgba(${testVioletRgb}, 0.2)`,
-                  color: `rgb(${testVioletRgb})`,
-                  borderColor: `rgba(${testVioletRgb}, 0.4)`,
-                  borderWidth: '1px'
-                }}
-              >
+            <div className="figma-lab-surface flex-1 p-6 rounded-xl border flex flex-col justify-center items-center gap-4 transition-all">
+              <button className="figma-lab-button px-6 py-2 rounded-lg font-bold text-sm transition-all">
                 Simulated Primary
               </button>
               
-              <div 
-                className="text-noctvm-caption font-mono tracking-widest uppercase transition-colors"
-                style={{ color: `rgb(${testVioletRgb})` }}
-              >
+              <div className="figma-lab-preview-text text-noctvm-caption font-mono tracking-widest uppercase transition-colors">
                 Injected Accent Preview
               </div>
             </div>

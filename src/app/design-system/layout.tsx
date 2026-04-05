@@ -100,7 +100,7 @@ export default function DesignSystemLayout({ children }: { children: React.React
       {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-white/5 bg-noctvm-surface/50 h-screen sticky top-0 overflow-y-auto flex flex-col hidden md:flex">
         <div className="p-6 border-b border-white/5">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-noctvm-silver bg-clip-text text-transparent heading-syne uppercase tracking-wider">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-noctvm-silver bg-clip-text text-transparent font-heading uppercase tracking-wider">
             NOCTVM
           </h1>
           <p className="text-xs text-noctvm-silver/50 font-mono mt-1">Component Library System</p>

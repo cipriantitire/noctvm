@@ -27,7 +27,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-noctvm-black overflow-hidden font-sans text-white selection:bg-noctvm-violet/30 selection:text-white">
+    <div className="flex flex-col lg:flex-row h-screen bg-noctvm-black overflow-hidden font-body text-white selection:bg-noctvm-violet/30 selection:text-white">
       {/* Dynamic Background Noise/Gradient */}
       <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-noctvm-violet/20 blur-[120px] rounded-full animate-pulse-slow"></div>

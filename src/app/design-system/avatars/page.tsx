@@ -17,7 +17,7 @@ export default function AvatarsShowcasePage() {
   return (
     <div className="space-y-8 animate-fade-in pb-24">
       <div className="mb-6">
-        <h1 className="text-4xl font-bold text-white mb-2 heading-syne tracking-wider uppercase">Avatars</h1>
+        <h1 className="text-4xl font-bold text-white mb-2 font-heading tracking-wider uppercase">Avatars</h1>
         <p className="text-noctvm-silver/70">
           The core atomic component for representing users, venues, or brands. Supports story rings, live states, and text fallbacks.
         </p>

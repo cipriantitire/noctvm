@@ -62,7 +62,7 @@ function MobileView() {
       {/* Top */}
       <div className="flex items-center gap-2 px-4 pt-12 pb-3">
         <CogIcon className="w-5 h-5 text-noctvm-violet" />
-        <span className="text-white font-bold text-lg font-[Syne]">Settings</span>
+        <span className="text-white font-bold text-lg font-heading">Settings</span>
       </div>
 
       {/* Profile preview */}
@@ -143,7 +143,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-[Syne]">Platform</p>
+          <p className="text-white font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -164,7 +164,7 @@ function DesktopView() {
       {/* Settings nav */}
       <div className="w-[280px] border-r border-white/5 bg-[#070707] flex flex-col pt-8 shrink-0">
         <div className="px-6 mb-6">
-          <h1 className="text-xl font-black text-white font-[Syne]">Settings</h1>
+          <h1 className="text-xl font-black text-white font-heading">Settings</h1>
         </div>
         {/* Profile preview */}
         <div className="px-4 mb-6">
@@ -203,7 +203,7 @@ function DesktopView() {
       <main className="flex-1 p-10 overflow-y-auto">
         {activeSection === 'Account' && (
           <div className="max-w-xl space-y-6">
-            <h2 className="text-xl font-bold text-white font-[Syne]">Account Settings</h2>
+            <h2 className="text-xl font-bold text-white font-heading">Account Settings</h2>
             <GlassPanel variant="subtle" className="rounded-2xl p-6 space-y-4">
               <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest">Profile</p>
               <Field label="Display Name">
@@ -235,7 +235,7 @@ function DesktopView() {
         )}
         {activeSection === 'Notifications' && (
           <div className="max-w-xl space-y-6">
-            <h2 className="text-xl font-bold text-white font-[Syne]">Notifications</h2>
+            <h2 className="text-xl font-bold text-white font-heading">Notifications</h2>
             <GlassPanel variant="subtle" className="rounded-2xl p-6 space-y-0">
               {TOGGLE_SETTINGS.map(s => (
                 <div key={s.label} className="flex items-center justify-between py-4 border-b border-white/5 last:border-0">
@@ -251,7 +251,7 @@ function DesktopView() {
         )}
         {(activeSection === 'Privacy' || activeSection === 'App') && (
           <div className="max-w-xl">
-            <h2 className="text-xl font-bold text-white font-[Syne] mb-6">{activeSection}</h2>
+            <h2 className="text-xl font-bold text-white font-heading mb-6">{activeSection}</h2>
             <GlassPanel variant="subtle" className="rounded-2xl p-6">
               {SETTINGS_SECTIONS.find(s => s.title === activeSection)?.items.map(item => (
                 <SettingRow key={item} label={item} />

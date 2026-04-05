@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect, useRef } from 'react';
 
 // ── Social link URL helpers ──────────────────────────────────────────────────
 
@@ -36,12 +36,43 @@ function usernameFromUrl(platform: string, url: string): string {
   }
 }
 
+const settingsScrollPositions = new Map<string, number>();
+
+function useSettingsScrollMemory(storageKey: string) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+    element.scrollTop = settingsScrollPositions.get(storageKey) ?? 0;
+  }, [storageKey]);
+
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+
+    const handleScroll = () => {
+      settingsScrollPositions.set(storageKey, element.scrollTop);
+    };
+
+    handleScroll();
+    element.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      settingsScrollPositions.set(storageKey, element.scrollTop);
+      element.removeEventListener('scroll', handleScroll);
+    };
+  }, [storageKey]);
+
+  return scrollRef;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 import NextImage from 'next/image';
-import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useSettings } from '@/hooks/useSettings';
+import { GlassPanel } from '@/components/ui';
 import { GENRE_FILTERS } from './FilterBar';
 import { 
   BellIcon, 
@@ -63,33 +94,108 @@ import {
   GridIcon
 } from '@/components/icons';
 
+type SettingsMenuItem = {
+  id: string;
+  label: string;
+  desc: string;
+  icon: JSX.Element;
+};
+
+function SettingsGroup({
+  title,
+  description,
+  items,
+  onSelect,
+}: {
+  title: string;
+  description: string;
+  items: SettingsMenuItem[];
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <GlassPanel variant="subtle" className="overflow-hidden rounded-[24px]">
+      <div className="px-4 pt-4 pb-2.5">
+        <p className="text-noctvm-caption font-mono text-[9px] uppercase tracking-[0.28em] text-noctvm-silver/45">
+          {title}
+        </p>
+        <p className="mt-1 text-xs text-noctvm-silver/60">{description}</p>
+      </div>
+
+      <div className="divide-y divide-white/5">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onSelect(item.id)}
+            className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/5 bg-noctvm-midnight/80 text-noctvm-violet transition-transform group-hover:scale-[1.03]">
+              {item.icon}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-heading text-sm font-semibold text-white">{item.label}</p>
+              <p className="mt-0.5 text-xs leading-snug text-noctvm-silver/70">{item.desc}</p>
+            </div>
+            <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-noctvm-silver/40 transition-all group-hover:translate-x-1 group-hover:text-white" />
+          </button>
+        ))}
+      </div>
+    </GlassPanel>
+  );
+}
+
 // ==================== SHARED COMPONENTS ====================
 
 function BackButton({ onBack, label }: { onBack: () => void, label: string }) {
   return (
     <button
       onClick={onBack}
-      className="flex items-center gap-2 text-noctvm-silver hover:text-white transition-colors mb-6 group"
+      className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/5 bg-white/[0.03] px-2.5 py-1.5 text-noctvm-silver transition-all hover:border-white/10 hover:bg-white/[0.05] hover:text-white"
     >
-      <div className="w-8 h-8 rounded-lg bg-noctvm-midnight border border-noctvm-border flex items-center justify-center group-hover:bg-noctvm-surface transition-colors">
-        <svg className="w-4 h-4 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/5 bg-noctvm-midnight/70 transition-colors group-hover:border-noctvm-violet/20 group-hover:bg-noctvm-violet/10">
+        <svg className="h-3.5 w-3.5 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </div>
-      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+      <span className="text-[9px] font-mono font-bold uppercase tracking-[0.24em]">{label}</span>
     </button>
+  );
+}
+
+function SettingsPageHeader({
+  title,
+  subtitle,
+  onBack,
+  backLabel,
+  titleClassName = 'font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white leading-none',
+  subtitleClassName = 'text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45',
+}: {
+  title: string;
+  subtitle?: string;
+  onBack: () => void;
+  backLabel: string;
+  titleClassName?: string;
+  subtitleClassName?: string;
+}) {
+  return (
+    <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5">
+      <div className="min-w-0 space-y-1">
+        <h2 className={`${titleClassName} min-w-0`}>{title}</h2>
+        {subtitle && <p className={subtitleClassName}>{subtitle}</p>}
+      </div>
+      <BackButton onBack={onBack} label={backLabel} />
+    </div>
   );
 }
 
 function FormInput({ label, value, onChange, placeholder = '', type = 'text', title }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string, type?: string, title?: string }) {
   return (
     <div className="space-y-1.5 text-left">
-      <label className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
+      <label className="ml-1 text-noctvm-caption font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-noctvm-silver/50">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         title={title || label}
-        className="w-full px-4 py-2.5 rounded-xl bg-noctvm-midnight border border-noctvm-border focus:border-noctvm-violet/40 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/30"
+        className="w-full rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/30 focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
       />
     </div>
   );
@@ -98,13 +204,13 @@ function FormInput({ label, value, onChange, placeholder = '', type = 'text', ti
 function FormTextarea({ label, value, onChange, rows = 3 }: { label: string, value: string, onChange: (v: string) => void, rows?: number }) {
   return (
     <div className="space-y-1.5 text-left">
-      <label className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
+      <label className="ml-1 text-noctvm-caption font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-noctvm-silver/50">{label}</label>
       <textarea
         rows={rows}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         title={label}
-        className="w-full px-4 py-2.5 rounded-xl bg-noctvm-midnight border border-noctvm-border focus:border-noctvm-violet/40 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/30 resize-none"
+        className="w-full resize-none rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/30 focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
       />
     </div>
   );
@@ -113,12 +219,12 @@ function FormTextarea({ label, value, onChange, rows = 3 }: { label: string, val
 function FormSelect({ label, value, onChange, options, title }: { label: string, value: string, onChange: (v: string) => void, options: { value: string, label: string }[], title?: string }) {
   return (
     <div className="space-y-1.5 flex-1 text-left">
-      <label className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-wider ml-1">{label}</label>
+      <label className="ml-1 text-noctvm-caption font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-noctvm-silver/50">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         title={title || label}
-        className="w-full px-4 py-2.5 rounded-xl bg-noctvm-midnight border border-noctvm-border focus:border-noctvm-violet/40 transition-all outline-none text-sm text-white appearance-none cursor-pointer"
+        className="w-full cursor-pointer appearance-none rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-white outline-none transition-all focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -133,14 +239,14 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
     <button
       onClick={onToggle}
       title={label}
-      className="w-full flex items-center justify-between p-4 rounded-xl bg-noctvm-midnight/40 border border-noctvm-border hover:border-noctvm-violet/20 transition-all text-left"
+      className="group flex w-full items-center justify-between rounded-[24px] border border-white/5 bg-noctvm-surface/25 px-4 py-4 text-left transition-all hover:border-white/10 hover:bg-white/[0.05]"
     >
-      <div>
-        <p className="text-sm font-bold text-white">{label}</p>
-        {desc && <p className="text-noctvm-label text-noctvm-silver mt-0.5">{desc}</p>}
+      <div className="min-w-0 pr-4">
+        <p className="text-sm font-semibold text-white">{label}</p>
+        {desc && <p className="mt-1 text-noctvm-label leading-snug text-noctvm-silver">{desc}</p>}
       </div>
-      <div className={`w-10 h-5 rounded-full transition-all relative ${enabled ? 'bg-noctvm-violet' : 'bg-noctvm-surface border border-noctvm-border'}`}>
-        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${enabled ? 'left-6' : 'left-1'}`} />
+      <div className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors ${enabled ? 'border-noctvm-violet/30 bg-noctvm-violet/20' : 'border-white/5 bg-white/[0.03]'}`}>
+        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-lg transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
       </div>
     </button>
   );
@@ -149,10 +255,10 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
 // ==================== MAIN SETTINGS HUB ====================
 
 export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => void, initialView?: string }) {
-  const { signOut, isOwner, isAdmin } = useAuth();
+  const { signOut } = useAuth();
   const [view, setView] = useState(initialView);
-  
-  const menuItems = [
+  const scrollRef = useSettingsScrollMemory('settings-hub');
+  const menuItems: SettingsMenuItem[] = [
     { id: 'edit',          label: 'Edit Profile',    desc: 'Avatar, bio, music, socials', icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
     { id: 'account',       label: 'Account',         desc: 'Email, password, security',   icon: <UserIcon className="w-5 h-5 text-noctvm-silver" /> },
     { id: 'privacy',       label: 'Privacy',         desc: 'Visibility & interactions',   icon: <ShieldIcon className="w-5 h-5 text-noctvm-emerald" /> },
@@ -163,6 +269,30 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
     { id: 'activity',      label: 'Activity Log',    desc: 'Audit trail of events',       icon: <LayoutListIcon className="w-5 h-5 text-noctvm-violet" /> },
     { id: 'add_location',  label: 'Add Location',    desc: 'List a new venue or club',   icon: <MapPinIcon className="w-5 h-5 text-noctvm-silver" /> },
     { id: 'claim_location',label: 'Claim Location',  desc: 'Verify venue ownership',      icon: <ShieldIcon className="w-5 h-5 text-noctvm-silver" /> },
+  ];
+
+  const getItem = (id: string) => menuItems.find((item) => item.id === id)!;
+  const menuGroups = [
+    {
+      title: 'Profile',
+      description: 'Identity and account access',
+      items: [getItem('edit'), getItem('account')],
+    },
+    {
+      title: 'Preferences',
+      description: 'Visibility, alerts, and appearance',
+      items: [getItem('privacy'), getItem('notifications'), getItem('appearance')],
+    },
+    {
+      title: 'Safety',
+      description: 'Boundaries and activity history',
+      items: [getItem('blocked_muted'), getItem('activity')],
+    },
+    {
+      title: 'Tools',
+      description: 'Inventory and venue workflows',
+      items: [getItem('inventory'), getItem('add_location'), getItem('claim_location')],
+    },
   ];
 
   if (view === 'edit')           return <EditProfilePage onBack={() => setView('hub')} />;
@@ -177,55 +307,49 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
   if (view === 'claim_location') return <ClaimLocationPage onBack={() => setView('hub')} />;
 
   return (
-    <div className="max-w-lg mx-auto pb-24">
-      <BackButton onBack={onBack} label="Back to Profile" />
-      <h2 className="font-heading text-xl font-bold text-white mb-6">Settings</h2>
-
-      <div className="space-y-2">
-        {menuItems.map(item => (
-          <button
-            key={item.id}
-            onClick={() => setView(item.id as any)}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-[40px] border border-white/5 hover:bg-white/[0.08] hover:border-noctvm-violet/30 transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.2,0.64,1)] active:scale-[0.98] text-left group relative overflow-hidden"
-          >
-            {/* Specular Highlight */}
-            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-            
-            <div className="w-10 h-10 rounded-xl bg-noctvm-surface border border-noctvm-border flex items-center justify-center group-hover:scale-105 transition-transform text-noctvm-violet shadow-lg shadow-noctvm-violet/10">
-              {item.icon}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-bold text-white leading-tight">{item.label}</p>
-              <p className="text-noctvm-label text-noctvm-silver mt-0.5">{item.desc}</p>
-            </div>
-            <ChevronRightIcon className="w-4 h-4 text-noctvm-silver opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-          </button>
-        ))}
+    <div className="mx-auto max-w-xl h-full flex flex-col overflow-hidden px-4">
+      <div className="pt-2">
+        <SettingsPageHeader
+          title="Settings"
+          onBack={onBack}
+          backLabel="Back"
+          titleClassName="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-white leading-none"
+        />
       </div>
 
-      {(isOwner || isAdmin) && (
-        <Link
-          href="/design-system"
-          className="fixed bottom-24 right-6 z-50 px-4 py-2 bg-noctvm-violet text-white text-sm font-bold rounded-full shadow-lg border border-white/20 hover:scale-105 transition-transform"
-        >
-          🎨 Design System
-        </Link>
-      )}
+      <div ref={scrollRef} className="flex-1 min-h-0 space-y-6 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
+        <section className="space-y-3">
+          {menuGroups.map((group) => (
+            <SettingsGroup
+              key={group.title}
+              title={group.title}
+              description={group.description}
+              items={group.items}
+              onSelect={(id) => setView(id)}
+            />
+          ))}
+        </section>
 
-      <div className="mt-12 pt-6 border-t border-noctvm-border">
-        <button
-          onClick={() => { signOut(); onBack(); }}
-          className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20 transition-all text-left group active:scale-[0.98]"
-          title="Log out of your account"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-bold text-red-500">Log Out</p>
-              <p className="text-noctvm-label text-noctvm-silver mt-0.5">Sign out of your account</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] border border-red-500/10 bg-red-500/5 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-red-300/70">
+                Danger zone
+              </p>
+              <p className="text-sm text-red-100/80">
+                Sign out from this device.
+              </p>
             </div>
-            <svg className="w-5 h-5 text-red-500 opacity-50 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+
+            <button
+              onClick={() => { signOut(); onBack(); }}
+              className="inline-flex items-center justify-center rounded-full border border-red-500/20 bg-red-500/10 px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-red-200 transition-colors hover:border-red-500/30 hover:bg-red-500/15"
+              title="Log out of your account"
+            >
+              Log Out
+            </button>
           </div>
-        </button>
+        </GlassPanel>
       </div>
     </div>
   );
@@ -234,6 +358,7 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
 // ==================== SUB-PAGES ====================
 
 export function EditProfilePage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('edit-profile');
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [username, setUsername] = useState(profile?.username || '');
@@ -299,60 +424,68 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
   const unusedPlatforms = PLATFORMS.filter(p => !socialLinks.some(l => l.platform === p));
 
   return (
-    <div className="max-w-xl mx-auto h-full flex flex-col">
+    <div className="max-w-xl mx-auto h-full flex flex-col overflow-hidden">
       <div className="px-4 pt-2">
-        <BackButton onBack={onBack} label="Settings" />
-        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Edit Profile</h3>
+        <SettingsPageHeader
+          title="Edit Profile"
+          subtitle="Avatar, bio, music, socials"
+          onBack={onBack}
+          backLabel="Settings"
+        />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-12 scrollbar-hide space-y-8">
-        {/* Core Info */}
-        <div className="space-y-5">
-          <FormInput label="Display Name" value={displayName} onChange={setDisplayName} />
-          <FormInput label="Username" value={username} onChange={setUsername} />
-          <FormTextarea label="Bio" value={bio} onChange={setBio} rows={3} />
-          <FormInput label="City" value={city} onChange={setCity} />
-        </div>
-
-        {/* Music */}
-        <div className="pt-6 border-t border-white/5">
-          <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest mb-4 text-left">Music Presence</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <FormSelect label="Platform" value={musicType} onChange={setMusicType} options={[
-               { value: 'spotify', label: 'Spotify' },
-               { value: 'soundcloud', label: 'SoundCloud' },
-               { value: 'youtube', label: 'YouTube' },
-               { value: 'ytmusic', label: 'YT Music' },
-             ]} />
-             <FormInput label="Link URL" value={musicUrl} onChange={setMusicUrl} placeholder="https://..." />
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-12 space-y-4 scrollbar-hide overscroll-contain">
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-5">
+          <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Core Info</p>
+          <div className="space-y-5">
+            <FormInput label="Display Name" value={displayName} onChange={setDisplayName} />
+            <FormInput label="Username" value={username} onChange={setUsername} />
+            <FormTextarea label="Bio" value={bio} onChange={setBio} rows={3} />
+            <FormInput label="City" value={city} onChange={setCity} />
           </div>
-        </div>
+        </GlassPanel>
 
-        {/* Genres */}
-        <div className="pt-6 border-t border-white/5 text-left">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest">Favorite Genres</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Music Presence</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormSelect label="Platform" value={musicType} onChange={setMusicType} options={[
+              { value: 'spotify', label: 'Spotify' },
+              { value: 'soundcloud', label: 'SoundCloud' },
+              { value: 'youtube', label: 'YouTube' },
+              { value: 'ytmusic', label: 'YT Music' },
+            ]} />
+            <FormInput label="Link URL" value={musicUrl} onChange={setMusicUrl} placeholder="https://..." />
+          </div>
+        </GlassPanel>
+
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Favorite Genres</p>
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-noctvm-caption text-white outline-none w-24 focus:w-32 focus:border-noctvm-violet/40 transition-all"
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-24 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-white outline-none transition-all focus:w-32 focus:border-noctvm-violet/40"
                 value={genreSearch}
                 onChange={(e) => setGenreSearch(e.target.value)}
               />
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto scrollbar-hide p-1">
+          <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto p-1 scrollbar-hide">
             {filteredGenreOptions.length > 0 ? (
-              filteredGenreOptions.map(g => (
+              filteredGenreOptions.map((g) => (
                 <button
                   key={g}
-                  onClick={() => setGenres(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])}
-                  className={`px-3 py-1.5 rounded-full text-noctvm-caption font-bold transition-all border ${
-                    genres.includes(g) 
-                      ? 'bg-noctvm-violet border-noctvm-violet text-white shadow-glow' 
-                      : 'bg-white/5 border-white/10 text-noctvm-silver hover:border-white/20'
-                  } active:scale-95`}
+                  onClick={() => setGenres((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])}
+                  className={`rounded-full border px-3 py-1.5 text-noctvm-caption font-bold transition-all active:scale-95 ${
+                    genres.includes(g)
+                      ? 'border-noctvm-violet bg-noctvm-violet text-white shadow-glow'
+                      : 'border-white/10 bg-white/5 text-noctvm-silver hover:border-white/20'
+                  }`}
                   title={`Toggle ${g} genre`}
                 >
                   {g}
@@ -362,11 +495,10 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
               <p className="text-noctvm-caption text-noctvm-silver/40">No genres found...</p>
             )}
           </div>
-        </div>
+        </GlassPanel>
 
-        {/* Website */}
-        <div className="pt-6 border-t border-white/5 text-left">
-          <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest mb-4">Website / Portfolio</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
+          <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Website / Portfolio</p>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40 group-focus-within:text-noctvm-violet transition-colors">
               <GlobeIcon className="w-4 h-4" />
@@ -376,35 +508,34 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
               placeholder="yoursite.com"
               value={usernameFromUrl('website', socialLinks.find(l => l.platform === 'website')?.url ?? '')}
               onChange={(e) => updateSocial('website', buildSocialUrl('website', e.target.value))}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-noctvm-midnight/50 border border-white/5 focus:border-noctvm-violet/30 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/20"
+              className="w-full rounded-xl border border-white/5 bg-noctvm-midnight/50 py-3 pl-12 pr-4 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/20 focus:border-noctvm-violet/30"
             />
           </div>
-        </div>
+        </GlassPanel>
 
-        {/* Socials */}
-        <div className="pt-6 border-t border-white/5 text-left">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest">Social Connections</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Social Connections</p>
             {unusedPlatforms.length > 0 && (
               <div className="relative">
                 <button
                   onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-caption text-noctvm-silver hover:text-white hover:bg-white/10 transition-all active:scale-95"
+                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-noctvm-silver transition-all active:scale-95 hover:bg-white/10 hover:text-white"
                   title="Add a social media link"
                 >
                   <span>Add Social</span>
                   <svg className={`w-3 h-3 transition-transform ${showPlatformDropdown ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 {showPlatformDropdown && (
-                  <div className="absolute right-0 top-full mt-1 z-50 bg-[#0A0A0A] border border-white/10 rounded-xl shadow-2xl py-1 min-w-[120px] animate-in fade-in slide-in-from-top-1">
+                  <div className="absolute right-0 top-full z-50 mt-1 min-w-[120px] rounded-xl border border-white/10 bg-[#0A0A0A] py-1 shadow-2xl animate-in fade-in slide-in-from-top-1">
                     {unusedPlatforms.map(p => (
                       <button
                         key={p}
                         onClick={() => {
-                          updateSocial(p, ' '); // Temporary space to show it
+                          updateSocial(p, ' ');
                           setShowPlatformDropdown(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-noctvm-caption text-noctvm-silver hover:text-white hover:bg-white/5 capitalize active:scale-95"
+                        className="w-full px-3 py-2 text-left capitalize text-noctvm-caption text-noctvm-silver transition-all active:scale-95 hover:bg-white/5 hover:text-white"
                         title={`Add ${p} link`}
                       >
                         {p}
@@ -419,11 +550,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
             {socialLinks.filter((l: any) => l.platform !== 'website').length > 0 ? (
               socialLinks.filter((l: any) => l.platform !== 'website').map(link => {
                 const p = link.platform;
-                const Icon = p === 'instagram' ? InstagramIcon :
-                            p === 'twitter' ? TwitterIcon :
-                            p === 'tiktok' ? TikTokIcon : 
-                            p === 'facebook' ? FacebookIcon :
-                            p === 'snapchat' ? SnapchatIcon : GlobeIcon;
+                const Icon = p === 'instagram' ? InstagramIcon : p === 'twitter' ? TwitterIcon : p === 'tiktok' ? TikTokIcon : p === 'facebook' ? FacebookIcon : p === 'snapchat' ? SnapchatIcon : GlobeIcon;
                 return (
                   <div key={p} className="relative group animate-in fade-in slide-in-from-left-2">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40 group-focus-within:text-noctvm-violet transition-colors">
@@ -434,13 +561,13 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
                       placeholder={p === 'website' ? 'yoursite.com' : 'username'}
                       value={link.url === ' ' ? '' : usernameFromUrl(p, link.url)}
                       onChange={(e) => updateSocial(p, buildSocialUrl(p, e.target.value))}
-                      className="w-full pl-12 pr-10 py-3 rounded-xl bg-noctvm-midnight/50 border border-white/5 focus:border-noctvm-violet/30 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/20"
+                      className="w-full rounded-xl border border-white/5 bg-noctvm-midnight/50 py-3 pl-12 pr-10 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/20 focus:border-noctvm-violet/30"
                     />
-                    <button 
+                    <button
                       onClick={() => updateSocial(p, '')}
                       title={`Remove ${p} link`}
                       aria-label={`Remove ${p} link`}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all active:scale-95"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 opacity-0 transition-all active:scale-95 group-hover:opacity-100 hover:text-red-500"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -448,29 +575,29 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
                 );
               })
             ) : (
-                <div className="py-8 text-center bg-white/[0.02] border border-dashed border-white/5 rounded-xl">
-                    <p className="text-noctvm-caption text-noctvm-silver/30">No social links added yet</p>
-                </div>
+              <div className="rounded-xl border border-dashed border-white/5 bg-white/[0.02] py-8 text-center">
+                <p className="text-noctvm-caption text-noctvm-silver/30">No social links added yet</p>
+              </div>
             )}
           </div>
-        </div>
+        </GlassPanel>
 
-        <div className="pt-4 pb-8 space-y-2">
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-3">
           {saveError && (
-            <p className="text-xs text-red-400 text-center px-2">{saveError}</p>
+            <p className="px-2 text-center text-xs text-red-400">{saveError}</p>
           )}
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full py-4 rounded-xl bg-noctvm-violet text-white text-sm font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+            className="w-full rounded-xl bg-noctvm-violet px-4 py-4 text-sm font-bold text-white shadow-lg shadow-noctvm-violet/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
           >
             {saving ? 'Saving...' : saved ? 'Saved!' : 'Save All Changes'}
           </button>
-        </div>
+        </GlassPanel>
 
         {/* Integrated Inventory Section */}
-        <div className="mt-8 pt-8 border-t border-white/5">
+        <div className="mt-4 pt-4 border-t border-white/5">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2.5 bg-yellow-500/10 rounded-xl">
               <StarIcon className="w-5 h-5 text-yellow-500" />
@@ -488,6 +615,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
 }
 
 export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('privacy');
   const { settings, updateSettings, loading } = useSettings();
 
   if (loading) return (
@@ -497,16 +625,19 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
   );
 
   return (
-    <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
-        <BackButton onBack={onBack} label="Settings" />
-        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Privacy & Safety</h3>
+        <SettingsPageHeader
+          title="Privacy & Safety"
+          subtitle="Discovery and interactions"
+          onBack={onBack}
+          backLabel="Settings"
+        />
       </div>
       
-      <div className="flex-1 overflow-y-auto pb-12 space-y-8 scrollbar-hide">
-        {/* Profile Visibility */}
-        <div className="space-y-4">
-          <p className="text-noctvm-caption font-bold text-noctvm-emerald uppercase tracking-widest text-left">Discovery</p>
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-8 scrollbar-hide overscroll-contain">
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
+          <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Profile Visibility</p>
           <ToggleSwitch 
             enabled={settings?.is_profile_private || false} 
             onToggle={() => updateSettings({ is_profile_private: !settings?.is_profile_private })} 
@@ -519,11 +650,10 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
             label="Show Moonray Rank" 
             desc="Display your pocket rank publically on your profile" 
           />
-        </div>
+        </GlassPanel>
 
-        {/* Interactions */}
-        <div className="pt-6 border-t border-white/5 space-y-4">
-          <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest text-left">Interactions</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
+          <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Interactions</p>
           <FormSelect 
             label="Who can see your likes?" 
             value={settings?.likes_visibility || 'public'} 
@@ -554,11 +684,10 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
               { value: 'none', label: 'No One' },
             ]} 
           />
-        </div>
+        </GlassPanel>
 
-        {/* Permissions */}
-        <div className="pt-6 border-t border-white/5 space-y-4">
-          <p className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-widest text-left">Permissions</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
+          <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Permissions</p>
           <ToggleSwitch 
             enabled={settings?.location_access || false} 
             onToggle={() => updateSettings({ location_access: !settings?.location_access })} 
@@ -571,13 +700,14 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
             label="Push Notifications" 
             desc="Allow device notifications for social alerts" 
           />
-        </div>
+        </GlassPanel>
       </div>
     </div>
   );
 }
 
 export function ActivityLogPage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('activity');
   const { profile } = useAuth();
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -618,13 +748,17 @@ export function ActivityLogPage({ onBack }: { onBack: () => void }) {
   }, [profile]);
 
   return (
-    <div className="max-w-xl mx-auto px-4 h-[75vh] flex flex-col">
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
-        <BackButton onBack={onBack} label="Settings" />
-        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Activity Journal</h3>
+        <SettingsPageHeader
+          title="Activity Journal"
+          subtitle="Audit trail"
+          onBack={onBack}
+          backLabel="Settings"
+        />
       </div>
       
-      <div className="flex-1 overflow-y-auto pb-12 space-y-4 scrollbar-hide">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
             <div className="w-10 h-10 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
@@ -659,6 +793,7 @@ export function ActivityLogPage({ onBack }: { onBack: () => void }) {
 }
 
 export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('notifications');
   const { settings, updateSettings, loading } = useSettings();
 
   if (loading) return (
@@ -668,43 +803,53 @@ export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
   );
 
   return (
-    <div className="max-w-xl mx-auto px-4">
-      <BackButton onBack={onBack} label="Settings" />
-      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Notifications</h3>
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
+      <div className="pt-2">
+        <SettingsPageHeader
+          title="Notifications"
+          subtitle="Alerts & preferences"
+          onBack={onBack}
+          backLabel="Settings"
+        />
+      </div>
       
-      <div className="space-y-6">
-        <div className="space-y-2">
-           <ToggleSwitch 
-             enabled={settings?.notify_likes || false} 
-             onToggle={() => updateSettings({ notify_likes: !settings?.notify_likes })} 
-             label="Likes" 
-             desc="Notify when someone likes your posts or stories" 
-           />
-           <ToggleSwitch 
-             enabled={settings?.notify_comments || false} 
-             onToggle={() => updateSettings({ notify_comments: !settings?.notify_comments })} 
-             label="Comments" 
-             desc="Notify when someone comments on your post" 
-           />
-           <ToggleSwitch 
-             enabled={settings?.notify_followers || false} 
-             onToggle={() => updateSettings({ notify_followers: !settings?.notify_followers })} 
-             label="New Followers" 
-             desc="Notify when someone follows your channel" 
-           />
-           <ToggleSwitch 
-             enabled={settings?.notify_events || false} 
-             onToggle={() => updateSettings({ notify_events: !settings?.notify_events })} 
-             label="Event Reminders" 
-             desc="Notifications for events you have saved" 
-           />
-        </div>
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-6 scrollbar-hide overscroll-contain">
+        <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
+          <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Alerts</p>
+          <div className="space-y-2">
+             <ToggleSwitch 
+               enabled={settings?.notify_likes || false} 
+               onToggle={() => updateSettings({ notify_likes: !settings?.notify_likes })} 
+               label="Likes" 
+               desc="Notify when someone likes your posts or stories" 
+             />
+             <ToggleSwitch 
+               enabled={settings?.notify_comments || false} 
+               onToggle={() => updateSettings({ notify_comments: !settings?.notify_comments })} 
+               label="Comments" 
+               desc="Notify when someone comments on your post" 
+             />
+             <ToggleSwitch 
+               enabled={settings?.notify_followers || false} 
+               onToggle={() => updateSettings({ notify_followers: !settings?.notify_followers })} 
+               label="New Followers" 
+               desc="Notify when someone follows your channel" 
+             />
+             <ToggleSwitch 
+               enabled={settings?.notify_events || false} 
+               onToggle={() => updateSettings({ notify_events: !settings?.notify_events })} 
+               label="Event Reminders" 
+               desc="Notifications for events you have saved" 
+             />
+          </div>
+        </GlassPanel>
       </div>
     </div>
   );
 }
 
 export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => void, hideHeader?: boolean }) {
+  const scrollRef = useSettingsScrollMemory('inventory');
   const premiumEffects = [
     { id: 'neon_ring', name: 'Neon Avatar Ring', price: '500 MR', locked: true },
     { id: 'emerald_badge', name: 'Emerald VIP Badge', price: '1000 MR', locked: true },
@@ -712,15 +857,19 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
   ];
 
   return (
-    <div className={`max-w-xl mx-auto px-4 ${hideHeader ? '' : 'h-[75vh] flex flex-col'}`}>
+    <div className={`max-w-xl mx-auto px-4 ${hideHeader ? '' : 'h-full flex flex-col overflow-hidden'}`}>
       {!hideHeader && (
         <div className="pt-2">
-          <BackButton onBack={onBack} label="Settings" />
-          <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Vanity Inventory</h3>
+          <SettingsPageHeader
+            title="Vanity Inventory"
+            subtitle="Premium profile effects"
+            onBack={onBack}
+            backLabel="Settings"
+          />
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto pb-12 space-y-4 scrollbar-hide">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
         <div className="p-4 rounded-2xl bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight border border-noctvm-violet/30 mb-6">
           <p className="text-xs font-bold text-noctvm-violet uppercase tracking-widest mb-1">Your Stash</p>
           <p className="text-noctvm-label text-noctvm-silver leading-relaxed">Customize your presence with premium gear unlocked from the Boutique.</p>
@@ -745,11 +894,12 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
 }
 
 export function ManageAccountPage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('manage-account');
   const { profile } = useAuth();
   const [email, setEmail] = useState(profile?.email || '');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const handleUpdateEmail = async () => {
     setLoading(true);
@@ -778,56 +928,60 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 pb-24 h-full flex flex-col">
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
-        <BackButton onBack={onBack} label="Settings" />
-        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left text-glow-emerald">Account Portal</h3>
+        <SettingsPageHeader
+          title="Account Portal"
+          subtitle="Identity and security"
+          onBack={onBack}
+          backLabel="Settings"
+        />
       </div>
-      
-      <div className="flex-1 overflow-y-auto space-y-8 scrollbar-hide">
+
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto space-y-8 scrollbar-hide overscroll-contain pb-12">
         {message && (
-          <div className={`p-4 rounded-xl text-xs font-bold uppercase tracking-wider ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+          <div className={`rounded-2xl border px-4 py-3 text-xs font-bold uppercase tracking-wider ${message.type === 'success' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500' : 'border-red-500/20 bg-red-500/10 text-red-500'}`}>
             {message.text}
           </div>
         )}
 
-        <div className="p-6 rounded-2xl bg-noctvm-surface/40 border border-noctvm-border space-y-6">
-          <p className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-widest">Identity</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-6 space-y-6">
+          <p className="text-noctvm-caption font-mono uppercase tracking-[0.28em] text-noctvm-silver/45">Identity</p>
           <div className="space-y-4">
             <FormInput label="Email Address" value={email} onChange={setEmail} />
-            <button 
+            <button
               onClick={handleUpdateEmail}
               disabled={loading || email === profile?.email}
-              className="px-6 py-2 rounded-xl bg-noctvm-violet text-white text-xs font-bold hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-white transition-all hover:border-noctvm-violet/30 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Update Email
             </button>
           </div>
-        </div>
+        </GlassPanel>
 
-        <div className="p-6 rounded-2xl bg-noctvm-surface/40 border border-noctvm-border space-y-6">
-          <p className="text-noctvm-caption font-bold text-noctvm-silver uppercase tracking-widest">Security</p>
+        <GlassPanel variant="subtle" className="rounded-[28px] p-6 space-y-6">
+          <p className="text-noctvm-caption font-mono uppercase tracking-[0.28em] text-noctvm-silver/45">Security</p>
           <div className="space-y-4">
             <FormInput label="New Password" type="password" value={password} onChange={setPassword} placeholder="Min 6 characters" />
-            <button 
+            <button
               onClick={handleUpdatePassword}
               disabled={loading || !password}
-              className="px-6 py-2 rounded-xl bg-noctvm-midnight border border-noctvm-border text-white text-xs font-bold hover:border-noctvm-violet/40 transition-all active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-white transition-all hover:border-noctvm-violet/30 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Update Password
             </button>
           </div>
-        </div>
+        </GlassPanel>
 
         <div className="pt-8 border-t border-white/5 flex flex-col gap-3">
-          <button className="w-full p-4 rounded-xl bg-noctvm-surface/40 border border-noctvm-border text-noctvm-silver text-xs font-bold hover:text-white transition-all text-left flex justify-between items-center group">
+          <button className="group flex w-full items-center justify-between rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-4 text-left text-noctvm-silver transition-all hover:border-white/10 hover:text-white">
             <span>Request Data Export</span>
-            <ChevronRightIcon className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-all" />
+            <ChevronRightIcon className="h-4 w-4 opacity-50 transition-all group-hover:translate-x-1" />
           </button>
-          
-          <button className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/10 transition-all text-left flex justify-between items-center group">
+
+          <button className="group flex w-full items-center justify-between rounded-2xl border border-red-500/10 bg-red-500/5 px-4 py-4 text-left text-red-500 transition-all hover:bg-red-500/10">
             <span>Delete Account</span>
-            <ChevronRightIcon className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-all" />
+            <ChevronRightIcon className="h-4 w-4 opacity-50 transition-all group-hover:translate-x-1" />
           </button>
         </div>
       </div>
@@ -836,6 +990,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
 }
 
 export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('appearance');
   const { settings, updateSettings, loading } = useSettings();
 
   const themes = [
@@ -847,44 +1002,48 @@ export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
   if (loading) return null;
 
   return (
-    <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
-        <BackButton onBack={onBack} label="Settings" />
-        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Appearance</h3>
+        <SettingsPageHeader
+          title="Appearance"
+          subtitle="Theme preference"
+          onBack={onBack}
+          backLabel="Settings"
+        />
       </div>
 
-      <div className="flex-1 space-y-6">
-        <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest text-left">Theme Preference</p>
-        <div className="grid grid-cols-1 gap-3">
-          {themes.map(t => (
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-6 scrollbar-hide overscroll-contain">
+        <div className="space-y-3">
+          {themes.map((t) => (
             <button
               key={t.id}
               onClick={() => updateSettings({ theme: t.id as any })}
-              className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 transform active:scale-[0.98] text-left group ${
-                settings?.theme === t.id 
-                  ? 'bg-noctvm-violet/10 border-noctvm-violet shadow-[0_0_20px_rgba(139,92,246,0.1)]' 
-                  : 'bg-noctvm-surface/40 border-noctvm-border hover:border-noctvm-violet/30'
+              className={`group flex w-full items-center gap-4 rounded-[28px] border px-4 py-4 text-left transition-all duration-300 active:scale-[0.99] ${
+                settings?.theme === t.id
+                  ? 'border-noctvm-violet/30 bg-noctvm-violet/10'
+                  : 'border-white/5 bg-white/[0.03] hover:border-noctvm-violet/20 hover:bg-white/[0.05]'
               }`}
             >
-              <div className={`w-12 h-12 rounded-xl border border-white/5 ${t.color}`} />
+              <div className={`h-12 w-12 rounded-2xl border border-white/5 ${t.color}`} />
               <div className="flex-1">
                 <p className={`text-sm font-bold ${settings?.theme === t.id ? 'text-white' : 'text-noctvm-silver'}`}>{t.label}</p>
-                <p className="text-noctvm-label text-noctvm-silver/50 mt-0.5">{t.desc}</p>
+                <p className="mt-0.5 text-noctvm-label text-noctvm-silver/50">{t.desc}</p>
               </div>
               {settings?.theme === t.id && (
-                <div className="w-6 h-6 rounded-full bg-noctvm-violet flex items-center justify-center animate-in zoom-in duration-300">
-                  <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-noctvm-violet animate-in zoom-in duration-300">
+                  <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
               )}
             </button>
           ))}
-        </div>
       </div>
+    </div>
     </div>
   );
 }
 
 export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
+  const scrollRef = useSettingsScrollMemory('blocked-muted');
   const [tab, setTab] = useState<'blocked' | 'muted'>('blocked');
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -927,63 +1086,67 @@ export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 h-full flex flex-col">
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
-        <BackButton onBack={onBack} label="Settings" />
-        <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Safety Controls</h3>
+        <SettingsPageHeader
+          title="Safety Controls"
+          subtitle="Restricted users"
+          onBack={onBack}
+          backLabel="Settings"
+        />
       </div>
 
-      <div className="flex bg-noctvm-midnight/50 p-1 rounded-xl border border-white/5 mb-6">
-        <button 
+      <div className="mb-6 flex rounded-2xl border border-white/5 bg-white/[0.03] p-1">
+        <button
           onClick={() => setTab('blocked')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${tab === 'blocked' ? 'bg-noctvm-surface text-white shadow-lg border border-noctvm-border' : 'text-noctvm-silver'}`}
+          className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${tab === 'blocked' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver'}`}
         >
           Blocked Users
         </button>
-        <button 
+        <button
           onClick={() => setTab('muted')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${tab === 'muted' ? 'bg-noctvm-surface text-white shadow-lg border border-noctvm-border' : 'text-noctvm-silver'}`}
+          className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${tab === 'muted' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver'}`}
         >
           Muted Users
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-12 scrollbar-hide">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="w-8 h-8 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
+            <div className="h-8 w-8 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
           </div>
         ) : users.length === 0 ? (
-          <div className="text-center py-24 text-noctvm-silver/30 border-2 border-dashed border-white/5 rounded-2xl">
-            <ShieldIcon className="w-12 h-12 mx-auto mb-4 opacity-10" />
+          <div className="rounded-[28px] border border-dashed border-white/5 bg-white/[0.02] py-24 text-center text-noctvm-silver/30">
+            <ShieldIcon className="mx-auto mb-4 h-12 w-12 opacity-10" />
             <p className="text-xs font-medium">No one {tab === 'blocked' ? 'blocked' : 'muted'} yet.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-3">
             {users.map((u: any) => (
-              <div key={u.id} className="flex items-center gap-4 p-4 rounded-xl bg-noctvm-surface/40 border border-noctvm-border">
-                <div className="w-10 h-10 rounded-full bg-noctvm-midnight overflow-hidden relative">
-                  <NextImage 
-                    src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`} 
-                    alt={u.display_name} 
+              <div key={u.id} className="flex items-center gap-4 rounded-[24px] border border-white/5 bg-white/[0.03] p-4">
+                <div className="relative h-10 w-10 overflow-hidden rounded-full bg-noctvm-midnight">
+                  <NextImage
+                    src={u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`}
+                    alt={u.display_name}
                     fill
                     className="object-cover"
                     unoptimized
                   />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-white leading-tight">{u.display_name}</p>
-                  <p className="text-xs text-noctvm-silver mt-0.5">@{u.username}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold leading-tight text-white">{u.display_name}</p>
+                  <p className="mt-0.5 text-xs text-noctvm-silver">@{u.username}</p>
                 </div>
-                <button 
+                <button
                   onClick={() => handleUnrestrict(u.id)}
-                  className="px-4 py-1.5 rounded-lg border border-white/10 text-noctvm-silver text-xs font-bold hover:text-white hover:border-white/20 transition-all"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-bold text-noctvm-silver transition-all hover:border-white/20 hover:text-white"
                 >
                   Un{tab === 'blocked' ? 'block' : 'mute'}
                 </button>
               </div>
             ))}
-          </div>
+          </GlassPanel>
         )}
       </div>
     </div>
@@ -992,11 +1155,19 @@ export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
 
 export function AddLocationPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="max-w-lg mx-auto px-4">
-      <BackButton onBack={onBack} label="Profile" />
-      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Add Location</h3>
-      <div className="p-8 text-center text-noctvm-silver text-sm border-2 border-dashed border-noctvm-border rounded-2xl">
-        Search for your business or location to add it.
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
+      <div className="pt-2">
+        <SettingsPageHeader
+          title="Add Location"
+          subtitle="Venue tools"
+          onBack={onBack}
+          backLabel="Profile"
+        />
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
+        <GlassPanel variant="subtle" className="rounded-[28px] p-8 text-center text-sm text-noctvm-silver">
+          Search for your business or location to add it.
+        </GlassPanel>
       </div>
     </div>
   );
@@ -1004,11 +1175,19 @@ export function AddLocationPage({ onBack }: { onBack: () => void }) {
 
 export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="max-w-lg mx-auto px-4">
-      <BackButton onBack={onBack} label="Profile" />
-      <h3 className="font-heading text-xl font-bold text-white mb-6 text-left">Claim Your Venue</h3>
-      <div className="p-8 text-center text-noctvm-silver text-sm border-2 border-dashed border-noctvm-border rounded-2xl">
-        Verify ownrship to manage your venue profile and events.
+    <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
+      <div className="pt-2">
+        <SettingsPageHeader
+          title="Claim Your Venue"
+          subtitle="Venue tools"
+          onBack={onBack}
+          backLabel="Profile"
+        />
+      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
+        <GlassPanel variant="subtle" className="rounded-[28px] p-8 text-center text-sm text-noctvm-silver">
+          Verify ownership to manage your venue profile and events.
+        </GlassPanel>
       </div>
     </div>
   );

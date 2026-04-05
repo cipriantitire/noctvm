@@ -44,7 +44,7 @@ const profileTabs: TabItem[] = [
 function StatBlock({ value, label }: { value: string | number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <span className="text-white font-bold text-lg font-[Syne]">{typeof value === 'number' ? value.toLocaleString() : value}</span>
+      <span className="text-white font-bold text-lg font-heading">{typeof value === 'number' ? value.toLocaleString() : value}</span>
       <span className="text-[#8A8A8A] text-xs">{label}</span>
     </div>
   );
@@ -95,7 +95,7 @@ function MobileView() {
     <div className="w-[390px] bg-[#050505] min-h-screen flex flex-col border border-white/5 rounded-3xl overflow-hidden">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-12 pb-3">
-        <span className="text-white font-bold text-lg font-[Syne]">@{MOCK_USER.username}</span>
+        <span className="text-white font-bold text-lg font-heading">@{MOCK_USER.username}</span>
         <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
       </div>
 
@@ -165,7 +165,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-[Syne]">Platform</p>
+          <p className="text-white font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -207,7 +207,7 @@ function DesktopView() {
               <Avatar size="2xl" src={MOCK_USER.avatar} alt={MOCK_USER.displayName} ring="highlight" />
               <div className="flex-1 pb-2">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-white text-2xl font-black font-[Syne]">{MOCK_USER.displayName}</h1>
+                  <h1 className="text-white text-2xl font-black font-heading">{MOCK_USER.displayName}</h1>
                   {MOCK_USER.verified && <Badge variant="featured">Verified</Badge>}
                 </div>
                 <p className="text-[#8A8A8A] text-sm">@{MOCK_USER.username}</p>
@@ -248,7 +248,7 @@ function DesktopView() {
         <GlassPanel variant="subtle" className="rounded-2xl p-4 mb-4">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-3">Moonrays</p>
           <div className="text-center py-2">
-            <p className="text-3xl font-black text-noctvm-gold font-[Syne]">{MOCK_USER.moonrays.toLocaleString()}</p>
+            <p className="text-3xl font-black text-noctvm-gold font-heading">{MOCK_USER.moonrays.toLocaleString()}</p>
             <p className="text-[#8A8A8A] text-xs mt-1">{MOCK_USER.rank} Rank</p>
           </div>
         </GlassPanel>

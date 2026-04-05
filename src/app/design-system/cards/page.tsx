@@ -11,7 +11,7 @@ export default function CardsShowcasePage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 heading-syne uppercase tracking-wider">Cards & Containers</h1>
+        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Cards & Containers</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">
           The frosted glass base system for all modal windows, dropdowns, and content blocks.
         </p>

@@ -62,7 +62,7 @@ function PrestigeCard({ compact = false }: { compact?: boolean }) {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-[#8A8A8A] text-xs font-mono uppercase tracking-widest">Moonrays Balance</p>
-            <p className={`text-noctvm-gold font-black font-[Syne] leading-none mt-1 ${compact ? 'text-3xl' : 'text-5xl'}`}>
+            <p className={`text-noctvm-gold font-black font-heading leading-none mt-1 ${compact ? 'text-3xl' : 'text-5xl'}`}>
               {MOCK_POCKET.moonrays.toLocaleString()}
             </p>
           </div>
@@ -157,7 +157,7 @@ function MobileView() {
       {/* Top */}
       <div className="flex items-center gap-2 px-4 pt-12 pb-3">
         <PocketIcon className="w-5 h-5 text-noctvm-violet" />
-        <span className="text-white font-bold text-lg font-[Syne]">Pocket</span>
+        <span className="text-white font-bold text-lg font-heading">Pocket</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-4">
@@ -215,7 +215,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-[Syne]">Platform</p>
+          <p className="text-white font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -240,7 +240,7 @@ function DesktopView() {
       {/* Main content */}
       <main className="flex-1 p-10 overflow-y-auto">
         <div className="max-w-2xl space-y-8">
-          <h1 className="text-2xl font-black text-white font-[Syne]">Pocket</h1>
+          <h1 className="text-2xl font-black text-white font-heading">Pocket</h1>
 
           {/* Prestige card */}
           <PrestigeCard />

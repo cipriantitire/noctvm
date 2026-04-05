@@ -15,7 +15,7 @@ const Kbd = React.forwardRef<HTMLElement, KbdProps>(
         className={cn(
           'inline-flex items-center gap-0.5',
           'rounded-noctvm-sm border border-white/10 bg-white/5',
-          'px-1.5 py-0.5 text-noctvm-caption font-sans font-normal',
+          'px-1.5 py-0.5 text-noctvm-caption font-mono font-normal',
           'text-noctvm-silver shadow-inner',
           className
         )}

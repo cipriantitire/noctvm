@@ -137,7 +137,7 @@ function MobileView() {
       <div className="flex items-center justify-between px-4 pt-12 pb-3">
         <div className="flex items-center gap-2">
           <FeedIcon className="w-5 h-5 text-noctvm-violet" />
-          <span className="text-white font-bold text-lg font-[Syne]">Feed</span>
+          <span className="text-white font-bold text-lg font-heading">Feed</span>
         </div>
         <Button variant="primary" size="sm">Post</Button>
       </div>
@@ -175,7 +175,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-[Syne]">Platform</p>
+          <p className="text-white font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -204,7 +204,7 @@ function DesktopView() {
       <main className="flex-1 max-w-[680px] border-r border-white/5">
         <div className="sticky top-0 z-10 bg-[#050505]/90 backdrop-blur-md px-6 pt-6 pb-3 border-b border-white/5">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-black text-white font-[Syne]">Feed</h1>
+            <h1 className="text-xl font-black text-white font-heading">Feed</h1>
           </div>
           <Tabs tabs={subTabs} activeTab={tab} onChange={setTab} />
         </div>

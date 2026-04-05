@@ -41,7 +41,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section className="mb-20">
       <div className="flex items-center gap-4 mb-8">
-        <h2 className="text-2xl font-bold text-white font-[Syne] uppercase tracking-wider">
+        <h2 className="text-2xl font-bold text-white font-heading uppercase tracking-wider">
           {title}
         </h2>
         <div className="flex-1 h-px bg-white/5" />
@@ -115,7 +115,7 @@ export default function ComponentsExportPage() {
         {/* ── Header ── */}
         <div className="mb-16">
           <p className="text-[10px] uppercase tracking-widest text-[#8A8A8A] font-mono mb-2">NOCTVM</p>
-          <h1 className="text-5xl font-black text-white font-[Syne] uppercase tracking-tight">Component Library</h1>
+          <h1 className="text-5xl font-black text-white font-heading uppercase tracking-tight">Component Library</h1>
           <p className="text-[#8A8A8A] mt-2 text-sm">42 components · Dark system · Violet brand · Glass effects</p>
         </div>
 
