@@ -59,14 +59,9 @@ export default function SearchBar(props: SearchBarProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, [genreDropdownOpen]);
 
-  const stickyStyle = {
-    top: headerHidden ? '0px' : '56px',
-  };
-
   return (
     <div 
-      className={`sticky lg:!top-0 z-20 transition-all duration-300 ease-in-out mb-4 ${headerHidden ? '-translate-y-[220%]' : ''}`}
-      style={stickyStyle}
+      className={`sticky z-20 transition-all duration-300 ease-in-out mb-4 ${headerHidden ? '-translate-y-[220%] top-0' : 'top-[56px]'} lg:!top-0`}
     >
       <div className="frosted-noise frosted-glass-header rounded-2xl p-4 shadow-xl">
         {/* Desktop Header area */}
@@ -100,7 +95,7 @@ export default function SearchBar(props: SearchBarProps) {
             onDateChange={props.onDateChange || (() => {})}
           />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -112,32 +107,44 @@ export default function SearchBar(props: SearchBarProps) {
                   title="Search venues"
                   value={props.venueSearch || ''}
                   onChange={e => props.onVenueSearchChange?.(e.target.value)}
-                  className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
+                  className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
                 />
                 {props.venueSearch && (
-                  <button onClick={() => props.onVenueSearchChange?.('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-white transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => props.onVenueSearchChange?.('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-white transition-colors"
+                    aria-label="Clear venue search"
+                    title="Clear venue search"
+                  >
                     <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 )}
               </div>
               
-              <div className="flex p-0.5 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[38px] items-center">
+              <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px] items-center">
                 <button
+                  type="button"
                   onClick={() => props.onVenueViewChange?.('grid')}
-                  className={`p-1.5 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                  aria-label="Switch to grid view"
+                  title="Switch to grid view"
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
                 </button>
-                <div className="w-px h-3 bg-noctvm-border self-center mx-0.5 opacity-50" />
+                <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
                 <button
+                  type="button"
                   onClick={() => props.onVenueViewChange?.('list')}
-                  className={`p-1.5 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                  aria-label="Switch to list view"
+                  title="Switch to list view"
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                 </button>
               </div>
 
-              <div className="flex p-0.5 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[38px] items-center px-2">
+              <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px] items-center px-3">
                 <select 
                   value={props.venueSort}
                   onChange={(e) => props.onVenueSortChange?.(e.target.value as any)}
@@ -154,7 +161,7 @@ export default function SearchBar(props: SearchBarProps) {
             <div className="relative" ref={genreDropdownRef}>
               <button
                 onClick={() => setGenreDropdownOpen(o => !o)}
-                className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
                   props.activeGenre === 'All'
                     ? 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:border-noctvm-violet/30'
                     : 'bg-noctvm-violet/10 border-noctvm-violet/50 text-noctvm-violet'
