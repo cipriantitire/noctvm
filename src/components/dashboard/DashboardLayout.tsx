@@ -37,9 +37,15 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {/* Mobile Top Header - Always Sticky */}
       <header className="lg:hidden sticky top-0 z-50 glass border-b border-noctvm-border px-4 py-3 shadow-lg">
         <div className="grid grid-cols-3 items-center">
-          <div className="flex items-center gap-2" onClick={() => router.push('/dashboard')}>
-            <MoonIcon className="w-6 h-6 text-noctvm-violet" />
-            <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
+          <div className="flex items-center justify-start min-w-0 overflow-hidden" onClick={() => router.push('/dashboard')}>
+            <Image
+              src="/images/typelogo-first.webp"
+              alt="NOCTVM"
+              width={200}
+              height={48}
+              priority
+              className="h-6 w-auto max-w-[120px] object-contain sm:max-w-[140px]"
+            />
           </div>
           
           <div className="flex justify-center">

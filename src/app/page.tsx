@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar';
 import BottomNav from '@/components/BottomNav';
 import FilterBar, { GENRE_FILTERS } from '@/components/FilterBar';
 import Link from 'next/link';
+import Image from 'next/image';
 import EventCard from '@/components/EventCard';
 import RightPanel from '@/components/RightPanel';
 import VenueModal from '@/components/VenueModal';
@@ -386,9 +387,15 @@ export default function Home() {
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
             <div className="grid grid-cols-3 items-center">
               {/* Left: Logo */}
-              <div className="flex items-center gap-2">
-                <MoonIcon className="w-6 h-6 text-noctvm-violet" />
-                <span className="font-heading text-lg font-bold text-glow">NOCTVM</span>
+              <div className="flex items-center justify-start min-w-0 overflow-hidden">
+                <Image
+                  src="/images/typelogo-first.webp"
+                  alt="NOCTVM"
+                  width={200}
+                  height={48}
+                  priority
+                  className="h-6 w-auto max-w-[120px] object-contain sm:max-w-[140px]"
+                />
               </div>
               
               {/* Middle: City Selector */}

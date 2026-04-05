@@ -529,45 +529,48 @@ export default function UserProfilePage({
           </div>
 
           {/* Identity col: name + handle + location + bio */}
-          <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-2xl sm:text-3xl font-sans font-black text-white tracking-tight leading-none">
-                {targetProfile.display_name || 'Night Owl'}
-              </h2>
-              {targetProfile.badge && targetProfile.badge !== 'none' && (
-                <VerifiedBadge type={targetProfile.badge} size="md" />
+          <div className="flex-1 min-w-0 flex items-start justify-between gap-3 pt-1">
+            <div className="min-w-0 flex flex-col gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-2xl sm:text-3xl font-sans font-black text-white tracking-tight leading-none">
+                  {targetProfile.display_name || 'Night Owl'}
+                </h2>
+                {targetProfile.badge && targetProfile.badge !== 'none' && (
+                  <VerifiedBadge type={targetProfile.badge} size="md" />
+                )}
+              </div>
+
+              <p className="text-xs font-black text-noctvm-silver/50 uppercase tracking-[0.2em]">
+                @{targetProfile.username}
+              </p>
+
+              {targetProfile.city && (
+                <div className="flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
+                  <MapPinIcon className="w-3 h-3 text-noctvm-silver/60" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">
+                    {targetProfile.city}
+                  </span>
+                </div>
               )}
-              {/* Mobile Agenda trigger */}
-              {isOwner && (
-                <button
-                  onClick={() => setIsSavedEventsOpen(true)}
-                  type="button"
-                  className="xl:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
-                  title="View Agenda"
-                >
-                  <CalendarIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-noctvm-violet rounded-full border border-noctvm-black animate-pulse" />
-                </button>
+
+              {targetProfile.bio && (
+                <p className="text-xs text-noctvm-silver/70 leading-relaxed italic font-medium mt-1">
+                  &quot;{targetProfile.bio}&quot;
+                </p>
               )}
             </div>
 
-            <p className="text-xs font-black text-noctvm-silver/50 uppercase tracking-[0.2em]">
-              @{targetProfile.username}
-            </p>
-
-            {targetProfile.city && (
-              <div className="flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
-                <MapPinIcon className="w-3 h-3 text-noctvm-silver/60" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">
-                  {targetProfile.city}
-                </span>
-              </div>
-            )}
-
-            {targetProfile.bio && (
-              <p className="text-xs text-noctvm-silver/70 leading-relaxed italic font-medium mt-1">
-                &quot;{targetProfile.bio}&quot;
-              </p>
+            {/* Mobile Agenda trigger */}
+            {isOwner && (
+              <button
+                onClick={() => setIsSavedEventsOpen(true)}
+                type="button"
+                className="xl:hidden shrink-0 p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
+                title="View Agenda"
+              >
+                <CalendarIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-noctvm-violet rounded-full border border-noctvm-black animate-pulse" />
+              </button>
             )}
           </div>
         </div>

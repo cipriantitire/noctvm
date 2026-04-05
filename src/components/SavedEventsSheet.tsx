@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { NoctEvent, Venue } from '@/lib/types';
@@ -123,7 +124,11 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
 
   const displayEvents = showAll ? savedEvents : filteredEvents;
 
-  return (
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -133,7 +138,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] xl:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[400] xl:hidden"
           />
 
           {/* Sheet Container */}
@@ -148,7 +153,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
             onDragEnd={(_, info) => {
               if (info.offset.x > 80) onClose();
             }}
-            className="fixed right-0 top-0 bottom-0 w-[85%] sm:w-80 bg-noctvm-black border-l border-white/10 z-[101] flex flex-col xl:hidden overflow-hidden"
+            className="fixed right-0 top-0 bottom-0 w-[85%] sm:w-80 bg-noctvm-black border-l border-white/10 z-[401] flex flex-col xl:hidden overflow-hidden"
           >
             {/* Header */}
             <div className="p-5 flex items-center justify-between border-b border-white/5 bg-noctvm-midnight/50 backdrop-blur-md">
@@ -241,6 +246,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
