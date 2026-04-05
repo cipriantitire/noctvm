@@ -246,6 +246,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
   const [musicUrl, setMusicUrl] = useState(profile?.music_link?.url || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
 
   const GENRE_OPTIONS = GENRE_FILTERS.filter(g => g !== 'All');
@@ -272,7 +273,10 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
     if (!error) {
       await refreshProfile();
       setSaved(true);
+      setSaveError(null);
       setTimeout(() => setSaved(false), 2000);
+    } else {
+      setSaveError(error.message);
     }
     setSaving(false);
   };
@@ -412,8 +416,8 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
             )}
           </div>
           <div className="space-y-3">
-            {socialLinks.length > 0 ? (
-              socialLinks.map(link => {
+            {socialLinks.filter((l: any) => l.platform !== 'website').length > 0 ? (
+              socialLinks.filter((l: any) => l.platform !== 'website').map(link => {
                 const p = link.platform;
                 const Icon = p === 'instagram' ? InstagramIcon :
                             p === 'twitter' ? TwitterIcon :
@@ -451,13 +455,17 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <div className="pt-4 pb-8">
+        <div className="pt-4 pb-8 space-y-2">
+          {saveError && (
+            <p className="text-xs text-red-400 text-center px-2">{saveError}</p>
+          )}
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
             className="w-full py-4 rounded-xl bg-noctvm-violet text-white text-sm font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
           >
-            {saving ? 'Saving...' : saved ? 'Success!' : 'Save All Changes'}
+            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save All Changes'}
           </button>
         </div>
 
