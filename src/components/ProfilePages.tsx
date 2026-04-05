@@ -249,7 +249,7 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
   const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
 
   const GENRE_OPTIONS = GENRE_FILTERS.filter(g => g !== 'All');
-  const PLATFORMS = ['instagram', 'facebook', 'twitter', 'tiktok', 'snapchat', 'website'];
+  const PLATFORMS = ['instagram', 'facebook', 'twitter', 'tiktok', 'snapchat'];
 
   const handleSave = async () => {
     if (!profile) return;
@@ -357,6 +357,23 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
             ) : (
               <p className="text-noctvm-caption text-noctvm-silver/40">No genres found...</p>
             )}
+          </div>
+        </div>
+
+        {/* Website */}
+        <div className="pt-6 border-t border-white/5 text-left">
+          <p className="text-noctvm-caption font-bold text-noctvm-violet uppercase tracking-widest mb-4">Website / Portfolio</p>
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-noctvm-silver/40 group-focus-within:text-noctvm-violet transition-colors">
+              <GlobeIcon className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              placeholder="yoursite.com"
+              value={usernameFromUrl('website', socialLinks.find(l => l.platform === 'website')?.url ?? '')}
+              onChange={(e) => updateSocial('website', buildSocialUrl('website', e.target.value))}
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-noctvm-midnight/50 border border-white/5 focus:border-noctvm-violet/30 transition-all outline-none text-sm text-white placeholder:text-noctvm-silver/20"
+            />
           </div>
         </div>
 

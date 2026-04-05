@@ -100,25 +100,15 @@ function MusicLinkRow({ link }: { link: { type: string; url: string; label?: str
   const [title, setTitle] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    let fetchUrl = link.url;
     let shouldFetch = false;
     try {
       const host = new URL(link.url).hostname.replace(/^www\./, '');
-      if (host === 'youtube.com' || host === 'youtu.be') {
-        shouldFetch = true;
-      } else if (host === 'music.youtube.com') {
-        // noembed works with regular youtube.com — convert the URL
-        const vid = new URL(link.url).searchParams.get('v');
-        if (vid) {
-          fetchUrl = `https://www.youtube.com/watch?v=${vid}`;
-          shouldFetch = true;
-        }
-      }
+      shouldFetch = host === 'youtube.com' || host === 'youtu.be' || host === 'music.youtube.com';
     } catch { /* noop */ }
 
     if (!shouldFetch) return;
     let cancelled = false;
-    fetch(`https://noembed.com/embed?url=${encodeURIComponent(fetchUrl)}`)
+    fetch(`/api/yt-title?url=${encodeURIComponent(link.url)}`)
       .then(r => r.json())
       .then(data => { if (!cancelled && data.title) setTitle(data.title); })
       .catch(() => { /* silently fallback */ });
