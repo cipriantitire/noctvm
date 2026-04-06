@@ -26,7 +26,7 @@ export function StoriesRow({
   };
 
   return (
-    <div className="flex justify-center mb-4">
+    <div className="flex justify-start mb-4">
       <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 py-3">
         {myEntry ? (
           <div
