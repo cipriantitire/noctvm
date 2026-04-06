@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import ScrollFadeInit from './ScrollFadeInit';
 
 // Completely isolate the import and instantiation of the Consent Manager
 const ConsentManagerBase = dynamic(() => 
@@ -19,5 +20,5 @@ export function SafeConsentManager({ children }: { children: React.ReactNode }) 
   // Strict guard: Do not even render the dynamic import until the client fully mounts
   if (!isMounted) return <>{children}</>;
 
-  return <ConsentManagerBase>{children}</ConsentManagerBase>;
+  return <ConsentManagerBase><ScrollFadeInit />{children}</ConsentManagerBase>;
 }
