@@ -127,31 +127,46 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
     setSubmitting(true);
     setError('');
     try {
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
 
-      const ext = imageFile.name.split('.').pop() ?? 'jpg';
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from('story-media')
-        .upload(path, imageFile, { cacheControl: '3600', upsert: false });
-      if (uploadErr) throw uploadErr;
-      const { data: { publicUrl } } = supabase.storage.from('story-media').getPublicUrl(path);
+      if (!accessToken) {
+        throw new Error('Please sign in again to share a story.');
+      }
 
-      const { error: insertError } = await supabase.from('stories').insert({
-        user_id: user.id,
-        image_url: publicUrl,
-        caption: caption.trim() || null,
-        venue_name: selectedVenue || null,
-        expires_at: expiresAt,
-        tags: tags.length > 0 ? tags : null,
-        event_id: selectedEvent?.id || null,
-        event_title: selectedEvent?.title || null,
+      const formData = new FormData();
+      formData.append('media', imageFile);
+      formData.append('caption', caption.trim());
+      formData.append('venue_name', selectedVenue);
+      formData.append('expires_at', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
+      formData.append('tags', JSON.stringify(tags));
+      formData.append('event_id', selectedEvent?.id || '');
+      formData.append('event_title', selectedEvent?.title || '');
+
+      const response = await fetch('/api/stories', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
       });
-      if (insertError) throw insertError;
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(
+          payload?.error || payload?.message || 'Failed to share story.'
+        );
+      }
+
       onStoryCreated?.();
       window.dispatchEvent(new Event('noctvm:story-views-updated'));
       handleClose();
     } catch (err: unknown) {
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Could not reach the story upload service. Try again in a moment.');
+        return;
+      }
+
       setError(
         err instanceof Error
           ? err.message
