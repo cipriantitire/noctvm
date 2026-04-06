@@ -100,11 +100,13 @@ export default function RootLayout({
     <html lang="en" className={`dark ${freshid.variable} ${satoshi.variable} ${jetbrainsMono.variable}`}>
       <head>
       </head>
-      <body className="font-body bg-noctvm-black text-white min-h-screen">
-        <Providers>{children}</Providers>
+      <body className="font-body bg-noctvm-black text-white min-h-screen relative isolate overflow-x-hidden">
+        <div className="relative z-10">
+          <Providers>{children}</Providers>
+        </div>
         
         {/* Global SVG Filters for Glassmorphism */}
-        <svg className="absolute w-0 h-0" aria-hidden="true" focusable="false">
+        <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true" focusable="false">
           <filter id="displace">
             <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />

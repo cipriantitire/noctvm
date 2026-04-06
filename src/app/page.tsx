@@ -27,6 +27,7 @@ import GlobalSearchSheet, { type GlobalSearchActionId } from '@/components/Globa
 import type { StoryUser } from '@/components/StoriesViewerModal';
 import StoriesViewerModal from '@/components/StoriesViewerModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
+import AppBackdrop from '@/components/AppBackdrop';
 import { 
   MoonIcon, 
   UserIcon, 
@@ -303,6 +304,8 @@ function AppShell() {
   }, []);
 
   useFrostedGlass();
+
+  const backdropMode = activeTab === 'events' || activeTab === 'venues' ? 'rich' : 'faded';
 
   useEffect(() => {
     if (window.innerWidth >= 1024) setViewMode('portrait');
@@ -672,6 +675,8 @@ function AppShell() {
 
   return (
     <>
+      <AppBackdrop mode={backdropMode} />
+
       {/* ── Auth Modal ──────────────────────────────────────────── */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
@@ -762,7 +767,7 @@ function AppShell() {
       )}
 
       {/* ── Main Layout ─────────────────────────────────────────── */}
-      <div className="flex h-screen bg-noctvm-black overflow-hidden">
+      <div className="flex h-screen bg-transparent overflow-hidden">
         <Sidebar
           activeTab={activeTab}
           onTabChange={handleTabChange}
