@@ -274,7 +274,19 @@ export default function ColorBends({
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [
+    rotation,
+    speed,
+    colors,
+    transparent,
+    autoRotate,
+    scale,
+    frequency,
+    warpStrength,
+    mouseInfluence,
+    parallax,
+    noise,
+  ]);
 
   useEffect(() => {
     const material = materialRef.current;
