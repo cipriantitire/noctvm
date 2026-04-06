@@ -62,9 +62,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
   const { explorePosts, followingPosts, friendsPosts, loading, fetchExplorePosts } = useFeedData(user, activeCity);
   
   const [liveStoryUsers, setLiveStoryUsers] = useState<StoryUser[]>([]);
-  const [showMyStoryDropdown, setShowMyStoryDropdown] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
-  const myStoryBtnRef = useRef<HTMLButtonElement>(null);
   
 
   const [sharePostId, setSharePostId] = useState<string | null>(null);
@@ -183,14 +180,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
     }
   }, [explorePosts, friendsPosts, followingPosts, initialPostId]);
   
-  const toggleMyStoryDropdown = useCallback(() => {
-    if (!showMyStoryDropdown && myStoryBtnRef.current) {
-      const rect = myStoryBtnRef.current.getBoundingClientRect();
-      setDropdownPos({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
-    }
-    setShowMyStoryDropdown(v => !v);
-  }, [showMyStoryDropdown]);
-
   const handleOpenStories = useCallback((users: StoryUser[], index: number) => {
     markViewedStoryUserIds(users.map(userStory => userStory.id));
     setLiveStoryUsers(prev => prev.map(userStory => (
@@ -315,11 +304,6 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
         liveStoryUsers={liveStoryUsers}
         onOpenStories={handleOpenStories}
         onOpenCreateStory={onOpenCreateStory}
-        showMyStoryDropdown={showMyStoryDropdown}
-        setShowMyStoryDropdown={setShowMyStoryDropdown}
-        dropdownPos={dropdownPos}
-        myStoryBtnRef={myStoryBtnRef}
-        toggleMyStoryDropdown={toggleMyStoryDropdown}
       />
 
       <div className="space-y-6 max-w-2xl mx-auto pb-20">
