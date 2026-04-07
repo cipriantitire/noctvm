@@ -175,6 +175,64 @@ export function clean(text: string | null | undefined): string {
     .trim();
 }
 
+function normalizeSearchText(text: string | null | undefined): string {
+  return clean(text ?? '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const CITY_SIGNAL_GROUPS: string[][] = [
+  ['bucuresti', 'bucharest', 'ilfov', 'sector'],
+  ['constanta', 'mamaia', 'eforie', 'mangalia', 'navodari', 'costinesti', 'vama veche', '2 mai', 'neptun', 'olimp', 'jupiter', 'saturn', 'venus', 'techirghiol', 'corbu', 'culmea'],
+  ['cluj', 'cluj napoca'],
+  ['sibiu'],
+  ['iasi'],
+  ['timisoara'],
+  ['brasov'],
+  ['oradea'],
+  ['arad'],
+  ['galati'],
+  ['craiova'],
+  ['suceava'],
+  ['piatra neamt'],
+  ['baia mare'],
+  ['targu mures'],
+  ['bistrita'],
+  ['bacau'],
+  ['ploiesti'],
+  ['ramnicu valcea'],
+  ['alba iulia'],
+  ['baile tusnad'],
+  ['brezoi'],
+];
+
+export function containsUnexpectedCitySignal(text: string, allowedCities?: string[]): boolean {
+  if (!allowedCities || allowedCities.length === 0) return false;
+
+  const normalizedText = normalizeSearchText(text);
+  if (!normalizedText) return false;
+
+  const normalizedAllowed = allowedCities
+    .map(city => normalizeSearchText(city))
+    .filter(Boolean);
+
+  if (normalizedAllowed.some(city => normalizedText.includes(city))) {
+    return false;
+  }
+
+  return CITY_SIGNAL_GROUPS.some(group => {
+    const groupHit = group.some(signal => normalizedText.includes(signal));
+    if (!groupHit) return false;
+
+    return !group.some(signal =>
+      normalizedAllowed.some(allowed => allowed.includes(signal) || signal.includes(allowed)),
+    );
+  });
+}
+
 // ── Genre / music filter ──────────────────────────────────────────────────────
 
 /**
@@ -200,6 +258,9 @@ const HARD_BLOCK_TERMS = [
   'magie pentru', 'magician', 'clovn', 'ursitoare', 'animatori', 'circ', 'circus', 'magie', 'magic show',
   // Salsa / Latin specific blocked terms
   'salsa revolution', 'salsa congress',
+  // Festival inventory belongs to the dedicated festival scraper
+  'festival tickets', 'festival ticket', 'festival pass', 'festival passes', 'day pass', 'camping pass',
+  'acces general festival', 'abonament festival', 'despre festival', 'bilete festival',
   // Social/party games (non-nightlife music)
   'suspecti la party', 'suspecți la party', 'murder mystery', 'board game', 'boardgames', 'social game', 'games night',
   // Family/kids festivals
@@ -231,10 +292,7 @@ const STRONG_MUSIC_TERMS = [
 
 /** Returns genre array if music event, null if definitively non-music. */
 export function guessGenres(title: string, desc: string): string[] | null {
-  const normalize = (s: string) => (s || '')
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
+  const normalize = (s: string) => normalizeSearchText(s);
 
   const t = normalize(title) + ' ' + normalize(desc);
 
@@ -264,7 +322,7 @@ export function guessGenres(title: string, desc: string): string[] | null {
   // Soft blocks
   const isSoftBlocked = SOFT_BLOCK_TERMS.some(term => t.includes(normalize(term)));
   const isStrongMusic = STRONG_MUSIC_TERMS.some(sm => hasTerm(sm));
-  const hasMusicIntentInTitle = /\b(concert|live|dj|party|festival|tour|showcase|album|trupa|band)\b/.test(normalize(title));
+  const hasMusicIntentInTitle = /\b(concert|live|dj|party|tour|showcase|album|trupa|band)\b/.test(normalize(title));
 
   if (isSoftBlocked && !isStrongMusic && !hasMusicIntentInTitle) return null;
 
@@ -459,6 +517,38 @@ export function extractPriceFromOffers(offers: unknown): string | null {
   const min = prices[0];
   const max = prices[prices.length - 1];
   
+  if (min === 0 && max === 0) return 'Free';
+  if (min === 0) return `Free - ${max} ${currency}`;
+  return `${min} - ${max} ${currency}`;
+}
+
+export function extractPriceRangeFromText(text: string): string | null {
+  const normalizedText = cleanJsonLdText(text);
+  if (!normalizedText) return null;
+
+  const matches = Array.from(
+    normalizedText.matchAll(/(\d+(?:[.,]\d+)?)\s*(RON|lei|LEI|EUR|€)/gi),
+  );
+  if (matches.length === 0) return null;
+
+  const prices = matches
+    .map(match => parseFloat(match[1].replace(',', '.')))
+    .filter(price => !isNaN(price) && price >= 0 && price < 5000)
+    .sort((a, b) => a - b);
+
+  if (prices.length === 0) return null;
+
+  const unique = Array.from(new Set(prices));
+  const usesEuro = matches.some(match => /eur|€/i.test(match[2]));
+  const currency = usesEuro ? 'EUR' : 'RON';
+
+  if (unique.length === 1) {
+    return unique[0] === 0 ? 'Free' : `${unique[0]} ${currency}`;
+  }
+
+  const min = unique[0];
+  const max = unique[unique.length - 1];
+
   if (min === 0 && max === 0) return 'Free';
   if (min === 0) return `Free - ${max} ${currency}`;
   return `${min} - ${max} ${currency}`;
@@ -1005,6 +1095,8 @@ export async function parseDetailPage(
     // Skip location.name if it looks like a street address (some sites set it to the street address)
     const location = (b.location as Record<string, unknown>) ?? {};
     const addrBlock = (location.address as Record<string, unknown>) ?? {};
+    const venueName = clean(String(location.name ?? addrBlock.name ?? ''));
+    const htmlVenue = extractVenueFromHtml(html);
 
     // ── City verification (iabilet lists national events under Bucharest URL) ──
     if (allowedCities && allowedCities.length > 0) {
@@ -1019,8 +1111,6 @@ export async function parseDetailPage(
       }
     }
 
-    const venueName = clean(String(location.name ?? addrBlock.name ?? ''));
-    const htmlVenue = extractVenueFromHtml(html);
     // If venueHint looks like an address, try to salvage the venue name from it
     const resolvedVenueHint =
       venueHint && isAddressString(venueHint) ? extractVenueFromAddress(venueHint) : venueHint;

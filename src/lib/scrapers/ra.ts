@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml, extractPriceFromHtml, extractDescriptionFromHtml, cleanJsonLdText } from './utils';
+import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml, extractPriceFromHtml, extractDescriptionFromHtml, cleanJsonLdText, extractPriceRangeFromText } from './utils';
 
 /**
  * Extract ticket price(s) from a 2nite.ro event page.
@@ -49,6 +49,60 @@ async function extract2nitePrice(url: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+function normalizeRAVenueCandidate(candidate: string | null | undefined): string | null {
+  const cleaned = clean(candidate || '')
+    .replace(/\s*-\s*Bucharest$/i, '')
+    .trim();
+
+  if (!cleaned || /\btba\b/i.test(cleaned) || /venue tbc/i.test(cleaned)) {
+    return null;
+  }
+
+  return cleaned;
+}
+
+function extractRAVenueFromDescription(description: string): string | null {
+  const patterns = [
+    /\bcourtyard of ([A-Z][A-Za-z0-9&' .-]{2,60}?)(?:\s+Bucharest\b|,|\.|\s+as\b)/i,
+    /\binside ([A-Z][A-Za-z0-9&' .-]{2,60}?)(?:\s+Bucharest\b|,|\.|\s+at\b)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match) {
+      const venue = normalizeRAVenueCandidate(match[1]);
+      if (venue) return venue;
+    }
+  }
+
+  return null;
+}
+
+function extractRAVenue(html: string, description: string, venueHint: string | null): string {
+  const candidates = [
+    html.match(/"location"\s*:\s*\{[^}]*"name"\s*:\s*"([^"]+)"/i)?.[1],
+    html.match(/(?:Venue|Location)[\s\S]{0,300}?href=["'][^"']+(?:\/clubs\/|\/venues\/)[^"']*["'][^>]*>\s*(?:<span[^>]*>)?([^<]{2,80})/i)?.[1],
+    html.match(/(?:Venue|Location)[\s\S]{0,200}?<span[^>]*>\s*([^<]{2,80})\s*<\/span>/i)?.[1],
+    venueHint,
+    extractRAVenueFromDescription(description),
+  ];
+
+  for (const candidate of candidates) {
+    const venue = normalizeRAVenueCandidate(candidate);
+    if (venue) return venue;
+  }
+
+  return 'Venue TBC';
+}
+
+function extractRATicketTextPrice(html: string, description: string): string | null {
+  const ticketSection =
+    html.match(/(?:TICKETS?|BILETE)[\s\S]{0,1500}?(?:Cost|Min\. age|Event admin|Promotional links|<\/section>)/i)?.[0] ??
+    description;
+
+  return extractPriceRangeFromText(ticketSection);
 }
 
 const RA_GRAPHQL = 'https://ra.co/graphql';
@@ -144,10 +198,6 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     if (!date || date < today) return null;
     const time = startDate.includes('T') ? startDate.split('T')[1].slice(0, 5) : null;
 
-    // Venue
-    const venueMatch = html.match(/"location"\s*:\s*\{[^}]*"name"\s*:\s*"([^"]+)"/);
-    const venue = clean(venueMatch?.[1] || venueHint || 'Venue TBC');
-
     // Image
     const imageMatch = html.match(/"image"\s*:\s*\{[^}]*"url"\s*:\s*"([^"]+)"/) || html.match(/"image"\s*:\s*"([^"]+)"/);
     let image_url = imageMatch?.[1] || '';
@@ -160,6 +210,7 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     const jsonDesc = cleanJsonLdText(descMatch?.[1] || '');
     const htmlDesc = extractDescriptionFromHtml(html) || '';
     const description = htmlDesc.length > jsonDesc.length ? htmlDesc : jsonDesc;
+    const venue = extractRAVenue(html, description, venueHint);
 
     // CHECK FOR SOLD OUT - Strict word boundary check
     let isSoldOut = false;
@@ -222,8 +273,10 @@ export async function parseRADetailPage(url: string, city: string): Promise<Scra
     // Pattern B: Description Parsing (e.g., "50 lei • door deal")
     if (!price && !isSoldOut) {
       const descPriceRegex = /(\d+(?:[.,]\d+)?)\s*(?:lei|RON|EUR|€)/i;
+      const ticketTextPrice = extractRATicketTextPrice(html, description);
+      if (ticketTextPrice) price = ticketTextPrice;
       const descMatch = description.match(descPriceRegex);
-      if (descMatch) {
+      if (!price && descMatch) {
         const val = parseFloat(descMatch[1].replace(',', '.'));
         price = `${Math.round(val)} RON`;
         if (description.toLowerCase().includes('euro') || description.includes('€')) {
@@ -376,6 +429,7 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
           const gqlTicketLink = e.promotionalLinks?.find(pl => 
             pl.title.toLowerCase().includes('ticket') || 
             pl.url.toLowerCase().includes('iabilet.ro') ||
+            pl.url.toLowerCase().includes('ambilet.ro') ||
             pl.url.toLowerCase().includes('eventbook.ro') ||
             pl.url.toLowerCase().includes('livetickets.ro') ||
             pl.url.toLowerCase().includes('2nite.ro') ||
@@ -437,6 +491,7 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
           const gqlTicketLink = lEvent.promotionalLinks?.find(pl => 
             pl.title.toLowerCase().includes('ticket') || 
             pl.url.toLowerCase().includes('iabilet.ro') ||
+            pl.url.toLowerCase().includes('ambilet.ro') ||
             pl.url.toLowerCase().includes('eventbook.ro') ||
             pl.url.toLowerCase().includes('livetickets.ro') ||
             pl.url.toLowerCase().includes('entertix.ro') ||
@@ -460,7 +515,35 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
             }
           }
 
-          // 3. Fallback to Listing Cost
+          if (!dev.price && dev.event_url.includes('ra.co/events/')) {
+            const eventId = dev.event_url.split('/').pop();
+            if (eventId) {
+              const widgetUrl = `https://ra.co/widget/event/${eventId}/embedtickets`;
+              try {
+                const widgetHtml = await fetchHtml(widgetUrl);
+                const priceMatches = Array.from(widgetHtml.matchAll(/<div class="type-price">([\d.,]+)\s*(?:lei|RON|EUR|â‚¬)<\/div>/gi));
+                if (priceMatches.length > 0) {
+                  const numericPrices = priceMatches
+                    .map(m => parseFloat(m[1].replace(',', '.')))
+                    .filter(n => !isNaN(n))
+                    .sort((a, b) => a - b);
+                  if (numericPrices.length > 0) {
+                    const min = Math.round(numericPrices[0]);
+                    const max = Math.round(numericPrices[numericPrices.length - 1]);
+                    dev.price = min === max ? `${min} RON` : `${min} - ${max} RON`;
+                  }
+                }
+              } catch (e) { /* ignore */ }
+            }
+          }
+
+          // 3. Description / ticket copy beats the generic Cost field on RA
+          if (!dev.price) {
+            const descriptionPrice = extractPriceRangeFromText(dev.description ?? '');
+            if (descriptionPrice) dev.price = descriptionPrice;
+          }
+
+          // 4. Fallback to Listing Cost
           if ((!dev.price || dev.price === 'FREE') && lEvent.cost) {
             const numeric = parseFloat(lEvent.cost.replace(',', '.'));
             let fallbackPrice = isNaN(numeric) ? lEvent.cost : `${Math.round(numeric)} RON`;
@@ -499,10 +582,16 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
             if (turl.includes('2nite.ro')) {
               const p = await extract2nitePrice(turl);
               if (p) dev.price = p;
-            } else if (turl.includes('eventbook.ro') || turl.includes('livetickets.ro') || turl.includes('control-club.ro')) {
+            } else if (
+              turl.includes('ambilet.ro') ||
+              turl.includes('iabilet.ro') ||
+              turl.includes('eventbook.ro') ||
+              turl.includes('livetickets.ro') ||
+              turl.includes('control-club.ro')
+            ) {
               try {
                 const extHtml = await fetchHtml(turl);
-                const extPrice = extractPriceFromHtml(extHtml);
+                const extPrice = extractPriceFromHtml(extHtml, turl);
                 if (extPrice && extPrice !== 'FREE') dev.price = extPrice;
               } catch (e) { /* ignore */ }
             }

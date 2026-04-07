@@ -134,6 +134,46 @@ function normalizeInTensionToken(s: string): string {
     .trim();
 }
 
+function normalizeTitleWithoutPromoterPrefix(s: string): string {
+  if (!s) return '';
+  return normalizeForDedupeLoose(
+    s.replace(/^(?:[a-z0-9+&.'-]{2,}\s*(?:x|×)\s*){1,4}(?=[a-z0-9].{0,80}(?::|-|\[|\())/i, '')
+  );
+}
+
+function normalizeComparableUrl(url?: string | null): string {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '').toLowerCase();
+  } catch {
+    return url.trim().replace(/\/+$/, '').toLowerCase();
+  }
+}
+
+function priceStrength(price?: string | null): number {
+  if (!price) return 0;
+  const normalized = price.toLowerCase().trim();
+  if (!normalized) return 0;
+  if (/sold\s*out|sold-out|epuizat|unavailable/.test(normalized)) return 6;
+  const numericMatches = Array.from(normalized.matchAll(/(\d+(?:[.,]\d+)?)/g));
+  if (numericMatches.length >= 2) return 5;
+  if (numericMatches.length === 1) return 4;
+  if (/free|gratuit|intrare libera/.test(normalized)) return 3;
+  if (/door|at the door|cash|card/.test(normalized)) return 2;
+  return 1;
+}
+
+function pickStrongerPrice(current?: string | null, candidate?: string | null): string | undefined {
+  const currentStrength = priceStrength(current);
+  const candidateStrength = priceStrength(candidate);
+  if (candidateStrength > currentStrength) return candidate ?? undefined;
+  if (candidateStrength === currentStrength && (candidate?.length ?? 0) > (current?.length ?? 0)) {
+    return candidate ?? undefined;
+  }
+  return current ?? undefined;
+}
+
 interface ScrapeResult {
   source: Source;
   count: number;
@@ -304,13 +344,15 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       if (bestIsRA && otherIsCC) {
         if (other.date) best.date = other.date;           // CC date is authoritative
         if (other.time) best.time = other.time;           // CC time from the calendar
-        if (other.price === 'SOLD OUT') best.price = 'SOLD OUT';
-        else if (!best.price && other.price) best.price = other.price;
+        const mergedPrice = pickStrongerPrice(best.price, other.price);
+        if (mergedPrice) best.price = mergedPrice;
       }
       if (bestIsCC && otherIsRA) {
         if (!best.description && other.description) best.description = other.description;
         if (!best.ticket_url && other.ticket_url)   best.ticket_url  = other.ticket_url;
         if (!best.image_url  && other.image_url)    best.image_url   = other.image_url;
+        const mergedPrice = pickStrongerPrice(best.price, other.price);
+        if (mergedPrice) best.price = mergedPrice;
       }
 
       // General fallback for all other source combos
@@ -318,6 +360,8 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       if (!best.image_url   && other.image_url)   best.image_url   = other.image_url;
       if (!best.description && other.description) best.description = other.description;
       if (!best.time        && other.time)        best.time        = other.time;
+      const mergedPrice = pickStrongerPrice(best.price, other.price);
+      if (mergedPrice) best.price = mergedPrice;
       // RA-specific fallback: if RA is not the winner but another source lacked a ticket link
       if (bestIsRA && !best.ticket_url && !otherIsCC && other.event_url) {
         best.ticket_url = other.event_url;
@@ -589,7 +633,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   // (e.g. because (title,venue,date,source) is the existing unique constraint)
   const { data: allUpcoming } = await supabase
     .from('events')
-    .select('id, title, venue, date, time, source, ticket_url, event_url')
+    .select('id, title, venue, date, time, price, source, ticket_url, event_url, image_url, description')
     .gte('date', today);
 
   if (allUpcoming && allUpcoming.length > 0) {
@@ -629,7 +673,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     // Re-read after strict dedupe so clustering works on fresh set
     const { data: allUpcoming2 } = await supabase
       .from('events')
-      .select('id, title, venue, date, time, source, ticket_url, event_url')
+      .select('id, title, venue, date, time, price, source, ticket_url, event_url, image_url, description')
       .gte('date', today);
     const rowsForSweep = allUpcoming2 || allUpcoming;
 
@@ -663,10 +707,16 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       for (const event of eventsAtVenueDate) {
         let addedToCluster = false;
         const normTitle = normalizeForDedupe(event.title);
+        const promoterFreeTitle = normalizeTitleWithoutPromoterPrefix(event.title);
+        const eventTicketUrl = normalizeComparableUrl(event.ticket_url);
+        const eventUrl = normalizeComparableUrl(event.event_url);
 
         for (const cluster of clusters) {
           const leader = cluster[0];
           const leaderTitle = normalizeForDedupe(leader.title);
+          const leaderPromoterFreeTitle = normalizeTitleWithoutPromoterPrefix(leader.title);
+          const leaderTicketUrl = normalizeComparableUrl(leader.ticket_url);
+          const leaderEventUrl = normalizeComparableUrl(leader.event_url);
           
           // Fuzzy match: if titles are nearly identical or one is a significant substring of the other
           // We use 6 chars as a minimum for substring matching to avoid short false positives
@@ -678,10 +728,18 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
                            (normTitleLoose.includes('intension') && leaderTitleLoose.includes('intension')) ||
                            (normTitle.length > 6 && leaderTitle.includes(normTitle)) ||
                            (leaderTitle.length > 6 && normTitle.includes(leaderTitle)) ||
+                           (promoterFreeTitle.length > 6 && leaderPromoterFreeTitle.length > 6 && (
+                             promoterFreeTitle === leaderPromoterFreeTitle ||
+                             promoterFreeTitle.includes(leaderPromoterFreeTitle) ||
+                             leaderPromoterFreeTitle.includes(promoterFreeTitle)
+                           )) ||
                            // Prefix match: if both titles share the same first 10+ chars, they're likely the same event
                            (normTitle.length >= 10 && leaderTitle.length >= 10 && normTitle.slice(0, 10) === leaderTitle.slice(0, 10)) ||
                            // URL match: if they point to the exact same ticket listing (e.g. RA event link)
-                           (event.ticket_url && leader.ticket_url && event.ticket_url === leader.ticket_url && event.ticket_url.length > 20);
+                           (eventTicketUrl && leaderTicketUrl && eventTicketUrl === leaderTicketUrl && eventTicketUrl.length > 20) ||
+                           (eventUrl && leaderEventUrl && eventUrl === leaderEventUrl && eventUrl.length > 20) ||
+                           (eventTicketUrl && leaderEventUrl && eventTicketUrl === leaderEventUrl && eventTicketUrl.length > 20) ||
+                           (eventUrl && leaderTicketUrl && eventUrl === leaderTicketUrl && eventUrl.length > 20);
 
           if (isRelated) {
             cluster.push(event);
@@ -722,6 +780,11 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
             winner.time = loser.time;
             updatedWinner = true;
           }
+          const mergedPrice = pickStrongerPrice(winner.price, loser.price);
+          if (mergedPrice !== winner.price) {
+            winner.price = mergedPrice;
+            updatedWinner = true;
+          }
           idsToDelete.push(loser.id);
         }
 
@@ -729,7 +792,10 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
           console.log(`[orchestrator] sweeper: update winner "${winner.title}" (${winner.id})`);
           await supabase.from('events').update({ 
             ticket_url: winner.ticket_url,
+            image_url: winner.image_url,
+            description: winner.description,
             time: winner.time,
+            price: winner.price,
             updated_at: new Date().toISOString()
           }).eq('id', winner.id);
         }

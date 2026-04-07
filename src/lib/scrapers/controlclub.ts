@@ -22,6 +22,11 @@ interface EventStub {
   ticketUrl: string | null;
 }
 
+function extractEmbeddedTicketUrl(html: string): string | null {
+  const embeddedMatch = html.match(/"ticket_url":"(https:\\\/\\\/[^"]+)"/i);
+  return embeddedMatch ? embeddedMatch[1].replace(/\\\//g, '/') : null;
+}
+
 /**
  * Parse event stubs from the listing page HTML.
  * The page has links like:
@@ -120,6 +125,7 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
 
     const description = clean(og['og:description'] || og['description'] || '') || null;
     const image_url = og['og:image'] || '';
+    const embeddedTicketUrl = extractEmbeddedTicketUrl(html);
 
     // Control Club is trusted source; keep events even if generic genre heuristics are uncertain.
     // This prevents valid venue events from being dropped by aggressive global filters.
@@ -239,6 +245,8 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     const raLinkMatch = html.match(/href=["'](https?:\/\/ra\.co\/events\/\d+)["']/i);
     if (stub.ticketUrl) {
       ticket_url = stub.ticketUrl;
+    } else if (embeddedTicketUrl) {
+      ticket_url = embeddedTicketUrl;
     } else if (ticketFromBottom) {
       ticket_url = ticketFromBottom;
     } else {
@@ -248,7 +256,7 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     }
 
     // Proactive external price fetching if price is missing
-    if (!price && ticket_url) {
+    if ((!price || /^door$/i.test(price)) && ticket_url) {
       try {
         if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('iabilet.ro') || ticket_url.includes('ambilet.ro')) {
           const extHtml = await fetchHtml(ticket_url);

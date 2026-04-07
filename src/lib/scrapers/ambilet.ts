@@ -13,11 +13,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { fetchHtml, batchFetch } from './utils';
+import { fetchHtml, batchFetch, containsUnexpectedCitySignal } from './utils';
 
 const LIST_URLS = [
-  { url: 'https://www.ambilet.ro/orase/bucuresti/', city: 'Bucharest' },
-  { url: 'https://www.ambilet.ro/orase/constanta/', city: 'Constanta' },
+  {
+    url: 'https://www.ambilet.ro/orase/bucuresti/',
+    city: 'Bucharest',
+    allowedCities: ['bucuresti', 'bucharest', 'ilfov', 'sector'],
+  },
+  {
+    url: 'https://www.ambilet.ro/orase/constanta/',
+    city: 'Constanta',
+    allowedCities: ['constanta', 'mamaia', 'corbu', 'culmea', 'costinesti', 'eforie', 'mangalia', 'navodari', 'vama veche', '2 mai'],
+  },
 ];
 const BASE_URL = 'https://www.ambilet.ro';
 
@@ -60,15 +68,18 @@ export async function scrapeAmbilet(settings?: { scan_depth?: number; concurrenc
   const limit = Math.max(20, Math.min(settings?.scan_depth ?? 60, 80));
   const batchSize = Math.max(3, Math.min(settings?.concurrency ?? 5, 6));
 
-  for (const { url, city } of LIST_URLS) {
+  for (const { url, city, allowedCities } of LIST_URLS) {
     try {
       const html = await fetchHtml(url, 15_000);
       const eventUrls = extractEventUrls(html);
       console.log(`[ambilet] ${city}: ${eventUrls.length} candidate URLs (slug-filtered)`);
 
-      const events = await batchFetch(eventUrls, city, { limit, batchSize });
-      console.log(`[ambilet] ${city}: kept ${events.length} music events`);
-      allEvents.push(...events);
+      const events = await batchFetch(eventUrls, city, { limit, batchSize, allowedCities });
+      const filteredEvents = events.filter(event =>
+        !containsUnexpectedCitySignal([event.title, event.venue, event.description].filter(Boolean).join(' '), allowedCities),
+      );
+      console.log(`[ambilet] ${city}: kept ${filteredEvents.length} music events`);
+      allEvents.push(...filteredEvents);
     } catch (err) {
       console.warn(`[ambilet] failed for ${url}:`, err);
     }
