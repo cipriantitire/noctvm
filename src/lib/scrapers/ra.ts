@@ -7,6 +7,7 @@
 
 import { ScrapedEvent } from './types';
 import { parseDate, clean, guessGenres, splitTitleVenue, fetchHtml, extractPriceFromHtml, extractDescriptionFromHtml, cleanJsonLdText, extractPriceRangeFromText } from './utils';
+import { fetchLiveticketsEventByUrl, formatLiveticketsPrice } from './livetickets';
 
 /**
  * Extract ticket price(s) from a 2nite.ro event page.
@@ -103,6 +104,30 @@ function extractRATicketTextPrice(html: string, description: string): string | n
     description;
 
   return extractPriceRangeFromText(ticketSection);
+}
+
+function scoreRAPrice(price?: string | null): number {
+  if (!price) return 0;
+  const normalized = price.toLowerCase().trim();
+  if (!normalized) return 0;
+  if (/sold\s*out|sold-out|epuizat|unavailable/.test(normalized)) return 6;
+  const numericMatches = Array.from(normalized.matchAll(/(\d+(?:[.,]\d+)?)/g));
+  if (numericMatches.length >= 2) return 5;
+  if (numericMatches.length === 1) return 4;
+  if (/free|gratuit|intrare libera/.test(normalized)) return 3;
+  if (/door|at the door|cash|card/.test(normalized)) return 2;
+  return 1;
+}
+
+function pickBetterRAPrice(current?: string | null, candidate?: string | null, preferCandidate = false): string | null {
+  if (!candidate) return current ?? null;
+  if (preferCandidate) return candidate;
+
+  const currentScore = scoreRAPrice(current);
+  const candidateScore = scoreRAPrice(candidate);
+  if (candidateScore > currentScore) return candidate;
+  if (candidateScore === currentScore && (candidate?.length ?? 0) > (current?.length ?? 0)) return candidate;
+  return current ?? null;
 }
 
 const RA_GRAPHQL = 'https://ra.co/graphql';
@@ -576,23 +601,33 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
             }
           }
 
-          // 5. PROACTIVE EXTERNAL SCRAPING (If price is still missing)
-          if (!dev.price && dev.ticket_url) {
+          // 5. PROACTIVE EXTERNAL SCRAPING
+          if (dev.ticket_url) {
             const turl = dev.ticket_url;
-            if (turl.includes('2nite.ro')) {
+            if (turl.includes('livetickets.ro')) {
+              try {
+                const liveticketsItem = await fetchLiveticketsEventByUrl(turl);
+                const liveticketsPrice = liveticketsItem ? formatLiveticketsPrice(liveticketsItem) : null;
+                if (liveticketsPrice) {
+                  dev.price = pickBetterRAPrice(dev.price, liveticketsPrice, true);
+                }
+              } catch (e) { /* ignore */ }
+            } else if (turl.includes('2nite.ro')) {
               const p = await extract2nitePrice(turl);
-              if (p) dev.price = p;
+              if (p) dev.price = pickBetterRAPrice(dev.price, p, true);
             } else if (
               turl.includes('ambilet.ro') ||
               turl.includes('iabilet.ro') ||
               turl.includes('eventbook.ro') ||
-              turl.includes('livetickets.ro') ||
               turl.includes('control-club.ro')
             ) {
               try {
                 const extHtml = await fetchHtml(turl);
                 const extPrice = extractPriceFromHtml(extHtml, turl);
-                if (extPrice && extPrice !== 'FREE') dev.price = extPrice;
+                if (extPrice && extPrice !== 'FREE') {
+                  const isExternalSeller = /(ambilet|iabilet|eventbook|livetickets)\.ro/i.test(turl);
+                  dev.price = pickBetterRAPrice(dev.price, extPrice, isExternalSeller);
+                }
               } catch (e) { /* ignore */ }
             }
           }

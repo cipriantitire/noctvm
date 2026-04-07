@@ -8,10 +8,12 @@
 import { ScrapedEvent } from './types';
 import { parseDate, extractTime, clean, guessGenres } from './utils';
 
-// Single unfiltered fetch — the API has no working city filter param;
-// we fetch all Romanian events and filter client-side.
-const API_URL =
-  'https://api.livetickets.ro/public/event-search?spc.numberOfRecords=200&spc.pageNumber=1';
+// The API has no working city filter param; fetch all Romanian events and
+// filter client-side. Important: page 1 is not enough. Relevant events can sit
+// on later pages, which leaves weaker aggregator rows alive.
+const API_BASE_URL = 'https://api.livetickets.ro/public/event-search';
+const PAGE_SIZE = 200;
+const MAX_PAGES = 5;
 const IMG_CDN = 'https://livetickets-cdn.azureedge.net/itemimages/';
 const WEB_BASE = 'https://www.livetickets.ro';
 
@@ -23,12 +25,14 @@ const API_HEADERS = {
 };
 
 interface LiveticketsItem {
+  event_id?: string;
   name?: string;
   start_date?: string;
   description?: string;
   image?: string;
   url?: string;
   price_min?: number | string;
+  price_max?: number | string;
   currency?: { symbol?: string };
   image_token?: string;
   // Venue can come from multiple fields depending on API version
@@ -39,6 +43,81 @@ interface LiveticketsItem {
   place_name?: string;
   city?: string;
   city_name?: string;
+}
+
+let liveticketsItemsPromise: Promise<LiveticketsItem[]> | null = null;
+
+function buildApiUrl(pageNumber: number): string {
+  return `${API_BASE_URL}?spc.numberOfRecords=${PAGE_SIZE}&spc.pageNumber=${pageNumber}`;
+}
+
+function normalizeLiveticketsSlug(url: string): string {
+  try {
+    const parsed = new URL(url, WEB_BASE);
+    const marker = '/bilete/';
+    const idx = parsed.pathname.toLowerCase().indexOf(marker);
+    if (idx === -1) return '';
+    return parsed.pathname.slice(idx + marker.length).replace(/^\/+|\/+$/g, '').toLowerCase();
+  } catch {
+    const marker = '/bilete/';
+    const lower = url.toLowerCase();
+    const idx = lower.indexOf(marker);
+    return idx === -1 ? '' : lower.slice(idx + marker.length).replace(/^\/+|\/+$/g, '');
+  }
+}
+
+export function formatLiveticketsPrice(item: LiveticketsItem): string | null {
+  const priceMin = parseFloat(String(item.price_min ?? ''));
+  const priceMax = parseFloat(String(item.price_max ?? ''));
+  const currency = item.currency?.symbol ?? 'RON';
+
+  if (isNaN(priceMin)) return null;
+  if (priceMin === 0 && (isNaN(priceMax) || priceMax === 0)) return 'Free';
+  if (!isNaN(priceMax) && priceMax > priceMin) return `${priceMin} - ${priceMax} ${currency}`;
+  return `${priceMin} ${currency}`;
+}
+
+async function fetchLiveticketsPage(pageNumber: number): Promise<LiveticketsItem[]> {
+  const res = await fetch(buildApiUrl(pageNumber), { headers: API_HEADERS });
+  if (!res.ok) throw new Error(`HTTP ${res.status} on page ${pageNumber}`);
+
+  const data = (await res.json()) as { events?: { items?: LiveticketsItem[] } };
+  return data.events?.items ?? [];
+}
+
+async function fetchAllLiveticketsItems(): Promise<LiveticketsItem[]> {
+  if (!liveticketsItemsPromise) {
+    liveticketsItemsPromise = (async () => {
+      const allItems: LiveticketsItem[] = [];
+      const seen = new Set<string>();
+
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const items = await fetchLiveticketsPage(page);
+        console.log(`[livetickets] API page ${page} returned ${items.length} raw items`);
+
+        for (const item of items) {
+          const dedupeKey = item.event_id ?? item.url ?? `${item.name ?? ''}|${item.start_date ?? ''}`;
+          if (seen.has(dedupeKey)) continue;
+          seen.add(dedupeKey);
+          allItems.push(item);
+        }
+
+        if (items.length < PAGE_SIZE) break;
+      }
+
+      return allItems;
+    })();
+  }
+
+  return liveticketsItemsPromise;
+}
+
+export async function fetchLiveticketsEventByUrl(url: string): Promise<LiveticketsItem | null> {
+  const slug = normalizeLiveticketsSlug(url);
+  if (!slug) return null;
+
+  const items = await fetchAllLiveticketsItems();
+  return items.find(item => (item.url ?? '').toLowerCase() === slug) ?? null;
 }
 
 /** Resolve the best venue name from an API item. */
@@ -116,12 +195,8 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    const res = await fetch(API_URL, { headers: API_HEADERS });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = (await res.json()) as { events?: { items?: LiveticketsItem[] } };
-    const items = data.events?.items ?? [];
-    console.log(`[livetickets] API returned ${items.length} raw items`);
+    const items = await fetchAllLiveticketsItems();
+    console.log(`[livetickets] API returned ${items.length} raw items after pagination`);
 
     for (const item of items) {
       const startDate = String(item.start_date ?? '');
@@ -146,19 +221,7 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
         : '';
       const event_url = resolveUrl(item);
 
-      const priceMin = parseFloat(String(item.price_min ?? ''));
-      const priceMax = parseFloat(String((item as any).price_max ?? ''));
-      
-      let price: string | null = null;
-      if (!isNaN(priceMin)) {
-        if (priceMin === 0 && (isNaN(priceMax) || priceMax === 0)) {
-          price = 'Free';
-        } else if (!isNaN(priceMax) && priceMax > priceMin) {
-          price = `${priceMin} - ${priceMax} ${item.currency?.symbol ?? 'RON'}`;
-        } else {
-          price = `${priceMin} ${item.currency?.symbol ?? 'RON'}`;
-        }
-      }
+      const price = formatLiveticketsPrice(item);
 
       const genres = guessGenres(title, description ?? '');
       if (!genres) continue;
@@ -171,6 +234,7 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
         description,
         image_url,
         event_url,
+        ticket_url: event_url,
         genres,
         price,
         city,

@@ -58,6 +58,8 @@ const VENUE_ALIASES: Record<string, string> = {
   'nuba club':               'Nuba Beach Club',
   'platforma wolff':         'Platforma Wolff',
   'wolff':                   'Platforma Wolff',
+  'beraria h':               'Beraria H',
+  'berăria h':               'Beraria H',
   // Restaurant Dorna — strip HTML entities / bullet variants
   'restaurant dorna mamaia &bull; zile și nopți': 'Restaurant Dorna Mamaia',
   'restaurant dorna mamaia • zile și nopți':      'Restaurant Dorna Mamaia',
@@ -145,9 +147,30 @@ function normalizeComparableUrl(url?: string | null): string {
   if (!url) return '';
   try {
     const parsed = new URL(url);
-    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '').toLowerCase();
+    const cleanedParams = Array.from(parsed.searchParams.entries())
+      .filter(([key]) => !/^(utm_|fbclid$|gclid$|ref$|refsrc$|mc_cid$|mc_eid$|aem_)/i.test(key))
+      .sort(([a], [b]) => a.localeCompare(b));
+
+    const query = cleanedParams.length > 0
+      ? `?${cleanedParams.map(([key, value]) => `${key}=${value}`).join('&')}`
+      : '';
+
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '').toLowerCase() + query.toLowerCase();
   } catch {
     return url.trim().replace(/\/+$/, '').toLowerCase();
+  }
+}
+
+function comparableUrlKey(url?: string | null): string {
+  const normalized = normalizeComparableUrl(url);
+  if (!normalized) return '';
+
+  try {
+    const parsed = new URL(normalized);
+    if (!parsed.pathname || parsed.pathname === '/') return '';
+    return normalized;
+  } catch {
+    return /^https?:\/\/[^/]+\/.+/i.test(normalized) ? normalized : '';
   }
 }
 
@@ -172,6 +195,23 @@ function pickStrongerPrice(current?: string | null, candidate?: string | null): 
     return candidate ?? undefined;
   }
   return current ?? undefined;
+}
+
+function parseTimeToMinutes(time?: string | null): number | null {
+  if (!time) return null;
+  const match = time.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+  return hours * 60 + minutes;
+}
+
+function diffDays(dateA: string, dateB: string): number | null {
+  const a = new Date(`${dateA}T00:00:00Z`);
+  const b = new Date(`${dateB}T00:00:00Z`);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return null;
+  return Math.round(Math.abs(a.getTime() - b.getTime()) / 86400000);
 }
 
 interface ScrapeResult {
@@ -424,7 +464,6 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   }
 
   // ── Normalize venue city values (Constanța with ț → Constanta without) ──────
-  await supabase.from('venues').update({ city: 'Constanta' }).eq('city', 'Constanța');
 
   // ── Clean legacy artifacts from previous scraper versions ────────────────────
   // 1. Titles stored as "Event @ Venue" (now stripped at scrape time)
@@ -434,8 +473,6 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     supabase.from('events').delete().like('title', '% @ %'),
     supabase.from('events').delete().like('title', '% @%'),
     ...ADDRESS_PREFIXES.map(p => supabase.from('events').delete().ilike('venue', p)),
-    // Also purge address-string venue names from the venues table
-    ...ADDRESS_PREFIXES.map(p => supabase.from('venues').delete().ilike('name', p)),
   ]);
 
   // ── Purge specifically bad venue entries ─────────────────────────────────────
@@ -514,7 +551,6 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   ];
   await Promise.all([
     ...BAD_VENUES_EVENTS.map(v => supabase.from('events').delete().eq('venue', v)),
-    ...BAD_VENUES_VENUES_TABLE.map(v => supabase.from('venues').delete().eq('name', v)),
     // Merge duplicate Quantic rows in events table (rename "Quantic Club" → "Quantic")
     supabase.from('events').update({ venue: 'Quantic' }).eq('venue', 'Quantic Club'),
     // Merge duplicate Doors rows (rename "Club Doors" → "Doors Club")
@@ -587,46 +623,13 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     }
   }
 
-  // ── Auto-sync venues from scraped events ──────────────────────────────────
-  // Insert new venues discovered from events; never overwrite existing data.
-  const venueMap = new Map<string, { city: string; genres: Set<string> }>();
-  for (const row of unique) {
-    if (!isValidVenueName(row.venue)) continue;
-    const existing = venueMap.get(row.venue);
-    if (existing) {
-      row.genres.forEach(g => existing.genres.add(g));
-    } else {
-      venueMap.set(row.venue, { city: row.city, genres: new Set(row.genres) });
-    }
-  }
-
-  if (venueMap.size > 0) {
-    const venueRows = Array.from(venueMap.entries()).map(([name, data]) => ({
-      name,
-      city:    data.city,
-      genres:  Array.from(data.genres),
-      address: '',
-    }));
-
-    // Insert new venues discovered from events; ignoreDuplicates: true ensures we never overwrite old ones
-    console.log(`[orchestrator] found ${venueRows.length} potential venues to sync`);
-    
-    for (const cityGroup of ['Bucharest', 'Constanta']) {
-      const batch = venueRows.filter(v => v.city === cityGroup);
-      if (batch.length === 0) continue;
-      
-      const { data: newVenues, error: ve } = await supabase
-        .from('venues')
-        .upsert(batch, { onConflict: 'name', ignoreDuplicates: true })
-        .select('name');
-        
-      if (ve) {
-        console.warn(`[orchestrator] venue sync error (${cityGroup}): ${ve.message}`);
-      } else if (newVenues && newVenues.length > 0) {
-        console.log(`[orchestrator] added ${newVenues.length} new ${cityGroup} venues`);
-      }
-    }
-  }
+  // ── Venue sync disabled ───────────────────────────────────────────────────
+  // Venues are curated manually. Scrapes must not mutate the venues table or
+  // reintroduce duplicates when editors are cleaning venue records.
+  const unmatchedVenues = Array.from(
+    new Set(unique.map(row => row.venue).filter(name => isValidVenueName(name)))
+  );
+  console.log(`[orchestrator] venue auto-sync disabled; ${unmatchedVenues.length} scraped venue names observed this run`);
 
   // ── Global duplicate sweeper ───────────────────────────────────────────────
   // Fetch all upcoming events and manually prune duplicates that survived upsert
@@ -708,38 +711,38 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
         let addedToCluster = false;
         const normTitle = normalizeForDedupe(event.title);
         const promoterFreeTitle = normalizeTitleWithoutPromoterPrefix(event.title);
-        const eventTicketUrl = normalizeComparableUrl(event.ticket_url);
-        const eventUrl = normalizeComparableUrl(event.event_url);
+        const eventTicketUrl = comparableUrlKey(event.ticket_url);
+        const eventUrl = comparableUrlKey(event.event_url);
 
         for (const cluster of clusters) {
           const leader = cluster[0];
           const leaderTitle = normalizeForDedupe(leader.title);
           const leaderPromoterFreeTitle = normalizeTitleWithoutPromoterPrefix(leader.title);
-          const leaderTicketUrl = normalizeComparableUrl(leader.ticket_url);
-          const leaderEventUrl = normalizeComparableUrl(leader.event_url);
+          const leaderTicketUrl = comparableUrlKey(leader.ticket_url);
+          const leaderEventUrl = comparableUrlKey(leader.event_url);
           
-          // Fuzzy match: if titles are nearly identical or one is a significant substring of the other
-          // We use 6 chars as a minimum for substring matching to avoid short false positives
+          // Keep same-day dedupe conservative. Loose substring/prefix heuristics were
+          // collapsing distinct lineups at the same venue on the same night.
           const normTitleLoose = normalizeInTensionToken(event.title);
           const leaderTitleLoose = normalizeInTensionToken(leader.title);
 
-          const isRelated = normTitle === leaderTitle || 
-                           // Explicit alias bridge for inTension/intension variants
-                           (normTitleLoose.includes('intension') && leaderTitleLoose.includes('intension')) ||
-                           (normTitle.length > 6 && leaderTitle.includes(normTitle)) ||
-                           (leaderTitle.length > 6 && normTitle.includes(leaderTitle)) ||
-                           (promoterFreeTitle.length > 6 && leaderPromoterFreeTitle.length > 6 && (
-                             promoterFreeTitle === leaderPromoterFreeTitle ||
-                             promoterFreeTitle.includes(leaderPromoterFreeTitle) ||
-                             leaderPromoterFreeTitle.includes(promoterFreeTitle)
-                           )) ||
-                           // Prefix match: if both titles share the same first 10+ chars, they're likely the same event
-                           (normTitle.length >= 10 && leaderTitle.length >= 10 && normTitle.slice(0, 10) === leaderTitle.slice(0, 10)) ||
-                           // URL match: if they point to the exact same ticket listing (e.g. RA event link)
-                           (eventTicketUrl && leaderTicketUrl && eventTicketUrl === leaderTicketUrl && eventTicketUrl.length > 20) ||
-                           (eventUrl && leaderEventUrl && eventUrl === leaderEventUrl && eventUrl.length > 20) ||
-                           (eventTicketUrl && leaderEventUrl && eventTicketUrl === leaderEventUrl && eventTicketUrl.length > 20) ||
-                           (eventUrl && leaderTicketUrl && eventUrl === leaderTicketUrl && eventUrl.length > 20);
+          const sameMeaningfulUrl =
+            (eventTicketUrl && leaderTicketUrl && eventTicketUrl === leaderTicketUrl && eventTicketUrl.length > 20) ||
+            (eventUrl && leaderEventUrl && eventUrl === leaderEventUrl && eventUrl.length > 20) ||
+            (eventTicketUrl && leaderEventUrl && eventTicketUrl === leaderEventUrl && eventTicketUrl.length > 20) ||
+            (eventUrl && leaderTicketUrl && eventUrl === leaderTicketUrl && eventUrl.length > 20);
+
+          const promoterFreeExact =
+            promoterFreeTitle.length > 6 &&
+            leaderPromoterFreeTitle.length > 6 &&
+            promoterFreeTitle === leaderPromoterFreeTitle;
+
+          const isRelated =
+            normTitle === leaderTitle ||
+            promoterFreeExact ||
+            sameMeaningfulUrl ||
+            // Explicit alias bridge for inTension/intension variants
+            (normTitleLoose.includes('intension') && leaderTitleLoose.includes('intension'));
 
           if (isRelated) {
             cluster.push(event);
@@ -791,6 +794,131 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
         if (updatedWinner) {
           console.log(`[orchestrator] sweeper: update winner "${winner.title}" (${winner.id})`);
           await supabase.from('events').update({ 
+            ticket_url: winner.ticket_url,
+            image_url: winner.image_url,
+            description: winner.description,
+            time: winner.time,
+            price: winner.price,
+            updated_at: new Date().toISOString()
+          }).eq('id', winner.id);
+        }
+      }
+    }
+
+    // Pass 2: merge overnight duplicates that split across adjacent dates
+    // (e.g. venue calendar says 22:00 on Friday, aggregator says 01:00 on Saturday).
+    const deletedIds = new Set(idsToDelete);
+    const venueGroups = new Map<string, any[]>();
+    for (const row of rowsForSweep) {
+      if (deletedIds.has(row.id)) continue;
+      const vNorm = normalizeVenue(row.venue, row.title);
+      if (!venueGroups.has(vNorm)) venueGroups.set(vNorm, []);
+      venueGroups.get(vNorm)!.push(row);
+    }
+
+    for (const eventsAtVenue of Array.from(venueGroups.values())) {
+      if (eventsAtVenue.length <= 1) continue;
+
+      const clusters: any[][] = [];
+      const priority = (s: string) => {
+        if (s === 'manual') return 100;
+        if (s === 'controlclub') return 11;
+        if (s === 'livetickets') return 10;
+        if (s === 'ra') return 9;
+        if (s === 'eventbook') return 8;
+        if (s === 'iabilet') return 7;
+        return 1;
+      };
+
+      const isCrossMidnightDuplicate = (a: any, b: any): boolean => {
+        const dayGap = diffDays(a.date, b.date);
+        if (dayGap !== 1) return false;
+
+        const aMinutes = parseTimeToMinutes(a.time);
+        const bMinutes = parseTimeToMinutes(b.time);
+        if (aMinutes === null || bMinutes === null) return false;
+
+        const overnight =
+          (aMinutes >= 20 * 60 && bMinutes <= 6 * 60) ||
+          (bMinutes >= 20 * 60 && aMinutes <= 6 * 60);
+        if (!overnight) return false;
+
+        const aNormTitle = normalizeForDedupe(a.title);
+        const bNormTitle = normalizeForDedupe(b.title);
+        const aPromoterFreeTitle = normalizeTitleWithoutPromoterPrefix(a.title);
+        const bPromoterFreeTitle = normalizeTitleWithoutPromoterPrefix(b.title);
+        const aTicketUrl = comparableUrlKey(a.ticket_url);
+        const bTicketUrl = comparableUrlKey(b.ticket_url);
+        const aEventUrl = comparableUrlKey(a.event_url);
+        const bEventUrl = comparableUrlKey(b.event_url);
+
+        const sameMeaningfulUrl =
+          (aTicketUrl && bTicketUrl && aTicketUrl === bTicketUrl) ||
+          (aEventUrl && bEventUrl && aEventUrl === bEventUrl) ||
+          (aTicketUrl && bEventUrl && aTicketUrl === bEventUrl) ||
+          (aEventUrl && bTicketUrl && aEventUrl === bTicketUrl);
+
+        if (sameMeaningfulUrl) return true;
+
+        return (
+          aNormTitle === bNormTitle ||
+          (aPromoterFreeTitle.length > 8 &&
+            bPromoterFreeTitle.length > 8 &&
+            aPromoterFreeTitle === bPromoterFreeTitle)
+        );
+      };
+
+      for (const event of eventsAtVenue) {
+        let addedToCluster = false;
+        for (const cluster of clusters) {
+          if (cluster.some(existing => isCrossMidnightDuplicate(event, existing))) {
+            cluster.push(event);
+            addedToCluster = true;
+            break;
+          }
+        }
+        if (!addedToCluster) clusters.push([event]);
+      }
+
+      for (const cluster of clusters) {
+        if (cluster.length <= 1) continue;
+
+        cluster.sort((a, b) => priority(b.source) - priority(a.source));
+        const winner = cluster[0];
+        const losers = cluster.slice(1);
+
+        let updatedWinner = false;
+        for (const loser of losers) {
+          if (deletedIds.has(loser.id)) continue;
+          console.log(`[orchestrator] sweeper: cross-midnight duplicate "${loser.title}" (${loser.source}) -> keeping "${winner.title}" (${winner.source})`);
+          if (!winner.ticket_url && loser.ticket_url) {
+            winner.ticket_url = loser.ticket_url;
+            updatedWinner = true;
+          }
+          if (!winner.image_url && loser.image_url) {
+            winner.image_url = loser.image_url;
+            updatedWinner = true;
+          }
+          if (!winner.description && loser.description) {
+            winner.description = loser.description;
+            updatedWinner = true;
+          }
+          if (!winner.time && loser.time) {
+            winner.time = loser.time;
+            updatedWinner = true;
+          }
+          const mergedPrice = pickStrongerPrice(winner.price, loser.price);
+          if (mergedPrice !== winner.price) {
+            winner.price = mergedPrice;
+            updatedWinner = true;
+          }
+          idsToDelete.push(loser.id);
+          deletedIds.add(loser.id);
+        }
+
+        if (updatedWinner) {
+          console.log(`[orchestrator] sweeper: update winner "${winner.title}" (${winner.id})`);
+          await supabase.from('events').update({
             ticket_url: winner.ticket_url,
             image_url: winner.image_url,
             description: winner.description,
