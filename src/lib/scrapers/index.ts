@@ -227,6 +227,27 @@ export interface FetchSummary {
   results: ScrapeResult[];
 }
 
+type HistoricalScraperLog = {
+  source?: string | null;
+  total_upserted?: number | null;
+  results?: Array<{ source?: string | null; count?: number | null }> | null;
+};
+
+function extractHistoricalSourceCount(log: HistoricalScraperLog, source: Source): number | null {
+  if (log.source === source) {
+    const directCount = log.results?.find((entry) => entry.source === source)?.count;
+    if (typeof directCount === 'number') return directCount;
+    return typeof log.total_upserted === 'number' ? log.total_upserted : null;
+  }
+
+  if (log.source === 'all') {
+    const nestedCount = log.results?.find((entry) => entry.source === source)?.count;
+    return typeof nestedCount === 'number' ? nestedCount : null;
+  }
+
+  return null;
+}
+
 const SCRAPERS: [Source, (settings?: ScraperSettings) => Promise<ScrapedEvent[]>][] = [
   ['zilesinopti', scrapeZilesinopti],
   ['iabilet',     scrapeIabilet],
@@ -946,6 +967,40 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   // after it has passed. Only prune rows that have been stale for a long time.
   // Exception: never delete SOLD OUT events — they have historical value.
   const activeSourcesWithEvents = results.filter(r => r.count > 0).map(r => r.source);
+  const { data: historicalLogs } = await supabase
+    .from('scraper_logs')
+    .select('source, total_upserted, results')
+    .order('run_date', { ascending: false })
+    .limit(40);
+
+  for (const src of activeSourcesWithEvents) {
+    const currentCount = results.find((result) => result.source === src)?.count ?? 0;
+    const previousCounts = ((historicalLogs || []) as HistoricalScraperLog[])
+      .map((log) => extractHistoricalSourceCount(log, src))
+      .filter((count): count is number => typeof count === 'number' && count > 0)
+      .slice(0, 3);
+
+    const historicalBaseline = previousCounts.length > 0 ? Math.max(...previousCounts) : null;
+    const minimumTrustedCount = historicalBaseline
+      ? Math.max(5, Math.floor(historicalBaseline * 0.6))
+      : 5;
+
+    if (historicalBaseline && currentCount < minimumTrustedCount) {
+      console.warn(
+        `[orchestrator] skipping stale future cleanup for ${src}: current count ${currentCount} is below trusted threshold ${minimumTrustedCount} (baseline ${historicalBaseline})`,
+      );
+      continue;
+    }
+
+    const { error: staleFutureErr } = await supabase
+      .from('events')
+      .delete()
+      .eq('source', src)
+      .gte('date', today)
+      .lt('updated_at', runStart);
+    if (staleFutureErr) console.warn(`[orchestrator] stale future cleanup error for ${src}:`, staleFutureErr.message);
+  }
+
   const archiveRetentionDays = 365;
   const archiveCutoffIso = new Date(Date.now() - archiveRetentionDays * 24 * 60 * 60 * 1000).toISOString();
   for (const src of activeSourcesWithEvents) {

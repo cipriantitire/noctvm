@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { logActivity } from '@/lib/activity';
 import ScraperSettingsModal from './ScraperSettingsModal';
+import VenueCleanupPanel from './VenueCleanupPanel';
 
 interface ScraperSource {
   id: string;
@@ -172,6 +173,8 @@ export default function ScraperManager() {
           {loading ? 'Processing...' : 'Full System Scrape'}
         </button>
       </div>
+
+      <VenueCleanupPanel accessToken={session?.access_token} />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden frosted-noise shadow-xl">

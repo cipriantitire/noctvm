@@ -154,10 +154,13 @@ function matchesCity(item: LiveticketsItem, expectedCity: string): boolean {
   const rawCity   = clean(item.city_name ?? item.city ?? '').toLowerCase();
   const rawVenue  = clean(item.venue_name ?? item.venue ?? item.place_name ?? item.place ?? item.location ?? '').toLowerCase();
   const rawName   = clean(item.name ?? '').toLowerCase();
+  const rawDescription = clean((item.description ?? '').replace(/<[^>]+>/g, ' ')).toLowerCase();
+  const rawUrl = clean(item.url ?? '').toLowerCase();
 
   // Reject anything with a confirmed foreign-country/city hint in any field
-  const textToCheck = `${rawCity} ${rawVenue} ${rawName}`;
-  if (FOREIGN_HINTS.some(h => textToCheck.includes(h))) return false;
+  const textToCheck = `${rawCity} ${rawVenue} ${rawName} ${rawDescription} ${rawUrl}`;
+  const allForeignHints = [...FOREIGN_HINTS, 'bulgaria', 'varna', 'golden sands', 'black sea coast'];
+  if (allForeignHints.some(h => textToCheck.includes(h))) return false;
 
   // Other Romanian cities — if found in name/venue, reject for both Bucharest and Constanta
   const OTHER_RO_CITIES = [
