@@ -115,8 +115,8 @@ function inferGenresFromZileSiNoptiCard(stub: ZileSiNoptiStub): string[] | null 
     .replace(/[\u0300-\u036f]/g, '');
 
   if (/\bparty\b|\bnights?\b/.test(text)) return ['Party'];
-  if (/\bdj set\b|electronic|club|dance/.test(text)) return ['Electronic'];
   if (/concerte|concert|greek music|pop-rock|rock|muzica|music|band/.test(text)) return ['Live Music'];
+  if (/\bdj set\b|electronic|club|dance/.test(text)) return ['Electronic'];
   return null;
 }
 

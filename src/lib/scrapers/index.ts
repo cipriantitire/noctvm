@@ -158,7 +158,7 @@ function hasSameCoreLineup(a: string, b: string): boolean {
 
   const aCompact = aCore.replace(/\s+/g, '');
   const bCompact = bCore.replace(/\s+/g, '');
-  if (Math.min(aCompact.length, bCompact.length) >= 12 && (aCompact.includes(bCompact) || bCompact.includes(aCompact))) {
+  if (Math.min(aCompact.length, bCompact.length) >= 8 && (aCompact.includes(bCompact) || bCompact.includes(aCompact))) {
     return true;
   }
 
