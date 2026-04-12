@@ -58,6 +58,7 @@ const VENUE_ALIASES: Record<string, string> = {
   'nuba club':               'Nuba Beach Club',
   'platforma wolff':         'Platforma Wolff',
   'wolff':                   'Platforma Wolff',
+  'rock halle':              'Rock Halle',
   'beraria h':               'Beraria H',
   'berăria h':               'Beraria H',
   // Restaurant Dorna — strip HTML entities / bullet variants
@@ -141,6 +142,35 @@ function normalizeTitleWithoutPromoterPrefix(s: string): string {
   return normalizeForDedupeLoose(
     s.replace(/^(?:[a-z0-9+&.'-]{2,}\s*(?:x|×)\s*){1,4}(?=[a-z0-9].{0,80}(?::|-|\[|\())/i, '')
   );
+}
+
+function normalizeTitleForLineupMatch(s: string): string {
+  return normalizeTitleWithoutPromoterPrefix(s)
+    .replace(/\b(?:bucuresti|bucharest|constanta|concert|live|party|event|eveniment|bilete|tickets?|with|feat|featuring|si|at|all|night|long|prezinta|presents|festival|fest|tour|editia|edition)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hasSameCoreLineup(a: string, b: string): boolean {
+  const aCore = normalizeTitleForLineupMatch(a);
+  const bCore = normalizeTitleForLineupMatch(b);
+  if (!aCore || !bCore) return false;
+
+  const aCompact = aCore.replace(/\s+/g, '');
+  const bCompact = bCore.replace(/\s+/g, '');
+  if (Math.min(aCompact.length, bCompact.length) >= 12 && (aCompact.includes(bCompact) || bCompact.includes(aCompact))) {
+    return true;
+  }
+
+  const aTokens = aCore.split(' ').filter(token => token.length >= 3);
+  const bTokens = bCore.split(' ').filter(token => token.length >= 3);
+  const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+  const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
+  if (shorter.length < 2) return false;
+
+  const longerSet = new Set(longer);
+  const hits = shorter.filter(token => longerSet.has(token)).length;
+  return hits === shorter.length || (hits >= 2 && hits / shorter.length >= 0.75);
 }
 
 function normalizeComparableUrl(url?: string | null): string {
@@ -449,6 +479,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'copii', 'marionete', 'papusi', 'păpuși',
     'educativ', 'balet', 'ballet',
     'teatru',
+    'stand-up', 'stand up', 'standup',
+    'comedy', 'comedie',
+    'elrow',
   ];
   for (const term of HARD_BLOCK_TITLE_TERMS) {
     const { error: cleanErr } = await supabase
@@ -475,6 +508,12 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'social game',
     'copii',
     'teatru',
+    'stand-up',
+    'stand up',
+    'standup',
+    'comedy',
+    'comedie',
+    'elrow',
   ];
   for (const term of HARD_BLOCK_DESC_TERMS) {
     const { error: cleanErr } = await supabase
@@ -706,7 +745,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     for (const row of rowsForSweep) {
       // Use normalizeVenue to ensure different aliases of same venue end up in same bucket
       const vNorm = normalizeVenue(row.venue, row.title);
-      const key = `${vNorm}|${row.date}`;
+      const key = `${normalizeForDedupeLoose(vNorm)}|${row.date}`;
       if (!venueDateGroups.has(key)) venueDateGroups.set(key, []);
       venueDateGroups.get(key)!.push(row);
     }
@@ -761,6 +800,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
           const isRelated =
             normTitle === leaderTitle ||
             promoterFreeExact ||
+            hasSameCoreLineup(event.title, leader.title) ||
             sameMeaningfulUrl ||
             // Explicit alias bridge for inTension/intension variants
             (normTitleLoose.includes('intension') && leaderTitleLoose.includes('intension'));
@@ -832,7 +872,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     const venueGroups = new Map<string, any[]>();
     for (const row of rowsForSweep) {
       if (deletedIds.has(row.id)) continue;
-      const vNorm = normalizeVenue(row.venue, row.title);
+      const vNorm = normalizeForDedupeLoose(normalizeVenue(row.venue, row.title));
       if (!venueGroups.has(vNorm)) venueGroups.set(vNorm, []);
       venueGroups.get(vNorm)!.push(row);
     }
@@ -848,6 +888,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
         if (s === 'ra') return 9;
         if (s === 'eventbook') return 8;
         if (s === 'iabilet') return 7;
+        if (s === 'ambilet') return 7;
         return 1;
       };
 
@@ -883,6 +924,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
 
         return (
           aNormTitle === bNormTitle ||
+          hasSameCoreLineup(a.title, b.title) ||
           (aPromoterFreeTitle.length > 8 &&
             bPromoterFreeTitle.length > 8 &&
             aPromoterFreeTitle === bPromoterFreeTitle)

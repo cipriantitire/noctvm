@@ -5,6 +5,7 @@ import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { supabase } from '@/lib/supabase';
 import { NoctEvent, Venue } from '@/lib/types';
+import { buildMapVenuesForEvents } from '@/lib/map-venues';
 import SidebarMap from './SidebarMap';
 
 import LiveTonight from './LiveTonight';
@@ -45,7 +46,7 @@ export default function MobileTopSection({
       .select('*')
       .eq('city', cityLabel)
       .eq('date', today)
-      .limit(6)
+      .order('time', { ascending: true })
       .then(({ data }) => {
         if (data) setDbEvents(data as NoctEvent[]);
       });
@@ -103,10 +104,11 @@ export default function MobileTopSection({
       );
     }
 
-    // On Events tab mobile, show venues that have events tonight
-    const activeVenueNames = new Set(tonightEvents.map(e => e.venue));
-    return filtered.filter(v => activeVenueNames.has(v.name));
-  }, [venues, activeGenres, tonightEvents]);
+    if (activeTab === 'venues') return filtered;
+
+    // On Events tab mobile, show coordinate-backed venues that have events tonight.
+    return buildMapVenuesForEvents(tonightEvents, filtered);
+  }, [venues, activeGenres, tonightEvents, activeTab]);
 
   return (
     <div className="lg:hidden space-y-2 mb-3 animate-fade-in relative">

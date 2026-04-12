@@ -259,6 +259,7 @@ const HARD_BLOCK_TERMS = [
   // Salsa / Latin specific blocked terms
   'salsa revolution', 'salsa congress',
   // Festival inventory belongs to the dedicated festival scraper
+  'elrow',
   'festival tickets', 'festival ticket', 'festival pass', 'festival passes', 'day pass', 'camping pass',
   'acces general festival', 'abonament festival', 'despre festival', 'bilete festival',
   // Social/party games (non-nightlife music)
@@ -1042,12 +1043,15 @@ export async function parseDetailPage(
   city: string,
   timeoutMs = 10_000,
   allowedCities?: string[],
+  htmlOverride?: string,
 ): Promise<ScrapedEvent | null> {
-  let html: string;
-  try {
-    html = await fetchHtml(url, timeoutMs);
-  } catch {
-    return null;
+  let html = htmlOverride ?? '';
+  if (!html) {
+    try {
+      html = await fetchHtml(url, timeoutMs);
+    } catch {
+      return null;
+    }
   }
 
   const today = new Date().toISOString().split('T')[0];

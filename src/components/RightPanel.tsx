@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { NoctEvent, Venue } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import { buildMapVenuesForEvents } from '@/lib/map-venues';
 import SidebarMap from './SidebarMap';
 
 interface RightPanelProps {
@@ -36,7 +37,7 @@ export default function RightPanel({
       .select('*')
       .eq('city', cityLabel)
       .eq('date', today)
-      .limit(10)
+      .order('time', { ascending: true })
       .then(({ data }) => {
         if (data) setDbEvents(data as NoctEvent[]);
       });
@@ -89,14 +90,13 @@ export default function RightPanel({
     if (activeTab === 'venues') return filtered;
     
     // For feed/events tab, only show venues with events tonight
-    const activeVenueNames = new Set(dbEvents.map(e => e.venue));
-    return filtered.filter(v => activeVenueNames.has(v.name));
+    return buildMapVenuesForEvents(dbEvents, filtered);
   }, [venues, dbEvents, activeTab, activeGenres]);
 
   const tonightEvents = useMemo(() => dbEvents, [dbEvents]);
 
   return (
-    <aside className="hidden xl:block w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 p-6 overflow-hidden">
+    <aside className="hidden xl:block w-80 h-screen sticky top-0 frosted-glass-subtle border-l border-white/5 p-6 overflow-hidden z-40">
       <div className="flex items-center justify-end gap-2 mb-5 px-1">
         <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
         <span className="text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest">
@@ -117,7 +117,7 @@ export default function RightPanel({
       </div>
 
       {/* Live Tonight */}
-      <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-md border border-white/5 relative overflow-hidden group">
+      <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-sm border border-white/5 relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-noctvm-violet/10 transition-colors" />
         <div className="flex items-center gap-2 mb-3 relative z-10">
           <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
@@ -164,7 +164,7 @@ export default function RightPanel({
             <button
               key={name}
               onClick={() => onVenueClick?.(name)}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-noctvm-violet/30 hover:bg-white/[0.08] transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.08] border border-white/5 hover:border-noctvm-violet/30 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
             >
               <div className="w-9 h-9 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
                 <img src={getVenueLogo(name)} alt={name} className="w-full h-full object-cover"
