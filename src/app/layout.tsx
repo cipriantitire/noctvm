@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Providers from "./providers";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const dynamic = 'force-dynamic';
 import "./globals.css";
@@ -112,6 +113,7 @@ export default function RootLayout({
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
           </filter>
         </svg>
+        <SpeedInsights />
       </body>
     </html>
   );
