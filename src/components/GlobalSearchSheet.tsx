@@ -9,6 +9,7 @@ import { getVenueLogo } from '@/lib/venue-logos';
 import type { NoctEvent, Venue } from '@/lib/types';
 import VerifiedBadge from './VerifiedBadge';
 import { CalendarIcon, CogIcon, GridIcon, SearchIcon, UserIcon, VenuesIcon, EventsIcon, BellIcon, EditIcon, ShieldIcon, StarIcon, MapPinIcon, LayoutListIcon } from './icons';
+import CurvedScrollBar from './ui/CurvedScrollBar';
 
 export type GlobalSearchActionId =
   | 'open-settings'
@@ -474,7 +475,7 @@ export default function GlobalSearchSheet({
             </div>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
+          <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="px-4 py-4" edgePadding={4} verticalInset={4} cornerRadius={16}>
             {!hasQuery ? (
                 <div className="mb-4 rounded-[22px] border border-white/5 bg-noctvm-black/55 px-4 py-3.5">
                   <div className="flex items-start gap-3">
@@ -628,7 +629,7 @@ export default function GlobalSearchSheet({
                 </div>
               </div>
             )}
-          </div>
+          </CurvedScrollBar>
         </div>
       </SheetContent>
     </Sheet>

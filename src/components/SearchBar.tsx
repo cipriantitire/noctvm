@@ -1,8 +1,10 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useState } from 'react';
 import FilterBar from './FilterBar';
 import { SearchIcon } from './icons';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/Popover';
+import CurvedScrollBar from './ui/CurvedScrollBar';
 
 interface SearchBarProps {
   type: 'events' | 'venues';
@@ -46,26 +48,15 @@ export default function SearchBar(props: SearchBarProps) {
   } = props;
 
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
-  const genreDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!genreDropdownOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (genreDropdownRef.current && !genreDropdownRef.current.contains(e.target as Node)) {
-        setGenreDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [genreDropdownOpen]);
 
   return (
     <div 
       className={`sticky z-20 transition-all duration-300 ease-in-out mb-4 ${headerHidden ? '-translate-y-[220%] top-0' : 'top-[56px]'} lg:!top-0`}
     >
-      <div className="frosted-noise frosted-glass-header rounded-2xl p-4 shadow-xl">
+      <div className="liquid-glass-card rounded-[28px]">
+        <div className="card-content">
         {/* Desktop Header area */}
-        <div className="hidden lg:flex items-center justify-between mb-4">
+        <div className="card-header hidden lg:flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 mt-1">
             <span className="text-sm text-noctvm-silver">{type === 'events' ? 'Nightlife' : 'Venues'} in</span>
             <div className="relative">
@@ -96,8 +87,8 @@ export default function SearchBar(props: SearchBarProps) {
           />
         ) : (
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="relative flex-1 min-w-0 h-[42px] frosted-glass rounded-xl">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                   <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
                 </div>
@@ -107,7 +98,7 @@ export default function SearchBar(props: SearchBarProps) {
                   title="Search venues"
                   value={props.venueSearch || ''}
                   onChange={e => props.onVenueSearchChange?.(e.target.value)}
-                  className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
+                  className="h-full w-full bg-transparent border-0 rounded-xl pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:ring-0"
                 />
                 {props.venueSearch && (
                   <button
@@ -122,11 +113,11 @@ export default function SearchBar(props: SearchBarProps) {
                 )}
               </div>
               
-              <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px] items-center">
+              <div className="flex h-[42px] flex-shrink-0 items-center rounded-xl frosted-glass p-1">
                 <button
                   type="button"
                   onClick={() => props.onVenueViewChange?.('grid')}
-                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
                   aria-label="Switch to grid view"
                   title="Switch to grid view"
                 >
@@ -136,74 +127,103 @@ export default function SearchBar(props: SearchBarProps) {
                 <button
                   type="button"
                   onClick={() => props.onVenueViewChange?.('list')}
-                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
                   aria-label="Switch to list view"
                   title="Switch to list view"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                 </button>
               </div>
-
-              <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px] items-center px-3">
-                <select 
-                  value={props.venueSort}
-                  onChange={(e) => props.onVenueSortChange?.(e.target.value as any)}
-                  className="bg-transparent text-noctvm-caption font-bold text-white focus:outline-none cursor-pointer appearance-none uppercase"
-                  title="Sort venues"
-                >
-                  <option value="popularity">POPULAR</option>
-                  <option value="events">EVENTS</option>
-                  <option value="name">A-Z</option>
-                </select>
-              </div>
             </div>
 
-            <div className="relative" ref={genreDropdownRef}>
-              <button
-                onClick={() => setGenreDropdownOpen(o => !o)}
-                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
-                  props.activeGenre === 'All'
-                    ? 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:border-noctvm-violet/30'
-                    : 'bg-noctvm-violet/10 border-noctvm-violet/50 text-noctvm-violet'
-                }`}
-              >
-                <span>{props.activeGenre === 'All' ? 'All Genres' : props.activeGenre}</span>
-                <svg
-                  className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${genreDropdownOpen ? 'rotate-180' : ''}`}
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-
-              {genreDropdownOpen && (
-                <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-noctvm-black/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl overflow-hidden">
-                  <div className="flex flex-wrap gap-1.5 p-3 max-h-48 overflow-y-auto">
-                    {allGenres.map(genre => (
-                      <button
-                        key={genre}
-                        onClick={() => { props.onGenreChange?.(genre); setGenreDropdownOpen(false); }}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                          props.activeGenre === genre
-                            ? 'bg-noctvm-violet text-white shadow-glow'
-                            : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
-                        }`}
-                      >
-                        {genre}
-                      </button>
-                    ))}
-                  </div>
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="relative flex-shrink-0 w-fit">
+                <div className="flex h-[34px] w-fit items-center justify-center rounded-xl frosted-glass px-2.5">
+                  <select 
+                    value={props.venueSort}
+                    onChange={(e) => props.onVenueSortChange?.(e.target.value as any)}
+                    className="w-auto whitespace-nowrap bg-transparent text-center [text-align-last:center] text-[12px] font-medium text-noctvm-silver focus:outline-none cursor-pointer appearance-none normal-case leading-none"
+                    title="Sort venues"
+                  >
+                    <option value="popularity">Popular</option>
+                    <option value="events">Events</option>
+                    <option value="name">A-Z</option>
+                  </select>
                 </div>
-              )}
+              </div>
+
+              <Popover open={genreDropdownOpen} onOpenChange={setGenreDropdownOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className={`w-full h-[34px] flex items-center justify-between gap-2 px-3 rounded-xl text-[12px] font-medium frosted-glass transition-colors ${
+                      props.activeGenre === 'All'
+                        ? 'text-noctvm-silver hover:border-noctvm-violet/30'
+                        : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
+                    }`}
+                  >
+                    <span>{props.activeGenre === 'All' ? 'All Genres' : props.activeGenre}</span>
+                    <svg
+                      className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${genreDropdownOpen ? 'rotate-180' : ''}`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  sideOffset={8}
+                  style={{ width: 'var(--radix-popover-trigger-width)' }}
+                  className="!z-[500] !p-0 !rounded-xl !border-white/10 !shadow-2xl overflow-hidden"
+                >
+                  <CurvedScrollBar
+                    className="w-full h-48"
+                    viewportClassName="p-3"
+                    scrollBarColor="rgb(var(--noctvm-violet-rgb) / 0.92)"
+                    scrollBarWidth={4}
+                    visibleLength={56}
+                    edgePadding={2}
+                    cornerRadius={20}
+                    verticalInset={2}
+                  >
+                    <div className="flex flex-wrap gap-1.5">
+                      {allGenres.map(genre => (
+                        <button
+                          key={genre}
+                          type="button"
+                          onClick={() => {
+                            props.onGenreChange?.(genre);
+                            setGenreDropdownOpen(false);
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            props.activeGenre === genre
+                              ? 'bg-noctvm-violet/85 text-white'
+                              : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
+                          }`}
+                        >
+                          {genre}
+                        </button>
+                      ))}
+                    </div>
+                  </CurvedScrollBar>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         )}
 
         {/* Count footer */}
-        <div className="flex items-center mt-1">
+        <p className="card-tip flex items-center justify-start mt-1 text-left">
           <span className="text-noctvm-caption text-noctvm-silver/50 font-mono">
             {type === 'events' ? `${eventsCount || 0} events` : `${venuesCount || 0} venues`}
           </span>
+        </p>
         </div>
       </div>
     </div>

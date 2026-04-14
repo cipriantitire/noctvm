@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 import { Venue, NoctEvent } from '@/lib/types';
+import MapVenuePopup from '@/components/MapVenuePopup';
 
 // Coordinates for center positioning
 const CITY_CENTERS = {
@@ -124,8 +125,8 @@ export default function SidebarMap({
         <MapController center={center} />
 
         {venues.map((venue) => {
-          const tonightEvent = isEventsMode ? events.find(e => e.venue === venue.name) : null;
-          const count = eventCounts[venue.name] || 0;
+          const venueEvents = isEventsMode ? events.filter((event) => event.venue === venue.name) : [];
+          const count = eventCounts[venue.name] || venueEvents.length;
           
           return venue.lat && venue.lng ? (
             <Marker 
@@ -133,50 +134,15 @@ export default function SidebarMap({
               position={[venue.lat, venue.lng]} 
               icon={customIcon}
             >
-              <Popup className="noctvm-popup">
-                <div 
-                  onClick={() => {
-                    if (isEventsMode && tonightEvent && onEventClick) {
-                      onEventClick(tonightEvent);
-                    } else {
-                      onVenueClick?.(venue.name);
-                    }
-                  }}
-                  className="bg-noctvm-black/98 text-white p-1.5 rounded-xl border border-white/10 min-w-0 w-[115px] cursor-pointer hover:border-noctvm-violet/30 hover:bg-noctvm-midnight transition-all group/pop relative flex flex-col gap-0.5"
-                >
-                  <div className="flex items-start justify-between gap-1">
-                    <p className="text-noctvm-caption font-bold text-white truncate leading-tight flex-1">{venue.name}</p>
-                    <div className="w-4 h-4 rounded-md bg-noctvm-violet/10 flex items-center justify-center text-noctvm-violet group-hover/pop:bg-noctvm-violet group-hover/pop:text-white transition-all flex-shrink-0">
-                      <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </div>
-                  </div>
-                  
-                  <p className="text-noctvm-xs text-noctvm-silver/40 truncate leading-none mb-0.5">{venue.address}</p>
-                  
-                  {isEventsMode && tonightEvent ? (
-                    <div className="p-1 rounded-lg bg-noctvm-violet/5 border border-noctvm-violet/15">
-                      <div className="flex items-center gap-1 mb-0.5">
-                        <span className="w-1 h-1 rounded-full bg-noctvm-violet animate-pulse" />
-                        <p className="text-[7px] text-noctvm-violet font-mono uppercase tracking-tight">Tonight</p>
-                      </div>
-                      <p className="text-noctvm-micro font-semibold text-white/90 truncate leading-tight">{tonightEvent.title}</p>
-                    </div>
-                  ) : (
-                    <>
-                      {count > 0 ? (
-                        <p className="text-noctvm-xs text-noctvm-emerald font-mono leading-none">{count} events</p>
-                      ) : (
-                        <div className="flex gap-1 overflow-hidden">
-                          {venue.genres?.slice(0, 1).map((g, i) => (
-                            <span key={i} className="text-[7px] px-1 py-0 rounded bg-noctvm-violet/10 text-noctvm-violet/70 border border-noctvm-violet/15">
-                              {g}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+              <Popup className="noctvm-popup" closeButton={false} maxWidth={280}>
+                <MapVenuePopup
+                  venue={venue}
+                  isEventsMode={isEventsMode}
+                  events={venueEvents}
+                  eventCount={count}
+                  onVenueClick={onVenueClick}
+                  onEventClick={onEventClick}
+                />
               </Popup>
             </Marker>
           ) : null;

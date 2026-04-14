@@ -111,7 +111,7 @@ export default function MobileTopSection({
   }, [venues, activeGenres, tonightEvents, activeTab]);
 
   return (
-    <div className="lg:hidden space-y-2 mb-3 animate-fade-in relative">
+    <div className="lg:hidden space-y-4 mb-4 animate-fade-in relative">
       {loading ? (
         <>
           <MapSkeleton />

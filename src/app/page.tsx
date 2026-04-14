@@ -340,9 +340,17 @@ function AppShell() {
       const y = el.scrollTop;
       const diff = y - lastY;
       
-      // Delay hide until user has scrolled past most of the top section
-      // 600px is ~8 lines (Events), 300px is ~4 lines (Venues)
-      const threshold = activeTab === 'venues' ? 300 : 600;
+      // Delay hide until the first venue card reaches the top of the scroll area.
+      const threshold = (() => {
+        if (activeTab !== 'venues') return 600;
+
+        const firstVenueCard = el.querySelector<HTMLElement>('[data-venue-card="first"]');
+        if (!firstVenueCard) return 520;
+
+        const containerRect = el.getBoundingClientRect();
+        const cardRect = firstVenueCard.getBoundingClientRect();
+        return Math.max(cardRect.top - containerRect.top + y, 0);
+      })();
       
       if (diff > 8 && y > threshold) setHeaderHidden(true);
       else if (diff < -8) setHeaderHidden(false);
@@ -743,7 +751,7 @@ function AppShell() {
         >
           <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
-            className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col ${
+            className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col min-h-0 ${
               venueClosing ? 'animate-scale-out' : 'animate-scale-in'
             } border-0 sm:border border-white/10 frosted-glass-modal frosted-noise`}
             onAnimationEnd={() => {
@@ -777,7 +785,7 @@ function AppShell() {
           activeCity={activeCity}
         />
 
-        <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto mobile-scrollbar-hide'}`}>
           {/* Mobile header */}
           <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
             <div className="grid grid-cols-3 items-center">
@@ -887,7 +895,7 @@ function AppShell() {
                 <>
                     <div
                       key={viewMode}
-                      className={`mt-10 view-transition ${
+                      className={`mt-0 view-transition ${
                         viewMode === 'portrait'
                           ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-stretch'
                           : 'grid grid-cols-1 lg:grid-cols-2 gap-4'

@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { SearchIcon } from './icons';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/Popover';
+import CurvedScrollBar from './ui/CurvedScrollBar';
 
 export const GENRE_FILTERS = [
   'All', 'Techno', 'House', 'Electronic', 'Minimal', 'Underground',
@@ -36,18 +38,6 @@ export default function FilterBar({
   onDateChange,
 }: FilterBarProps) {
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!genreDropdownOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setGenreDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [genreDropdownOpen]);
 
   const handleGenreClick = (genre: string) => {
     if (genre === 'All') {
@@ -68,7 +58,7 @@ export default function FilterBar({
     <div className="space-y-2">
       {/* Row 1: Search + view toggle */}
       <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+        <div className="relative flex-1 h-[42px] frosted-glass rounded-xl">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
             <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
           </div>
@@ -76,18 +66,18 @@ export default function FilterBar({
             type="text"
             placeholder="Search events, venues..."
             value={searchQuery}
-            className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all"
+            className="h-full w-full bg-transparent border-0 rounded-xl pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:ring-0"
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
 
         {/* View mode toggle */}
-        <div className="flex p-1 bg-noctvm-surface border border-noctvm-border rounded-xl shadow-inner flex-shrink-0 h-[42px]">
+        <div className="flex h-[42px] flex-shrink-0 items-center rounded-xl frosted-glass p-1">
           <button
             onClick={() => onViewModeChange('portrait')}
             className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
               viewMode === 'portrait'
-                ? 'bg-noctvm-violet text-white shadow-lg scale-105'
+                ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20'
                 : 'text-noctvm-silver hover:text-white'
             }`}
             title="Grid view"
@@ -104,7 +94,7 @@ export default function FilterBar({
             onClick={() => onViewModeChange('landscape')}
             className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
               viewMode === 'landscape'
-                ? 'bg-noctvm-violet text-white shadow-lg scale-105'
+                ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20'
                 : 'text-noctvm-silver hover:text-white'
             }`}
             title="List view"
@@ -126,10 +116,10 @@ export default function FilterBar({
               input?.showPicker?.();
               input?.click();
             }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
+            className={`flex h-[34px] items-center gap-1.5 px-3 rounded-xl text-xs font-medium frosted-glass transition-colors ${
               selectedDate
-                ? 'bg-noctvm-violet/20 border-noctvm-violet/50 text-noctvm-violet'
-                : 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:border-noctvm-violet/30'
+                ? 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
+                : 'text-noctvm-silver hover:border-noctvm-violet/30'
             }`}
           >
             {selectedDate ? (
@@ -168,45 +158,61 @@ export default function FilterBar({
         </div>
 
         {/* Genres dropdown */}
-        <div className="relative flex-1" ref={dropdownRef}>
-          <button
-            onClick={() => setGenreDropdownOpen(o => !o)}
-            className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
-              activeGenres.includes('All')
-                ? 'bg-noctvm-surface border-noctvm-border text-noctvm-silver hover:border-noctvm-violet/30'
-                : 'bg-noctvm-violet/10 border-noctvm-violet/50 text-noctvm-violet'
-            }`}
-          >
-            <span>
-              {activeGenres.includes('All')
-                ? 'All Genres'
-                : `${activeGenres.length} genre${activeGenres.length > 1 ? 's' : ''}`}
-            </span>
-            <svg
-              className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${genreDropdownOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <Popover open={genreDropdownOpen} onOpenChange={setGenreDropdownOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className={`w-full flex h-[34px] items-center justify-between gap-2 px-3 rounded-xl text-xs font-medium frosted-glass transition-colors ${
+                activeGenres.includes('All')
+                  ? 'text-noctvm-silver hover:border-noctvm-violet/30'
+                  : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
+              }`}
             >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-
-          {genreDropdownOpen && (
-            <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-noctvm-black/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl overflow-hidden">
-              <div className="flex flex-wrap gap-1.5 p-3 max-h-48 overflow-y-auto">
+              <span>
+                {activeGenres.includes('All')
+                  ? 'All Genres'
+                  : `${activeGenres.length} genre${activeGenres.length > 1 ? 's' : ''}`}
+              </span>
+              <svg
+                className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${genreDropdownOpen ? 'rotate-180' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            sideOffset={8}
+            style={{ width: 'var(--radix-popover-trigger-width)' }}
+            className="!z-[500] !p-0 !rounded-xl !border-white/10 !shadow-2xl overflow-hidden"
+          >
+            <CurvedScrollBar
+              className="w-full h-48"
+              viewportClassName="p-3"
+              scrollBarColor="rgb(var(--noctvm-violet-rgb) / 0.92)"
+              scrollBarWidth={4}
+              visibleLength={56}
+              edgePadding={2}
+              cornerRadius={20}
+              verticalInset={2}
+            >
+              <div className="flex flex-wrap gap-1.5">
                 {GENRE_FILTERS.map(genre => {
                   const isActive = activeGenres.includes(genre);
                   return (
                     <button
                       key={genre}
+                      type="button"
                       onClick={() => handleGenreClick(genre)}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                         isActive
-                          ? 'bg-noctvm-violet text-white shadow-glow'
+                          ? 'bg-noctvm-violet/85 text-white'
                           : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
                       }`}
                     >
@@ -215,9 +221,9 @@ export default function FilterBar({
                   );
                 })}
               </div>
-            </div>
-          )}
-        </div>
+            </CurvedScrollBar>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );

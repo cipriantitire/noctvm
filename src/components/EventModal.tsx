@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import VerifiedBadge from './VerifiedBadge';
 import { Badge, Button, GlassPanel, IconButton } from '@/components/ui';
+import CurvedScrollBar from './ui/CurvedScrollBar';
 
 interface EventModalProps {
   event: NoctEvent | null;
@@ -186,7 +187,7 @@ export default function EventModal({
       {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
       <GlassPanel
         variant="modal"
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60`}
+        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col min-h-0 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60`}
         style={{ zIndex: (zIndex || 200) + 1 }}
         onClick={e => e.stopPropagation()}
         onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
@@ -251,7 +252,7 @@ export default function EventModal({
           )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-5 overscroll-contain" cornerRadius={24} edgePadding={4} verticalInset={4}>
           {/* Genres */}
           <div className="flex flex-wrap gap-1.5">
             {event.genres.map(genre => (
@@ -328,7 +329,7 @@ export default function EventModal({
               )}
             </div>
           )}
-        </div>
+        </CurvedScrollBar>
 
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">

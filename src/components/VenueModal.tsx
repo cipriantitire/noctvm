@@ -9,6 +9,7 @@ import { Venue } from '@/lib/types';
 import EventCard from './EventCard';
 import VerifiedBadge from './VerifiedBadge';
 import Image from 'next/image';
+import CurvedScrollBar from './ui/CurvedScrollBar';
 
 interface VenueModalProps {
   venueName: string;
@@ -41,10 +42,20 @@ const GALLERY_THEMES = [
   { gradient: 'from-sky-900/60 via-noctvm-midnight to-blue-900/40', label: 'VIP', icon: 'V' },
 ];
 
+const VENUE_SCROLLBAR_CORNER_RADIUS_WINDOW = 20;
+const VENUE_SCROLLBAR_CORNER_RADIUS_FULLSCREEN = 10;
+
 export default function VenueModal({ venueName, onBack, onClose, onEventClick }: VenueModalProps) {
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [isWindowedModal, setIsWindowedModal] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.matchMedia('(min-width: 640px)').matches;
+  });
   const info = getVenueInfo(venueName);
 
   useEffect(() => {
@@ -69,6 +80,15 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
         if (data) setDbEvents(data as NoctEvent[]);
       });
   }, [venueName]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 640px)');
+    const updateLayout = () => setIsWindowedModal(media.matches);
+
+    updateLayout();
+    media.addEventListener('change', updateLayout);
+    return () => media.removeEventListener('change', updateLayout);
+  }, []);
 
   const venueEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -106,6 +126,9 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
 
   const logoSrc = getVenueLogo(venueName);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const venueScrollbarCornerRadius = isWindowedModal
+    ? VENUE_SCROLLBAR_CORNER_RADIUS_WINDOW
+    : VENUE_SCROLLBAR_CORNER_RADIUS_FULLSCREEN;
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -116,7 +139,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
   };
 
   return (
-    <div className="p-4 lg:p-6 overflow-y-auto flex-1 min-h-0 overscroll-contain">
+    <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-4 lg:p-6 overscroll-contain" edgePadding={4} verticalInset={4} cornerRadius={venueScrollbarCornerRadius}>
       {/* Header */}
       <button
         onClick={onBack}
@@ -274,6 +297,6 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
           </div>
         </div>
       )}
-    </div>
+    </CurvedScrollBar>
   );
 }

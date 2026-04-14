@@ -288,13 +288,13 @@ export default function VenuesPage({
 
       {/* Venues list/grid */}
       {loadingVenues ? (
-        <div className="space-y-3 pb-24 lg:pb-6">
+        <div className="space-y-4 pb-24 lg:pb-6">
           {[1, 2, 3].map(i => (
             <div key={i} className="h-24 rounded-2xl bg-noctvm-surface animate-pulse" />
           ))}
         </div>
       ) : (
-      <div className={`mt-10 pb-24 lg:pb-6 ${venueView === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3'}`}>
+      <div className={`mt-0 pb-24 lg:pb-6 ${venueView === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-4'}`}>
         {sortedVenues.map((venue, idx) => {
           const isFollowed = followedVenues.has(venue.name);
           const isLoading = loadingFollows.has(venue.name);
@@ -307,6 +307,7 @@ export default function VenuesPage({
             <div
               key={venue.name}
               onClick={() => onVenueClick(venue.name)}
+              data-venue-card={idx === 0 ? 'first' : undefined}
               className={`group bg-noctvm-surface rounded-xl border cursor-pointer hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow overflow-hidden h-full flex flex-col ${isFollowed ? 'border-noctvm-violet/30' : 'border-noctvm-border'}`}
               style={{ animationDelay: `${idx * 50}ms` }}
             >
@@ -327,8 +328,8 @@ export default function VenuesPage({
                   <span className={`fallback hidden text-2xl font-bold text-white absolute inset-0 flex items-center justify-center`}>{venue.name[0]}</span>
                 </div>
                 {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/80 text-white text-noctvm-micro font-semibold">Following</span>}
-              </div>
-              {/* Info */}
+                </div>
+                {/* Info */}
               <div className="p-3 flex flex-col flex-1">
                 <div className="flex items-center gap-1.5 mb-1 min-w-0">
                   <h3 className="font-heading font-semibold text-white text-sm leading-tight group-hover:text-noctvm-violet transition-colors truncate">{venue.name}</h3>
@@ -359,6 +360,7 @@ export default function VenuesPage({
             <div
               key={venue.name}
               onClick={() => onVenueClick(venue.name)}
+              data-venue-card={idx === 0 ? 'first' : undefined}
               className="bg-noctvm-surface rounded-2xl border border-noctvm-border transition-all duration-300 overflow-hidden animate-fade-in-up cursor-pointer hover:border-noctvm-violet/30 hover:shadow-[0_4px_24px_rgba(124,58,237,0.08)]"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
@@ -446,10 +448,10 @@ export default function VenuesPage({
                   setExpandedVenue(next);
                   if (next) fetchReviews(next);
                 }}
-                className="w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors"
+                className="relative w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors overflow-hidden"
               >
-                <div className="absolute inset-0 z-0 mask-gradient" />
-                <div className="flex items-center gap-1.5">
+                <div className="absolute inset-0 z-0 pointer-events-none mask-gradient" />
+                <div className="relative z-10 flex items-center gap-1.5">
                   {(() => {
                     const stat = loadedReviews[venue.name] !== undefined
                       ? { avg: reviews.length > 0 ? avgRating : 0, count: reviews.length }
