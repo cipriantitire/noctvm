@@ -58,6 +58,8 @@ GEMINI.md
 .vscode/
 /browser-evidence/
 /marketing-site/
+/figma-plugin/
+/figma-tokens/
 /public/output.css
 /skills-lock.json
 /headers.txt
