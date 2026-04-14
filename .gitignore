@@ -25,6 +25,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env.example
 
 # vercel
 .vercel
@@ -38,9 +39,40 @@ next-env.d.ts
 /tmp/
 /.agents/
 /docs/
+.agent/
+.agent_overrides.md
+.agents/
+.antigravity-context.json
+.claude/
+.cursor/
+.env
+.kiro/
+.mcp.json
+.socraticodecontextartifacts.json
+.roomodes
+.ignore
+.rgignore
+.impeccable.md
+AGENTS.md
+GEMINI.md
+.vscode/
+/browser-evidence/
+/marketing-site/
+/public/output.css
+/skills-lock.json
+/headers.txt
+/out.html
+/page.html
+/pen.html
+/pen_extracted.html
+/pen_setup.txt
+/scratch_original_glass.tsx
+/New Bitmap image.bmp
+*.log
 .claude/skills/find-skills/SKILL.md
 .claude/skills/save-learning/SKILL.md
 .claude/skills/setup-caliber/SKILL.md
 .cursor/skills/find-skills/SKILL.md
 .cursor/skills/save-learning/SKILL.md
 .cursor/skills/setup-caliber/SKILL.md
+.vscode/settings.json
