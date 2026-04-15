@@ -52,7 +52,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
       className={`fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 pb-[env(safe-area-inset-bottom)] pointer-events-none ${className}`}
       aria-label="Primary navigation"
     >
-      <div className="relative isolate w-full max-w-[346px] h-[57px] pointer-events-auto">
+      <div className="relative isolate w-full max-w-[360px] h-[59px] pointer-events-auto">
         <div
           className="liquid-glass-card cursor-default relative h-full overflow-hidden rounded-full border border-white/10 shadow-[0_18px_40px_rgba(0,0,0,0.5)]"
           style={{ ...glassSurfaceStyle, ...cardStyle }}
@@ -91,7 +91,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                   }`}
                 >
                   <div
-                    className={`relative z-10 flex h-[22px] w-[22px] items-center justify-center transition-[color,filter] duration-300 ${
+                    className={`relative z-10 flex h-6 w-6 items-center justify-center transition-[color,filter] duration-300 ${
                       isActive ? activeTintClass : 'text-current'
                     }`}
                   >
@@ -108,7 +108,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                     )}
                   </div>
                   <span
-                    className={`relative z-10 max-w-full truncate text-[11px] leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
+                    className={`relative z-10 max-w-full truncate text-[12px] leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
                       isActive ? activeTintClass : 'text-white/90 group-hover:text-white'
                     }`}
                   >
