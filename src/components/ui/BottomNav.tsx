@@ -52,7 +52,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
       className={`fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 pb-[env(safe-area-inset-bottom)] pointer-events-none ${className}`}
       aria-label="Primary navigation"
     >
-      <div className="relative isolate w-full max-w-[346px] h-[53px] pointer-events-auto">
+      <div className="relative isolate w-full max-w-[346px] h-[57px] pointer-events-auto">
         <div
           className="liquid-glass-card cursor-default relative h-full overflow-hidden rounded-full border border-white/10 shadow-[0_18px_40px_rgba(0,0,0,0.5)]"
           style={{ ...glassSurfaceStyle, ...cardStyle }}
@@ -64,7 +64,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
             <motion.div
               layout
               initial={false}
-              className="absolute top-[4px] bottom-[4px] z-0 rounded-full border border-noctvm-violet/20 bg-noctvm-surface/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_8px_20px_rgba(0,0,0,0.2),0_0_18px_rgba(124,58,237,0.1)] backdrop-blur-md pointer-events-none"
+              className="absolute top-[3px] bottom-[3px] z-0 rounded-full border border-noctvm-violet/20 bg-noctvm-surface/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_8px_20px_rgba(0,0,0,0.2),0_0_18px_rgba(124,58,237,0.1)] backdrop-blur-md pointer-events-none"
               style={getTabGeometry(activeIndex)}
               aria-hidden="true"
               transition={{
@@ -84,14 +84,14 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
               const tabGeometry = getTabGeometry(index);
               const content = (
                 <div
-                  className={`relative z-10 flex h-full w-full flex-col items-center justify-center gap-0.5 text-center transition-[color,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  className={`relative z-10 flex h-full w-full flex-col items-center justify-center gap-1 text-center transition-[color,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                     isActive
                       ? `${activeTintClass} drop-shadow-[0_0_4px_rgba(124,58,237,0.12)]`
                       : 'text-noctvm-silver/70 hover:text-white'
                   }`}
                 >
                   <div
-                    className={`relative z-10 flex h-5 w-5 items-center justify-center transition-[color,filter] duration-300 ${
+                    className={`relative z-10 flex h-[22px] w-[22px] items-center justify-center transition-[color,filter] duration-300 ${
                       isActive ? activeTintClass : 'text-current'
                     }`}
                   >
@@ -108,7 +108,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                     )}
                   </div>
                   <span
-                    className={`relative z-10 max-w-full truncate text-[10px] leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
+                    className={`relative z-10 max-w-full truncate text-[11px] leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
                       isActive ? activeTintClass : 'text-white/90 group-hover:text-white'
                     }`}
                   >
@@ -118,7 +118,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
               );
 
               const activeControlClassName =
-                'group absolute top-[4px] bottom-[4px] z-20 flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/50';
+                'group absolute top-[2px] bottom-[2px] z-20 flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/50';
 
               if (item.href) {
                 return (
