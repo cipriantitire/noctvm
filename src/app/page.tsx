@@ -135,6 +135,7 @@ function AppShell() {
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'portrait' | 'landscape'>('landscape');
   const [profileView, setProfileView] = useState<ProfileView>('profile');
+  const [editProfileOrigin, setEditProfileOrigin] = useState<'profile' | 'settings'>('profile');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<NoctEvent | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
@@ -370,7 +371,7 @@ function AppShell() {
     }
   }, [isGlobalSearchOpen, selectedVenue, selectedEvent, showAuthModal, showCreatePost, showCreateStory, showStories]);
 
-  const openProfileSettingsView = useCallback((view: ProfileView) => {
+  const openProfileSettingsView = useCallback((view: ProfileView, options?: { editOrigin?: 'profile' | 'settings' }) => {
     setPreviousTab(activeTab);
     setActiveTab('profile');
     setProfileView('profile');
@@ -384,6 +385,10 @@ function AppShell() {
     if (!user) {
       setShowAuthModal(true);
       return;
+    }
+
+    if (view === 'edit-profile') {
+      setEditProfileOrigin(options?.editOrigin ?? 'settings');
     }
 
     setProfileView(view);
@@ -419,7 +424,7 @@ function AppShell() {
         router.push('/dashboard');
         return;
       case 'edit-profile':
-        openProfileSettingsView('edit-profile');
+        openProfileSettingsView('edit-profile', { editOrigin: 'settings' });
         return;
       case 'account':
         openProfileSettingsView('account');
@@ -593,7 +598,14 @@ function AppShell() {
   const backToMenu = () => setProfileView('account-menu');
   const profileSubContent: Record<string, React.ReactNode> = {
     'account-menu':    <SettingsPage onBack={closeProfileSettingsView} />,
-    'edit-profile':    <SettingsPage onBack={closeProfileSettingsView} initialView="edit" />,
+    'edit-profile':    (
+      <SettingsPage
+        onBack={closeProfileSettingsView}
+        initialView="edit"
+        editProfileOrigin={editProfileOrigin}
+        onEditProfileBack={() => setProfileView('profile')}
+      />
+    ),
     'account':         <SettingsPage onBack={closeProfileSettingsView} initialView="account" />,
     'manage-account':  <SettingsPage onBack={closeProfileSettingsView} initialView="privacy" />,
     'privacy':         <SettingsPage onBack={closeProfileSettingsView} initialView="privacy" />,
@@ -1042,10 +1054,7 @@ function AppShell() {
                     onSettingsClick={handleSettingsClick}
                     onOpenCreateStory={() => setShowCreateStory(true)}
                     onOpenActivityLog={() => setProfileView('activity-log')}
-                    onEditProfileClick={() => {
-                      setActiveTab('profile');
-                      setProfileView('edit-profile' as ProfileView);
-                    }}
+                    onEditProfileClick={() => openProfileSettingsView('edit-profile', { editOrigin: 'profile' })}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
                     onEventClick={(e) => openEvent(e)}
@@ -1061,10 +1070,7 @@ function AppShell() {
                     onSettingsClick={handleSettingsClick}
                     onOpenCreateStory={() => setShowCreateStory(true)}
                     onOpenActivityLog={() => setProfileView('activity-log')}
-                    onEditProfileClick={() => {
-                      setActiveTab('profile');
-                      setProfileView('edit-profile' as ProfileView);
-                    }}
+                    onEditProfileClick={() => openProfileSettingsView('edit-profile', { editOrigin: 'profile' })}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
                     onEventClick={(e) => openEvent(e)}

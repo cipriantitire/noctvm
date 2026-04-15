@@ -267,9 +267,22 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
 
 // ==================== MAIN SETTINGS HUB ====================
 
-export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => void, initialView?: string }) {
+type EditProfileOrigin = 'profile' | 'settings';
+
+export function SettingsPage({
+  onBack,
+  initialView = 'hub',
+  editProfileOrigin = 'settings',
+  onEditProfileBack,
+}: {
+  onBack: () => void,
+  initialView?: string,
+  editProfileOrigin?: EditProfileOrigin,
+  onEditProfileBack?: () => void,
+}) {
   const { signOut } = useAuth();
   const [view, setView] = useState(initialView);
+  const [activeEditProfileOrigin, setActiveEditProfileOrigin] = useState<EditProfileOrigin>(editProfileOrigin);
   const scrollRef = useSettingsScrollMemory('settings-hub');
   const menuItems: SettingsMenuItem[] = [
     { id: 'edit',          label: 'Edit Profile',    desc: 'Avatar, bio, music, socials', icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
@@ -308,7 +321,21 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
     },
   ];
 
-  if (view === 'edit')           return <EditProfilePage onBack={() => setView('hub')} />;
+  useEffect(() => {
+    setView(initialView);
+  }, [initialView]);
+
+  useEffect(() => {
+    setActiveEditProfileOrigin(editProfileOrigin);
+  }, [editProfileOrigin]);
+
+  const editBackLabel = activeEditProfileOrigin === 'profile' ? 'Profile' : 'Settings';
+  const editTitle = activeEditProfileOrigin === 'profile' ? 'Edit Your Profile' : 'Edit Profile';
+  const editBackHandler = activeEditProfileOrigin === 'profile'
+    ? (onEditProfileBack ?? onBack)
+    : () => setView('hub');
+
+  if (view === 'edit')           return <EditProfilePage onBack={editBackHandler} backLabel={editBackLabel} title={editTitle} />;
   if (view === 'inventory')      return <InventoryPage onBack={() => setView('hub')} />;
   if (view === 'privacy')        return <PrivacySettingsPage onBack={() => setView('hub')} />;
   if (view === 'account')        return <ManageAccountPage onBack={() => setView('hub')} />;
@@ -337,7 +364,10 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
               title={group.title}
               description={group.description}
               items={group.items}
-              onSelect={(id) => setView(id)}
+              onSelect={(id) => {
+                if (id === 'edit') setActiveEditProfileOrigin('settings');
+                setView(id);
+              }}
             />
           ))}
         </section>
@@ -369,7 +399,15 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
 
 // ==================== SUB-PAGES ====================
 
-export function EditProfilePage({ onBack }: { onBack: () => void }) {
+export function EditProfilePage({
+  onBack,
+  backLabel = 'Settings',
+  title = 'Edit Profile',
+}: {
+  onBack: () => void,
+  backLabel?: string,
+  title?: string,
+}) {
   const scrollRef = useSettingsScrollMemory('edit-profile');
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
@@ -439,10 +477,10 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
     <div className="max-w-xl mx-auto h-full flex flex-col overflow-hidden">
       <div className="px-4 pt-2">
         <SettingsPageHeader
-          title="Edit Profile"
+          title={title}
           subtitle="Avatar, bio, music, socials"
           onBack={onBack}
-          backLabel="Settings"
+          backLabel={backLabel}
         />
       </div>
 
