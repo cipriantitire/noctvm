@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import FilterBar from './FilterBar';
 import { SearchIcon } from './icons';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/DropdownMenu';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/Popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select';
 import CurvedScrollBar from './ui/CurvedScrollBar';
+import { CheckIcon } from 'lucide-react';
 
 interface SearchBarProps {
   type: 'events' | 'venues';
@@ -59,18 +62,41 @@ export default function SearchBar(props: SearchBarProps) {
         <div className="card-header hidden lg:flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 mt-1">
             <span className="text-sm text-noctvm-silver">{type === 'events' ? 'Nightlife' : 'Venues'} in</span>
-            <div className="relative">
-                <select
-                  value={activeCity}
-                  onChange={(e) => onCityChange(e.target.value as 'bucuresti' | 'constanta')}
-                  className="bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-1 text-sm text-white font-medium focus:outline-none focus:border-noctvm-violet/50 cursor-pointer pr-7 appearance-none"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex h-[34px] min-w-[7rem] items-center justify-between gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm font-medium text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:bg-white/[0.06]"
                   title="Select city"
                 >
-                <option value="bucuresti">București</option>
-                <option value="constanta">Constanța</option>
-              </select>
-              <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-            </div>
+                  <span>{activeCity === 'bucuresti' ? 'București' : 'Constanța'}</span>
+                  <svg className="size-4 text-noctvm-silver/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" sideOffset={8} className="w-56">
+                <DropdownMenuItem
+                  onClick={() => onCityChange('bucuresti')}
+                  className={activeCity === 'bucuresti' ? 'bg-white/10 text-white' : ''}
+                >
+                  <span>București</span>
+                  <span className="ml-auto flex w-4 items-center justify-center">
+                    {activeCity === 'bucuresti' ? <CheckIcon className="size-4 text-noctvm-violet" /> : null}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => onCityChange('constanta')}
+                  className={activeCity === 'constanta' ? 'bg-white/10 text-white' : ''}
+                >
+                  <span>Constanța</span>
+                  <span className="ml-auto flex w-4 items-center justify-center">
+                    {activeCity === 'constanta' ? <CheckIcon className="size-4 text-noctvm-violet" /> : null}
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -138,18 +164,24 @@ export default function SearchBar(props: SearchBarProps) {
 
             <div className="flex items-center gap-2 min-w-0">
               <div className="relative flex-shrink-0 w-fit">
-                <div className="flex h-[34px] w-fit items-center justify-center rounded-xl frosted-glass px-2.5">
-                  <select 
-                    value={props.venueSort}
-                    onChange={(e) => props.onVenueSortChange?.(e.target.value as any)}
-                    className="w-auto whitespace-nowrap bg-transparent text-center [text-align-last:center] text-[12px] font-medium text-noctvm-silver focus:outline-none cursor-pointer appearance-none normal-case leading-none"
+                <Select value={props.venueSort} onValueChange={(value) => props.onVenueSortChange?.(value as NonNullable<SearchBarProps['venueSort']>)}>
+                  <SelectTrigger
+                    size="sm"
+                    className="h-[34px] w-auto whitespace-nowrap !justify-between !rounded-xl !border-white/10 !bg-white/[0.04] !px-2.5 !py-1 !text-[12px] !font-medium !text-noctvm-silver !shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:!bg-white/[0.06] focus-visible:!border-noctvm-violet/50"
                     title="Sort venues"
                   >
-                    <option value="popularity">Popular</option>
-                    <option value="events">Events</option>
-                    <option value="name">A-Z</option>
-                  </select>
-                </div>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent
+                    align="start"
+                    sideOffset={8}
+                    className="!z-[500] !min-w-[8.5rem] !rounded-[20px] !border-white/10 !bg-noctvm-black/82 !p-2 !shadow-[0_24px_48px_rgba(0,0,0,0.55)]"
+                  >
+                    <SelectItem value="popularity">Popular</SelectItem>
+                    <SelectItem value="events">Events</SelectItem>
+                    <SelectItem value="name">A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <Popover open={genreDropdownOpen} onOpenChange={setGenreDropdownOpen}>

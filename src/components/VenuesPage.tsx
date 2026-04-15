@@ -10,6 +10,8 @@ import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { StarIcon, SearchIcon } from './icons';
 import VerifiedBadge from './VerifiedBadge';
 import SearchBar from './SearchBar';
+import TrendingVenues from './TrendingVenues';
+import { TrendingVenuesSkeleton } from './SkeletonLoader';
 
 interface VenueReview {
   id: string;
@@ -75,12 +77,15 @@ export default function VenuesPage({
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
   const [venueSort, setVenueSort] = useState<'name' | 'popularity' | 'events'>('popularity');
   const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
+  const [trendingVenues, setTrendingVenues] = useState<{ name: string; count: number }[]>([]);
   const [loadedReviews, setLoadedReviews] = useState<Record<string, VenueReview[]>>({});
   const [loadingReviews, setLoadingReviews] = useState<Set<string>>(new Set());
   const [submittingReview, setSubmittingReview] = useState(false);
   const [preloadedStats, setPreloadedStats] = useState<Record<string, { avg: number; count: number }>>({});
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
+  const [loadingTrendingVenues, setLoadingTrendingVenues] = useState(true);
   const genreDropdownRef = useRef<HTMLDivElement>(null);
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     // Fetch event counts for sorting
@@ -91,6 +96,49 @@ export default function VenuesPage({
       setEventCounts(counts);
     });
   }, [cityToQuery]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadTrendingVenues = async () => {
+      setLoadingTrendingVenues(true);
+      setTrendingVenues([]);
+
+      try {
+        const { data } = await supabase
+          .from('events')
+          .select('venue')
+          .eq('city', cityToQuery)
+          .gte('date', today);
+
+        if (!isActive) return;
+
+        if (data) {
+          const counts: Record<string, number> = {};
+          data.forEach((event) => {
+            counts[event.venue] = (counts[event.venue] || 0) + 1;
+          });
+
+          const sorted = Object.entries(counts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+
+          setTrendingVenues(sorted);
+        }
+      } finally {
+        if (isActive) {
+          setLoadingTrendingVenues(false);
+        }
+      }
+    };
+
+    void loadTrendingVenues();
+
+    return () => {
+      isActive = false;
+    };
+  }, [cityToQuery, today]);
 
   useEffect(() => {
     if (!genreDropdownOpen) return;
@@ -266,6 +314,18 @@ export default function VenuesPage({
             headerHidden={headerHidden}
           />
         </div>
+      </div>
+
+      <div className="lg:hidden mb-4 animate-fade-in-up">
+        {loadingTrendingVenues ? (
+          <TrendingVenuesSkeleton />
+        ) : (
+          <TrendingVenues
+            venues={trendingVenues}
+            onVenueClick={onVenueClick}
+            headerHidden={headerHidden}
+          />
+        )}
       </div>
 
       {/* Sticky auto-hide header */}

@@ -51,6 +51,7 @@ import PocketPage from '@/components/PocketPage';
 import { useAuth } from '@/contexts/AuthContext';
 import ManageVenueModal from '@/components/ManageVenueModal';
 import type { Profile } from '@/lib/supabase';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
 
 type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
@@ -787,8 +788,20 @@ function AppShell() {
 
         <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto mobile-scrollbar-hide'}`}>
           {/* Mobile header */}
-          <header className="lg:hidden sticky top-0 z-40 glass border-b border-noctvm-border px-4 py-3">
-            <div className="grid grid-cols-3 items-center">
+          <header
+            className="lg:hidden sticky top-0 z-40 liquid-glass-card cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
+            style={{
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'rgba(7, 8, 12, 0.72)',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 18px 40px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_0%,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.03)_20%,rgba(255,255,255,0)_60%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_18%,rgba(0,0,0,0.15)_100%)] pointer-events-none" />
+
+            <div className="relative z-10 grid grid-cols-3 items-center">
               {/* Left: Logo */}
               <div className="flex items-center justify-start min-w-0 overflow-hidden">
                 <Image
@@ -808,20 +821,50 @@ function AppShell() {
                     aria-hidden="true"
                     className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse shadow-[0_0_10px_rgba(16,185,129,0.6)] flex-shrink-0"
                   />
-                  <div className="relative flex h-6 items-center">
-                    <select
-                      value={activeCity}
-                      onChange={(e) => setActiveCity(e.target.value as 'bucuresti' | 'constanta')}
-                      className="h-6 bg-transparent text-noctvm-label text-noctvm-silver font-mono capitalize leading-none focus:outline-none cursor-pointer appearance-none pr-4"
-                      aria-label="Select City"
-                    >
-                      <option value="bucuresti" className="bg-noctvm-black">București</option>
-                      <option value="constanta" className="bg-noctvm-black">Constanța</option>
-                    </select>
-                    <svg className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-noctvm-silver pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex h-6 items-center gap-1 bg-transparent px-0 text-noctvm-label text-noctvm-silver font-mono capitalize leading-none transition-colors hover:text-white focus:outline-none"
+                        aria-label="Select City"
+                        title="Select City"
+                      >
+                        <span>{activeCity === 'bucuresti' ? 'București' : 'Constanța'}</span>
+                        <svg className="size-2.5 text-noctvm-silver/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" sideOffset={8} className="w-56">
+                      <DropdownMenuItem
+                        onClick={() => setActiveCity('bucuresti')}
+                        className={activeCity === 'bucuresti' ? 'bg-white/10 text-white' : ''}
+                      >
+                        <span>București</span>
+                        <span className="ml-auto flex w-4 items-center justify-center">
+                          {activeCity === 'bucuresti' ? (
+                            <svg className="size-4 text-noctvm-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          ) : null}
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setActiveCity('constanta')}
+                        className={activeCity === 'constanta' ? 'bg-white/10 text-white' : ''}
+                      >
+                        <span>Constanța</span>
+                        <span className="ml-auto flex w-4 items-center justify-center">
+                          {activeCity === 'constanta' ? (
+                            <svg className="size-4 text-noctvm-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          ) : null}
+                        </span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -1051,7 +1094,9 @@ function AppShell() {
           />
         )}
 
-        <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        {!isGlobalSearchOpen && (
+          <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+        )}
         <GlobalSearchSheet
           open={isGlobalSearchOpen}
           onOpenChange={setIsGlobalSearchOpen}

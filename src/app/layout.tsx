@@ -103,7 +103,7 @@ export default function RootLayout({
       <head>
       </head>
       <body className="font-body bg-noctvm-black text-white min-h-screen relative isolate overflow-x-hidden">
-        <div className="relative z-10">
+        <div className="relative">
           <Providers>{children}</Providers>
         </div>
         

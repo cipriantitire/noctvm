@@ -125,7 +125,6 @@ export default function GlobalSearchSheet({
   const inputRef = useRef<HTMLInputElement>(null);
   const isCompactLayout = !isDesktop;
   const mobileSheetTop = 'calc(3.75rem + env(safe-area-inset-top))';
-  const mobileBackdropTop = 'calc(3.75rem + env(safe-area-inset-top) - 6px)';
   const mobileSheetHeight = 'calc(100dvh - 3.75rem - env(safe-area-inset-top))';
 
   useEffect(() => {
@@ -377,8 +376,8 @@ export default function GlobalSearchSheet({
   const overlayStyle = isDesktop
     ? { zIndex: 400 }
     : {
-        zIndex: 400,
-        top: mobileBackdropTop,
+        zIndex: 30,
+        top: 0,
         right: 0,
         bottom: 0,
         left: 0,
@@ -420,12 +419,12 @@ export default function GlobalSearchSheet({
     <Sheet open={open} onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : closeSearch())}>
       <SheetContent
         side={openSide}
-        overlayClassName="bg-transparent backdrop-blur-sm"
+        overlayClassName="!bg-noctvm-black/28 backdrop-blur-sm"
         overlayStyle={overlayStyle}
         glass={isDesktop}
         showCloseButton={isDesktop}
         className={isDesktop
-          ? 'overflow-hidden border-white/10 bg-noctvm-black/95 p-0 shadow-[0_0_80px_rgba(0,0,0,0.65)]'
+          ? 'overflow-hidden border-white/10 bg-noctvm-black/97 p-0 shadow-[0_0_80px_rgba(0,0,0,0.7)]'
           : 'overflow-hidden border-0 bg-transparent p-0 shadow-none !border-0 !shadow-none !rounded-none'}
         style={sheetStyle}
       >
@@ -449,7 +448,8 @@ export default function GlobalSearchSheet({
                 onClear={() => setQuery('')}
                 placeholder="Search events, venues, people, settings..."
                 aria-label="Global search"
-                className="rounded-2xl border-white/10 bg-noctvm-black/90 py-4 pl-11 pr-10 text-sm placeholder:text-noctvm-silver/35 focus:border-noctvm-violet/40"
+                tone="glass"
+                className="py-4 pl-11 pr-10 text-sm placeholder:text-noctvm-silver/35 focus:border-noctvm-violet/40"
                 wrapperClassName={isDesktop ? '!w-[calc(100%+2.5rem)]' : 'w-full'}
                 onKeyDown={(e) => {
                   if (e.key !== 'Enter') return;

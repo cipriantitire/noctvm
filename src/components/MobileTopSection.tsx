@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { SAMPLE_EVENTS } from '@/lib/events-data';
-import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { supabase } from '@/lib/supabase';
 import { NoctEvent, Venue } from '@/lib/types';
 import { buildMapVenuesForEvents } from '@/lib/map-venues';
 import SidebarMap from './SidebarMap';
 
 import LiveTonight from './LiveTonight';
-import TrendingVenues from './TrendingVenues';
 
 interface MobileTopSectionProps {
   onVenueClick: (venueName: string) => void;
@@ -20,7 +18,7 @@ interface MobileTopSectionProps {
   headerHidden?: boolean;
 }
 
-import { MapSkeleton, LiveTonightSkeleton, TrendingVenuesSkeleton } from './SkeletonLoader';
+import { MapSkeleton, LiveTonightSkeleton } from './SkeletonLoader';
 
 export default function MobileTopSection({ 
   onVenueClick, 
@@ -32,7 +30,6 @@ export default function MobileTopSection({
 }: MobileTopSectionProps) {
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
-  const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const today = new Date().toISOString().split('T')[0];
 
@@ -60,27 +57,7 @@ export default function MobileTopSection({
         if (data) setVenues(data as Venue[]);
       });
 
-    // Trending venues
-    const fetchTrending = supabase
-      .from('events')
-      .select('venue')
-      .eq('city', cityLabel)
-      .gte('date', today)
-      .then(({ data }) => {
-        if (data) {
-          const counts: Record<string, number> = {};
-          data.forEach(ev => {
-            counts[ev.venue] = (counts[ev.venue] || 0) + 1;
-          });
-          const sorted = Object.entries(counts)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 10);
-          setTrendingVenues(sorted);
-        }
-      });
-
-    Promise.all([fetchEvents, fetchVenues, fetchTrending]).then(() => {
+    Promise.all([fetchEvents, fetchVenues]).then(() => {
       setLoading(false);
     });
   }, [activeCity, today]);
@@ -116,7 +93,6 @@ export default function MobileTopSection({
         <>
           <MapSkeleton />
           <LiveTonightSkeleton />
-          <TrendingVenuesSkeleton />
         </>
       ) : (
         <>
@@ -138,12 +114,6 @@ export default function MobileTopSection({
           <LiveTonight 
             events={tonightEvents} 
             onEventClick={onEventClick} 
-            headerHidden={headerHidden} 
-          />
-
-          <TrendingVenues 
-            venues={trendingVenues} 
-            onVenueClick={onVenueClick} 
             headerHidden={headerHidden} 
           />
         </>
