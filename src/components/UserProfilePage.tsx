@@ -208,6 +208,8 @@ export default function UserProfilePage({
 }: UserProfilePageProps) {
   const { user } = useAuth();
   const isOwner = user?.id === targetProfile.id;
+  const profileUsername = (targetProfile.username || 'user').replace(/^@/, '').toLowerCase();
+  const profileName = targetProfile.display_name || profileUsername || 'Night Owl';
   const dragControls = useDragControls();
   const [isFollowingTarget, setIsFollowingTarget] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
@@ -590,7 +592,7 @@ export default function UserProfilePage({
     const storyInitials = (targetProfile.display_name || targetProfile.username || 'N')[0].toUpperCase();
     const storyUser: StoryUser = {
       id: targetProfile.id,
-      name: targetProfile.display_name || targetProfile.username || 'User',
+      name: profileName,
       avatar: storyInitials,
       avatarUrl: targetProfile.avatar_url ?? null,
       hasNew: true,
@@ -713,16 +715,16 @@ export default function UserProfilePage({
           <div className="flex-1 min-w-0 flex items-start justify-between gap-3 pt-1">
             <div className="min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-2xl sm:text-3xl font-heading font-black text-white tracking-tight leading-none">
-                  {targetProfile.display_name || 'Night Owl'}
+                <h2 className="text-2xl sm:text-3xl font-heading font-semibold text-white tracking-tight leading-none">
+                  {profileName}
                 </h2>
                 {targetProfile.badge && targetProfile.badge !== 'none' && (
                   <VerifiedBadge type={targetProfile.badge} size="md" />
                 )}
               </div>
 
-              <p className="text-xs font-black text-noctvm-silver/50 uppercase tracking-[0.2em]">
-                @{targetProfile.username}
+              <p className="text-xs font-semibold text-noctvm-silver/50 tracking-[0.2em]">
+                @{profileUsername}
               </p>
 
               {targetProfile.city && (
@@ -845,7 +847,7 @@ export default function UserProfilePage({
             <button
               type="button"
               onClick={onEditProfileClick}
-              className="flex-1 py-3 rounded-2xl bg-white text-black text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-silver/90 transition-all active:scale-95"
+              className="flex-1 py-3 rounded-2xl border border-white/10 bg-white/[0.05] text-noctvm-label font-black uppercase tracking-wider text-white transition-all hover:border-white/15 hover:bg-white/[0.08] active:scale-95"
             >
               Edit Profile
             </button>
@@ -1152,7 +1154,7 @@ export default function UserProfilePage({
         initialIndex={viewerIndex}
         isOpen={viewerOpen}
         onClose={() => setViewerOpen(false)}
-        profileName={targetProfile.display_name || targetProfile.username || 'User'}
+        profileName={profileName}
         profileAvatar={targetProfile.avatar_url ?? null}
         profileInitial={initials}
       />
@@ -1218,7 +1220,7 @@ export default function UserProfilePage({
                    activeTab === 'saved' ? 'Saved' : 'Tagged'}
                 </span>
                 <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
-                  {targetProfile.display_name || targetProfile.username}
+                  {profileName}
                 </span>
               </div>
             </div>

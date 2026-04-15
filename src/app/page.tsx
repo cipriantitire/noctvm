@@ -394,6 +394,17 @@ function AppShell() {
     openProfileSettingsView('account-menu');
   }, [openProfileSettingsView]);
 
+  const closeProfileSettingsView = useCallback(() => {
+    setActiveTab(previousTab);
+    setProfileView('profile');
+    setSelectedEvent(null);
+    setPendingEventId(null);
+    setSelectedVenue(null);
+    setVenueClosing(false);
+    setInitialPostId(null);
+    syncHistory({ tab: previousTab, eventId: null, venueName: null, postId: null }, 'replace');
+  }, [previousTab, syncHistory]);
+
   const handleSearchAction = useCallback((action: GlobalSearchActionId) => {
     setIsGlobalSearchOpen(false);
 
@@ -581,19 +592,19 @@ function AppShell() {
   // ── Profile sub-page resolver ─────────────────────────────────────────────
   const backToMenu = () => setProfileView('account-menu');
   const profileSubContent: Record<string, React.ReactNode> = {
-    'account-menu':    <SettingsPage onBack={() => setProfileView('profile')} />,
-    'edit-profile':    <SettingsPage onBack={() => setProfileView('profile')} initialView="edit" />,
-    'account':         <SettingsPage onBack={() => setProfileView('profile')} initialView="account" />,
-    'manage-account':  <SettingsPage onBack={() => setProfileView('profile')} initialView="privacy" />,
-    'privacy':         <SettingsPage onBack={() => setProfileView('profile')} initialView="privacy" />,
-    'notifications':   <SettingsPage onBack={() => setProfileView('profile')} initialView="notifications" />,
-    'appearance':      <SettingsPage onBack={() => setProfileView('profile')} initialView="appearance" />,
-    'blocked_muted':   <SettingsPage onBack={() => setProfileView('profile')} initialView="blocked_muted" />,
-    'inventory':       <SettingsPage onBack={() => setProfileView('profile')} initialView="inventory" />,
-    'add-location':    <SettingsPage onBack={() => setProfileView('profile')} initialView="add_location" />,
-    'claim-location':  <SettingsPage onBack={() => setProfileView('profile')} initialView="claim_location" />,
-    'app-settings':    <SettingsPage onBack={() => setProfileView('profile')} initialView="notifications" />,
-    'activity-log':    <ActivityLogPage onBack={() => setProfileView('profile')} />,
+    'account-menu':    <SettingsPage onBack={closeProfileSettingsView} />,
+    'edit-profile':    <SettingsPage onBack={closeProfileSettingsView} initialView="edit" />,
+    'account':         <SettingsPage onBack={closeProfileSettingsView} initialView="account" />,
+    'manage-account':  <SettingsPage onBack={closeProfileSettingsView} initialView="privacy" />,
+    'privacy':         <SettingsPage onBack={closeProfileSettingsView} initialView="privacy" />,
+    'notifications':   <SettingsPage onBack={closeProfileSettingsView} initialView="notifications" />,
+    'appearance':      <SettingsPage onBack={closeProfileSettingsView} initialView="appearance" />,
+    'blocked_muted':   <SettingsPage onBack={closeProfileSettingsView} initialView="blocked_muted" />,
+    'inventory':       <SettingsPage onBack={closeProfileSettingsView} initialView="inventory" />,
+    'add-location':    <SettingsPage onBack={closeProfileSettingsView} initialView="add_location" />,
+    'claim-location':  <SettingsPage onBack={closeProfileSettingsView} initialView="claim_location" />,
+    'app-settings':    <SettingsPage onBack={closeProfileSettingsView} initialView="notifications" />,
+    'activity-log':    <ActivityLogPage onBack={closeProfileSettingsView} />,
   };
 
   const isProfileSubPage = [

@@ -149,12 +149,18 @@ function BackButton({ onBack, label }: { onBack: () => void, label: string }) {
   return (
     <button
       onClick={onBack}
-      className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-white/5 bg-white/[0.03] px-2.5 py-1.5 text-noctvm-silver transition-all hover:border-white/10 hover:bg-white/[0.05] hover:text-white"
+      className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-white/90 transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+      aria-label={label}
     >
-      <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/5 bg-noctvm-midnight/70 transition-colors group-hover:border-noctvm-violet/20 group-hover:bg-noctvm-violet/10">
-        <svg className="h-3.5 w-3.5 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </div>
-      <span className="text-[9px] font-mono font-bold uppercase tracking-[0.24em]">{label}</span>
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+        <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span
+        className="whitespace-nowrap text-[11px] font-mono font-bold uppercase tracking-[0.16em] leading-none"
+        style={{ color: 'rgb(229 231 235)', WebkitTextFillColor: 'rgb(229 231 235)', opacity: 1 }}
+      >
+        {label}
+      </span>
     </button>
   );
 }
@@ -164,7 +170,7 @@ function SettingsPageHeader({
   subtitle,
   onBack,
   backLabel,
-  titleClassName = 'font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white leading-none',
+  titleClassName = 'text-xl sm:text-2xl font-semibold tracking-tight text-white leading-tight',
   subtitleClassName = 'text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45',
 }: {
   title: string;
@@ -175,12 +181,19 @@ function SettingsPageHeader({
   subtitleClassName?: string;
 }) {
   return (
-    <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5">
-      <div className="min-w-0 space-y-1">
-        <h2 className={`${titleClassName} min-w-0`}>{title}</h2>
-        {subtitle && <p className={subtitleClassName}>{subtitle}</p>}
+    <div className="relative z-10 mb-4 sm:mb-5">
+      <div className="flex w-full items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2
+            className={`${titleClassName} w-full break-words`}
+            style={{ color: 'rgb(255 255 255)', WebkitTextFillColor: 'rgb(255 255 255)', opacity: 1 }}
+          >
+            {title}
+          </h2>
+          {subtitle && <p className={`${subtitleClassName} mt-1 w-full break-words`}>{subtitle}</p>}
+        </div>
+        <BackButton onBack={onBack} label={backLabel} />
       </div>
-      <BackButton onBack={onBack} label={backLabel} />
     </div>
   );
 }
@@ -313,7 +326,6 @@ export function SettingsPage({ onBack, initialView = 'hub' }: { onBack: () => vo
           title="Settings"
           onBack={onBack}
           backLabel="Back"
-          titleClassName="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-white leading-none"
         />
       </div>
 
