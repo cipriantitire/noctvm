@@ -109,7 +109,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                   </div>
                   <span
                     className={`relative z-10 max-w-full truncate text-[12px] leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
-                      isActive ? activeTintClass : 'text-white/90 group-hover:text-white'
+                      isActive ? activeTintClass : 'text-current group-hover:text-white'
                     }`}
                   >
                     {item.label}
