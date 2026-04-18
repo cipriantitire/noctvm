@@ -46,15 +46,11 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
   const [saveCount, setSaveCount] = useState(0);
   const [saveLoading, setSaveLoading] = useState(false);
 
-  const isCCMergedWithRA = event.source === 'controlclub' && !!event.ticket_url && event.ticket_url.includes('ra.co');
-  const displaySource = isCCMergedWithRA ? 'ra' : event.source;
-  const sourceBadge = getSourceBadge(displaySource);
-  
-  const badgeLink = isCCMergedWithRA ? event.ticket_url || undefined : event.event_url;
-  
+  const sourceBadge = getSourceBadge(event.source);
+  const badgeLink = event.event_url || undefined;
+
   const isValidTicketUrl = event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc');
-  // For Control Club, we ALWAYS want the CTA to go to their event page where tickets are sold.
-  const priceLink = event.source === 'controlclub' ? event.event_url : (isValidTicketUrl ? event.ticket_url || undefined : event.event_url);
+  const priceLink = isValidTicketUrl ? event.ticket_url || undefined : event.event_url;
 
   const real = isRealEvent(event.id);
 

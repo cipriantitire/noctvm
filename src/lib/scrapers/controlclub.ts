@@ -259,12 +259,22 @@ async function fetchDetailPage(stub: EventStub): Promise<ScrapedEvent | null> {
     if ((!price || /^door$/i.test(price)) && ticket_url) {
       try {
         if (ticket_url.includes('eventbook.ro') || ticket_url.includes('livetickets.ro') || ticket_url.includes('iabilet.ro') || ticket_url.includes('ambilet.ro')) {
-          const extHtml = await fetchHtml(ticket_url);
           const { extractPriceFromHtml } = await import('./utils');
-          const extPrice = extractPriceFromHtml(extHtml, ticket_url);
-          if (extPrice && extPrice !== 'FREE') price = extPrice;
+          for (let attempt = 0; attempt < 2 && !price; attempt++) {
+            try {
+              const extHtml = await fetchHtml(ticket_url, 12_000);
+              const extPrice = extractPriceFromHtml(extHtml, ticket_url);
+              if (extPrice && !/^free$/i.test(extPrice) && !/^0(?:\s|$)/.test(extPrice)) {
+                price = extPrice;
+                break;
+              }
+            } catch {
+              // Retry once on transient external seller failures.
+              await new Promise(resolve => setTimeout(resolve, 350));
+            }
+          }
         }
-      } catch (e) { /* ignore */ }
+      } catch { /* ignore */ }
     }
 
     return {

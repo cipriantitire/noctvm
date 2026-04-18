@@ -260,6 +260,7 @@ const HARD_BLOCK_TERMS = [
   'salsa revolution', 'salsa congress',
   // Festival inventory belongs to the dedicated festival scraper
   'elrow',
+  'biserica', 'concert de org',
   'festival tickets', 'festival ticket', 'festival pass', 'festival passes', 'day pass', 'camping pass',
   'acces general festival', 'abonament festival', 'despre festival', 'bilete festival',
   // Social/party games (non-nightlife music)
@@ -292,10 +293,10 @@ const STRONG_MUSIC_TERMS = [
 ];
 
 /** Returns genre array if music event, null if definitively non-music. */
-export function guessGenres(title: string, desc: string): string[] | null {
+export function guessGenres(title: string, desc: string, venueHint = ''): string[] | null {
   const normalize = (s: string) => normalizeSearchText(s);
 
-  const t = normalize(title) + ' ' + normalize(desc);
+  const t = normalize(title) + ' ' + normalize(desc) + ' ' + normalize(venueHint);
 
   // Helper for word-boundary matching (prevents "terapie" matching "rap")
   const hasTerm = (term: string) => {
@@ -387,11 +388,6 @@ export function parseEventsFromJsonLd(html: string, city: string): ScrapedEvent[
     if (!rawName) continue;
     const { title, venueHint } = splitTitleVenue(rawName);
 
-    const description = clean(String(b.description ?? '')) || null;
-
-    const genres = guessGenres(title, description ?? '');
-    if (!genres) continue;
-
     const location = (b.location as Record<string, unknown>) ?? {};
     const addr = (location.address as Record<string, unknown>) ?? {};
     const venueName = clean(String(location.name ?? addr.name ?? ''));
@@ -401,6 +397,10 @@ export function parseEventsFromJsonLd(html: string, city: string): ScrapedEvent[
     const venue = (venueName && !isAddressString(venueName))
       ? venueName
       : resolvedVenueHint || 'Venue TBC';
+
+    const description = clean(String(b.description ?? '')) || null;
+    const genres = guessGenres(title, description ?? '', venue);
+    if (!genres) continue;
 
     const rawImg = b.image;
     const image_url =
@@ -1173,7 +1173,7 @@ export async function parseDetailPage(
     const ticket_url: string | null = externalTicketLink;
 
     // Genre filter
-    const genres = guessGenres(title, description ?? '');
+    const genres = guessGenres(title, description ?? '', venue);
     if (!genres) continue;
 
     return {
@@ -1221,8 +1221,6 @@ export async function parseDetailPage(
     htmlDescFallback && htmlDescFallback.length > ogDesc.length
       ? htmlDescFallback
       : ogDesc || htmlDescFallback || null;
-  const genres = guessGenres(ogTitle, finalDesc ?? '');
-  if (!genres) return null;
 
   // Venue strategy: JSON-LD location fragment → title "@Venue" hint → " – Venue" → HTML
   let venue = 'Venue TBC';
@@ -1240,6 +1238,9 @@ export async function parseDetailPage(
       venue = isAddressString(htmlVenue) ? 'Venue TBC' : htmlVenue;
     }
   }
+
+  const genres = guessGenres(ogTitle, finalDesc ?? '', venue);
+  if (!genres) return null;
 
   return {
     title: ogTitle,

@@ -54,7 +54,7 @@ const TITLE_BLOCK_TERMS = [
   'elrow',
 ];
 
-const TEXT_BLOCK_RE = /\b(?:stand\s*-?\s*up|standup|comedy|comedie|comedian|improv)\b/i;
+const TEXT_BLOCK_RE = /\b(?:stand\s*-?\s*up|standup|comedy|comedie|comedian|improv|biserica)\b/i;
 
 type ZileSiNoptiStub = {
   title: string;

@@ -12,7 +12,7 @@ import { scrapeRA }           from './ra';
 import { scrapeEventbook }    from './eventbook';
 import { scrapeControlClub }  from './controlclub';
 import { ScrapedEvent }       from './types';
-import { isValidVenueName }  from './utils';
+import { isValidVenueName, clean }  from './utils';
 import { withSentryScraper } from '../sentry-utils';
 import * as Sentry           from '@sentry/nextjs';
 
@@ -96,10 +96,11 @@ function stripVenueSuffix(name: string): string {
 function normalizeVenue(venueName: string, eventTitle: string): string {
   // Strip aggregator suffixes first (e.g. "Control Club • Zile și Nopți" → "Control Club")
   const cleaned = stripVenueSuffix(venueName);
-  const lower = cleaned.toLowerCase().trim();
+  const tbaRecovered = clean(cleaned.replace(/^(?:venue\s*)?tba\s*[-:|/]\s*/i, '')) || cleaned;
+  const lower = tbaRecovered.toLowerCase().trim();
   // Simple alias lookup
   const alias = VENUE_ALIASES[lower];
-  const base = alias ?? cleaned;
+  const base = alias ?? tbaRecovered;
 
   // Remove trailing city suffixes from venue names to improve cross-source dedupe
   // e.g. "Natural High București" vs "Natural High"
@@ -146,6 +147,9 @@ function normalizeTitleWithoutPromoterPrefix(s: string): string {
 
 function normalizeTitleForLineupMatch(s: string): string {
   return normalizeTitleWithoutPromoterPrefix(s)
+    // Cross-language/event-taxonomy bridges so identical events from RO/EN feeds collide.
+    .replace(/\b(?:targ|târg)\s+de\s+viniluri\b/g, 'records fair')
+    .replace(/\bvinyl\s+fair\b/g, 'records fair')
     .replace(/\b(?:bucuresti|bucharest|constanta|concert|live|party|event|eveniment|bilete|tickets?|with|feat|featuring|si|at|all|night|long|prezinta|presents|festival|fest|tour|editia|edition)\b/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -218,6 +222,14 @@ function priceStrength(price?: string | null): number {
 }
 
 function pickStrongerPrice(current?: string | null, candidate?: string | null): string | undefined {
+  const currentNorm = (current ?? '').toLowerCase().trim();
+  const candidateNorm = (candidate ?? '').toLowerCase().trim();
+  // If the winner already has an explicit FREE price, don't let a lower-priority
+  // duplicate overwrite it with a paid amount.
+  if (/^free$|gratuit|intrare libera/.test(currentNorm) && /\d/.test(candidateNorm)) {
+    return current ?? undefined;
+  }
+
   const currentStrength = priceStrength(current);
   const candidateStrength = priceStrength(candidate);
   if (candidateStrength > currentStrength) return candidate ?? undefined;
@@ -482,6 +494,7 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'stand-up', 'stand up', 'standup',
     'comedy', 'comedie',
     'elrow',
+    'concert de org',
   ];
   for (const term of HARD_BLOCK_TITLE_TERMS) {
     const { error: cleanErr } = await supabase
@@ -514,6 +527,8 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'comedy',
     'comedie',
     'elrow',
+    'biserica',
+    'concert de org',
   ];
   for (const term of HARD_BLOCK_DESC_TERMS) {
     const { error: cleanErr } = await supabase
@@ -521,6 +536,16 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
       .delete()
       .ilike('description', `%${term}%`);
     if (cleanErr) console.warn(`[orchestrator] cleanup error (description) for "${term}":`, cleanErr.message);
+  }
+
+  // Venue-level hard blocks for non-nightlife spaces that should never appear.
+  const HARD_BLOCK_VENUE_TERMS = ['biserica'];
+  for (const term of HARD_BLOCK_VENUE_TERMS) {
+    const { error: cleanErr } = await supabase
+      .from('events')
+      .delete()
+      .ilike('venue', `%${term}%`);
+    if (cleanErr) console.warn(`[orchestrator] cleanup error (venue) for "${term}":`, cleanErr.message);
   }
 
   // ── Normalize venue city values (Constanța with ț → Constanta without) ──────

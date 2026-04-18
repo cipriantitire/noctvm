@@ -45,6 +45,18 @@ function getSourceBadge(source: string) {
   }
 }
 
+function getTicketProviderFromUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const lower = url.toLowerCase();
+  if (lower.includes('ambilet.ro')) return 'ambilet';
+  if (lower.includes('iabilet.ro')) return 'iabilet';
+  if (lower.includes('eventbook.ro')) return 'eventbook';
+  if (lower.includes('livetickets.ro')) return 'livetickets';
+  if (lower.includes('ra.co')) return 'ra';
+  if (lower.includes('control-club.ro')) return 'controlclub';
+  return null;
+}
+
 export default function EventModal({ 
   event, 
   onClose, 
@@ -137,15 +149,14 @@ export default function EventModal({
 
   if (!event) return null;
 
-  const isCCMergedWithRA = event.source === 'controlclub' && !!event.ticket_url && event.ticket_url.includes('ra.co');
-  const displaySource = isCCMergedWithRA ? 'ra' : event.source;
-  const sourceBadge = getSourceBadge(displaySource);
-  
-  const badgeLink = isCCMergedWithRA ? event.ticket_url || undefined : event.event_url;
-  
+  const sourceBadge = getSourceBadge(event.source);
+  const badgeLink = event.event_url || undefined;
+
   const isValidTicketUrl = event.ticket_url && !event.ticket_url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|pdf|ico|php|xml)(\?|#|$)/i) && !event.ticket_url.includes('/assets/') && !event.ticket_url.includes('/css/') && !event.ticket_url.includes('x.com') && !event.ticket_url.includes('twitter.com') && !event.ticket_url.includes('facebook.com') && !event.ticket_url.includes('xmlrpc');
-  // For Control Club, we ALWAYS want the CTA to go to their event page where tickets are sold.
-  const priceLink = event.source === 'controlclub' ? event.event_url : (isValidTicketUrl ? event.ticket_url || undefined : event.event_url);
+  const ticketCtaLink = isValidTicketUrl ? event.ticket_url || undefined : event.event_url;
+  const ticketSource = getTicketProviderFromUrl(ticketCtaLink) || event.source;
+  const ticketSourceBadge = getSourceBadge(ticketSource);
+  const priceLink = ticketCtaLink;
 
   const hasPrice = event.price && event.price.toLowerCase() !== 'free';
   const isFree = event.price?.toLowerCase() === 'free';
@@ -333,9 +344,9 @@ export default function EventModal({
 
         {/* CTA footer */}
         <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
-          {badgeLink ? (
+          {ticketCtaLink ? (
             <Button
-              href={badgeLink}
+              href={ticketCtaLink}
               target="_blank"
               rel="noopener noreferrer"
               variant="primary"
@@ -344,13 +355,13 @@ export default function EventModal({
               className="w-full"
             >
               <TicketIcon className="w-4 h-4" />
-              Get Tickets on {sourceBadge.label}
+              Get Tickets on {ticketSourceBadge.label}
             </Button>
           ) : (
             <p className="text-center text-sm text-noctvm-silver/50 py-3">No outbound link for this event.</p>
           )}
-          {badgeLink && (
-            <p className="text-center text-noctvm-caption text-noctvm-silver/40 mt-2">Opens {sourceBadge.label} in a new tab</p>
+          {ticketCtaLink && (
+            <p className="text-center text-noctvm-caption text-noctvm-silver/40 mt-2">Opens {ticketSourceBadge.label} in a new tab</p>
           )}
         </div>
       </GlassPanel>
