@@ -378,7 +378,7 @@ export default function EventModal({
             className={`absolute top-4 left-4 pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border z-10 hover:scale-105 transition-transform`}
           >
             <TicketIcon className="w-3 h-3" />
-            {sourceBadge.label}
+            {sourceBadge.label === 'Control Club' ? 'CTRL' : sourceBadge.label}
           </a>
 
           {heroGenres.length > 0 && (
@@ -386,7 +386,7 @@ export default function EventModal({
               {heroGenres.map((genre) => (
                 <span
                   key={genre}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight backdrop-blur-md border ${imageGenreBadgeClass}`}
+                  className={`px-3 py-1.5 rounded-full corner-smooth-none text-xs font-bold uppercase tracking-tight backdrop-blur-md border ${imageGenreBadgeClass}`}
                 >
                   {genre}
                 </span>

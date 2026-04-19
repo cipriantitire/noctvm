@@ -117,7 +117,10 @@ export default function RightPanel({
       </div>
 
       {/* Live Tonight */}
-      <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-sm border border-white/5 relative overflow-hidden group">
+      <div
+        data-colorbends-refraction="search-surface"
+        className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-sm border border-white/5 relative overflow-hidden group"
+      >
         <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-noctvm-violet/10 transition-colors" />
         <div className="flex items-center gap-2 mb-3 relative z-10">
           <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>

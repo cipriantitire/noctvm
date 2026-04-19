@@ -51,26 +51,27 @@ export default function SearchBar(props: SearchBarProps) {
   } = props;
 
   const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
+  const resultCountLabel = type === 'events' ? `${eventsCount || 0} events` : `${venuesCount || 0} venues`;
 
   return (
     <div 
       className={`sticky z-20 transition-all duration-300 ease-in-out mb-4 ${headerHidden ? '-translate-y-[220%] top-0' : 'top-[56px]'} lg:!top-0`}
     >
-      <div className="liquid-glass-card rounded-[28px]">
+      <div className="liquid-glass-card search-frost-boost rounded-[40px] corner-smooth-none" data-colorbends-refraction="search-surface">
         <div className="card-content">
         {/* Desktop Header area */}
-        <div className="card-header hidden lg:flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 mt-1">
+        <div className="card-header hidden lg:!flex !items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
             <span className="text-sm text-noctvm-silver">{type === 'events' ? 'Nightlife' : 'Venues'} in</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex h-[34px] min-w-[7rem] items-center justify-between gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm font-medium text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:bg-white/[0.06]"
+                  className="search-static-glass flex h-[34px] min-w-[7rem] items-center justify-between gap-1.5 rounded-[16px] px-3 text-[13px] font-medium text-noctvm-silver transition-colors"
                   title="Select city"
                 >
                   <span>{activeCity === 'bucuresti' ? 'București' : 'Constanța'}</span>
-                  <svg className="size-4 text-noctvm-silver/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="size-4 text-noctvm-silver" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
@@ -98,6 +99,9 @@ export default function SearchBar(props: SearchBarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          <span className="flex h-[34px] items-center text-noctvm-caption text-noctvm-silver/50 font-mono">
+            {resultCountLabel}
+          </span>
         </div>
 
         {type === 'events' ? (
@@ -114,9 +118,9 @@ export default function SearchBar(props: SearchBarProps) {
         ) : (
           <div className="space-y-2">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="relative flex-1 min-w-0 h-[42px] frosted-glass rounded-xl">
+              <div className="relative flex-1 min-w-0 h-[42px] frosted-glass rounded-full corner-smooth-none">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
+                  <SearchIcon className="w-4 h-4 text-noctvm-silver" />
                 </div>
                 <input
                   type="text"
@@ -124,7 +128,7 @@ export default function SearchBar(props: SearchBarProps) {
                   title="Search venues"
                   value={props.venueSearch || ''}
                   onChange={e => props.onVenueSearchChange?.(e.target.value)}
-                  className="h-full w-full bg-transparent border-0 rounded-xl pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:ring-0"
+                  className="h-full w-full bg-transparent border-0 rounded-full corner-smooth-none pl-10 pr-4 text-sm text-noctvm-silver placeholder:text-noctvm-silver focus:outline-none focus:ring-0"
                 />
                 {props.venueSearch && (
                   <button
@@ -139,11 +143,11 @@ export default function SearchBar(props: SearchBarProps) {
                 )}
               </div>
               
-              <div className="flex h-[42px] flex-shrink-0 items-center rounded-xl frosted-glass p-1">
+              <div className="flex h-[42px] flex-shrink-0 items-center rounded-full corner-smooth-none frosted-glass p-1">
                 <button
                   type="button"
                   onClick={() => props.onVenueViewChange?.('grid')}
-                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
                   aria-label="Switch to grid view"
                   title="Switch to grid view"
                 >
@@ -153,7 +157,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <button
                   type="button"
                   onClick={() => props.onVenueViewChange?.('list')}
-                  className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
                   aria-label="Switch to list view"
                   title="Switch to list view"
                 >
@@ -167,7 +171,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <Select value={props.venueSort} onValueChange={(value) => props.onVenueSortChange?.(value as NonNullable<SearchBarProps['venueSort']>)}>
                   <SelectTrigger
                     size="sm"
-                    className="h-[34px] w-auto whitespace-nowrap !justify-between !rounded-xl !border-white/10 !bg-white/[0.04] !px-2.5 !py-1 !text-[12px] !font-medium !text-noctvm-silver !shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:!bg-white/[0.06] focus-visible:!border-noctvm-violet/50"
+                    className="h-[34px] w-auto whitespace-nowrap !justify-between !rounded-full corner-smooth-none !border-white/10 !bg-white/[0.04] !px-2.5 !py-1 !text-[12px] !font-medium !text-noctvm-silver !shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:!bg-white/[0.06] focus-visible:!border-noctvm-violet/50"
                     title="Sort venues"
                   >
                     <SelectValue />
@@ -188,7 +192,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className={`w-full h-[34px] flex items-center justify-between gap-2 px-3 rounded-xl text-[12px] font-medium frosted-glass transition-colors ${
+                    className={`w-full h-[34px] flex items-center justify-between gap-2 px-3 rounded-full corner-smooth-none text-[12px] font-medium frosted-glass transition-colors ${
                       props.activeGenre === 'All'
                         ? 'text-noctvm-silver hover:border-noctvm-violet/30'
                         : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
@@ -221,7 +225,7 @@ export default function SearchBar(props: SearchBarProps) {
                     scrollBarWidth={4}
                     visibleLength={56}
                     edgePadding={2}
-                    cornerRadius={20}
+                    cornerRadius={12}
                     verticalInset={2}
                   >
                     <div className="flex flex-wrap gap-1.5">
@@ -250,12 +254,6 @@ export default function SearchBar(props: SearchBarProps) {
           </div>
         )}
 
-        {/* Count footer */}
-        <p className="card-tip flex items-center justify-start mt-1 text-left">
-          <span className="text-noctvm-caption text-noctvm-silver/50 font-mono">
-            {type === 'events' ? `${eventsCount || 0} events` : `${venuesCount || 0} venues`}
-          </span>
-        </p>
         </div>
       </div>
     </div>

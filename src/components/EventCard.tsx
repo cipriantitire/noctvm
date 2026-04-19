@@ -39,9 +39,14 @@ interface EventCardProps {
   variant?: 'portrait' | 'landscape';
   onClick?: (event: NoctEvent) => void;
   onSaveRequireAuth?: () => void;
+  saveState?: {
+    isSaved: boolean;
+    saveCount: number;
+  };
+  onSaveStateChange?: (eventId: string, state: { isSaved: boolean; saveCount: number }) => void;
 }
 
-function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: EventCardProps) {
+function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, saveState, onSaveStateChange }: EventCardProps) {
   const { user } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
   const [saveCount, setSaveCount] = useState(0);
@@ -54,9 +59,25 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
   const priceLink = isValidTicketUrl ? event.ticket_url || undefined : event.event_url;
 
   const real = isRealEvent(event.id);
+  const isSaveStateControlled = saveState !== undefined;
+  const currentIsSaved = saveState?.isSaved ?? isSaved;
+  const currentSaveCount = saveState?.saveCount ?? saveCount;
+  const applySaveState = (nextState: { isSaved: boolean; saveCount: number }) => {
+    if (isSaveStateControlled) {
+      onSaveStateChange?.(event.id, nextState);
+      return;
+    }
+
+    setIsSaved(nextState.isSaved);
+    setSaveCount(nextState.saveCount);
+  };
 
   // Fetch save count + user's saved state
   useEffect(() => {
+    if (isSaveStateControlled) {
+      return;
+    }
+
     if (!real) {
       setSaveCount(0);
       setIsSaved(false);
@@ -78,7 +99,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
     };
 
     fetchSaveData();
-  }, [event.id, user, real]);
+  }, [event.id, user, real, isSaveStateControlled]);
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,17 +109,26 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
     // If it's a sample event, it can't be saved to DB (foreign key constraint)
     if (!real) {
       // Just toggle local state for UI demo purposes if it's a sample event
-      setIsSaved(!isSaved);
-      setSaveCount(c => !isSaved ? c + 1 : Math.max(0, c - 1));
+      applySaveState({
+        isSaved: !currentIsSaved,
+        saveCount: !currentIsSaved ? currentSaveCount + 1 : Math.max(0, currentSaveCount - 1),
+      });
       return;
     }
 
-    const newSaved = !isSaved;
-    setIsSaved(newSaved);
-    setSaveCount(c => newSaved ? c + 1 : Math.max(0, c - 1));
+    const previousState = {
+      isSaved: currentIsSaved,
+      saveCount: currentSaveCount,
+    };
+    const nextState = {
+      isSaved: !currentIsSaved,
+      saveCount: !currentIsSaved ? currentSaveCount + 1 : Math.max(0, currentSaveCount - 1),
+    };
+
+    applySaveState(nextState);
     setSaveLoading(true);
     try {
-      if (isSaved) {
+      if (currentIsSaved) {
         await supabase.from('event_saves').delete().eq('event_id', event.id).eq('user_id', user.id);
       } else {
         await supabase.from('event_saves').insert({ event_id: event.id, user_id: user.id });
@@ -106,8 +136,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
     } catch (err) {
       console.error('Error saving event:', err);
       // Revert on error
-      setIsSaved(isSaved);
-      setSaveCount(c => newSaved ? Math.max(0, c - 1) : c + 1);
+      applySaveState(previousState);
     } finally {
       setSaveLoading(false);
     }
@@ -118,16 +147,16 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
       onClick={handleSave}
       disabled={saveLoading}
       className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-200 ${
-        isSaved 
+        currentIsSaved 
           ? 'bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/30' 
           : 'bg-white/5 text-noctvm-silver/50 hover:bg-white/10 hover:text-white border border-white/5'
       } active:scale-95`}
-      title={isSaved ? 'Remove from saved' : 'Save event'}
+      title={currentIsSaved ? 'Remove from saved' : 'Save event'}
     >
       <svg
-        className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${isSaved ? 'scale-110' : ''}`}
+        className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${currentIsSaved ? 'scale-110' : ''}`}
         viewBox="0 0 24 24"
-        fill={isSaved ? 'currentColor' : 'none'}
+        fill={currentIsSaved ? 'currentColor' : 'none'}
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"
@@ -135,7 +164,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
       </svg>
-      <span className="text-noctvm-caption font-bold font-mono tracking-tight">{saveCount}</span>
+      <span className="text-noctvm-caption font-bold font-mono tracking-tight">{currentSaveCount}</span>
     </button>
   );
 
@@ -180,7 +209,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
 
   if (variant === 'landscape') {
     return (
-      <Wrapper className="group event-card-liquid flex rounded-xl overflow-hidden transition-all duration-300 h-[160px] lg:h-[180px] cursor-pointer">
+      <Wrapper className="group event-card-liquid flex rounded-xl corner-smooth overflow-hidden transition-all duration-300 h-[160px] lg:h-[180px] cursor-pointer">
         <div className="relative w-[180px] sm:w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
             <Image
               src={event.image_url || '/images/event-fallback.png'}
@@ -200,7 +229,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
             onClick={e => e.stopPropagation()}
             className={`absolute top-2.5 left-2.5 z-20 px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border hover:scale-105 transition-transform`}
           >
-            {sourceBadge.label}
+            {sourceBadge.label === 'Control Club' ? 'CTRL' : sourceBadge.label}
           </a>
           {getPriceBadge()}
           {ratingBadge}
@@ -209,7 +238,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
           <div>
             <div className="flex flex-wrap gap-1.5 mb-2">
               {event.genres.slice(0, 2).map(genre => (
-                <span key={genre} className="px-2 py-0.5 rounded-lg text-noctvm-caption uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{genre}</span>
+                <span key={genre} className="px-2 py-0.5 rounded-full corner-smooth-none text-noctvm-caption uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{genre}</span>
               ))}
             </div>
             <h3 className="font-heading font-semibold text-white text-sm lg:text-base leading-tight mb-1 line-clamp-2 group-hover:text-noctvm-violet transition-colors">
@@ -236,9 +265,9 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
   }
 
   return (
-    <Wrapper className="group event-card-liquid flex flex-col rounded-2xl overflow-hidden transition-all duration-500 cursor-pointer h-full relative">
+    <Wrapper className="group event-card-liquid flex flex-col rounded-xl corner-smooth overflow-hidden transition-all duration-500 cursor-pointer h-full min-h-[338px] relative">
       {/* Fixed-height image — no aspect-ratio so content area stays consistent */}
-      <div className="relative h-[160px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
+      <div className="relative h-[192px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
         <Image
           src={event.image_url || '/images/event-fallback.png'}
           alt={event.title}
@@ -256,7 +285,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
           onClick={e => e.stopPropagation()}
           className={`absolute top-3 left-3 z-20 px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border hover:scale-105 transition-transform`}
         >
-          {sourceBadge.label}
+          {sourceBadge.label === 'Control Club' ? 'CTRL' : sourceBadge.label}
         </a>
         {getPriceBadge()}
         {ratingBadge}
@@ -265,7 +294,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
       <div className="p-3 flex flex-col flex-1">
         <div className="flex flex-wrap gap-1 mb-1.5">
           {event.genres.slice(0, 2).map(genre => (
-            <span key={genre} className="px-1.5 py-0.5 rounded text-noctvm-micro lg:text-noctvm-caption uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{genre}</span>
+            <span key={genre} className="px-1.5 py-0.5 rounded-full corner-smooth-none text-noctvm-micro lg:text-noctvm-caption uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{genre}</span>
           ))}
         </div>
         <h3 className="font-heading font-semibold text-white text-sm leading-snug mb-1 line-clamp-2 group-hover:text-noctvm-violet transition-colors">

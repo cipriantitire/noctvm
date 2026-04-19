@@ -131,6 +131,27 @@ export default function RootLayout({
                 yChannelSelector="G"
               />
             </filter>
+            <filter id="glass-distortion-nav" x="0%" y="0%" width="100%" height="100%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.026 0.026"
+                numOctaves="2"
+                seed="92"
+                result="noise"
+              />
+              <feGaussianBlur
+                in="noise"
+                stdDeviation="1.6"
+                result="blurred"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="blurred"
+                scale="78"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
           </defs>
         </svg>
         <SpeedInsights />

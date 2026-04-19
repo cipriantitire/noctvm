@@ -65,24 +65,24 @@ export default function FilterBar({
     <div className="space-y-2">
       {/* Row 1: Search + view toggle */}
       <div className="flex items-center gap-2">
-        <div className="relative flex-1 h-[42px] frosted-glass rounded-xl">
+        <div className="relative flex-1 h-[42px] frosted-glass rounded-full corner-smooth-none">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <SearchIcon className="w-4 h-4 text-noctvm-silver/50" />
+            <SearchIcon className="w-4 h-4 text-noctvm-silver" />
           </div>
           <input
             type="text"
             placeholder="Search events, venues..."
             value={searchQuery}
-            className="h-full w-full bg-transparent border-0 rounded-xl pl-10 pr-4 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:ring-0"
+            className="h-full w-full bg-transparent border-0 rounded-full corner-smooth-none pl-10 pr-4 text-sm text-noctvm-silver placeholder:text-noctvm-silver focus:outline-none focus:ring-0"
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
 
         {/* View mode toggle */}
-        <div className="flex h-[42px] flex-shrink-0 items-center rounded-xl frosted-glass p-1">
+        <div className="flex h-[42px] flex-shrink-0 items-center rounded-full corner-smooth-none frosted-glass p-1">
           <button
             onClick={() => onViewModeChange('portrait')}
-            className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
+            className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${
               viewMode === 'portrait'
                 ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20'
                 : 'text-noctvm-silver hover:text-white'
@@ -99,7 +99,7 @@ export default function FilterBar({
           <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
           <button
             onClick={() => onViewModeChange('landscape')}
-            className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
+            className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${
               viewMode === 'landscape'
                 ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20'
                 : 'text-noctvm-silver hover:text-white'
@@ -119,7 +119,7 @@ export default function FilterBar({
           <PopoverTrigger asChild>
             <button
               type="button"
-              className={`flex h-[34px] w-fit min-w-[5.25rem] items-center justify-center gap-1.5 rounded-xl border border-white/10 px-3 text-xs font-medium frosted-glass transition-colors ${
+              className={`flex h-[34px] w-fit min-w-[5.25rem] items-center justify-center gap-1.5 rounded-full corner-smooth-none border border-white/10 px-3 text-xs font-medium frosted-glass transition-colors ${
                 selectedDate
                   ? '!border-noctvm-violet/20 !bg-noctvm-violet/10 !text-white'
                   : '!text-noctvm-silver hover:!border-noctvm-violet/30'
@@ -181,7 +181,7 @@ export default function FilterBar({
           <PopoverTrigger asChild>
             <button
               type="button"
-              className={`w-full flex h-[34px] items-center justify-between gap-2 px-3 rounded-xl text-xs font-medium frosted-glass transition-colors ${
+              className={`w-full flex h-[34px] items-center justify-between gap-2 px-3 rounded-full corner-smooth-none text-xs font-medium frosted-glass transition-colors ${
                 activeGenres.includes('All')
                   ? 'text-noctvm-silver hover:border-noctvm-violet/30'
                   : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
@@ -218,7 +218,7 @@ export default function FilterBar({
               scrollBarWidth={4}
               visibleLength={56}
               edgePadding={2}
-              cornerRadius={20}
+              cornerRadius={12}
               verticalInset={2}
             >
               <div className="flex flex-wrap gap-1.5">

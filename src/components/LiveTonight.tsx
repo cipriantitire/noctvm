@@ -18,7 +18,10 @@ export default function LiveTonight({
   if (events.length === 0) return null;
 
   return (
-    <div className={`p-3 rounded-xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-sm border border-white/5 transition-transform duration-300 ease-in-out relative group overflow-hidden ${headerHidden ? '-translate-y-[calc(100%+1rem)]' : ''}`}>
+    <div
+      data-colorbends-refraction="search-surface"
+      className={`p-3 rounded-xl bg-gradient-to-br from-noctvm-midnight/50 to-transparent backdrop-blur-sm border border-white/5 transition-transform duration-300 ease-in-out relative group overflow-hidden ${headerHidden ? '-translate-y-[calc(100%+1rem)]' : ''}`}
+    >
       <div className="absolute top-0 right-0 w-24 h-24 bg-noctvm-violet/5 rounded-full -mr-12 -mt-12 blur-2xl" />
       <div className="flex items-center gap-2 mb-2 relative z-10">
         <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse" />

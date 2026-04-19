@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { collectRefractionRects } from '@/components/ColorBends/refractionTargets';
 
 type ColorBendsProps = {
   className?: string;
@@ -20,12 +21,17 @@ type ColorBendsProps = {
   interactive?: boolean;
   isPaused?: boolean;
   maxPixelRatio?: number;
+  refraction?: boolean;
+  refractionStrength?: number;
 };
 
 const MAX_COLORS = 8 as const;
+const MAX_REFRACTION_RECTS = 12 as const;
+const REFRACTION_TARGET_SELECTOR = '[data-colorbends-refraction="search-surface"]';
 
 const frag = `
 #define MAX_COLORS ${MAX_COLORS}
+#define MAX_REFRACTION_RECTS ${MAX_REFRACTION_RECTS}
 uniform vec2 uCanvas;
 uniform float uTime;
 uniform float uSpeed;
@@ -40,7 +46,44 @@ uniform vec2 uPointer; // in NDC [-1,1]
 uniform float uMouseInfluence;
 uniform float uParallax;
 uniform float uNoise;
+uniform int uRefractionCount;
+uniform vec4 uRefractionRects[MAX_REFRACTION_RECTS];
+uniform float uRefractionStrength;
 varying vec2 vUv;
+
+vec2 refractionWarp(vec2 frag, float t, out float maskOut, out float edgeOut) {
+  vec2 warp = vec2(0.0);
+  float mask = 0.0;
+  float edgeGlow = 0.0;
+
+  for (int i = 0; i < MAX_REFRACTION_RECTS; ++i) {
+    if (i >= uRefractionCount) break;
+
+    vec4 rect = uRefractionRects[i];
+    vec2 local = frag - rect.xy;
+    vec2 size = max(rect.zw, vec2(1.0));
+    vec2 edge = min(local, size - local);
+    float minEdge = min(edge.x, edge.y);
+    float inside = step(0.0, minEdge);
+    float soft = smoothstep(0.0, 80.0, minEdge) * inside;
+    vec2 uv = local / size;
+    float n =
+      sin((uv.x * 17.0 + uv.y * 9.0) + t * 0.7) +
+      sin((uv.x * 7.0 - uv.y * 13.0) - t * 0.5);
+    vec2 direction = vec2(
+      sin(n + t + uv.y * 6.2831),
+      cos(n - t + uv.x * 6.2831)
+    );
+
+    warp += direction * soft;
+    mask = max(mask, soft);
+    edgeGlow = max(edgeGlow, inside * (1.0 - smoothstep(0.0, 18.0, minEdge)));
+  }
+
+  maskOut = mask;
+  edgeOut = edgeGlow;
+  return warp;
+}
 
 void main() {
   float t = uTime * uSpeed;
@@ -51,6 +94,14 @@ void main() {
   q /= max(uScale, 0.0001);
   q /= 0.5 + 0.2 * dot(q, q);
   q += 0.2 * cos(t) - 7.56;
+
+  float glassMask = 0.0;
+  float glassEdge = 0.0;
+  if (uRefractionStrength > 0.0001 && uRefractionCount > 0) {
+    vec2 glassWarp = refractionWarp(gl_FragCoord.xy, t, glassMask, glassEdge);
+    q += glassWarp * uRefractionStrength * 0.022;
+  }
+
   vec2 toward = (uPointer - rp);
   q += toward * uMouseInfluence * 0.2;
 
@@ -103,6 +154,13 @@ void main() {
       col = clamp(col, 0.0, 1.0);
     }
 
+    if (glassMask > 0.0001) {
+      col = mix(col, col * 1.16 + vec3(0.035, 0.025, 0.01), glassMask * 0.35);
+      col += vec3(0.07, 0.055, 0.025) * glassEdge * uRefractionStrength;
+      col = clamp(col, 0.0, 1.0);
+      a = max(a, glassMask * 0.08);
+    }
+
     vec3 rgb = (uTransparent > 0) ? col * a : col;
     gl_FragColor = vec4(rgb, a);
 }
@@ -133,6 +191,8 @@ export default function ColorBends({
   interactive = true,
   isPaused = false,
   maxPixelRatio = 2,
+  refraction = false,
+  refractionStrength = 0.6,
 }: ColorBendsProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -146,6 +206,7 @@ export default function ColorBends({
   const pointerCurrentRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
   const pointerSmoothRef = useRef<number>(8);
   const pausedRef = useRef<boolean>(isPaused);
+  const refractionRef = useRef<boolean>(refraction);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -165,6 +226,7 @@ export default function ColorBends({
 
       geometry = new THREE.PlaneGeometry(2, 2);
       const uColorsArray = Array.from({ length: MAX_COLORS }, () => new THREE.Vector3(0, 0, 0));
+      const uRefractionRectsArray = Array.from({ length: MAX_REFRACTION_RECTS }, () => new THREE.Vector4(0, 0, 0, 0));
       material = new THREE.ShaderMaterial({
         vertexShader: vert,
         fragmentShader: frag,
@@ -182,7 +244,10 @@ export default function ColorBends({
           uPointer: { value: new THREE.Vector2(0, 0) },
           uMouseInfluence: { value: mouseInfluence },
           uParallax: { value: parallax },
-          uNoise: { value: noise }
+          uNoise: { value: noise },
+          uRefractionCount: { value: 0 },
+          uRefractionRects: { value: uRefractionRectsArray },
+          uRefractionStrength: { value: refraction ? refractionStrength : 0 }
         },
         premultipliedAlpha: true,
         transparent: true
@@ -221,12 +286,44 @@ export default function ColorBends({
     container.appendChild(renderer.domElement);
 
     const clock = new THREE.Clock();
+    const updateRefractionRects = () => {
+      if (!refractionRef.current || !material || !renderer) {
+        if (material) material.uniforms.uRefractionCount.value = 0;
+        return;
+      }
+
+      const canvasRect = renderer.domElement.getBoundingClientRect();
+      const targetRects = Array.from(document.querySelectorAll<HTMLElement>(REFRACTION_TARGET_SELECTOR))
+        .map((element) => element.getBoundingClientRect());
+      const rects = collectRefractionRects({
+        canvasRect,
+        viewport: {
+          width: window.innerWidth || canvasRect.width,
+          height: window.innerHeight || canvasRect.height,
+        },
+        targetRects,
+        maxRects: MAX_REFRACTION_RECTS,
+      });
+      const uniformRects = material.uniforms.uRefractionRects.value as THREE.Vector4[];
+
+      for (let i = 0; i < MAX_REFRACTION_RECTS; i += 1) {
+        const rect = rects[i];
+        if (rect) {
+          uniformRects[i].set(rect.x, rect.y, rect.width, rect.height);
+        } else {
+          uniformRects[i].set(0, 0, 0, 0);
+        }
+      }
+
+      material.uniforms.uRefractionCount.value = rects.length;
+    };
 
     const handleResize = () => {
       const w = container.clientWidth || 1;
       const h = container.clientHeight || 1;
       renderer.setSize(w, h, false);
       (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
+      updateRefractionRects();
     };
 
     handleResize();
@@ -250,6 +347,7 @@ export default function ColorBends({
         const dt = clock.getDelta();
         const elapsed = clock.elapsedTime;
         material.uniforms.uTime.value = elapsed;
+        updateRefractionRects();
 
         const deg = (rotationRef.current % 360) + autoRotateRef.current * elapsed;
         const rad = (deg * Math.PI) / 180;
@@ -310,6 +408,8 @@ export default function ColorBends({
     parallax,
     noise,
     maxPixelRatio,
+    refraction,
+    refractionStrength,
   ]);
 
   useEffect(() => {
@@ -319,6 +419,7 @@ export default function ColorBends({
 
     rotationRef.current = rotation;
     autoRotateRef.current = autoRotate;
+    refractionRef.current = refraction;
     material.uniforms.uSpeed.value = speed;
     material.uniforms.uScale.value = scale;
     material.uniforms.uFrequency.value = frequency;
@@ -326,6 +427,10 @@ export default function ColorBends({
     material.uniforms.uMouseInfluence.value = mouseInfluence;
     material.uniforms.uParallax.value = parallax;
     material.uniforms.uNoise.value = noise;
+    material.uniforms.uRefractionStrength.value = refraction ? refractionStrength : 0;
+    if (!refraction) {
+      material.uniforms.uRefractionCount.value = 0;
+    }
 
     const toVec3 = (hex: string) => {
       const h = hex.replace('#', '').trim();
@@ -357,7 +462,9 @@ export default function ColorBends({
     parallax,
     noise,
     colors,
-    transparent
+    transparent,
+    refraction,
+    refractionStrength
   ]);
 
   useEffect(() => {

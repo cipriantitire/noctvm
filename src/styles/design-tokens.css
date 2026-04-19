@@ -35,10 +35,13 @@
   --color-accent: var(--noctvm-violet);
 
   /* —— Radius (aligns with common rounded-* usage) —— */
-  --radius-sm: 0.5rem; /* 8px — rounded-lg */
-  --radius-md: 0.75rem; /* 12px — rounded-xl */
-  --radius-lg: 1rem; /* 16px — rounded-2xl */
-  --radius-xl: 1.5rem; /* 24px — rounded-3xl */
+  --radius-sm: 0.75rem; /* 12px */
+  --radius-md: 1rem; /* 16px */
+  --radius-lg: 1.25rem; /* 20px */
+  --radius-xl: 1.875rem; /* 30px */
+  --radius-2xl: 2.25rem; /* 36px */
+  --radius-3xl: 2.75rem; /* 44px */
+  --corner-smoothing: 0.8;
 
   /* —— Spacing scale (4px grid; optional for non-Tailwind CSS) —— */
   --space-1: 0.25rem;

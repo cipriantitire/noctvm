@@ -47,6 +47,8 @@ import { SAMPLE_EVENTS } from '@/lib/events-data';
 import { NoctEvent } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { useFrostedGlass } from '@/hooks/useFrostedGlass';
+import { useEventSaveStates } from '@/hooks/useEventSaveStates';
+import { useProgressiveEvents } from '@/hooks/useProgressiveEvents';
 import PocketPage from '@/components/PocketPage';
 import { useAuth } from '@/contexts/AuthContext';
 import ManageVenueModal from '@/components/ManageVenueModal';
@@ -148,6 +150,7 @@ function AppShell() {
   const [dbEvents, setDbEvents] = useState<NoctEvent[] | null>(null);
   const [managedVenueId, setManagedVenueId] = useState<string | null>(null);
   const mainRef = useRef<HTMLElement>(null);
+  const eventLoadMoreRef = useRef<HTMLDivElement>(null);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [pendingEventId, setPendingEventId] = useState<string | null>(null);
@@ -580,6 +583,41 @@ function AppShell() {
     return events;
   }, [dbEvents, activeGenres, searchQuery, selectedDate, activeCity]);
 
+  const eventBatchSize = viewMode === 'landscape' ? 24 : 40;
+  const {
+    visibleEvents,
+    hasMore: hasMoreEvents,
+    showMore: showMoreEvents,
+  } = useProgressiveEvents(filteredEvents, eventBatchSize);
+  const { saveStates, handleSaveStateChange } = useEventSaveStates(visibleEvents, user?.id);
+
+  useEffect(() => {
+    if (activeTab !== 'events' || !hasMoreEvents) return;
+
+    const sentinel = eventLoadMoreRef.current;
+    const scrollRoot = mainRef.current;
+    if (!sentinel || !scrollRoot || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          showMoreEvents();
+        }
+      },
+      {
+        root: scrollRoot,
+        rootMargin: '720px 0px',
+        threshold: 0.01,
+      },
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activeTab, hasMoreEvents, showMoreEvents]);
+
   const handleVenueClick = useCallback((name: string) => openVenue(name), [openVenue]);
   const handleCloseVenue = useCallback(() => setVenueClosing(true), []);
 
@@ -823,18 +861,18 @@ function AppShell() {
         <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto mobile-scrollbar-hide'}`}>
           {/* Mobile header */}
           <header
-            className="lg:hidden sticky top-0 z-40 liquid-glass-card cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
+            className="lg:hidden sticky top-0 z-40 liquid-glass-card liquid-glass-nav cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
             style={{
               position: 'sticky',
               top: 0,
-              backgroundColor: 'rgba(7, 8, 12, 0.72)',
+              backgroundColor: 'rgba(5, 6, 10, 0.64)',
               borderColor: 'rgba(255, 255, 255, 0.1)',
               borderTopWidth: 0,
               boxShadow: '0 18px 40px rgba(0, 0, 0, 0.5)',
             }}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_0%,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.03)_20%,rgba(255,255,255,0)_60%)] pointer-events-none" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_18%,rgba(0,0,0,0.15)_100%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_0%,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_20%,rgba(255,255,255,0)_60%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_18%,rgba(0,0,0,0.18)_100%)] pointer-events-none" />
 
             <div className="relative z-10 grid grid-cols-3 items-center">
               {/* Left: Logo */}
@@ -985,18 +1023,31 @@ function AppShell() {
                           <div key={i} className="bg-noctvm-surface/40 rounded-2xl h-[320px] animate-pulse border border-white/5" />
                         ))
                       ) : (
-                        filteredEvents.map((event, index) => (
-                          <div key={`${event.source}-${index}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
+                        visibleEvents.map((event, index) => (
+                          <div key={`${event.source}-${event.id}`} className={`animate-fade-in-up hover-lift stagger-${Math.min(index + 1, 12)} h-full`}>
                             <EventCard 
                               event={event} 
                               variant={viewMode} 
                               onClick={openEvent} 
                               onSaveRequireAuth={() => setShowAuthModal(true)} 
+                              saveState={saveStates[event.id] ?? { isSaved: false, saveCount: event.save_count ?? 0 }}
+                              onSaveStateChange={handleSaveStateChange}
                             />
                           </div>
                         ))
                       )}
                     </div>
+                    {dbEvents !== null && hasMoreEvents && (
+                      <div ref={eventLoadMoreRef} className="flex justify-center py-8">
+                        <button
+                          type="button"
+                          onClick={showMoreEvents}
+                          className="rounded-lg border border-white/10 bg-noctvm-surface/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-noctvm-silver transition-colors hover:border-white/20 hover:text-white"
+                        >
+                          Load more events
+                        </button>
+                      </div>
+                    )}
                     {filteredEvents.length === 0 && (
                       <div className="text-center py-16 animate-fade-in">
                         <div className="w-16 h-16 rounded-full bg-noctvm-surface flex items-center justify-center mx-auto mb-4">

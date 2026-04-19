@@ -18,11 +18,17 @@ export default function TrendingVenues({
   if (venues.length === 0) return null;
 
   return (
-    <div className={`p-3 rounded-xl bg-white/[0.02] border border-white/5 transition-transform duration-300 ease-in-out ${headerHidden ? '-translate-y-[calc(100%+1rem)]' : ''}`}>
-      <div className="flex items-center gap-2 mb-2.5">
-        <span className="text-noctvm-label font-semibold text-noctvm-silver/70 uppercase tracking-wider font-mono">Trending Venues</span>
+    <div
+      data-colorbends-refraction="search-surface"
+      className={`relative overflow-hidden p-3 rounded-xl bg-gradient-to-br from-noctvm-midnight/70 via-noctvm-midnight/52 to-black/25 backdrop-blur-sm border border-white/5 transition-transform duration-300 ease-in-out ${headerHidden ? '-translate-y-[calc(100%+1rem)]' : ''}`}
+    >
+      <div className="absolute top-0 right-0 w-24 h-24 bg-noctvm-violet/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+      <div className="flex items-center gap-2 mb-2.5 relative z-10">
+        <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse" />
+        <span className="text-noctvm-label font-semibold text-noctvm-emerald uppercase tracking-wider font-mono">Trending Venues</span>
+        <span className="text-noctvm-caption text-noctvm-silver/50 ml-auto font-mono">{venues.length} venues</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
         {venues.map(venue => {
           const logoSrc = getVenueLogo(venue.name);
           return (

@@ -52,6 +52,7 @@ export default function AppBackdrop({ mode, paused = false }: AppBackdropProps) 
   }), [isMobile]);
 
   const isRich = mode === 'rich';
+  const refractionStrength = isMobile ? 0.66 : 1.3;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -61,6 +62,8 @@ export default function AppBackdrop({ mode, paused = false }: AppBackdropProps) 
         className="absolute inset-0 transition-opacity duration-300"
         style={{ opacity: isRich ? 1 : 0.34 }}
         isPaused={paused}
+        refraction={isRich}
+        refractionStrength={refractionStrength}
         {...colorBendsProps}
       />
 

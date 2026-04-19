@@ -189,7 +189,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
               key={genre}
               type="button"
               onClick={() => handleGenreChange(genre)}
-              className={`px-3 py-1.5 rounded-lg text-noctvm-micro font-bold uppercase tracking-widest border transition-all duration-300 ${
+              className={`px-3 py-1.5 rounded-full corner-smooth-none text-noctvm-micro font-bold uppercase tracking-widest border transition-all duration-300 ${
                 formData.genres?.includes(genre)
                   ? 'bg-noctvm-violet text-white border-noctvm-violet shadow-lg shadow-noctvm-violet/20'
                   : 'bg-white/5 text-noctvm-silver border-white/10 hover:border-white/30 hover:text-white'

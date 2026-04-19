@@ -32,7 +32,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
   const slotWidth = `calc((100% - ${((itemCount - 1) * BAR_GAP) + (BAR_PADDING * 2)}px) / ${itemCount})`;
   const cardStyle = { ['--slot-width' as string]: slotWidth } as React.CSSProperties;
   const glassSurfaceStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(7, 8, 12, 0.72)',
+    backgroundColor: 'rgba(5, 6, 10, 0.64)',
     borderColor: 'rgba(255, 255, 255, 0.1)',
   };
 
@@ -54,11 +54,11 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
     >
       <div className="relative isolate w-full max-w-[360px] h-[59px] pointer-events-auto">
         <div
-          className="liquid-glass-card cursor-default relative h-full overflow-hidden rounded-full border border-white/10 shadow-[0_18px_40px_rgba(0,0,0,0.5)]"
+          className="liquid-glass-card liquid-glass-nav cursor-default relative h-full overflow-hidden rounded-full border border-white/10 shadow-[0_18px_40px_rgba(0,0,0,0.5)]"
           style={{ ...glassSurfaceStyle, ...cardStyle }}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_0%,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.03)_20%,rgba(255,255,255,0)_60%)] pointer-events-none" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_18%,rgba(0,0,0,0.15)_100%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_0%,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_20%,rgba(255,255,255,0)_60%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_18%,rgba(0,0,0,0.18)_100%)] pointer-events-none" />
 
           {hasActiveItem && (
             <motion.div

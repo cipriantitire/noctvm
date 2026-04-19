@@ -7,7 +7,7 @@ import { Venue } from '@/lib/types';
 import Image from 'next/image';
 import SidebarMap from './SidebarMap';
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
-import { StarIcon, SearchIcon } from './icons';
+import { StarIcon } from './icons';
 import VerifiedBadge from './VerifiedBadge';
 import SearchBar from './SearchBar';
 import TrendingVenues from './TrendingVenues';
@@ -368,12 +368,12 @@ export default function VenuesPage({
               key={venue.name}
               onClick={() => onVenueClick(venue.name)}
               data-venue-card={idx === 0 ? 'first' : undefined}
-              className={`group bg-noctvm-surface rounded-xl border cursor-pointer hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow overflow-hidden h-full flex flex-col ${isFollowed ? 'border-noctvm-violet/30' : 'border-noctvm-border'}`}
+              className="group event-card-liquid rounded-xl corner-smooth cursor-pointer transition-all duration-300 overflow-hidden h-full flex flex-col"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               {/* Venue color header */}
-              <div className={`h-[100px] bg-gradient-to-br ${getVenueColor(venue.name)} relative flex items-center justify-center flex-shrink-0 overflow-hidden`}>
-                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-black/20 relative">
+              <div className={`h-[156px] bg-gradient-to-br ${getVenueColor(venue.name)} relative flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+                <div className="w-[80px] h-[80px] rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-black/20 relative">
                   <Image
                     src={getVenueLogo(venue.name, venue.logo_url)}
                     alt={venue.name}
@@ -387,9 +387,9 @@ export default function VenuesPage({
                   />
                   <span className={`fallback hidden text-2xl font-bold text-white absolute inset-0 flex items-center justify-center`}>{venue.name[0]}</span>
                 </div>
-                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-noctvm-violet/80 text-white text-noctvm-micro font-semibold">Following</span>}
-                </div>
-                {/* Info */}
+                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full corner-smooth-none bg-noctvm-violet/80 text-white text-noctvm-micro font-semibold">Following</span>}
+              </div>
+              {/* Info */}
               <div className="p-3 flex flex-col flex-1">
                 <div className="flex items-center gap-1.5 mb-1 min-w-0">
                   <h3 className="font-heading font-semibold text-white text-sm leading-tight group-hover:text-noctvm-violet transition-colors truncate">{venue.name}</h3>
@@ -401,7 +401,7 @@ export default function VenuesPage({
                 </div>
                 <div className="flex flex-wrap gap-1 mb-auto">
                   {venue.genres.slice(0, 2).map(g => (
-                    <span key={g} className="px-1.5 py-0.5 rounded text-noctvm-micro uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{g}</span>
+                    <span key={g} className="px-1.5 py-0.5 rounded-full corner-smooth-none text-noctvm-micro uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{g}</span>
                   ))}
                 </div>
                 <div className="flex items-center justify-between pt-2 mt-2 border-t border-noctvm-border">
@@ -421,7 +421,7 @@ export default function VenuesPage({
               key={venue.name}
               onClick={() => onVenueClick(venue.name)}
               data-venue-card={idx === 0 ? 'first' : undefined}
-              className="bg-noctvm-surface rounded-2xl border border-noctvm-border transition-all duration-300 overflow-hidden animate-fade-in-up cursor-pointer hover:border-noctvm-violet/30 hover:shadow-[0_4px_24px_rgba(124,58,237,0.08)]"
+              className="event-card-liquid rounded-xl corner-smooth transition-all duration-300 overflow-hidden animate-fade-in-up cursor-pointer"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               {/* Venue header row */}
