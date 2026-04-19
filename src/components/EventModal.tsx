@@ -166,6 +166,7 @@ export default function EventModal({
   onOpenAuth,
   zIndex = 200
 }: EventModalProps) {
+  const LIGHTBOX_OPEN_GUARD_MS = 350;
   const { user } = useAuth();
   const [descExpanded, setDescExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -176,7 +177,11 @@ export default function EventModal({
   const [venueBadge, setVenueBadge] = useState<'none' | 'owner' | 'admin' | 'gold' | 'verified'>('none');
   const [isDescriptionOverflowing, setIsDescriptionOverflowing] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
-  const handleClose = useCallback(() => setIsClosing(true), []);
+  const blockLightboxUntilRef = useRef(0);
+  const handleClose = useCallback(() => {
+    setLightboxOpen(false);
+    setIsClosing(true);
+  }, []);
 
   useEffect(() => {
     if (!event) return;
@@ -255,7 +260,14 @@ export default function EventModal({
 
   useEffect(() => {
     setDescExpanded(false);
+    setLightboxOpen(false);
+    blockLightboxUntilRef.current = Date.now() + LIGHTBOX_OPEN_GUARD_MS;
   }, [event?.id]);
+
+  const handleHeroImageClick = useCallback(() => {
+    if (Date.now() < blockLightboxUntilRef.current) return;
+    setLightboxOpen(true);
+  }, []);
 
   useEffect(() => {
     const measureDescription = () => {
@@ -297,7 +309,8 @@ export default function EventModal({
     {/* Image lightbox */}
     {lightboxOpen && (
       <div
-        className="fixed inset-0 z-sheet flex items-center justify-center bg-black/95 cursor-zoom-out"
+        className="fixed inset-0 flex items-center justify-center bg-black/95 cursor-zoom-out"
+        style={{ zIndex: (zIndex || 200) + 2 }}
         onClick={() => setLightboxOpen(false)}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -341,7 +354,7 @@ export default function EventModal({
             src={event.image_url || '/images/event-fallback.png'}
             alt={event.title}
             className="w-full h-full object-cover cursor-zoom-in"
-            onClick={() => (event.image_url || true) && setLightboxOpen(true)}
+            onClick={handleHeroImageClick}
             onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
           />
           <IconButton

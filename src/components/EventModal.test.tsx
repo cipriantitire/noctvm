@@ -73,6 +73,7 @@ describe('EventModal', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders a secondary source event page action when it differs from the ticket CTA', () => {
@@ -137,5 +138,22 @@ describe('EventModal', () => {
     expect(screen.getByText('House')).toBeInTheDocument();
     expect(screen.getByText('Techno')).toBeInTheDocument();
     expect(screen.queryByText('Disco')).not.toBeInTheDocument();
+  });
+
+  it('prevents immediate ghost-click lightbox open when the modal first mounts', () => {
+    const dateNowSpy = vi.spyOn(Date, 'now');
+    dateNowSpy.mockReturnValue(1000);
+
+    renderModal();
+
+    const heroImage = screen.getByAltText(baseEvent.title);
+    fireEvent.click(heroImage);
+
+    expect(screen.queryByLabelText(/close image preview/i)).not.toBeInTheDocument();
+
+    dateNowSpy.mockReturnValue(1500);
+    fireEvent.click(heroImage);
+
+    expect(screen.getByLabelText(/close image preview/i)).toBeInTheDocument();
   });
 });
