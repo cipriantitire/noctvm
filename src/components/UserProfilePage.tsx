@@ -188,7 +188,8 @@ interface UserProfilePageProps {
   onOpenCreatePost?: () => void;
   onOpenCreateStory?: () => void;
   onOpenStories?: (users: StoryUser[], index: number) => void;
-  onEventClick: (event: NoctEvent) => void;
+  onEventClick: (event: NoctEvent, source?: 'profile-saved-events') => void;
+  reopenSavedEventsSignal?: number;
   onManageVenue?: (venueId: string) => void;
 }
 
@@ -204,6 +205,7 @@ export default function UserProfilePage({
   onOpenCreateStory,
   onOpenStories,
   onEventClick,
+  reopenSavedEventsSignal,
   onManageVenue,
 }: UserProfilePageProps) {
   const { user } = useAuth();
@@ -283,6 +285,15 @@ export default function UserProfilePage({
 
   // ── Saved Events Sheet state ──────────────────────────────────────────────
   const [isSavedEventsOpen, setIsSavedEventsOpen] = useState(false);
+  const lastSavedEventsReopenSignalRef = useRef<number>(reopenSavedEventsSignal ?? 0);
+
+  useEffect(() => {
+    if (!isOwner || reopenSavedEventsSignal === undefined) return;
+    if (reopenSavedEventsSignal === lastSavedEventsReopenSignalRef.current) return;
+
+    lastSavedEventsReopenSignalRef.current = reopenSavedEventsSignal;
+    setIsSavedEventsOpen(true);
+  }, [isOwner, reopenSavedEventsSignal]);
 
   useEffect(() => {
     if (!user || isOwner) {
@@ -724,7 +735,7 @@ export default function UserProfilePage({
           activeCity={targetProfile.city as any}
           onEventClick={(event) => {
             setIsSavedEventsOpen(false);
-            onEventClick(event);
+            onEventClick(event, 'profile-saved-events');
           }}
         />
       )}

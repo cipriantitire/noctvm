@@ -87,6 +87,8 @@ type UrlState = {
   postId: string | null;
 };
 
+type EventOpenSource = 'default' | 'profile-saved-events';
+
 const AUTH_GATED_TABS: TabType[] = ['feed', 'pocket', 'profile'];
 
 function isAuthGatedTab(tab: TabType) {
@@ -140,6 +142,9 @@ function AppShell() {
   const [editProfileOrigin, setEditProfileOrigin] = useState<'profile' | 'settings'>('profile');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<NoctEvent | null>(null);
+  const [eventOpenSource, setEventOpenSource] = useState<EventOpenSource>('default');
+  const [pendingSavedEventsReopen, setPendingSavedEventsReopen] = useState(false);
+  const [reopenProfileSavedEventsSignal, setReopenProfileSavedEventsSignal] = useState(0);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateStory, setShowCreateStory] = useState(false);
   const [previousTab, setPreviousTab] = useState<TabType>('events');
@@ -537,6 +542,7 @@ function AppShell() {
   }, [activeTab, maxZIndex, syncHistory]);
 
   const openEvent = useCallback((event: NoctEvent | null) => {
+    setPendingSavedEventsReopen(false);
     if (event) {
       const newZ = maxZIndex + 1;
       setEventZIndex(newZ);
@@ -549,6 +555,20 @@ function AppShell() {
     }
     setSelectedEvent(event);
   }, [activeTab, maxZIndex, syncHistory]);
+
+  const openEventWithSource = useCallback((event: NoctEvent | null, source: EventOpenSource = 'default') => {
+    if (event) {
+      setEventOpenSource(source);
+    }
+    openEvent(event);
+  }, [openEvent]);
+
+  useEffect(() => {
+    if (!selectedEvent && pendingSavedEventsReopen) {
+      setReopenProfileSavedEventsSignal((previous) => previous + 1);
+      setPendingSavedEventsReopen(false);
+    }
+  }, [selectedEvent, pendingSavedEventsReopen]);
 
   const filteredEvents = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -773,6 +793,11 @@ function AppShell() {
       <EventModal
         event={selectedEvent}
         onClose={() => {
+          const shouldReopenSavedEvents = eventOpenSource === 'profile-saved-events';
+          if (shouldReopenSavedEvents) {
+            setPendingSavedEventsReopen(true);
+          }
+          setEventOpenSource('default');
           if (typeof window !== 'undefined' && window.location.search.includes('event=')) {
             window.history.back();
             return;
@@ -783,6 +808,7 @@ function AppShell() {
         onVenueClick={(venueName) => {
           setSelectedEvent(null);
           setPendingEventId(null);
+          setEventOpenSource('default');
           openVenue(venueName);
         }}
         onOpenAuth={() => setShowAuthModal(true)}
@@ -1120,7 +1146,8 @@ function AppShell() {
                     onEditProfileClick={() => openProfileSettingsView('edit-profile', { editOrigin: 'profile' })}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
-                    onEventClick={(e) => openEvent(e)}
+                    onEventClick={(e, source) => openEventWithSource(e, source ?? 'default')}
+                    reopenSavedEventsSignal={reopenProfileSavedEventsSignal}
                     onManageVenue={(id) => setManagedVenueId(id)}
                   />
                 )}
@@ -1136,7 +1163,8 @@ function AppShell() {
                     onEditProfileClick={() => openProfileSettingsView('edit-profile', { editOrigin: 'profile' })}
                     onOpenCreatePost={() => setShowCreatePost(true)}
                     onOpenStories={(users, index) => handleOpenStories(users, index)}
-                    onEventClick={(e) => openEvent(e)}
+                    onEventClick={(e, source) => openEventWithSource(e, source ?? 'default')}
+                    reopenSavedEventsSignal={reopenProfileSavedEventsSignal}
                     onManageVenue={(id) => setManagedVenueId(id)}
                   />
                 )}
