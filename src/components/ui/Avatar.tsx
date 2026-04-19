@@ -65,6 +65,12 @@ export default function Avatar({
     <span className="font-bold text-white uppercase">{fallback[0]}</span>
   );
 
+  const innerCircle = (
+    <div className={`rounded-full overflow-hidden bg-noctvm-surface w-full h-full relative ${ring === 'none' ? 'border border-transparent' : 'border border-white/10'}`}>
+      {innerContent}
+    </div>
+  );
+
   let ringOuterClass = '';
 
   if (ring === 'story-unseen') {
@@ -79,12 +85,21 @@ export default function Avatar({
 
   return (
     <div
-      onClick={onClick}
-      className={`relative shrink-0 flex items-center justify-center ${baseSizeClass} ${ring === 'none' ? '' : ringOuterClass} ${onClick ? 'cursor-pointer hover:scale-105 transition-transform' : ''} ${className}`}
+      className={`relative shrink-0 flex items-center justify-center ${baseSizeClass} ${ring === 'none' ? '' : ringOuterClass} ${className}`}
     >
-      <div className={`rounded-full overflow-hidden bg-noctvm-surface w-full h-full relative ${ring === 'none' ? 'border border-transparent' : 'border border-white/10'}`}>
-        {innerContent}
-      </div>
+      {onClick ? (
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={alt}
+          title={alt}
+          className="block h-full w-full rounded-full cursor-pointer transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
+        >
+          {innerCircle}
+        </button>
+      ) : (
+        innerCircle
+      )}
       {showAddStoryButton && (
         <button
           type="button"
@@ -94,6 +109,7 @@ export default function Avatar({
             event.stopPropagation();
             onAddStoryClick?.();
           }}
+          onPointerDown={(event) => event.stopPropagation()}
           className={`absolute ${addButtonOffsetClass} flex items-center justify-center rounded-full border-2 border-noctvm-black bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95 transition-transform ${addButtonSizeClass}`}
         >
           <svg className={addButtonIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">

@@ -77,7 +77,7 @@ export function Modal({
     >
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-md" 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop-displace" 
         onClick={handleClose} 
       />
 

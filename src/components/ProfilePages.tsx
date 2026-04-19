@@ -71,6 +71,7 @@ function useSettingsScrollMemory(storageKey: string) {
 import NextImage from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { uploadOptimizedImage } from '@/lib/image-optimization';
 import { useSettings } from '@/hooks/useSettings';
 import { GlassPanel } from '@/components/ui';
 import { GENRE_FILTERS } from './FilterBar';
@@ -412,6 +413,9 @@ export function EditProfilePage({
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [username, setUsername] = useState(profile?.username || '');
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [bio, setBio] = useState(profile?.bio || '');
   const [city, setCity] = useState(profile?.city || '');
   const [genres, setGenres] = useState<string[]>(Array.isArray(profile?.genres) ? profile.genres : []);
@@ -423,18 +427,81 @@ export function EditProfilePage({
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const GENRE_OPTIONS = GENRE_FILTERS.filter(g => g !== 'All');
   const PLATFORMS = ['instagram', 'facebook', 'twitter', 'tiktok', 'snapchat'];
+  const avatarInitial = (displayName || username || profile?.username || 'N')[0].toUpperCase();
+
+  useEffect(() => {
+    setAvatarUrl(profile?.avatar_url || '');
+  }, [profile?.avatar_url]);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview && avatarPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
+  const handleAvatarFileChange = (file: File | null) => {
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setSaveError('Please select an image file for your profile picture.');
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setSaveError('Profile picture must be smaller than 8MB.');
+      return;
+    }
+
+    if (avatarPreview && avatarPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+    setSaveError(null);
+  };
+
+  const handleRemoveAvatar = () => {
+    if (avatarPreview && avatarPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    setAvatarPreview(null);
+    setAvatarFile(null);
+    setAvatarUrl('');
+  };
 
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
+
+    let nextAvatarUrl: string | null = avatarUrl || null;
+
+    if (avatarFile) {
+      const extension = avatarFile.name.split('.').pop() || 'jpg';
+      const uploadPath = `profile-avatars/${profile.id}/avatar-${Date.now()}.${extension}`;
+      const uploadedUrl = await uploadOptimizedImage(avatarFile, 'app-assets', uploadPath);
+
+      if (!uploadedUrl) {
+        setSaveError('Failed to upload profile picture. Please try again.');
+        setSaving(false);
+        return;
+      }
+
+      nextAvatarUrl = `${uploadedUrl}?t=${Date.now()}`;
+    }
+
     const { error } = await supabase
       .from('profiles')
       .update({
         display_name: displayName,
         username,
+        avatar_url: nextAvatarUrl,
         bio,
         city,
         genres,
@@ -447,6 +514,12 @@ export function EditProfilePage({
     
     if (!error) {
       await refreshProfile();
+      setAvatarUrl(nextAvatarUrl || '');
+      if (avatarPreview && avatarPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+      setAvatarPreview(null);
+      setAvatarFile(null);
       setSaved(true);
       setSaveError(null);
       setTimeout(() => setSaved(false), 2000);
@@ -488,6 +561,63 @@ export function EditProfilePage({
         <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-5">
           <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Core Info</p>
           <div className="space-y-5">
+            <div className="rounded-[20px] border border-white/5 bg-noctvm-surface/25 p-3.5">
+              <div className="flex items-center gap-4">
+                <div className="relative h-20 w-20 overflow-hidden rounded-full border border-white/10 bg-noctvm-surface">
+                  {avatarPreview || avatarUrl ? (
+                    <NextImage
+                      src={avatarPreview || avatarUrl}
+                      alt="Profile picture preview"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <span className="text-2xl font-bold text-white/90">{avatarInitial}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white">Profile picture</p>
+                  <p className="mt-1 text-xs text-noctvm-silver/60">Shown on your profile, stories, and comments.</p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-noctvm-silver transition-all hover:bg-white/10 hover:text-white"
+                    >
+                      {avatarPreview || avatarUrl ? 'Edit profile picture' : 'Add profile picture'}
+                    </button>
+
+                    {(avatarPreview || avatarUrl) && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-noctvm-silver transition-all hover:bg-white/10 hover:text-white"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    title="Upload profile picture"
+                    onChange={(event) => {
+                      handleAvatarFileChange(event.target.files?.[0] ?? null);
+                      event.currentTarget.value = '';
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
             <FormInput label="Display Name" value={displayName} onChange={setDisplayName} />
             <FormInput label="Username" value={username} onChange={setUsername} />
             <FormTextarea label="Bio" value={bio} onChange={setBio} rows={3} />

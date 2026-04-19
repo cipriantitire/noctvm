@@ -27,7 +27,7 @@ import {
   GlobeIcon,
   CalendarIcon
 } from './icons';
-import { ArrowUpRight, Ban, Flag, MoreHorizontal, Music2, Share2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, Ban, Eye, Flag, MoreHorizontal, Music2, PencilLine, PlusCircle, Share2, VolumeX, X } from 'lucide-react';
 import SavedEventsSheet from './SavedEventsSheet';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Avatar } from '@/components/ui';
@@ -243,6 +243,8 @@ export default function UserProfilePage({
 
   // ── Active stories state ──────────────────────────────────────────────────
   const [hasActiveStories, setHasActiveStories] = useState(false);
+  const [isAvatarActionPopoverOpen, setIsAvatarActionPopoverOpen] = useState(false);
+  const [showProfilePictureLightbox, setShowProfilePictureLightbox] = useState(false);
 
   // ── Posts state ───────────────────────────────────────────────────────────
   const [posts, setPosts] = useState<ProfilePost[]>([]);
@@ -578,6 +580,29 @@ export default function UserProfilePage({
     return () => window.removeEventListener('noctvm:story-views-updated', handleStoryRefresh);
   }, [refreshStoryMeta]);
 
+  useEffect(() => {
+    if (hasActiveStories && isAvatarActionPopoverOpen) {
+      setIsAvatarActionPopoverOpen(false);
+    }
+  }, [hasActiveStories, isAvatarActionPopoverOpen]);
+
+  useEffect(() => {
+    if (!showProfilePictureLightbox) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowProfilePictureLightbox(false);
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showProfilePictureLightbox]);
+
   const fetchAndOpenMyStories = async () => {
     if (!onOpenStories) return;
     const { data } = await supabase
@@ -618,12 +643,22 @@ export default function UserProfilePage({
   const handleAvatarClick = () => {
     if (hasActiveStories) {
       void fetchAndOpenMyStories();
-      return;
     }
+  };
 
-    if (isOwner) {
-      onOpenCreateStory?.();
-    }
+  const handleViewProfilePicture = () => {
+    setIsAvatarActionPopoverOpen(false);
+    setShowProfilePictureLightbox(true);
+  };
+
+  const handleEditProfilePicture = () => {
+    setIsAvatarActionPopoverOpen(false);
+    onEditProfileClick();
+  };
+
+  const handleAddStoryFromPopover = () => {
+    setIsAvatarActionPopoverOpen(false);
+    onOpenCreateStory?.();
   };
 
   const openHighlight = async (hl: DbHighlight) => {
@@ -697,18 +732,69 @@ export default function UserProfilePage({
         <div className="flex items-start gap-5 mb-5">
           {/* Avatar */}
           <div className="relative flex-shrink-0">
-            <Avatar
-              src={targetProfile.avatar_url}
-              alt={targetProfile.display_name || targetProfile.username || 'Profile'}
-              fallback={initials}
-              size="2xl"
-              ring={storyRing}
-              onClick={handleAvatarClick}
-              showAddStoryButton={isOwner}
-              onAddStoryClick={() => onOpenCreateStory?.()}
-              addStoryButtonSize="xl"
-              className={`w-32 h-32 ${hasActiveStories || isOwner ? 'cursor-pointer' : ''}`}
-            />
+            {isOwner && !hasActiveStories ? (
+              <DropdownMenu
+                open={isAvatarActionPopoverOpen}
+                onOpenChange={setIsAvatarActionPopoverOpen}
+              >
+                <DropdownMenuTrigger asChild>
+                  <div
+                    className="outline-none"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Profile picture actions"
+                    title="Profile picture actions"
+                  >
+                    <Avatar
+                      src={targetProfile.avatar_url}
+                      alt={targetProfile.display_name || targetProfile.username || 'Profile'}
+                      fallback={initials}
+                      size="2xl"
+                      ring={storyRing}
+                      showAddStoryButton={isOwner}
+                      onAddStoryClick={() => {
+                        setIsAvatarActionPopoverOpen(false);
+                        onOpenCreateStory?.();
+                      }}
+                      addStoryButtonSize="xl"
+                      className="w-32 h-32 cursor-pointer"
+                    />
+                  </div>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="start" side="bottom" sideOffset={8} className="w-56">
+                  <DropdownMenuItem onClick={handleViewProfilePicture}>
+                    <Eye className="h-4 w-4" />
+                    <span>View profile picture</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleEditProfilePicture}>
+                    <PencilLine className="h-4 w-4" />
+                    <span>Edit profile picture</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleAddStoryFromPopover}>
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Add a story</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Avatar
+                src={targetProfile.avatar_url}
+                alt={targetProfile.display_name || targetProfile.username || 'Profile'}
+                fallback={initials}
+                size="2xl"
+                ring={storyRing}
+                onClick={hasActiveStories ? handleAvatarClick : undefined}
+                showAddStoryButton={isOwner}
+                onAddStoryClick={() => {
+                  setIsAvatarActionPopoverOpen(false);
+                  onOpenCreateStory?.();
+                }}
+                addStoryButtonSize="xl"
+                className={`w-32 h-32 ${hasActiveStories || isOwner ? 'cursor-pointer' : ''}`}
+              />
+            )}
           </div>
 
           {/* Identity col: name + handle + location + bio */}
@@ -768,18 +854,18 @@ export default function UserProfilePage({
           </div>
 
           {/* Grouped card: Posts / Followers / Following */}
-          <div className="order-3 basis-full lg:order-2 lg:flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center justify-around">
-            <div className="flex flex-col items-center gap-1">
+          <div className="order-3 basis-full lg:order-2 lg:flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center">
+            <div className="flex flex-1 flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Posts</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-1 flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Followers</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-1 flex-col items-center gap-1">
               <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
               <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Following</span>
             </div>
@@ -1158,6 +1244,57 @@ export default function UserProfilePage({
         profileAvatar={targetProfile.avatar_url ?? null}
         profileInitial={initials}
       />
+
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showProfilePictureLightbox && (
+            <motion.div
+              key="profile-picture-lightbox"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[650] flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm"
+              onClick={() => setShowProfilePictureLightbox(false)}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Profile picture"
+            >
+              <button
+                type="button"
+                onClick={() => setShowProfilePictureLightbox(false)}
+                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white transition-colors hover:bg-black/75"
+                aria-label="Close profile picture"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+                className="relative h-[min(82vw,560px)] w-[min(82vw,560px)] max-h-[560px] max-w-[560px] overflow-hidden rounded-full border border-white/10 bg-noctvm-surface shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {targetProfile.avatar_url ? (
+                  <NextImage
+                    src={targetProfile.avatar_url}
+                    alt={targetProfile.display_name || targetProfile.username || 'Profile picture'}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <span className="text-7xl font-bold text-white/90">{initials}</span>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      , document.body)}
 
       {/* ── Profile Create Post FAB ──────────────────────────────── */}
       {isOwner && onOpenCreatePost && (

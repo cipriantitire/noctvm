@@ -215,6 +215,31 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   border-bottom: 1px solid var(--glass-border);
 }
 
+/* Modal-only displacement pass layered over existing Tailwind backdrop vars. */
+.modal-backdrop-displace {
+  -webkit-backdrop-filter:
+    var(--tw-backdrop-blur)
+    var(--tw-backdrop-brightness)
+    var(--tw-backdrop-contrast)
+    var(--tw-backdrop-grayscale)
+    var(--tw-backdrop-hue-rotate)
+    var(--tw-backdrop-invert)
+    var(--tw-backdrop-opacity)
+    var(--tw-backdrop-saturate)
+    var(--tw-backdrop-sepia);
+  backdrop-filter:
+    url(#glass-distortion)
+    var(--tw-backdrop-blur)
+    var(--tw-backdrop-brightness)
+    var(--tw-backdrop-contrast)
+    var(--tw-backdrop-grayscale)
+    var(--tw-backdrop-hue-rotate)
+    var(--tw-backdrop-invert)
+    var(--tw-backdrop-opacity)
+    var(--tw-backdrop-saturate)
+    var(--tw-backdrop-sepia);
+}
+
 .liquid-glass-card {
   position: relative;
   width: 100%;
@@ -457,7 +482,6 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     transparent 70%
   );
   opacity: 0;
-  animation: frostSheen 5s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -491,12 +515,6 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 @keyframes livePulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-}
-
-/* Frosted glass refraction sheen */
-@keyframes frostSheen {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
 }
 
 /* Fade in upward - cards, sections */
@@ -743,24 +761,6 @@ h1, h2, h3, h4, h5, h6, .font-heading {
     inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   transform: translateY(-4px) scale(1.08);
   color: white !important;
-}
-
-/* ========================= */
-/* FROSTED GLASS MOUSE TRACK  */
-/* ========================= */
-/* Desktop: mouse-reactive shimmer driven by --mouse-x / --mouse-y CSS vars */
-@media (hover: hover) and (pointer: fine) {
-  .frosted-glass.fg-mouse::before {
-    animation: none !important;
-    background: radial-gradient(
-      600px circle at calc(var(--mouse-x, 50%) * 1%) calc(var(--mouse-y, 50%) * 1%),
-      rgba(255, 255, 255, 0.07) 0%,
-      rgb(var(--noctvm-violet-rgb) / 0.04) 35%,
-      transparent 70%
-    );
-    background-size: 100% 100%;
-    transition: background 0.15s ease-out;
-  }
 }
 
 /* ========================= */

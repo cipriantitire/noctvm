@@ -337,7 +337,7 @@ export default function EventModal({
       style={{ zIndex }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={handleClose} />
+      <div className="absolute inset-0 modal-frost-overlay" onClick={handleClose} />
 
       {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
       <GlassPanel
