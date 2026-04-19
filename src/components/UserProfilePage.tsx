@@ -1316,7 +1316,7 @@ export default function UserProfilePage({
         <button
           type="button"
           onClick={onOpenCreatePost}
-          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-600 shadow-lg shadow-noctvm-violet/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border border-noctvm-violet/30"
+          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-95 transition-all duration-200"
           title="Create Post"
         >
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
