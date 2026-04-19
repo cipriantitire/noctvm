@@ -823,7 +823,7 @@ function AppShell() {
         <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto mobile-scrollbar-hide'}`}>
           {/* Mobile header */}
           <header
-            className="lg:hidden sticky top-0 z-40 liquid-glass-card cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
+            className="lg:hidden sticky top-0 -mt-px z-40 liquid-glass-card cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
             style={{
               position: 'sticky',
               top: 0,
