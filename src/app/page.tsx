@@ -308,6 +308,17 @@ function AppShell() {
   useFrostedGlass();
 
   const backdropMode = activeTab === 'events' || activeTab === 'venues' ? 'rich' : 'faded';
+  const backdropPaused = Boolean(
+    selectedEvent ||
+    selectedVenue ||
+    venueClosing ||
+    showAuthModal ||
+    showCreatePost ||
+    showCreateStory ||
+    showStories ||
+    isGlobalSearchOpen ||
+    managedVenueId,
+  );
 
   useEffect(() => {
     if (window.innerWidth >= 1024) setViewMode('portrait');
@@ -707,7 +718,7 @@ function AppShell() {
 
   return (
     <>
-      <AppBackdrop mode={backdropMode} />
+      <AppBackdrop mode={backdropMode} paused={backdropPaused} />
 
       {/* ── Auth Modal ──────────────────────────────────────────── */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />

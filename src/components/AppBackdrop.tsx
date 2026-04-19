@@ -1,14 +1,16 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import ColorBends from '@/components/ColorBends/ColorBends';
 
 type AppBackdropMode = 'rich' | 'faded';
 
 type AppBackdropProps = {
   mode: AppBackdropMode;
+  paused?: boolean;
 };
 
-const colorBendsProps = {
+const baseColorBendsProps = {
   rotation: 70,
   speed: 0.1,
   colors: ['#8033cc', '#140f1a', '#f4b625'],
@@ -17,12 +19,38 @@ const colorBendsProps = {
   scale: 0.8,
   frequency: 1.7,
   warpStrength: 1,
-  mouseInfluence: 1.2,
-  parallax: 0.8,
-  noise: 0.1,
+  mouseInfluence: 0.55,
+  parallax: 0.35,
+  noise: 0.07,
 };
 
-export default function AppBackdrop({ mode }: AppBackdropProps) {
+export default function AppBackdrop({ mode, paused = false }: AppBackdropProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 1023px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', update);
+      return () => media.removeEventListener('change', update);
+    }
+
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  const colorBendsProps = useMemo(() => ({
+    ...baseColorBendsProps,
+    interactive: !isMobile,
+    mouseInfluence: isMobile ? 0 : baseColorBendsProps.mouseInfluence,
+    parallax: isMobile ? 0 : baseColorBendsProps.parallax,
+    noise: isMobile ? 0.04 : baseColorBendsProps.noise,
+    maxPixelRatio: isMobile ? 1.1 : 1.5,
+  }), [isMobile]);
+
   const isRich = mode === 'rich';
 
   return (
@@ -32,6 +60,7 @@ export default function AppBackdrop({ mode }: AppBackdropProps) {
       <ColorBends
         className="absolute inset-0 transition-opacity duration-300"
         style={{ opacity: isRich ? 1 : 0.34 }}
+        isPaused={paused}
         {...colorBendsProps}
       />
 

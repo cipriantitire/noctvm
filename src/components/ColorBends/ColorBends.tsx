@@ -17,6 +17,9 @@ type ColorBendsProps = {
   mouseInfluence?: number;
   parallax?: number;
   noise?: number;
+  interactive?: boolean;
+  isPaused?: boolean;
+  maxPixelRatio?: number;
 };
 
 const MAX_COLORS = 8 as const;
@@ -126,11 +129,15 @@ export default function ColorBends({
   warpStrength = 1,
   mouseInfluence = 1,
   parallax = 0.5,
-  noise = 0.1
+  noise = 0.1,
+  interactive = true,
+  isPaused = false,
+  maxPixelRatio = 2,
 }: ColorBendsProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const rafRef = useRef<number | null>(null);
+  const loopRef = useRef<(() => void) | null>(null);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const rotationRef = useRef<number>(rotation);
@@ -138,6 +145,7 @@ export default function ColorBends({
   const pointerTargetRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
   const pointerCurrentRef = useRef<THREE.Vector2>(new THREE.Vector2(0, 0));
   const pointerSmoothRef = useRef<number>(8);
+  const pausedRef = useRef<boolean>(isPaused);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -203,7 +211,7 @@ export default function ColorBends({
 
     rendererRef.current = renderer;
     (renderer as any).outputColorSpace = (THREE as any).SRGBColorSpace;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Math.max(1, maxPixelRatio)));
     renderer.setClearColor(0x000000, transparent ? 0 : 1);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
@@ -233,6 +241,10 @@ export default function ColorBends({
 
     const loop = () => {
       if (isDisposed) return;
+      if (pausedRef.current) {
+        rafRef.current = null;
+        return;
+      }
 
       try {
         const dt = clock.getDelta();
@@ -252,16 +264,27 @@ export default function ColorBends({
         (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
 
         renderer.render(scene, camera);
-        rafRef.current = requestAnimationFrame(loop);
       } catch {
-        if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+        }
+        rafRef.current = null;
+        return;
       }
+
+      rafRef.current = requestAnimationFrame(loop);
     };
-    rafRef.current = requestAnimationFrame(loop);
+
+    loopRef.current = loop;
+    if (!pausedRef.current) {
+      rafRef.current = requestAnimationFrame(loop);
+    }
 
     return () => {
       isDisposed = true;
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      loopRef.current = null;
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
       else (window as Window).removeEventListener('resize', handleResize);
       geometry.dispose();
@@ -286,6 +309,7 @@ export default function ColorBends({
     mouseInfluence,
     parallax,
     noise,
+    maxPixelRatio,
   ]);
 
   useEffect(() => {
@@ -337,8 +361,30 @@ export default function ColorBends({
   ]);
 
   useEffect(() => {
+    pausedRef.current = isPaused;
+
+    if (isPaused) {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
+    }
+
+    if (rafRef.current === null && loopRef.current) {
+      rafRef.current = requestAnimationFrame(loopRef.current);
+    }
+  }, [isPaused]);
+
+  useEffect(() => {
     const material = materialRef.current;
     if (!material) return;
+
+    if (!interactive) {
+      pointerTargetRef.current.set(0, 0);
+      pointerCurrentRef.current.set(0, 0);
+      return;
+    }
 
     const handlePointerMove = (e: PointerEvent) => {
       const x = (e.clientX / (window.innerWidth || 1)) * 2 - 1;
@@ -350,7 +396,7 @@ export default function ColorBends({
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
     };
-  }, []);
+  }, [interactive]);
 
   return (
     <div
