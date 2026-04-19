@@ -722,6 +722,10 @@ export default function UserProfilePage({
           isOpen={isSavedEventsOpen}
           onClose={() => setIsSavedEventsOpen(false)}
           activeCity={targetProfile.city as any}
+          onEventClick={(event) => {
+            setIsSavedEventsOpen(false);
+            onEventClick(event);
+          }}
         />
       )}
 
