@@ -218,14 +218,15 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
             <p className="text-noctvm-silver/70 text-xs truncate">{event.venue}</p>
           </div>
           <div className="flex items-center justify-between pt-3 border-t border-white/5">
-            <div className="flex items-center gap-2 text-noctvm-silver/80">
+            <div className="flex items-center gap-1.5 text-noctvm-silver/80">
               <CalendarIcon className="w-3.5 h-3.5 flex-shrink-0" />
-              <div className="flex flex-col leading-tight sm:flex-row sm:items-center sm:gap-2">
-                <span className="text-noctvm-label font-mono">{formatDate(event.date)}</span>
-                {event.time && (
+              <span className="text-noctvm-label font-mono">{formatDate(event.date)}</span>
+              {event.time && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-white/10" />
                   <span className="text-noctvm-label font-mono text-noctvm-violet">{event.time}</span>
-                )}
-              </div>
+                </>
+              )}
             </div>
             {bookmarkButton}
           </div>
