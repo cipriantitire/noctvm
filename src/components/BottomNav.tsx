@@ -40,7 +40,7 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   }));
 
   return (
-    <div className="z-50 pb-8 pointer-events-none md:hidden">
+    <div className="z-50 pb-8 pointer-events-none lg:hidden">
       <div className="pointer-events-auto">
         <UIBottomNav items={navItems} />
       </div>

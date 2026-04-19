@@ -4,6 +4,7 @@ import { CalendarIcon, StarIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+import { imageBadgeChrome, imagePriceBadgeClass, imageRatingBadgeClass } from '@/lib/eventImageBadgeStyles';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
@@ -14,17 +15,17 @@ function formatDate(dateStr: string): string {
 
 function getSourceBadge(source: string) {
   switch (source) {
-    case 'controlclub': return { label: 'Control Club', color: 'bg-zinc-500/20 text-zinc-300 pointer-events-auto' };
-    case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400 pointer-events-auto' };
-    case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848] pointer-events-auto' };
-    case 'eventbook':   return { label: 'Eventbook',      color: 'bg-[#E01539]/15 text-[#E01539]' };
-    case 'livetickets': return { label: 'LiveTickets',    color: 'bg-pink-500/15 text-pink-400' };
-    case 'iabilet':     return { label: 'iaBilet',        color: 'bg-cyan-500/15 text-cyan-400' };
-    case 'beethere':    return { label: 'BeeThere',       color: 'bg-yellow-500/15 text-yellow-400 pointer-events-auto' };
-    case 'zilesinopti': return { label: 'Zile si Nopti',  color: 'bg-amber-500/15 text-amber-400 pointer-events-auto' };
-    case 'onevent':     return { label: 'OnEvent',         color: 'bg-violet-500/15 text-violet-400 pointer-events-auto' };
-    case 'ambilet':     return { label: 'Ambilet',         color: 'bg-teal-500/15 text-teal-400 pointer-events-auto' };
-    default:            return { label: source,            color: 'bg-noctvm-silver/15 text-noctvm-silver pointer-events-auto' };
+    case 'controlclub': return { label: 'Control Club', color: `bg-zinc-950/85 text-zinc-100 border-zinc-300/30 ${imageBadgeChrome}` };
+    case 'fever':       return { label: 'Fever',         color: `bg-orange-950/85 text-orange-200 border-orange-300/30 ${imageBadgeChrome}` };
+    case 'ra':          return { label: 'RA',             color: `bg-red-950/85 text-[#FF8A8A] border-red-300/30 ${imageBadgeChrome}` };
+    case 'eventbook':   return { label: 'Eventbook',      color: `bg-rose-950/85 text-[#FF7A8F] border-rose-300/30 ${imageBadgeChrome}` };
+    case 'livetickets': return { label: 'LiveTickets',    color: `bg-pink-950/85 text-pink-200 border-pink-300/30 ${imageBadgeChrome}` };
+    case 'iabilet':     return { label: 'iaBilet',        color: `bg-cyan-950/85 text-cyan-200 border-cyan-300/30 ${imageBadgeChrome}` };
+    case 'beethere':    return { label: 'BeeThere',       color: `bg-yellow-950/85 text-yellow-200 border-yellow-300/30 ${imageBadgeChrome}` };
+    case 'zilesinopti': return { label: 'Zile si Nopti',  color: `bg-amber-950/85 text-amber-200 border-amber-300/30 ${imageBadgeChrome}` };
+    case 'onevent':     return { label: 'OnEvent',         color: `bg-violet-950/85 text-violet-200 border-violet-300/30 ${imageBadgeChrome}` };
+    case 'ambilet':     return { label: 'Ambilet',         color: `bg-teal-950/85 text-teal-200 border-teal-300/30 ${imageBadgeChrome}` };
+    default:            return { label: source,            color: `bg-zinc-950/85 text-noctvm-silver border-zinc-300/30 ${imageBadgeChrome}` };
   }
 }
 
@@ -151,7 +152,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
         onClick={e => e.stopPropagation()}
         className="absolute bottom-3 right-3 z-30 group/price"
       >
-        <div className="flex items-center px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight bg-emerald-500/15 text-emerald-300 backdrop-blur-md border border-white/10 hover:scale-105 transition-transform">
+        <div className={`flex items-center px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight backdrop-blur-md border hover:scale-105 transition-transform ${imagePriceBadgeClass}`}>
           {display}
         </div>
       </a>
@@ -159,7 +160,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
   };
 
   const ratingBadge = event.rating && (
-    <div className={`absolute ${event.price ? 'top-2.5 right-2.5' : 'bottom-2.5 right-2.5'} flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 border border-white/5 z-20`}>
+    <div className={`absolute ${event.price ? 'top-2.5 right-2.5' : 'bottom-2.5 right-2.5'} flex items-center gap-1 backdrop-blur-sm rounded-lg px-2 py-1 border z-20 ${imageRatingBadgeClass}`}>
       <StarIcon className="w-3 h-3 text-noctvm-gold" />
       <span className="text-xs font-bold text-noctvm-gold">{event.rating}</span>
     </div>
@@ -179,7 +180,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
 
   if (variant === 'landscape') {
     return (
-      <Wrapper className="group flex bg-noctvm-surface rounded-xl overflow-hidden border border-noctvm-border hover:border-noctvm-violet/50 transition-all duration-300 hover:shadow-glow h-[160px] lg:h-[180px] cursor-pointer">
+      <Wrapper className="group event-card-liquid flex rounded-xl overflow-hidden transition-all duration-300 h-[160px] lg:h-[180px] cursor-pointer">
         <div className="relative w-[180px] sm:w-[240px] flex-shrink-0 overflow-hidden bg-noctvm-midnight">
             <Image
               src={event.image_url || '/images/event-fallback.png'}
@@ -197,7 +198,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            className={`absolute top-2.5 left-2.5 z-20 px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border border-white/10 hover:scale-105 transition-transform`}
+            className={`absolute top-2.5 left-2.5 z-20 px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border hover:scale-105 transition-transform`}
           >
             {sourceBadge.label}
           </a>
@@ -235,7 +236,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
   }
 
   return (
-    <Wrapper className="group flex flex-col bg-noctvm-surface/40 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/5 hover:border-noctvm-violet/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] cursor-pointer h-full relative">
+    <Wrapper className="group event-card-liquid flex flex-col rounded-2xl overflow-hidden transition-all duration-500 cursor-pointer h-full relative">
       {/* Fixed-height image — no aspect-ratio so content area stays consistent */}
       <div className="relative h-[160px] overflow-hidden bg-noctvm-midnight flex-shrink-0">
         <Image
@@ -253,7 +254,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth }: 
           target="_blank"
           rel="noopener noreferrer"
           onClick={e => e.stopPropagation()}
-          className={`absolute top-3 left-3 z-20 px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border border-white/10 hover:scale-105 transition-transform`}
+          className={`absolute top-3 left-3 z-20 px-2 py-1 rounded-lg text-noctvm-caption font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border hover:scale-105 transition-transform`}
         >
           {sourceBadge.label}
         </a>

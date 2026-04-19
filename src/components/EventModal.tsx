@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback, type MouseEvent } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type MouseEvent } from 'react';
 import { NoctEvent } from '@/lib/types';
 import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import VerifiedBadge from './VerifiedBadge';
-import { Badge, Button, GlassPanel, IconButton } from '@/components/ui';
+import { Button, GlassPanel, IconButton } from '@/components/ui';
 import CurvedScrollBar from './ui/CurvedScrollBar';
+import { imageBadgeChrome, imageGenreBadgeClass, imagePriceBadgeClass, imageRatingBadgeClass } from '@/lib/eventImageBadgeStyles';
 
 interface EventModalProps {
   event: NoctEvent | null;
@@ -31,17 +32,33 @@ function isRealEvent(id: string | undefined): boolean {
 
 function getSourceBadge(source: string) {
   switch (source) {
-    case 'controlclub': return { label: 'Control Club', color: 'bg-zinc-500/20 text-zinc-300 border-white/10' };
-    case 'fever':       return { label: 'Fever',         color: 'bg-orange-500/15 text-orange-400 border-white/10' };
-    case 'ra':          return { label: 'RA',             color: 'bg-[#FF4848]/15 text-[#FF4848] border-white/10' };
-    case 'eventbook':   return { label: 'Eventbook',      color: 'bg-[#E01539]/15 text-[#E01539] border-white/10' };
-    case 'livetickets': return { label: 'LiveTickets',    color: 'bg-pink-500/15 text-pink-400 border-white/10' };
-    case 'iabilet':     return { label: 'iaBilet',        color: 'bg-cyan-500/15 text-cyan-400 border-white/10' };
-    case 'beethere':    return { label: 'BeeThere',       color: 'bg-yellow-500/15 text-yellow-400 border-white/10' };
-    case 'zilesinopti': return { label: 'Zile și Nopți',  color: 'bg-amber-500/15 text-amber-400 border-white/10' };
-    case 'onevent':     return { label: 'OnEvent',         color: 'bg-violet-500/15 text-violet-400 border-white/10' };
-    case 'ambilet':     return { label: 'Ambilet',         color: 'bg-teal-500/15 text-teal-400 border-white/10' };
-    default:            return { label: source,            color: 'bg-noctvm-silver/15 text-noctvm-silver border-white/10' };
+    case 'controlclub': return { label: 'Control Club', color: `bg-zinc-950/85 text-zinc-100 border-zinc-300/30 ${imageBadgeChrome}` };
+    case 'fever':       return { label: 'Fever',         color: `bg-orange-950/85 text-orange-200 border-orange-300/30 ${imageBadgeChrome}` };
+    case 'ra':          return { label: 'RA',             color: `bg-red-950/85 text-[#FF8A8A] border-red-300/30 ${imageBadgeChrome}` };
+    case 'eventbook':   return { label: 'Eventbook',      color: `bg-rose-950/85 text-[#FF7A8F] border-rose-300/30 ${imageBadgeChrome}` };
+    case 'livetickets': return { label: 'LiveTickets',    color: `bg-pink-950/85 text-pink-200 border-pink-300/30 ${imageBadgeChrome}` };
+    case 'iabilet':     return { label: 'iaBilet',        color: `bg-cyan-950/85 text-cyan-200 border-cyan-300/30 ${imageBadgeChrome}` };
+    case 'beethere':    return { label: 'BeeThere',       color: `bg-yellow-950/85 text-yellow-200 border-yellow-300/30 ${imageBadgeChrome}` };
+    case 'zilesinopti': return { label: 'Zile și Nopți',  color: `bg-amber-950/85 text-amber-200 border-amber-300/30 ${imageBadgeChrome}` };
+    case 'onevent':     return { label: 'OnEvent',         color: `bg-violet-950/85 text-violet-200 border-violet-300/30 ${imageBadgeChrome}` };
+    case 'ambilet':     return { label: 'Ambilet',         color: `bg-teal-950/85 text-teal-200 border-teal-300/30 ${imageBadgeChrome}` };
+    default:            return { label: source,            color: `bg-zinc-950/85 text-noctvm-silver border-zinc-300/30 ${imageBadgeChrome}` };
+  }
+}
+
+function getSourceDisplayName(source: string): string {
+  switch (source) {
+    case 'controlclub': return 'Control Club';
+    case 'ra': return 'Resident Advisor';
+    case 'eventbook': return 'Eventbook';
+    case 'livetickets': return 'LiveTickets';
+    case 'iabilet': return 'iaBilet';
+    case 'beethere': return 'BeeThere';
+    case 'zilesinopti': return 'Zile si Nopti';
+    case 'onevent': return 'OnEvent';
+    case 'ambilet': return 'Ambilet';
+    case 'fever': return 'Fever';
+    default: return source;
   }
 }
 
@@ -55,6 +72,91 @@ function getTicketProviderFromUrl(url?: string | null): string | null {
   if (lower.includes('ra.co')) return 'ra';
   if (lower.includes('control-club.ro')) return 'controlclub';
   return null;
+}
+
+const DESCRIPTION_COLLAPSED_MAX_HEIGHT = 220;
+
+const HTML_ENTITY_MAP: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  ndash: '-',
+  mdash: '-',
+  lsquo: "'",
+  rsquo: "'",
+  ldquo: '"',
+  rdquo: '"',
+  hellip: '...',
+  bull: '*',
+};
+
+function normalizeDecodedEntity(value: string): string {
+  return value
+    .replace(/\u00a0/g, ' ')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/\u2026/g, '...')
+    .replace(/\u2022/g, '*');
+}
+
+function decodeHtmlEntities(value: string): string {
+  return normalizeDecodedEntity(value.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]+);/g, (entity, body: string) => {
+    const key = body.toLowerCase();
+    if (key in HTML_ENTITY_MAP) return HTML_ENTITY_MAP[key];
+
+    if (key.startsWith('#x')) {
+      const codePoint = Number.parseInt(key.slice(2), 16);
+      return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff ? String.fromCodePoint(codePoint) : entity;
+    }
+
+    if (key.startsWith('#')) {
+      const codePoint = Number.parseInt(key.slice(1), 10);
+      return Number.isFinite(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff ? String.fromCodePoint(codePoint) : entity;
+    }
+
+    return entity;
+  }));
+}
+
+function normalizeDescriptionParagraphs(description: string | null): string[] {
+  if (!description) return [];
+
+  const cleaned = decodeHtmlEntities(description)
+    .replace(/\r\n?/g, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\uFFFD/g, '')
+    .replace(/[ \t\f\v]+/g, ' ')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .replace(/^[\s?!.:,;|/\\-]+(?=[A-Za-z0-9])/g, '')
+    .trim();
+
+  if (!cleaned) return [];
+
+  return cleaned
+    .split(/\n{2,}/)
+    .map(paragraph => paragraph.trim())
+    .filter(Boolean);
+}
+
+function normalizeOutboundUrl(url?: string | null): string {
+  if (!url) return '';
+
+  try {
+    const parsed = new URL(url);
+    parsed.hash = '';
+    const normalizedPath = parsed.pathname.replace(/\/+$/, '') || '/';
+    return `${parsed.origin.toLowerCase()}${normalizedPath}${parsed.search}`;
+  } catch {
+    return url.trim().replace(/\/+$/, '').toLowerCase();
+  }
 }
 
 export default function EventModal({ 
@@ -72,6 +174,8 @@ export default function EventModal({
   const [isSaved,   setIsSaved]       = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [venueBadge, setVenueBadge] = useState<'none' | 'owner' | 'admin' | 'gold' | 'verified'>('none');
+  const [isDescriptionOverflowing, setIsDescriptionOverflowing] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
   const handleClose = useCallback(() => setIsClosing(true), []);
 
   useEffect(() => {
@@ -147,6 +251,28 @@ export default function EventModal({
     }
   };
 
+  const descriptionParagraphs = useMemo(() => normalizeDescriptionParagraphs(event?.description ?? null), [event?.description]);
+
+  useEffect(() => {
+    setDescExpanded(false);
+  }, [event?.id]);
+
+  useEffect(() => {
+    const measureDescription = () => {
+      const descriptionElement = descriptionRef.current;
+      if (!descriptionElement) {
+        setIsDescriptionOverflowing(false);
+        return;
+      }
+
+      setIsDescriptionOverflowing(descriptionElement.scrollHeight > DESCRIPTION_COLLAPSED_MAX_HEIGHT + 1);
+    };
+
+    measureDescription();
+    window.addEventListener('resize', measureDescription);
+    return () => window.removeEventListener('resize', measureDescription);
+  }, [descriptionParagraphs]);
+
   if (!event) return null;
 
   const sourceBadge = getSourceBadge(event.source);
@@ -157,12 +283,17 @@ export default function EventModal({
   const ticketSource = getTicketProviderFromUrl(ticketCtaLink) || event.source;
   const ticketSourceBadge = getSourceBadge(ticketSource);
   const priceLink = ticketCtaLink;
+  const sourceEventLink = event.event_url && normalizeOutboundUrl(event.event_url) !== normalizeOutboundUrl(ticketCtaLink)
+    ? event.event_url
+    : null;
+  const sourceEventLabel = getSourceDisplayName(event.source);
+  const heroGenres = event.genres.slice(0, 3);
 
   const hasPrice = event.price && event.price.toLowerCase() !== 'free';
   const isFree = event.price?.toLowerCase() === 'free';
 
   return (
-    <>
+    <div className="event-modal-root">
     {/* Image lightbox */}
     {lightboxOpen && (
       <div
@@ -237,46 +368,49 @@ export default function EventModal({
             {sourceBadge.label}
           </a>
 
-          {/* Price badge on image */}
-          {(hasPrice || isFree) && (
+          {heroGenres.length > 0 && (
+            <div className="absolute bottom-4 left-4 z-10 max-w-[70%] flex flex-wrap gap-1.5">
+              {heroGenres.map((genre) => (
+                <span
+                  key={genre}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight backdrop-blur-md border ${imageGenreBadgeClass}`}
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {(event.rating || hasPrice || isFree) && (
             <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
-              <a
-                href={priceLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight bg-emerald-500/15 text-emerald-300 backdrop-blur-md border border-white/10 hover:scale-105 transition-transform"
-              >
-                {isFree ? 'FREE' : event.price}
-              </a>
+              {event.rating && (
+                <div className={`flex items-center gap-1.5 backdrop-blur-sm rounded-lg px-2 py-1 border ${imageRatingBadgeClass}`}>
+                  <StarIcon className="w-3 h-3 text-noctvm-gold" />
+                  <span className="text-xs font-bold text-noctvm-gold">{event.rating}</span>
+                  {event.reviews && <span className="text-noctvm-caption text-noctvm-silver/60">({event.reviews} reviews)</span>}
+                </div>
+              )}
+              {(hasPrice || isFree) && (
+                <a
+                  href={priceLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight backdrop-blur-md border hover:scale-105 transition-transform ${imagePriceBadgeClass}`}
+                >
+                  {isFree ? 'FREE' : event.price}
+                </a>
+              )}
             </div>
           )}
         </div>
 
-
-          {event.rating && (
-            <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/10 z-10">
-              <StarIcon className="w-3.5 h-3.5 text-noctvm-gold" />
-              <span className="text-sm font-bold text-noctvm-gold">{event.rating}</span>
-              {event.reviews && <span className="text-noctvm-caption text-noctvm-silver/60">({event.reviews} reviews)</span>}
-            </div>
-          )}
-
-        {/* Content */}
-        <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-5 overscroll-contain" cornerRadius={24} edgePadding={4} verticalInset={4}>
-          {/* Genres */}
-          <div className="flex flex-wrap gap-1.5">
-            {event.genres.map(genre => (
-              <Badge key={genre} variant="genre">{genre}</Badge>
-            ))}
-          </div>
-
-          {/* Title */}
+        {/* Header metadata */}
+        <div className="flex-shrink-0 space-y-4 p-5">
           <h2 className="font-heading text-xl sm:text-2xl font-bold text-white leading-tight">
             {event.title}
           </h2>
 
-          {/* Venue */}
           {onVenueClick ? (
             <button
               onClick={(e) => { e.stopPropagation(); onVenueClick(event.venue); }}
@@ -298,7 +432,6 @@ export default function EventModal({
             </p>
           )}
 
-          {/* Date + Time */}
           <div className="flex items-center gap-3 text-noctvm-silver/80">
             <div className="w-9 h-9 rounded-xl bg-noctvm-surface border border-noctvm-border flex items-center justify-center flex-shrink-0">
               <CalendarIcon className="w-4 h-4 text-noctvm-violet" />
@@ -322,28 +455,68 @@ export default function EventModal({
               <span>{saveCount}</span>
             </button>
           </div>
+        </div>
 
-          {/* Description */}
-          {event.description && (
-            <div className="pt-1">
-              <div className="w-full h-px bg-noctvm-border mb-3" />
-              <p className={`text-sm text-noctvm-silver/80 leading-relaxed ${!descExpanded ? 'line-clamp-[15]' : ''}`}>
-                {event.description}
-              </p>
-              {event.description.length > 800 && (
+        <div className="flex-shrink-0 px-5">
+          <div className="w-full h-px bg-noctvm-border" />
+        </div>
+
+        {/* Scrollable description content */}
+        <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-5 overscroll-contain" cornerRadius={24} edgePadding={4} verticalInset={4}>
+          {descriptionParagraphs.length > 0 && (
+            <section id="event-modal-description" className="space-y-3">
+              <div
+                ref={descriptionRef}
+                className="space-y-3 overflow-hidden transition-[max-height] duration-300 ease-out"
+                style={{ maxHeight: descExpanded ? 'none' : `${DESCRIPTION_COLLAPSED_MAX_HEIGHT}px` }}
+              >
+                {descriptionParagraphs.map((paragraph, index) => (
+                  <p key={`${paragraph.slice(0, 24)}-${index}`} className="text-sm text-noctvm-silver/80 leading-relaxed whitespace-pre-line">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+              {isDescriptionOverflowing && (
                 <button
+                  type="button"
                   onClick={() => setDescExpanded(prev => !prev)}
-                  className="mt-1.5 text-xs text-noctvm-violet hover:text-noctvm-violet/80 font-medium transition-colors"
+                  className="text-xs text-noctvm-violet hover:text-noctvm-violet/80 font-medium transition-colors"
                 >
                   {descExpanded ? 'Show less' : 'Show more'}
                 </button>
               )}
-            </div>
+            </section>
           )}
         </CurvedScrollBar>
 
         {/* CTA footer */}
-        <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0">
+        <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0 space-y-3">
+          {sourceEventLink && (
+            <a
+              href={sourceEventLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
+              className="w-full flex items-center justify-center gap-1.5 text-noctvm-caption font-medium text-noctvm-silver/65 hover:text-noctvm-silver transition-colors"
+            >
+              <span>View event on {sourceEventLabel}</span>
+              <svg
+                aria-hidden="true"
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M14 4h6v6" />
+                <path d="M10 14L20 4" />
+                <path d="M20 14v6h-6" />
+                <path d="M4 10V4h6" />
+              </svg>
+            </a>
+          )}
           {ticketCtaLink ? (
             <Button
               href={ticketCtaLink}
@@ -360,12 +533,9 @@ export default function EventModal({
           ) : (
             <p className="text-center text-sm text-noctvm-silver/50 py-3">No outbound link for this event.</p>
           )}
-          {ticketCtaLink && (
-            <p className="text-center text-noctvm-caption text-noctvm-silver/40 mt-2">Opens {ticketSourceBadge.label} in a new tab</p>
-          )}
         </div>
       </GlassPanel>
     </div>
-    </>
+    </div>
   );
 }

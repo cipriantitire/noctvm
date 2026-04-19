@@ -958,7 +958,7 @@ function AppShell() {
                   eventsCount={filteredEvents.length}
                 />
 
-                <>
+                <div className="pb-20 sm:pb-24 lg:pb-0">
                     <div
                       key={viewMode}
                       className={`mt-0 view-transition ${
@@ -994,7 +994,7 @@ function AppShell() {
                         <p className="text-noctvm-silver/50 text-xs mt-1">Try adjusting your filters</p>
                       </div>
                     )}
-                  </>
+                  </div>
               </div>
             )}
 
