@@ -132,8 +132,8 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
   const displayEvents = showAll ? savedEvents : filteredEvents;
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 bg-noctvm-black border-l border-white/5 overflow-hidden font-body">
-      <div className="p-8 pb-4">
+    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 rounded-l-2xl frosted-glass-subtle border-l border-white/5 overflow-hidden font-body z-40">
+      <div className="p-6">
         <div className="flex items-end justify-between mb-8">
           <div>
             <h3 className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-noctvm-silver/40 mb-1">
@@ -148,7 +148,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
           </span>
         </div>
 
-        <div className="rounded-xl overflow-hidden mb-8 border border-noctvm-border h-[200px]">
+        <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border h-[200px]">
           <SidebarMap
             venues={venues}
             events={displayEvents}
@@ -177,7 +177,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col px-8">
+      <div className="flex-1 overflow-hidden flex flex-col px-6">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-noctvm-silver/60">
             {selectedDate ? format(selectedDate, 'MMM dd, yyyy') : 'All Events'}

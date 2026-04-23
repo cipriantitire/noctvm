@@ -96,7 +96,7 @@ export default function RightPanel({
   const tonightEvents = useMemo(() => dbEvents, [dbEvents]);
 
   return (
-    <aside className="hidden xl:block w-80 h-screen sticky top-0 frosted-glass-subtle border-l border-white/5 p-6 overflow-hidden z-40">
+    <aside className="hidden xl:block w-80 h-screen sticky top-0 rounded-l-2xl frosted-glass-subtle border-l border-white/5 p-6 overflow-hidden z-40">
       <div className="flex items-center justify-end gap-2 mb-5 px-1">
         <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
         <span className="text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest">

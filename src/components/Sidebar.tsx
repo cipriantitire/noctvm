@@ -48,7 +48,7 @@ export default function Sidebar({
     <aside 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen z-10 bg-noctvm-black border-r border-noctvm-border transition-[width] duration-300 [transition-timing-function:cubic-bezier(0.45,0,0.55,1)] py-6 overflow-hidden ${pushContent ? 'sticky top-0' : 'absolute left-0 top-0'}`}
+      className={`hidden lg:flex flex-col items-center w-[72px] hover:w-56 group/sidebar h-screen z-40 rounded-r-2xl bg-[rgb(20_20_20_/_0.7)] backdrop-blur-lg backdrop-saturate-150 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)] border-r border-white/[0.08] hover:bg-noctvm-black/95 hover:shadow-none hover:border-white/5 hover:rounded-r-xl transition-[width,background-color,box-shadow,border-radius] duration-300 [transition-timing-function:cubic-bezier(0.45,0,0.55,1)] py-6 overflow-hidden ${pushContent ? 'sticky top-0' : 'absolute left-0 top-0'}`}
     >
       {/* Logo */}
       <div className="relative flex items-center justify-center px-4 mb-10 w-full h-10 flex-shrink-0">
