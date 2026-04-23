@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, type MouseEvent } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { GlassPanel, IconButton } from '@/components/ui';
 
 export interface ModalProps {
@@ -33,6 +34,7 @@ export function Modal({
   maxWidth = 'md',
   showCloseButton = true
 }: ModalProps) {
+  const { ref, maskStyle } = useScrollFade('y');
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -121,7 +123,7 @@ export function Modal({
         )}
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
+        <div ref={ref} style={maskStyle} className="flex-1 overflow-y-auto w-full custom-scrollbar">
           {children}
         </div>
 

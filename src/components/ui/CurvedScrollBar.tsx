@@ -16,12 +16,14 @@ export type CurvedScrollBarProps = HTMLAttributes<HTMLDivElement> & {
   horizontalPosition?: number;
   visibleLength?: number;
   inactiveOpacity?: number;
+  fadeEdges?: boolean;
 };
 
 type Metrics = {
   width: number;
   height: number;
   contentHeight: number;
+  contentWidth: number;
 };
 
 type RailGeometry = {
@@ -109,6 +111,7 @@ export default function CurvedScrollBar({
   horizontalPosition = DEFAULT_HORIZONTAL_POSITION,
   visibleLength = DEFAULT_VISIBLE_LENGTH,
   inactiveOpacity = DEFAULT_INACTIVE_OPACITY,
+  fadeEdges = false,
   ...rest
 }: CurvedScrollBarProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -116,10 +119,21 @@ export default function CurvedScrollBar({
   const frameRef = useRef<number | null>(null);
   const scrollFadeTimeoutRef = useRef<number | null>(null);
   const pendingProgressRef = useRef(0);
-  const [metrics, setMetrics] = useState<Metrics>({ width: 0, height: 0, contentHeight: 0 });
+  const [metrics, setMetrics] = useState<Metrics>({ width: 0, height: 0, contentHeight: 0, contentWidth: 0 });
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isScrollActive, setIsScrollActive] = useState(false);
+  const [fadeMask, setFadeMask] = useState('');
+
+  const computeFadeMask = useCallback((el: HTMLDivElement) => {
+    if (!fadeEdges) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const canScrollUp = scrollTop > 1;
+    const canScrollDown = scrollTop < scrollHeight - clientHeight - 1;
+    const topStop = canScrollUp ? 'transparent' : 'black';
+    const bottomStop = canScrollDown ? 'transparent' : 'black';
+    setFadeMask(`linear-gradient(to bottom, ${topStop}, black 16px, black calc(100% - 16px), ${bottomStop})`);
+  }, [fadeEdges]);
 
   const measure = useCallback(() => {
     const viewport = viewportRef.current;
@@ -133,8 +147,10 @@ export default function CurvedScrollBar({
       width: viewport.clientWidth,
       height: viewport.clientHeight,
       contentHeight: content.scrollHeight,
+      contentWidth: content.scrollWidth,
     });
-  }, []);
+    computeFadeMask(viewport);
+  }, [computeFadeMask]);
 
   useEffect(() => {
     measure();
@@ -202,7 +218,8 @@ export default function CurvedScrollBar({
     }
 
     frameRef.current = window.requestAnimationFrame(commitProgress);
-  }, [commitProgress]);
+    computeFadeMask(target);
+  }, [commitProgress, computeFadeMask]);
 
   const railGeometry = useMemo(
     () => buildRailGeometry(metrics.width, metrics.height, cornerRadius, edgePadding, verticalInset, horizontalPosition),
@@ -229,6 +246,7 @@ export default function CurvedScrollBar({
         onPointerEnter={() => setIsHovered(true)}
         onPointerLeave={() => setIsHovered(false)}
         className={cn('min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide', viewportClassName)}
+        style={fadeMask ? { WebkitMaskImage: fadeMask, maskImage: fadeMask } : undefined}
       >
         <div ref={contentRef} className={cn('relative min-h-full w-full', contentClassName)}>
           {children}

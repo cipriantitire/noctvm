@@ -860,7 +860,7 @@ function AppShell() {
         <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto mobile-scrollbar-hide'}`}>
           {/* Mobile header */}
           <header
-            className="lg:hidden sticky top-0 z-40 liquid-glass-card liquid-glass-nav cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
+            className="lg:hidden sticky top-0 z-40 liquid-glass-card liquid-glass-nav cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3.5"
             style={{
               position: 'sticky',
               top: 0,
@@ -882,7 +882,7 @@ function AppShell() {
                   width={200}
                   height={48}
                   priority
-                  className="h-6 w-auto max-w-[120px] object-contain sm:max-w-[140px]"
+                  className="h-7 w-auto max-w-[140px] object-contain sm:max-w-[160px]"
                 />
               </div>
               
@@ -897,7 +897,7 @@ function AppShell() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="inline-flex h-6 items-center gap-1 bg-transparent px-0 text-noctvm-label text-noctvm-silver font-mono capitalize leading-none transition-colors hover:text-white focus:outline-none"
+                        className="inline-flex h-7 items-center gap-1 bg-transparent px-0 text-xs text-noctvm-silver font-mono capitalize leading-none transition-colors hover:text-white focus:outline-none"
                         aria-label="Select City"
                         title="Select City"
                       >
@@ -942,35 +942,35 @@ function AppShell() {
 
               {/* Right: Actions */}
               <div className="flex items-center gap-2.5 justify-end">
-                <button
-                  onClick={() => setIsGlobalSearchOpen(true)}
-                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
-                  title="Search"
-                >
-                  <SearchIcon className="w-3.5 h-3.5" />
-                </button>
                 {(isAdmin || isOwner) && (
-                  <Link 
+                  <Link
                     href="/dashboard"
-                    className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
                     title="Dashboard"
                   >
-                    <GridIcon className="w-3.5 h-3.5" />
+                    <GridIcon className="w-[18px] h-[18px]" />
                   </Link>
                 )}
                 <button
+                  onClick={() => setIsGlobalSearchOpen(true)}
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  title="Search"
+                >
+                  <SearchIcon className="w-[18px] h-[18px]" />
+                </button>
+                <button
                   onClick={() => setIsNotificationsOpen(true)}
-                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative"
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative"
                   title="Notifications"
                 >
-                  <BellIcon className="w-3.5 h-3.5" />
+                  <BellIcon className="w-[18px] h-[18px]" />
                 </button>
                 <button
                   onClick={handleSettingsClick}
-                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
                   title="Settings"
                 >
-                  <CogIcon className="w-3.5 h-3.5" />
+                  <CogIcon className="w-[18px] h-[18px]" />
                 </button>
               </div>
             </div>

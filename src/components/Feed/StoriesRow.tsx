@@ -1,4 +1,5 @@
 import { Avatar } from '@/components/ui';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import type { StoryUser } from '../StoriesViewerModal';
 
 interface StoriesRowProps {
@@ -14,6 +15,7 @@ export function StoriesRow({
   onOpenStories,
   onOpenCreateStory,
 }: StoriesRowProps) {
+  const { ref, maskStyle } = useScrollFade('x');
   const myEntry = user ? liveStoryUsers.find(su => su.id === user.id) : null;
   const othersStoryUsers = liveStoryUsers.filter(su => su.id !== user?.id);
   const userInitial = user ? (user.display_name || user.email || 'N')[0].toUpperCase() : 'N';
@@ -27,7 +29,7 @@ export function StoriesRow({
 
   return (
     <div className="flex justify-start mb-4">
-      <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 py-3">
+      <div ref={ref} style={maskStyle} className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide px-2 py-3">
         {myEntry ? (
           <div
             className="relative flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer"

@@ -227,6 +227,7 @@ export default function SearchBar(props: SearchBarProps) {
                     edgePadding={2}
                     cornerRadius={12}
                     verticalInset={2}
+                    fadeEdges
                   >
                     <div className="flex flex-wrap gap-1.5">
                       {allGenres.map(genre => (

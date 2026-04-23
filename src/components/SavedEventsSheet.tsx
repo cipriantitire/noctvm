@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
@@ -71,6 +72,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
   const [venues, setVenues] = useState<Venue[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const { ref, maskStyle } = useScrollFade('y');
   const dragControls = useDragControls();
 
   useEffect(() => {
@@ -192,7 +194,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar pl-6 pr-4 pb-6">
+            <div ref={ref} style={maskStyle} className="flex-1 overflow-y-auto custom-scrollbar pl-6 pr-4 pb-6">
               {/* Map Section */}
               <div className="mt-4 w-full rounded-[22px] border border-white/10 bg-noctvm-surface/40 overflow-hidden shadow-[0_12px_34px_rgba(0,0,0,0.45)]">
                 <div className="h-[188px] w-full relative">

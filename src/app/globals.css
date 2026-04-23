@@ -109,6 +109,19 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
+/* ========================= */
+/* SCROLL FADE EDGES         */
+/* ========================= */
+.scroll-fade-t {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 16px);
+  mask-image: linear-gradient(to bottom, transparent, black 16px);
+}
+
+.scroll-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 16px), transparent);
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover,
 .curved-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, rgb(var(--noctvm-violet-rgb) / 1) 0%, rgb(var(--noctvm-violet-rgb) / 0.6) 100%);

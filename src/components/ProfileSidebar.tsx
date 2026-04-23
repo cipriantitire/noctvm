@@ -9,6 +9,7 @@ import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { CalendarIcon, MapPinIcon, TicketIcon, ChevronRightIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import NextImage from 'next/image';
 
 interface ProfileSidebarProps {
@@ -130,6 +131,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
   }, [savedEvents, filteredEvents, showAll]);
 
   const displayEvents = showAll ? savedEvents : filteredEvents;
+  const { ref: scrollRef, maskStyle } = useScrollFade('y');
 
   return (
     <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 rounded-l-2xl frosted-glass-subtle border-l border-white/5 overflow-hidden font-body z-40">
@@ -185,7 +187,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
           <div className="h-px flex-1 bg-white/10" />
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pb-6 pr-1">
+        <div ref={scrollRef} style={maskStyle} className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pb-6 pr-1">
           {loading ? (
             Array(3).fill(0).map((_, i) => (
               <div key={i} className="animate-pulse flex items-center gap-3">

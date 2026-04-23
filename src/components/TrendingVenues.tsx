@@ -1,6 +1,7 @@
 'use client';
 
 import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 import Image from 'next/image';
 
@@ -10,11 +11,12 @@ interface TrendingVenuesProps {
   headerHidden?: boolean;
 }
 
-export default function TrendingVenues({ 
-  venues, 
+export default function TrendingVenues({
+  venues,
   onVenueClick,
-  headerHidden = false 
+  headerHidden = false
 }: TrendingVenuesProps) {
+  const { ref, maskStyle } = useScrollFade('x');
   if (venues.length === 0) return null;
 
   return (
@@ -28,7 +30,7 @@ export default function TrendingVenues({
         <span className="text-noctvm-label font-semibold text-noctvm-emerald uppercase tracking-wider font-mono">Trending Venues</span>
         <span className="text-noctvm-caption text-noctvm-silver/50 ml-auto font-mono">{venues.length} venues</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
+      <div ref={ref} style={maskStyle} className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
         {venues.map(venue => {
           const logoSrc = getVenueLogo(venue.name);
           return (

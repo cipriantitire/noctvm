@@ -1,5 +1,6 @@
 'use client';
 
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui';
 import CommentSection from './CommentSection';
 
@@ -16,6 +17,7 @@ interface CommentSheetProps {
  * Slides up from the bottom, covers whole viewport with Radix Sheet handling pointer interactions.
  */
 export default function CommentSheet({ postId, postOwnerId, currentUserId, storyRingByUserId, onClose }: CommentSheetProps) {
+  const { ref, maskStyle } = useScrollFade('y');
 
   return (
     <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
@@ -25,7 +27,7 @@ export default function CommentSheet({ postId, postOwnerId, currentUserId, story
         </SheetHeader>
 
         {/* Scrollable comment content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain px-0">
+        <div ref={ref} style={maskStyle} className="flex-1 overflow-y-auto overscroll-contain px-0">
           <CommentSection
             postId={postId}
             postOwnerId={postOwnerId}

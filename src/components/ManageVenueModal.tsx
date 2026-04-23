@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Venue } from '@/lib/types';
@@ -38,6 +39,8 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
   const [stats, setStats] = useState<VenueStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'reviews' | 'settings'>('overview');
+  const { ref: tabsRef, maskStyle: tabsMaskStyle } = useScrollFade('x');
+  const { ref: contentRef, maskStyle: contentMaskStyle } = useScrollFade('y');
 
   const fetchVenueData = useCallback(async () => {
     if (!venueId) return;
@@ -128,7 +131,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex px-4 py-2 border-b border-white/5 bg-white/2 gap-1 overflow-x-auto no-scrollbar">
+        <div ref={tabsRef} style={tabsMaskStyle} className="flex px-4 py-2 border-b border-white/5 bg-white/2 gap-1 overflow-x-auto no-scrollbar">
           {(['overview', 'events', 'reviews', 'settings'] as const).map(tab => (
             <button
               key={tab}
@@ -145,7 +148,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div ref={contentRef} style={contentMaskStyle} className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-8 h-8 border-2 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin" />

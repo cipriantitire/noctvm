@@ -10,6 +10,7 @@ import EventCard from './EventCard';
 import VerifiedBadge from './VerifiedBadge';
 import Image from 'next/image';
 import CurvedScrollBar from './ui/CurvedScrollBar';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 interface VenueModalProps {
   venueName: string;
@@ -125,7 +126,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
   const pastEvents = venueEvents.filter(e => e.date < today);
 
   const logoSrc = getVenueLogo(venueName);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollRef, maskStyle: galleryMaskStyle } = useScrollFade('x');
   const venueScrollbarCornerRadius = isWindowedModal
     ? VENUE_SCROLLBAR_CORNER_RADIUS_WINDOW
     : VENUE_SCROLLBAR_CORNER_RADIUS_FULLSCREEN;
@@ -139,7 +140,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
   };
 
   return (
-    <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-4 lg:p-6 overscroll-contain" edgePadding={4} verticalInset={4} cornerRadius={venueScrollbarCornerRadius}>
+    <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-4 lg:p-6 overscroll-contain" edgePadding={4} verticalInset={4} cornerRadius={venueScrollbarCornerRadius} fadeEdges>
       {/* Header */}
       <button
         onClick={onBack}
@@ -229,8 +230,9 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
           </div>
         </div>
         
-        <div 
+        <div
           ref={scrollRef}
+          style={galleryMaskStyle}
           className="flex gap-5 overflow-x-auto py-4 pb-6 scrollbar-hide px-4 snap-x snap-mandatory"
         >
           {GALLERY_THEMES.map((theme) => (

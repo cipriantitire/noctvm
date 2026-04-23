@@ -475,7 +475,7 @@ export default function EventModal({
         </div>
 
         {/* Scrollable description content */}
-        <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-5 overscroll-contain" cornerRadius={24} edgePadding={4} verticalInset={4}>
+        <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-5 overscroll-contain" cornerRadius={24} edgePadding={4} verticalInset={4} fadeEdges>
           {descriptionParagraphs.length > 0 && (
             <section id="event-modal-description" className="space-y-3">
               <div

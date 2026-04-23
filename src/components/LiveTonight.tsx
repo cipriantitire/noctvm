@@ -1,6 +1,7 @@
 'use client';
 
 import { NoctEvent } from '@/lib/types';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 import Image from 'next/image';
 
@@ -10,11 +11,12 @@ interface LiveTonightProps {
   headerHidden?: boolean;
 }
 
-export default function LiveTonight({ 
-  events, 
+export default function LiveTonight({
+  events,
   onEventClick,
-  headerHidden = false 
+  headerHidden = false
 }: LiveTonightProps) {
+  const { ref, maskStyle } = useScrollFade('x');
   if (events.length === 0) return null;
 
   return (
@@ -28,7 +30,7 @@ export default function LiveTonight({
         <span className="text-noctvm-label font-semibold text-noctvm-emerald uppercase tracking-wider font-mono">Live Tonight</span>
         <span className="text-noctvm-caption text-noctvm-silver/50 ml-auto font-mono">{events.length} events</span>
       </div>
-      <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
+      <div ref={ref} style={maskStyle} className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
         {events.slice(0, 5).map(event => (
           <button
             key={event.id}

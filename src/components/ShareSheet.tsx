@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui';
 
 interface ShareSheetProps {
@@ -96,6 +97,7 @@ const PLATFORMS = [
 ];
 
 export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl = '' }: ShareSheetProps) {
+  const { ref, maskStyle } = useScrollFade('x');
   const [search, setSearch] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -172,7 +174,7 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
         <div className="h-px bg-noctvm-border mx-0 mb-3" />
 
         {/* Platform row */}
-        <div className="px-1 pb-6 overflow-x-auto scrollbar-hide">
+        <div ref={ref} style={maskStyle} className="px-1 pb-6 overflow-x-auto scrollbar-hide">
           <div className="flex gap-4 min-w-max">
             {PLATFORMS.map((platform) => (
               <button

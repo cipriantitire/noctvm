@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
@@ -31,6 +32,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ref, maskStyle } = useScrollFade('y');
   const dragControls = useDragControls();
 
   useEffect(() => {
@@ -177,7 +179,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             </div>
 
             <div className="flex flex-col flex-1 pl-6 pr-4 pb-4">
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
+              <div ref={ref} style={maskStyle} className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
                 {loading ? (
                   <div className="flex flex-col items-center justify-center h-40 gap-3">
                     <div className="w-6 h-6 border-2 border-noctvm-violet border-t-transparent rounded-full animate-spin" />

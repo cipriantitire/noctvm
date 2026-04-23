@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { createPortal } from 'react-dom';
 import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,6 +90,7 @@ export default function PostViewerModal({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTaggedUsers, setShowTaggedUsers] = useState(false);
   const [reposting, setReposting] = useState(false);
+  const { ref, maskStyle } = useScrollFade('y');
 
   const post = posts[index];
 
@@ -458,7 +460,7 @@ export default function PostViewerModal({
           {/* Actions Bar removed from here, moved to Bottom Area */}
 
           {/* Comments Section (Scrollable) */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar flex flex-col gap-2">
+          <div ref={ref} style={maskStyle} className="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar flex flex-col gap-2">
              {post.caption && (
                <div className="mb-2 mt-1">
                   <p className="text-xs text-white/90 leading-relaxed break-words">

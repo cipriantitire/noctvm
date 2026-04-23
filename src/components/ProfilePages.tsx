@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useLayoutEffect, useRef } from 'react';
+import { useScrollFade } from '@/hooks/useScrollFade';
 
 // ── Social link URL helpers ──────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ function usernameFromUrl(platform: string, url: string): string {
 const settingsScrollPositions = new Map<string, number>();
 
 function useSettingsScrollMemory(storageKey: string) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null) as React.MutableRefObject<HTMLDivElement | null>;
 
   useLayoutEffect(() => {
     const element = scrollRef.current;
@@ -285,6 +286,7 @@ export function SettingsPage({
   const [view, setView] = useState(initialView);
   const [activeEditProfileOrigin, setActiveEditProfileOrigin] = useState<EditProfileOrigin>(editProfileOrigin);
   const scrollRef = useSettingsScrollMemory('settings-hub');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const menuItems: SettingsMenuItem[] = [
     { id: 'edit',          label: 'Edit Profile',    desc: 'Avatar, bio, music, socials', icon: <EditIcon className="w-5 h-5 text-noctvm-violet" /> },
     { id: 'account',       label: 'Account',         desc: 'Email, password, security',   icon: <UserIcon className="w-5 h-5 text-noctvm-silver" /> },
@@ -357,7 +359,7 @@ export function SettingsPage({
         />
       </div>
 
-      <div ref={scrollRef} className="flex-1 min-h-0 space-y-6 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 space-y-6 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
         <section className="space-y-3">
           {menuGroups.map((group) => (
             <SettingsGroup
@@ -410,6 +412,7 @@ export function EditProfilePage({
   title?: string,
 }) {
   const scrollRef = useSettingsScrollMemory('edit-profile');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [username, setUsername] = useState(profile?.username || '');
@@ -557,7 +560,7 @@ export function EditProfilePage({
         />
       </div>
 
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-12 space-y-4 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto px-4 pb-12 space-y-4 scrollbar-hide overscroll-contain">
         <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-5">
           <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Core Info</p>
           <div className="space-y-5">
@@ -796,6 +799,7 @@ export function EditProfilePage({
 
 export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
   const scrollRef = useSettingsScrollMemory('privacy');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const { settings, updateSettings, loading } = useSettings();
 
   if (loading) return (
@@ -815,7 +819,7 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
         />
       </div>
       
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-8 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-8 scrollbar-hide overscroll-contain">
         <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
           <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Profile Visibility</p>
           <ToggleSwitch 
@@ -888,6 +892,7 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
 
 export function ActivityLogPage({ onBack }: { onBack: () => void }) {
   const scrollRef = useSettingsScrollMemory('activity');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const { profile } = useAuth();
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -938,7 +943,7 @@ export function ActivityLogPage({ onBack }: { onBack: () => void }) {
         />
       </div>
       
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
             <div className="w-10 h-10 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
@@ -974,6 +979,7 @@ export function ActivityLogPage({ onBack }: { onBack: () => void }) {
 
 export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
   const scrollRef = useSettingsScrollMemory('notifications');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const { settings, updateSettings, loading } = useSettings();
 
   if (loading) return (
@@ -993,7 +999,7 @@ export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
         />
       </div>
       
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-6 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-6 scrollbar-hide overscroll-contain">
         <GlassPanel variant="subtle" className="rounded-[28px] p-5 space-y-4">
           <p className="text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45">Alerts</p>
           <div className="space-y-2">
@@ -1030,6 +1036,7 @@ export function NotificationSettingsPage({ onBack }: { onBack: () => void }) {
 
 export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => void, hideHeader?: boolean }) {
   const scrollRef = useSettingsScrollMemory('inventory');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const premiumEffects = [
     { id: 'neon_ring', name: 'Neon Avatar Ring', price: '500 MR', locked: true },
     { id: 'emerald_badge', name: 'Emerald VIP Badge', price: '1000 MR', locked: true },
@@ -1049,7 +1056,7 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
         <div className="p-4 rounded-2xl bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight border border-noctvm-violet/30 mb-6">
           <p className="text-xs font-bold text-noctvm-violet uppercase tracking-widest mb-1">Your Stash</p>
           <p className="text-noctvm-label text-noctvm-silver leading-relaxed">Customize your presence with premium gear unlocked from the Boutique.</p>
@@ -1075,6 +1082,7 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
 
 export function ManageAccountPage({ onBack }: { onBack: () => void }) {
   const scrollRef = useSettingsScrollMemory('manage-account');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const { profile } = useAuth();
   const [email, setEmail] = useState(profile?.email || '');
   const [password, setPassword] = useState('');
@@ -1118,7 +1126,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
         />
       </div>
 
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto space-y-8 scrollbar-hide overscroll-contain pb-12">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto space-y-8 scrollbar-hide overscroll-contain pb-12">
         {message && (
           <div className={`rounded-2xl border px-4 py-3 text-xs font-bold uppercase tracking-wider ${message.type === 'success' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500' : 'border-red-500/20 bg-red-500/10 text-red-500'}`}>
             {message.text}
@@ -1171,6 +1179,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
 
 export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
   const scrollRef = useSettingsScrollMemory('appearance');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const { settings, updateSettings, loading } = useSettings();
 
   const themes = [
@@ -1192,7 +1201,7 @@ export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
         />
       </div>
 
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-6 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-6 scrollbar-hide overscroll-contain">
         <div className="space-y-3">
           {themes.map((t) => (
             <button
@@ -1224,6 +1233,7 @@ export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
 
 export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
   const scrollRef = useSettingsScrollMemory('blocked-muted');
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   const [tab, setTab] = useState<'blocked' | 'muted'>('blocked');
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1291,7 +1301,7 @@ export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
         </button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
+      <div ref={(node) => { scrollRef.current = node; fadeRef.current = node; }} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 space-y-4 scrollbar-hide overscroll-contain">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="h-8 w-8 rounded-full border-2 border-noctvm-violet border-t-transparent animate-spin" />
@@ -1334,6 +1344,7 @@ export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
 }
 
 export function AddLocationPage({ onBack }: { onBack: () => void }) {
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   return (
     <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
@@ -1344,7 +1355,7 @@ export function AddLocationPage({ onBack }: { onBack: () => void }) {
           backLabel="Profile"
         />
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
+      <div ref={fadeRef} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
         <GlassPanel variant="subtle" className="rounded-[28px] p-8 text-center text-sm text-noctvm-silver">
           Search for your business or location to add it.
         </GlassPanel>
@@ -1354,6 +1365,7 @@ export function AddLocationPage({ onBack }: { onBack: () => void }) {
 }
 
 export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
+  const { ref: fadeRef, maskStyle } = useScrollFade('y');
   return (
     <div className="max-w-xl mx-auto px-4 h-full flex flex-col overflow-hidden">
       <div className="pt-2">
@@ -1364,7 +1376,7 @@ export function ClaimLocationPage({ onBack }: { onBack: () => void }) {
           backLabel="Profile"
         />
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
+      <div ref={fadeRef} style={maskStyle} className="flex-1 min-h-0 overflow-y-auto pb-12 scrollbar-hide overscroll-contain">
         <GlassPanel variant="subtle" className="rounded-[28px] p-8 text-center text-sm text-noctvm-silver">
           Verify ownership to manage your venue profile and events.
         </GlassPanel>

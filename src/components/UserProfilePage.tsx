@@ -27,6 +27,7 @@ import {
   GlobeIcon,
   CalendarIcon
 } from './icons';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import { ArrowUpRight, Ban, Eye, Flag, MoreHorizontal, Music2, PencilLine, PlusCircle, Share2, VolumeX, X } from 'lucide-react';
 import SavedEventsSheet from './SavedEventsSheet';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
@@ -236,7 +237,9 @@ export default function UserProfilePage({
       await supabase.from('post_likes').delete().match({ post_id: post.id, user_id: user.id });
     }
   }, [user]);
-  const feedScrollRef = useRef<HTMLDivElement>(null);
+  const feedScrollRef = useRef<HTMLDivElement>(null) as React.MutableRefObject<HTMLDivElement | null>;
+  const { ref: highlightsRef, maskStyle: highlightsMaskStyle } = useScrollFade('x');
+  const { ref: fadeRef, maskStyle: feedMaskStyle } = useScrollFade('y');
   const [activeTab, setActiveTab] = useState<'posts' | 'reposts' | 'saved' | 'tagged'>('posts');
 
   // ── Highlights state ──────────────────────────────────────────────────────
@@ -1062,7 +1065,7 @@ export default function UserProfilePage({
 
       {/* ── Story Highlights ──────────────────────────────────── */}
       <div className="border-t border-noctvm-border px-4 py-4">
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pt-1 px-0.5">
+        <div ref={highlightsRef} style={highlightsMaskStyle} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pt-1 px-0.5">
           {isOwner && (
             <button type="button" onClick={() => setShowCreateHighlight(true)} className="flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none group">
               <div className="w-16 h-16 rounded-full bg-noctvm-surface border-2 border-dashed border-noctvm-border flex items-center justify-center group-hover:border-noctvm-violet/50 transition-colors">
@@ -1378,7 +1381,7 @@ export default function UserProfilePage({
             </div>
           </div>
           {/* Scrollable content — separate from draggable container */}
-          <div ref={feedScrollRef} className="flex-1 overflow-y-auto">
+          <div ref={(node) => { feedScrollRef.current = node; fadeRef.current = node; }} style={feedMaskStyle} className="flex-1 overflow-y-auto">
             <div className="flex flex-col gap-px bg-noctvm-border">
               {activeViewerPosts.map((post, i) => {
                 const feedPost = post.raw_row ? mapSupabasePost(post.raw_row) : null;

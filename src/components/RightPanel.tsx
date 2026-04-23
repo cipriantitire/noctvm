@@ -5,6 +5,7 @@ import { getVenueLogo, getVenueColor } from '@/lib/venue-logos';
 import { NoctEvent, Venue } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { buildMapVenuesForEvents } from '@/lib/map-venues';
+import { useScrollFade } from '@/hooks/useScrollFade';
 import SidebarMap from './SidebarMap';
 
 interface RightPanelProps {
@@ -15,13 +16,14 @@ interface RightPanelProps {
   activeGenres?: string[];
 }
 
-export default function RightPanel({ 
-  onVenueClick, 
-  onEventClick, 
-  activeCity = 'bucuresti', 
+export default function RightPanel({
+  onVenueClick,
+  onEventClick,
+  activeCity = 'bucuresti',
   activeTab = 'events',
   activeGenres = ['All']
 }: RightPanelProps) {
+  const { ref: liveTonightRef, maskStyle: liveTonightMask } = useScrollFade('y');
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
@@ -128,7 +130,7 @@ export default function RightPanel({
           <span className="ml-auto text-noctvm-caption text-noctvm-silver font-mono">{tonightEvents.length} events</span>
         </div>
         {tonightEvents.length > 0 ? (
-          <div className="space-y-1 max-h-[220px] overflow-y-auto custom-scrollbar relative z-10 pr-1">
+          <div ref={liveTonightRef} style={liveTonightMask} className="space-y-1 max-h-[220px] overflow-y-auto custom-scrollbar relative z-10 pr-1">
             {tonightEvents.map((event, i) => (
               <button
                 key={i}
