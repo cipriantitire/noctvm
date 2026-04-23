@@ -189,7 +189,7 @@ export default function CommentSection({
           <button
             onClick={handleRootPost}
             disabled={!newComment.trim()}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-noctvm-violet text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-noctvm-violet text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
           >
             Post
           </button>

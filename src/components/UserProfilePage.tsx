@@ -948,7 +948,7 @@ export default function UserProfilePage({
             <button
               type="button"
               onClick={onEditProfileClick}
-              className="flex-1 py-3 rounded-2xl border border-white/10 bg-white/[0.05] text-noctvm-label font-black uppercase tracking-wider text-white transition-all hover:border-white/15 hover:bg-white/[0.08] active:scale-95"
+              className="flex-1 py-3 rounded-2xl border border-white/10 bg-white/[0.05] text-noctvm-label font-black uppercase tracking-wider text-white transition-all hover:border-white/15 hover:bg-white/[0.08] active:scale-[0.96]"
             >
               Edit Profile
             </button>
@@ -957,7 +957,7 @@ export default function UserProfilePage({
               type="button"
               onClick={() => void handleToggleFollow()}
               disabled={followLoading}
-              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-95 disabled:opacity-60"
+              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-[0.96] disabled:opacity-60"
             >
               {followLoading ? '...' : (isFollowingTarget ? 'Following' : 'Follow')}
             </button>
@@ -968,7 +968,7 @@ export default function UserProfilePage({
                 type="button"
                 aria-label="Profile options"
                 title={shareToast ? 'Profile shared' : 'Profile options'}
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 ${
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-[0.96] ${
                   shareToast
                     ? 'border-noctvm-violet/30 bg-noctvm-violet/10 text-white'
                     : 'border-noctvm-border bg-noctvm-surface text-white hover:bg-white/[0.06]'
@@ -1316,7 +1316,7 @@ export default function UserProfilePage({
         <button
           type="button"
           onClick={onOpenCreatePost}
-          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-95 transition-all duration-200"
+          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all duration-200"
           title="Create Post"
         >
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -1359,7 +1359,7 @@ export default function UserProfilePage({
                 type="button"
                 onClick={() => setMobileFeedView(false)}
                 title="Close feed"
-                className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+                className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-[0.96] transition-all"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />

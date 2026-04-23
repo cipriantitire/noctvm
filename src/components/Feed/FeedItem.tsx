@@ -363,7 +363,7 @@ export function FeedItem({
                {post.tags.map(tag => (
                  <span 
                    key={tag} 
-                   className="px-2 py-0.5 rounded-md bg-noctvm-violet/10 text-[10px] font-black text-noctvm-violet/60 hover:text-noctvm-violet hover:bg-noctvm-violet/20 cursor-pointer transition-all uppercase tracking-widest border border-noctvm-violet/10 active:scale-95"
+                   className="px-2 py-0.5 rounded-md bg-noctvm-violet/10 text-[10px] font-black text-noctvm-violet/60 hover:text-noctvm-violet hover:bg-noctvm-violet/20 cursor-pointer transition-all uppercase tracking-widest border border-noctvm-violet/10 active:scale-[0.96]"
                  >
                    #{tag}
                  </span>

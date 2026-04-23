@@ -137,7 +137,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                             onClick={() => handlePurchase(asset)}
                             className={`px-5 py-2 rounded-full text-noctvm-caption font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
                               canAfford 
-                                ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-95' 
+                                ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-[0.96]' 
                                 : 'bg-white/5 text-noctvm-silver/40 border border-white/5 cursor-not-allowed'
                             }`}
                           >

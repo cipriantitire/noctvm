@@ -167,7 +167,7 @@ export default function ScraperManager() {
         <button
           onClick={runAllScrapers}
           disabled={loading || !!runningSource}
-          className="flex items-center justify-center gap-2 px-6 py-4 bg-noctvm-violet text-white rounded-2xl text-noctvm-caption md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/10 active:scale-95 disabled:opacity-50 w-full"
+          className="flex items-center justify-center gap-2 px-6 py-4 bg-noctvm-violet text-white rounded-2xl text-noctvm-caption md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/10 active:scale-[0.96] disabled:opacity-50 w-full"
         >
           <PlayIcon className="w-4 h-4" />
           {loading ? 'Processing...' : 'Full System Scrape'}
@@ -214,7 +214,7 @@ export default function ScraperManager() {
                   <button 
                     onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}
                     disabled={loading || !!runningSource}
-                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver hover:bg-noctvm-violet hover:text-white hover:border-noctvm-violet transition-all active:scale-95 disabled:opacity-30"
+                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver hover:bg-noctvm-violet hover:text-white hover:border-noctvm-violet transition-all active:scale-[0.96] disabled:opacity-30"
                   >
                     {runningSource === source.id ? (
                       <div className="w-3 h-3 border-2 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
@@ -389,7 +389,7 @@ export default function ScraperManager() {
                   <button 
                     onClick={() => runSingleScraper(selectedSource.id)}
                     disabled={loading}
-                    className="flex-[2] px-4 py-3 bg-noctvm-violet text-white rounded-xl text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                    className="flex-[2] px-4 py-3 bg-noctvm-violet text-white rounded-xl text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-[0.96] disabled:opacity-50"
                   >
                     Run Scraper
                   </button>

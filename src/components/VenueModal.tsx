@@ -214,7 +214,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
             <button 
               onClick={() => scroll('left')}
               title="Scroll left"
-              className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-95"
+              className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-[0.96]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
@@ -222,7 +222,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
             <button 
               onClick={() => scroll('right')}
               title="Scroll right"
-              className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-95"
+              className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-[0.96]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </button>
@@ -235,7 +235,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
         >
           {GALLERY_THEMES.map((theme) => (
             <div key={theme.label} className="snap-start flex-shrink-0 w-full sm:w-[48%] lg:w-[23.5%]">
-              <div className={`aspect-video rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xl relative overflow-hidden`}>
+              <div className={`aspect-video rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.96] cursor-pointer shadow-xl relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="text-center group-hover:transform group-hover:scale-110 transition-transform relative z-10">
                   <span className="text-5xl font-bold text-white/10 group-hover:text-white/30 transition-colors uppercase tracking-tighter">{theme.icon}</span>

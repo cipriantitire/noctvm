@@ -62,7 +62,7 @@ function DashboardPage() {
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => setShowEventForm(true)}
-                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-violet/10 hover:border-noctvm-violet/30 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-violet/10 hover:border-noctvm-violet/30 transition-all duration-500 overflow-hidden active:scale-[0.96] shadow-xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
@@ -76,7 +76,7 @@ function DashboardPage() {
 
               <button 
                 onClick={() => setShowVenueForm(true)}
-                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-emerald/10 hover:border-noctvm-emerald/30 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-emerald/10 hover:border-noctvm-emerald/30 transition-all duration-500 overflow-hidden active:scale-[0.96] shadow-xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-noctvm-emerald/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
@@ -90,7 +90,7 @@ function DashboardPage() {
 
               <button 
                 onClick={() => window.location.href = '/dashboard/events'}
-                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-gold/10 hover:border-noctvm-gold/30 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-noctvm-gold/10 hover:border-noctvm-gold/30 transition-all duration-500 overflow-hidden active:scale-[0.96] shadow-xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-noctvm-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
@@ -104,7 +104,7 @@ function DashboardPage() {
 
               <button 
                 onClick={() => window.location.href = '/dashboard/scrapers'}
-                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden active:scale-95 shadow-xl"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden active:scale-[0.96] shadow-xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">

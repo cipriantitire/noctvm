@@ -26,6 +26,7 @@ const baseColorBendsProps = {
 
 export default function AppBackdrop({ mode, paused = false }: AppBackdropProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -42,14 +43,29 @@ export default function AppBackdrop({ mode, paused = false }: AppBackdropProps) 
     return () => media.removeListener(update);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setPrefersReducedMotion(media.matches);
+    update();
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', update);
+      return () => media.removeEventListener('change', update);
+    }
+
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
   const colorBendsProps = useMemo(() => ({
     ...baseColorBendsProps,
-    interactive: !isMobile,
-    mouseInfluence: isMobile ? 0 : baseColorBendsProps.mouseInfluence,
-    parallax: isMobile ? 0 : baseColorBendsProps.parallax,
-    noise: isMobile ? 0.04 : baseColorBendsProps.noise,
+    interactive: !isMobile && !prefersReducedMotion,
+    mouseInfluence: isMobile || prefersReducedMotion ? 0 : baseColorBendsProps.mouseInfluence,
+    parallax: isMobile || prefersReducedMotion ? 0 : baseColorBendsProps.parallax,
+    noise: isMobile || prefersReducedMotion ? 0.04 : baseColorBendsProps.noise,
     maxPixelRatio: isMobile ? 1.1 : 1.5,
-  }), [isMobile]);
+  }), [isMobile, prefersReducedMotion]);
 
   const isRich = mode === 'rich';
   const refractionStrength = isMobile ? 0.66 : 1.3;

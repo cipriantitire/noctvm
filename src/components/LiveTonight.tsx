@@ -33,7 +33,7 @@ export default function LiveTonight({
           <button
             key={event.id}
             onClick={() => onEventClick(event)}
-            className="flex-shrink-0 w-[140px] rounded-lg overflow-hidden border border-white/5 bg-black/20 hover:border-noctvm-violet/40 transition-all active:scale-95 text-left group/card"
+            className="flex-shrink-0 w-[140px] rounded-lg overflow-hidden border border-white/5 bg-black/20 hover:border-noctvm-violet/40 transition-all active:scale-[0.96] text-left group/card"
           >
             <div className="aspect-[3/2] bg-noctvm-midnight relative overflow-hidden">
               <Image 

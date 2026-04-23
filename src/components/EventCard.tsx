@@ -150,7 +150,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
         currentIsSaved 
           ? 'bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/30' 
           : 'bg-white/5 text-noctvm-silver/50 hover:bg-white/10 hover:text-white border border-white/5'
-      } active:scale-95`}
+      } active:scale-[0.96]`}
       title={currentIsSaved ? 'Remove from saved' : 'Save event'}
     >
       <svg
@@ -164,7 +164,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
       </svg>
-      <span className="text-noctvm-caption font-bold font-mono tracking-tight">{currentSaveCount}</span>
+      <span className="text-noctvm-caption font-bold font-mono tabular-nums tracking-tight">{currentSaveCount}</span>
     </button>
   );
 
@@ -215,8 +215,8 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
               src={event.image_url || '/images/event-fallback.png'}
               alt={event.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 640px) 180px, 240px"
+          className="object-cover group-hover:scale-105 transition-transform duration-500 image-outline-dark"
+          sizes="(max-width: 640px) 180px, 240px"
               priority={false}
               unoptimized
             />
@@ -272,7 +272,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
           src={event.image_url || '/images/event-fallback.png'}
           alt={event.title}
           fill
-          className="object-cover group-hover:scale-110 transition-transform duration-700"
+          className="object-cover group-hover:scale-110 transition-transform duration-700 image-outline-dark"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           unoptimized
         />

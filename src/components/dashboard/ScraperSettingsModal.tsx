@@ -262,14 +262,14 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
         <div className="mt-8 flex gap-3 relative z-10">
           <button 
             onClick={onClose}
-            className="flex-1 px-4 py-3 rounded-2xl border border-white/10 text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver hover:bg-white/5 transition-all active:scale-95"
+            className="flex-1 px-4 py-3 rounded-2xl border border-white/10 text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver hover:bg-white/5 transition-all active:scale-[0.96]"
           >
             Cancel
           </button>
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="flex-[2] px-4 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/20 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+            className="flex-[2] px-4 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/20 flex items-center justify-center gap-2 active:scale-[0.96] disabled:opacity-50"
           >
             {saving ? (
                <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>

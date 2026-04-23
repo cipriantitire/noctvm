@@ -234,7 +234,7 @@ export default function VenueForm({ onSuccess, onCancel, initialData }: VenueFor
         <button
           type="submit"
           disabled={loading}
-          className="px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95 shadow-lg shadow-noctvm-violet/20"
+          className="px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-[0.96] shadow-lg shadow-noctvm-violet/20"
         >
           {loading ? <span>Saving...</span> : (initialData?.id ? 'Save Changes' : 'Create Venue')}
         </button>

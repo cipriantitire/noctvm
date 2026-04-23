@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
@@ -286,6 +286,8 @@ export default function ColorBends({
     container.appendChild(renderer.domElement);
 
     const clock = new THREE.Clock();
+    let needsRefractionUpdate = true;
+
     const updateRefractionRects = () => {
       if (!refractionRef.current || !material || !renderer) {
         if (material) material.uniforms.uRefractionCount.value = 0;
@@ -323,7 +325,7 @@ export default function ColorBends({
       const h = container.clientHeight || 1;
       renderer.setSize(w, h, false);
       (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
-      updateRefractionRects();
+      needsRefractionUpdate = true;
     };
 
     handleResize();
@@ -334,6 +336,32 @@ export default function ColorBends({
       resizeObserverRef.current = ro;
     } else {
       (window as Window).addEventListener('resize', handleResize);
+    }
+
+    // Mark refraction dirty on scroll (throttled to 100ms)
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    const handleScroll = () => {
+      if (scrollTimeout) return;
+      scrollTimeout = setTimeout(() => {
+        needsRefractionUpdate = true;
+        scrollTimeout = null;
+      }, 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+
+    // Mark refraction dirty when target elements are added/removed/moved
+    let mutationTimeout: ReturnType<typeof setTimeout> | null = null;
+    const mutationObserver = 'MutationObserver' in window
+      ? new MutationObserver(() => {
+          if (mutationTimeout) return;
+          mutationTimeout = setTimeout(() => {
+            needsRefractionUpdate = true;
+            mutationTimeout = null;
+          }, 100);
+        })
+      : null;
+    if (mutationObserver) {
+      mutationObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
     }
 
     const loop = () => {
@@ -347,7 +375,11 @@ export default function ColorBends({
         const dt = clock.getDelta();
         const elapsed = clock.elapsedTime;
         material.uniforms.uTime.value = elapsed;
-        updateRefractionRects();
+
+        if (needsRefractionUpdate) {
+          needsRefractionUpdate = false;
+          updateRefractionRects();
+        }
 
         const deg = (rotationRef.current % 360) + autoRotateRef.current * elapsed;
         const rad = (deg * Math.PI) / 180;
@@ -385,6 +417,10 @@ export default function ColorBends({
       loopRef.current = null;
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
       else (window as Window).removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+      if (mutationObserver) mutationObserver.disconnect();
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      if (mutationTimeout) clearTimeout(mutationTimeout);
       geometry.dispose();
       material.dispose();
       renderer.dispose();

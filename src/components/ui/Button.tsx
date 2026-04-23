@@ -12,7 +12,7 @@ const variantClass: Record<Variant, string> = {
   ghost:
     "text-noctvm-silver hover:text-white transition-all font-bold text-noctvm-micro uppercase tracking-widest",
   submit:
-    "px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 disabled:opacity-50 active:scale-95 shadow-lg shadow-noctvm-violet/20",
+    "px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 disabled:opacity-50 active:scale-[0.96] shadow-lg shadow-noctvm-violet/20",
   outline:
     "border border-noctvm-border bg-transparent text-white hover:bg-white/5",
 };

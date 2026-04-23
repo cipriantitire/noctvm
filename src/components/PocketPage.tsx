@@ -128,7 +128,7 @@ export default function PocketPage() {
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="relative z-10 w-48 h-48 rounded-full flex flex-col items-center justify-center border border-white/10 glass-card bg-noctvm-midnight/40 shadow-2xl group cursor-pointer active:scale-95 transition-all"
+          className="relative z-10 w-48 h-48 rounded-full flex flex-col items-center justify-center border border-white/10 glass-card bg-noctvm-midnight/40 shadow-2xl group cursor-pointer active:scale-[0.96] transition-all"
         >
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/5 to-transparent overflow-hidden pointer-events-none" />
           <PocketIcon className="w-8 h-8 text-noctvm-violet mb-2 animate-float" />
@@ -189,7 +189,7 @@ export default function PocketPage() {
           <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Vanity Emporium</h2>
           <button 
             onClick={() => setIsBoutiqueOpen(true)}
-            className="text-noctvm-caption text-noctvm-violet font-mono uppercase flex items-center gap-1 hover:underline active:scale-95 transition-all"
+            className="text-noctvm-caption text-noctvm-violet font-mono uppercase flex items-center gap-1 hover:underline active:scale-[0.96] transition-all"
           >
             Enter Boutique <ShoppingBagIcon className="w-3 h-3" />
           </button>
@@ -203,7 +203,7 @@ export default function PocketPage() {
             <div 
               key={item.name} 
               onClick={() => setIsItemPreviewOpen(true)}
-              className="relative group p-5 rounded-3xl bg-white/5 border border-white/5 overflow-hidden cursor-pointer active:scale-95 transition-all hover:bg-white/10"
+              className="relative group p-5 rounded-3xl bg-white/5 border border-white/5 overflow-hidden cursor-pointer active:scale-[0.96] transition-all hover:bg-white/10"
             >
               <div className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl ${item.color} opacity-20`} />
               <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">

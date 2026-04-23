@@ -93,7 +93,7 @@ export default function Avatar({
           onClick={onClick}
           aria-label={alt}
           title={alt}
-          className="block h-full w-full rounded-full cursor-pointer transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
+          className="block h-full w-full rounded-full cursor-pointer transition-transform hover:scale-105 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
         >
           {innerCircle}
         </button>
@@ -110,7 +110,7 @@ export default function Avatar({
             onAddStoryClick?.();
           }}
           onPointerDown={(event) => event.stopPropagation()}
-          className={`absolute ${addButtonOffsetClass} flex items-center justify-center rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(124,58,237,0.72),rgba(124,58,237,0.44))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] backdrop-blur-md backdrop-saturate-150 hover:scale-105 hover:brightness-105 active:scale-95 transition-all ${addButtonSizeClass}`}
+          className={`absolute ${addButtonOffsetClass} flex items-center justify-center rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(124,58,237,0.72),rgba(124,58,237,0.44))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] backdrop-blur-md backdrop-saturate-150 hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all ${addButtonSizeClass}`}
         >
           <svg className={addButtonIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />

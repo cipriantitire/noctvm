@@ -177,7 +177,7 @@ export default function EventManager() {
 
           <button 
             onClick={() => { setEditingEvent(null); setShowForm(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] whitespace-nowrap"
             title="Create Event"
           >
             <PlusIcon className="w-3.5 h-3.5" />
@@ -386,7 +386,7 @@ export default function EventManager() {
                 <button 
                   onClick={() => fallbackFileRef.current?.click()}
                   disabled={uploadingFallback}
-                  className="w-full py-3.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] disabled:opacity-50"
                 >
                   {uploadingFallback ? 'Uploading...' : 'Upload New Design'}
                 </button>

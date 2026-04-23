@@ -661,7 +661,7 @@ export function EditProfilePage({
                 <button
                   key={g}
                   onClick={() => setGenres((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])}
-                  className={`rounded-full border px-3 py-1.5 text-noctvm-caption font-bold transition-all active:scale-95 ${
+                  className={`rounded-full border px-3 py-1.5 text-noctvm-caption font-bold transition-all active:scale-[0.96] ${
                     genres.includes(g)
                       ? 'border-noctvm-violet bg-noctvm-violet text-white shadow-glow'
                       : 'border-white/10 bg-white/5 text-noctvm-silver hover:border-white/20'
@@ -700,7 +700,7 @@ export function EditProfilePage({
               <div className="relative">
                 <button
                   onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-noctvm-silver transition-all active:scale-95 hover:bg-white/10 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-noctvm-silver transition-all active:scale-[0.96] hover:bg-white/10 hover:text-white"
                   title="Add a social media link"
                 >
                   <span>Add Social</span>
@@ -715,7 +715,7 @@ export function EditProfilePage({
                           updateSocial(p, ' ');
                           setShowPlatformDropdown(false);
                         }}
-                        className="w-full px-3 py-2 text-left capitalize text-noctvm-caption text-noctvm-silver transition-all active:scale-95 hover:bg-white/5 hover:text-white"
+                        className="w-full px-3 py-2 text-left capitalize text-noctvm-caption text-noctvm-silver transition-all active:scale-[0.96] hover:bg-white/5 hover:text-white"
                         title={`Add ${p} link`}
                       >
                         {p}
@@ -747,7 +747,7 @@ export function EditProfilePage({
                       onClick={() => updateSocial(p, '')}
                       title={`Remove ${p} link`}
                       aria-label={`Remove ${p} link`}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 opacity-0 transition-all active:scale-95 group-hover:opacity-100 hover:text-red-500"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 opacity-0 transition-all active:scale-[0.96] group-hover:opacity-100 hover:text-red-500"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -770,7 +770,7 @@ export function EditProfilePage({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full rounded-xl bg-noctvm-violet px-4 py-4 text-sm font-bold text-white shadow-lg shadow-noctvm-violet/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+            className="w-full rounded-xl bg-noctvm-violet px-4 py-4 text-sm font-bold text-white shadow-lg shadow-noctvm-violet/20 transition-all hover:scale-[1.02] active:scale-[0.96] disabled:opacity-50"
           >
             {saving ? 'Saving...' : saved ? 'Saved!' : 'Save All Changes'}
           </button>

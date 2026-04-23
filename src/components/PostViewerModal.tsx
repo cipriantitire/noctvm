@@ -470,7 +470,7 @@ export default function PostViewerModal({
                       {post.tags.map(tag => (
                         <span 
                           key={tag} 
-                          className="px-2.5 py-1 rounded bg-noctvm-violet/10 text-noctvm-micro font-black text-noctvm-violet/60 hover:text-noctvm-violet hover:bg-noctvm-violet/20 cursor-pointer transition-all uppercase tracking-widest border border-noctvm-violet/5 active:scale-95"
+                          className="px-2.5 py-1 rounded bg-noctvm-violet/10 text-noctvm-micro font-black text-noctvm-violet/60 hover:text-noctvm-violet hover:bg-noctvm-violet/20 cursor-pointer transition-all uppercase tracking-widest border border-noctvm-violet/5 active:scale-[0.96]"
                         >
                           #{tag}
                         </span>

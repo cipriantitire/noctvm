@@ -180,7 +180,7 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
                 onClick={() => handlePlatform(platform.action)}
                 className="flex flex-col items-center gap-1.5 flex-shrink-0"
               >
-                <div className={`w-12 h-12 rounded-2xl ${platform.bg} flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95`}>
+                <div className={`w-12 h-12 rounded-2xl ${platform.bg} flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-[0.96]`}>
                   {platform.icon}
                 </div>
                 <span className="text-noctvm-caption text-noctvm-silver whitespace-nowrap">

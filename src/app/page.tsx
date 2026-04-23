@@ -603,40 +603,13 @@ function AppShell() {
     return events;
   }, [dbEvents, activeGenres, searchQuery, selectedDate, activeCity]);
 
-  const eventBatchSize = viewMode === 'landscape' ? 24 : 40;
+  const eventBatchSize = 20;
   const {
     visibleEvents,
     hasMore: hasMoreEvents,
     showMore: showMoreEvents,
   } = useProgressiveEvents(filteredEvents, eventBatchSize);
   const { saveStates, handleSaveStateChange } = useEventSaveStates(visibleEvents, user?.id);
-
-  useEffect(() => {
-    if (activeTab !== 'events' || !hasMoreEvents) return;
-
-    const sentinel = eventLoadMoreRef.current;
-    const scrollRoot = mainRef.current;
-    if (!sentinel || !scrollRoot || typeof IntersectionObserver === 'undefined') return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          showMoreEvents();
-        }
-      },
-      {
-        root: scrollRoot,
-        rootMargin: '720px 0px',
-        threshold: 0.01,
-      },
-    );
-
-    observer.observe(sentinel);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [activeTab, hasMoreEvents, showMoreEvents]);
 
   const handleVenueClick = useCallback((name: string) => openVenue(name), [openVenue]);
   const handleCloseVenue = useCallback(() => setVenueClosing(true), []);
@@ -834,7 +807,7 @@ function AppShell() {
       {activeTab === 'feed' && user && (
         <button
           onClick={() => setShowCreatePost(true)}
-          className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 xl:right-[22rem] z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-95 transition-all duration-200"
+          className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 xl:right-[22rem] z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all duration-200"
           title="Add Post"
         >
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -968,10 +941,10 @@ function AppShell() {
               </div>
 
               {/* Right: Actions */}
-              <div className="flex items-center gap-2 justify-end">
+              <div className="flex items-center gap-2.5 justify-end">
                 <button
                   onClick={() => setIsGlobalSearchOpen(true)}
-                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
                   title="Search"
                 >
                   <SearchIcon className="w-3.5 h-3.5" />
@@ -979,7 +952,7 @@ function AppShell() {
                 {(isAdmin || isOwner) && (
                   <Link 
                     href="/dashboard"
-                    className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                    className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
                     title="Dashboard"
                   >
                     <GridIcon className="w-3.5 h-3.5" />
@@ -987,14 +960,14 @@ function AppShell() {
                 )}
                 <button
                   onClick={() => setIsNotificationsOpen(true)}
-                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative"
+                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative"
                   title="Notifications"
                 >
                   <BellIcon className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleSettingsClick}
-                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
                   title="Settings"
                 >
                   <CogIcon className="w-3.5 h-3.5" />

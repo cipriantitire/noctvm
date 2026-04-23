@@ -279,7 +279,7 @@ export default function VenueManager() {
 
           <button 
             onClick={() => { setEditingVenue(null); setShowForm(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-95 whitespace-nowrap"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] whitespace-nowrap"
             title="Add Venue"
           >
             <PlusIcon className="w-3.5 h-3.5" />

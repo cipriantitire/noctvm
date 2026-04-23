@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Badge } from './Badge';
 
 export interface BottomNavItem {
@@ -28,6 +28,7 @@ const ACTIVE_OVERLAP = 10;
 export default function BottomNav({ items, className = '' }: BottomNavProps) {
   const activeIndex = items.findIndex((item) => item.isActive);
   const hasActiveItem = activeIndex >= 0;
+  const reducedMotion = useReducedMotion();
   const itemCount = Math.max(items.length, 1);
   const slotWidth = `calc((100% - ${((itemCount - 1) * BAR_GAP) + (BAR_PADDING * 2)}px) / ${itemCount})`;
   const cardStyle = { ['--slot-width' as string]: slotWidth } as React.CSSProperties;
@@ -67,7 +68,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
               className="absolute top-[3px] bottom-[3px] z-0 rounded-full border border-noctvm-violet/20 bg-noctvm-surface/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_8px_20px_rgba(0,0,0,0.2),0_0_18px_rgba(124,58,237,0.1)] backdrop-blur-md pointer-events-none"
               style={getTabGeometry(activeIndex)}
               aria-hidden="true"
-              transition={{
+              transition={reducedMotion ? { duration: 0 } : {
                 type: 'spring',
                 stiffness: 520,
                 damping: 40,

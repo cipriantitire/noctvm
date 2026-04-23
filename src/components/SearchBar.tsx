@@ -99,7 +99,7 @@ export default function SearchBar(props: SearchBarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <span className="flex h-[34px] items-center text-noctvm-caption text-noctvm-silver/50 font-mono">
+          <span className="flex h-[34px] items-center text-noctvm-caption text-noctvm-silver/50 font-mono tabular-nums">
             {resultCountLabel}
           </span>
         </div>

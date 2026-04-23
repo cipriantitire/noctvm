@@ -121,7 +121,7 @@ export default function ClaimModal({ venue, onSuccess, onCancel }: ClaimModalPro
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-2.5 bg-noctvm-violet rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
+              className="px-8 py-2.5 bg-noctvm-violet rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-[0.96] disabled:opacity-50 flex items-center gap-2"
             >
               {loading ? (
                 <>

@@ -4,7 +4,7 @@ import { EventsIcon, FeedIcon, PocketIcon, UserIcon, CogIcon, VenuesIcon, BellIc
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 
 type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
@@ -36,6 +36,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const { profile, user, isAdmin, isOwner } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   const profileLabel = user
     ? (profile?.username || profile?.display_name || 'Profile')
@@ -115,10 +116,10 @@ export default function Sidebar({
         <AnimatePresence>
           {isHovered && (
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+              initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.25, ease: [0.45, 0, 0.55, 1] }}
+              exit={reducedMotion ? { opacity: 0, y: 0 } : { opacity: 0, y: 20 }}
+              transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: [0.45, 0, 0.55, 1] }}
               className="flex flex-col-reverse gap-1 mb-1"
             >
               {/* Notifications */}

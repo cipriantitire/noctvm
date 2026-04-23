@@ -248,7 +248,7 @@ const TreeGridItem = ({
                       setReplyText('');
                     }}
                     disabled={!replyText.trim()}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-label font-bold text-noctvm-violet hover:text-white hover:scale-105 active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-label font-bold text-noctvm-violet hover:text-white hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
                   >
                     Post
                   </button>
@@ -354,7 +354,7 @@ export function MessageTree({
               }
             }}
             disabled={!rootText.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow-lg hover:scale-105 active:scale-95 disabled:opacity-30 disabled:scale-100 transition-all"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow-lg hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
           >
             Post
           </button>

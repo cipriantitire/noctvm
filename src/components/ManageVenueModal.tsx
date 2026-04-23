@@ -249,7 +249,7 @@ export default function ManageVenueModal({ isOpen, onClose, venueId }: ManageVen
                   </div>
                   <h4 className="text-sm font-bold text-white uppercase tracking-tight">Event Management Coming Soon</h4>
                   <p className="text-xs text-noctvm-silver/60 max-w-xs mx-auto">Soon you&apos;ll be able to schedule, edit and promote your events directly from here.</p>
-                  <button className="px-6 py-2.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
+                  <button className="px-6 py-2.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:scale-105 active:scale-[0.96] transition-all">
                     Go to Dashboard
                   </button>
                 </div>
