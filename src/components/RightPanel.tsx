@@ -99,13 +99,6 @@ export default function RightPanel({
 
   return (
     <aside className="hidden xl:block w-80 h-screen sticky top-0 rounded-l-2xl frosted-glass-subtle border-l border-white/5 p-6 overflow-hidden z-40">
-      <div className="flex items-center justify-end gap-2 mb-5 px-1">
-        <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse flex-shrink-0" />
-        <span className="text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest">
-          {activeCity === 'bucuresti' ? 'Bucharest' : 'Constanța'}
-        </span>
-      </div>
-
       <div className="rounded-xl overflow-hidden mb-6 border border-noctvm-border h-[200px]">
         <SidebarMap 
           venues={mapVenues} 
@@ -126,8 +119,11 @@ export default function RightPanel({
         <div className="absolute top-0 right-0 w-32 h-32 bg-noctvm-violet/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-noctvm-violet/10 transition-colors" />
         <div className="flex items-center gap-2 mb-3 relative z-10">
           <span className="w-2 h-2 rounded-full bg-noctvm-emerald live-pulse"></span>
-          <span className="text-noctvm-caption uppercase tracking-widest text-noctvm-emerald font-mono font-medium">Live Tonight</span>
-          <span className="ml-auto text-noctvm-caption text-noctvm-silver font-mono">{tonightEvents.length} events</span>
+          <span className="text-noctvm-caption tracking-widest font-mono font-medium">
+            <span className="text-noctvm-emerald">LIVE</span>
+            <span className="text-noctvm-silver"> in {activeCity === 'bucuresti' ? 'București' : 'Constanța'}</span>
+          </span>
+          <span className="ml-auto text-noctvm-caption text-noctvm-silver/80 font-mono">{tonightEvents.length} events</span>
         </div>
         {tonightEvents.length > 0 ? (
           <div ref={liveTonightRef} style={liveTonightMask} className="space-y-1 max-h-[220px] overflow-y-auto custom-scrollbar relative z-10 pr-1">

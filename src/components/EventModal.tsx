@@ -481,7 +481,11 @@ export default function EventModal({
               <div
                 ref={descriptionRef}
                 className="space-y-3 overflow-hidden transition-[max-height] duration-300 ease-out"
-                style={{ maxHeight: descExpanded ? 'none' : `${DESCRIPTION_COLLAPSED_MAX_HEIGHT}px` }}
+                style={{
+                  maxHeight: descExpanded ? 'none' : `${DESCRIPTION_COLLAPSED_MAX_HEIGHT}px`,
+                  maskImage: (!descExpanded && isDescriptionOverflowing) ? 'linear-gradient(to bottom, black 75%, transparent 100%)' : undefined,
+                  WebkitMaskImage: (!descExpanded && isDescriptionOverflowing) ? 'linear-gradient(to bottom, black 75%, transparent 100%)' : undefined,
+                }}
               >
                 {descriptionParagraphs.map((paragraph, index) => (
                   <p key={`${paragraph.slice(0, 24)}-${index}`} className="text-sm text-noctvm-silver/80 leading-relaxed whitespace-pre-line">

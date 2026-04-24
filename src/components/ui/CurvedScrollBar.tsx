@@ -238,7 +238,7 @@ export default function CurvedScrollBar({
   return (
     <div
       {...rest}
-      className={cn('relative flex min-h-0 w-full', className)}
+      className={cn('relative flex flex-col min-h-0 w-full', className)}
     >
       <div
         ref={viewportRef}

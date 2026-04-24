@@ -111,10 +111,11 @@ export default function MobileTopSection({
             </div>
           </div>
 
-          <LiveTonight 
-            events={tonightEvents} 
-            onEventClick={onEventClick} 
-            headerHidden={headerHidden} 
+          <LiveTonight
+            events={tonightEvents}
+            onEventClick={onEventClick}
+            headerHidden={headerHidden}
+            activeCity={activeCity}
           />
         </>
       )}

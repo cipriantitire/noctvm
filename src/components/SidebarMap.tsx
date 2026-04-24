@@ -41,17 +41,23 @@ const Popup = dynamic(
   { ssr: false }
 );
 
-const MapViewUpdater = ({ center, useMap }: { center: [number, number], useMap: any }) => {
+const MapViewUpdater = ({ center, venues, useMap }: { center: [number, number], venues: Venue[], useMap: any }) => {
   const map = useMap();
   useEffect(() => {
-    if (map) {
+    if (!map) return;
+    const coords = venues
+      .filter((v) => v.lat && v.lng)
+      .map((v) => [v.lat, v.lng] as [number, number]);
+    if (coords.length > 0) {
+      map.fitBounds(coords, { padding: [20, 20], maxZoom: 14, animate: true });
+    } else {
       map.setView(center, 12, { animate: true });
     }
-  }, [map, center]);
+  }, [map, center, venues]);
   return null;
 };
 
-const MapController = ({ center }: { center: [number, number] }) => {
+const MapController = ({ center, venues }: { center: [number, number], venues: Venue[] }) => {
   const [useMapHook, setUseMapHook] = useState<any>(null);
 
   useEffect(() => {
@@ -60,7 +66,7 @@ const MapController = ({ center }: { center: [number, number] }) => {
     });
   }, []);
 
-  return useMapHook ? <MapViewUpdater center={center} useMap={useMapHook} /> : null;
+  return useMapHook ? <MapViewUpdater center={center} venues={venues} useMap={useMapHook} /> : null;
 };
 
 export default function SidebarMap({ 
@@ -122,7 +128,7 @@ export default function SidebarMap({
           <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full border border-noctvm-violet/10 radar-pulse stagger-2" />
         </div>
 
-        <MapController center={center} />
+        <MapController center={center} venues={venues} />
 
         {venues.map((venue) => {
           const venueEvents = isEventsMode ? events.filter((event) => event.venue === venue.name) : [];

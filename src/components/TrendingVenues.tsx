@@ -28,7 +28,7 @@ export default function TrendingVenues({
       <div className="flex items-center gap-2 mb-2.5 relative z-10">
         <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse" />
         <span className="text-noctvm-label font-semibold text-noctvm-emerald uppercase tracking-wider font-mono">Trending Venues</span>
-        <span className="text-noctvm-caption text-noctvm-silver/50 ml-auto font-mono">{venues.length} venues</span>
+        <span className="text-noctvm-caption text-noctvm-silver/80 ml-auto font-mono">{venues.length} venues</span>
       </div>
       <div ref={ref} style={maskStyle} className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
         {venues.map(venue => {
@@ -51,8 +51,8 @@ export default function TrendingVenues({
                   {venue.name.charAt(0)}
                 </span>
               </div>
-              <span className="text-noctvm-micro text-noctvm-silver/60 text-center line-clamp-1 w-full font-medium transition-colors group-hover:text-white">{venue.name}</span>
-              <span className="text-noctvm-xs text-noctvm-silver/40 font-mono -mt-1 group-hover:text-noctvm-violet transition-colors">{venue.count} events</span>
+              <span className="text-xs text-noctvm-silver/70 text-center line-clamp-1 w-full font-medium transition-colors group-hover:text-white">{venue.name}</span>
+              <span className="text-noctvm-caption text-noctvm-silver/50 font-mono -mt-1 group-hover:text-noctvm-violet transition-colors">{venue.count} events</span>
             </button>
           );
         })}

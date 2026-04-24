@@ -126,17 +126,19 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
   const pastEvents = venueEvents.filter(e => e.date < today);
 
   const logoSrc = getVenueLogo(venueName);
-  const { ref: scrollRef, maskStyle: galleryMaskStyle } = useScrollFade('x');
+  const { ref: galleryScrollRef, maskStyle: galleryMaskStyle } = useScrollFade('x');
   const venueScrollbarCornerRadius = isWindowedModal
     ? VENUE_SCROLLBAR_CORNER_RADIUS_WINDOW
     : VENUE_SCROLLBAR_CORNER_RADIUS_FULLSCREEN;
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
+  const scrollGallery = (direction: 'left' | 'right') => {
+    const el = galleryScrollRef.current;
+    if (!el) return;
+    const cardWidth = el.firstElementChild?.getBoundingClientRect().width ?? el.clientWidth * 0.48;
+    const gap = 20; // matches gap-5
+    const scrollAmount = cardWidth + gap;
+    const target = direction === 'left' ? el.scrollLeft - scrollAmount : el.scrollLeft + scrollAmount;
+    el.scrollTo({ left: target, behavior: 'smooth' });
   };
 
   return (
@@ -212,16 +214,16 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-noctvm-caption font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
           <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
-            <button 
-              onClick={() => scroll('left')}
+            <button
+              onClick={() => scrollGallery('left')}
               title="Scroll left"
               className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-[0.96]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
             <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
-            <button 
-              onClick={() => scroll('right')}
+            <button
+              onClick={() => scrollGallery('right')}
               title="Scroll right"
               className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-[0.96]"
             >
@@ -229,14 +231,14 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
             </button>
           </div>
         </div>
-        
+
         <div
-          ref={scrollRef}
+          ref={galleryScrollRef}
           style={galleryMaskStyle}
-          className="flex gap-5 overflow-x-auto py-4 pb-6 scrollbar-hide px-4 snap-x snap-mandatory"
+          className="flex gap-5 overflow-x-auto py-4 pb-6 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory"
         >
           {GALLERY_THEMES.map((theme) => (
-            <div key={theme.label} className="snap-start flex-shrink-0 w-full sm:w-[48%] lg:w-[23.5%]">
+            <div key={theme.label} className="snap-start flex-shrink-0 w-[85vw] sm:w-[48%] lg:w-[32%]">
               <div className={`aspect-video rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.96] cursor-pointer shadow-xl relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="text-center group-hover:transform group-hover:scale-110 transition-transform relative z-10">

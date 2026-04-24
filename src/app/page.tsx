@@ -53,7 +53,6 @@ import PocketPage from '@/components/PocketPage';
 import { useAuth } from '@/contexts/AuthContext';
 import ManageVenueModal from '@/components/ManageVenueModal';
 import type { Profile } from '@/lib/supabase';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/DropdownMenu';
 
 type TabType = 'events' | 'feed' | 'venues' | 'pocket' | 'profile';
 
@@ -860,7 +859,7 @@ function AppShell() {
         <main ref={mainRef} className={`flex-1 min-h-screen ${isProfileSettingsView ? 'overflow-hidden' : 'overflow-y-auto mobile-scrollbar-hide'}`}>
           {/* Mobile header */}
           <header
-            className="lg:hidden sticky top-0 z-40 liquid-glass-card liquid-glass-nav cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3.5"
+            className="lg:hidden sticky top-0 z-40 liquid-glass-card liquid-glass-nav cursor-default overflow-hidden rounded-b-[36px] border-x border-b border-t-0 px-4 py-3"
             style={{
               position: 'sticky',
               top: 0,
@@ -873,7 +872,7 @@ function AppShell() {
             <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_0%,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_20%,rgba(255,255,255,0)_60%)] pointer-events-none" />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_18%,rgba(0,0,0,0.18)_100%)] pointer-events-none" />
 
-            <div className="relative z-10 grid grid-cols-3 items-center">
+            <div className="relative z-10 flex items-center justify-between">
               {/* Left: Logo */}
               <div className="flex items-center justify-start min-w-0 overflow-hidden">
                 <Image
@@ -882,101 +881,47 @@ function AppShell() {
                   width={200}
                   height={48}
                   priority
-                  className="h-7 w-auto max-w-[140px] object-contain sm:max-w-[160px]"
+                  className="h-6 w-auto max-w-[120px] object-contain sm:max-w-[140px]"
                 />
-              </div>
-              
-              {/* Middle: City Selector */}
-              <div className="flex justify-center">
-                <div className="flex items-center gap-2 opacity-80">
-                  <span
-                    aria-hidden="true"
-                    className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald live-pulse shadow-[0_0_10px_rgba(16,185,129,0.6)] flex-shrink-0"
-                  />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline-flex h-7 items-center gap-1 bg-transparent px-0 text-xs text-noctvm-silver font-mono capitalize leading-none transition-colors hover:text-white focus:outline-none"
-                        aria-label="Select City"
-                        title="Select City"
-                      >
-                        <span>{activeCity === 'bucuresti' ? 'București' : 'Constanța'}</span>
-                        <svg className="size-2.5 text-noctvm-silver/70 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" sideOffset={8} className="w-56">
-                      <DropdownMenuItem
-                        onClick={() => setActiveCity('bucuresti')}
-                        className={activeCity === 'bucuresti' ? 'bg-white/10 text-white' : ''}
-                      >
-                        <span>București</span>
-                        <span className="ml-auto flex w-4 items-center justify-center">
-                          {activeCity === 'bucuresti' ? (
-                            <svg className="size-4 text-noctvm-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M20 6L9 17l-5-5" />
-                            </svg>
-                          ) : null}
-                        </span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => setActiveCity('constanta')}
-                        className={activeCity === 'constanta' ? 'bg-white/10 text-white' : ''}
-                      >
-                        <span>Constanța</span>
-                        <span className="ml-auto flex w-4 items-center justify-center">
-                          {activeCity === 'constanta' ? (
-                            <svg className="size-4 text-noctvm-violet" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M20 6L9 17l-5-5" />
-                            </svg>
-                          ) : null}
-                        </span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
               </div>
 
               {/* Right: Actions */}
-              <div className="flex items-center gap-2.5 justify-end">
+              <div className="flex items-center gap-2.5 justify-end flex-shrink-0">
                 {(isAdmin || isOwner) && (
                   <Link
                     href="/dashboard"
-                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                    className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
                     title="Dashboard"
                   >
-                    <GridIcon className="w-[18px] h-[18px]" />
+                    <GridIcon className="w-4 h-4" />
                   </Link>
                 )}
                 <button
                   onClick={() => setIsGlobalSearchOpen(true)}
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
                   title="Search"
                 >
-                  <SearchIcon className="w-[18px] h-[18px]" />
+                  <SearchIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setIsNotificationsOpen(true)}
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative flex-shrink-0"
                   title="Notifications"
                 >
-                  <BellIcon className="w-[18px] h-[18px]" />
+                  <BellIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleSettingsClick}
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
                   title="Settings"
                 >
-                  <CogIcon className="w-[18px] h-[18px]" />
+                  <CogIcon className="w-4 h-4" />
                 </button>
               </div>
             </div>
           </header>
 
-          <div className={`w-full h-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6 pb-24 lg:pb-6 ${isProfileSettingsView ? 'overflow-hidden' : ''}`}>
+          <div className={`w-full h-full max-w-[1800px] mx-auto px-4 lg:px-8 py-4 lg:py-6 pb-24 lg:pb-6 ${isProfileSettingsView ? 'overflow-hidden' : ''}`}>
 
             {/* ── Events Tab ──────────────────────────────────── */}
             {activeTab === 'events' && (
