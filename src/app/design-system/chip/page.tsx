@@ -12,7 +12,7 @@ export default function ChipPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Chip</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Chip</h1>
         <p className="text-noctvm-silver">Tags, filters, and removable labels.</p>
       </div>
       <div className="space-y-4">

@@ -7,7 +7,7 @@ export default function PopoverPage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Popover</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Popover</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Floating content anchored to a trigger. Portal-rendered, Radix-powered.</p>
       </div>
 
@@ -17,7 +17,7 @@ export default function PopoverPage() {
           <Popover>
             <PopoverTrigger asChild><Button variant="secondary">Open Popover</Button></PopoverTrigger>
             <PopoverContent>
-              <p className="text-sm text-white font-medium mb-1">Quick Info</p>
+              <p className="text-sm text-foreground font-medium mb-1">Quick Info</p>
               <p className="text-xs text-noctvm-silver">This popover is glass-styled, portal-rendered, and accessible.</p>
             </PopoverContent>
           </Popover>
@@ -46,7 +46,7 @@ export default function PopoverPage() {
             <PopoverContent className="w-56">
               <div className="space-y-1">
                 {['Save to list', 'Share event', 'Get directions', 'Report'].map(item => (
-                  <button key={item} className="w-full text-left px-2 py-1.5 text-sm text-noctvm-silver rounded hover:bg-white/10 hover:text-white transition-colors">{item}</button>
+                  <button key={item} className="w-full text-left px-2 py-1.5 text-sm text-noctvm-silver rounded hover:bg-white/10 hover:text-foreground transition-colors">{item}</button>
                 ))}
               </div>
             </PopoverContent>

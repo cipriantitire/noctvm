@@ -14,7 +14,7 @@ export default function AvatarGroupPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Avatar Group</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Avatar Group</h1>
         <p className="text-noctvm-silver">Overlapping stack for multiple users.</p>
       </div>
       <div className="space-y-6">

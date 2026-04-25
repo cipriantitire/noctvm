@@ -80,8 +80,8 @@ export default function Sidebar({
             onClick={() => onTabChange(tab)}
             className={`w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 ${
               activeTab === tab
-                ? 'bg-noctvm-violet/10 text-white'
-                : 'text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
+                ? 'bg-noctvm-violet/10 text-foreground'
+                : 'text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface'
             }`}
           >
             <Icon className={`w-6 h-6 flex-shrink-0 ${activeTab === tab ? 'scale-110' : ''}`} />
@@ -98,15 +98,15 @@ export default function Sidebar({
           onClick={() => onTabChange('profile')}
           className={`w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-all duration-150 z-20 ${
             activeTab === 'profile'
-              ? 'text-white group-hover/sidebar:bg-noctvm-violet/10 group-hover/sidebar:ring-1 group-hover/sidebar:ring-noctvm-violet/20 ring-1 ring-transparent'
-              : 'bg-noctvm-black text-noctvm-silver hover:text-white hover:bg-noctvm-surface'
+              ? 'text-foreground group-hover/sidebar:bg-noctvm-violet/10 group-hover/sidebar:ring-1 group-hover/sidebar:ring-noctvm-violet/20 ring-1 ring-transparent'
+              : 'bg-noctvm-black text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface'
           }`}
         >
           <div className={`w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 ring-2 overflow-hidden transition-all duration-200 ${activeTab === 'profile' ? 'ring-noctvm-violet/70 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'ring-noctvm-border'}`}>
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (
-              <UserIcon className="w-4 h-4 text-white" />
+              <UserIcon className="w-4 h-4 text-foreground" />
             )}
           </div>
           <span className={labelCls + ' truncate'}>{profileLabel}</span>
@@ -125,7 +125,7 @@ export default function Sidebar({
               {/* Notifications */}
               <button
                 onClick={onNotificationsClick}
-                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface"
               >
                 <BellIcon className="w-6 h-6 flex-shrink-0" />
                 <span className={labelCls}>Notifications</span>
@@ -134,7 +134,7 @@ export default function Sidebar({
               {/* Search */}
               <button
                 onClick={onSearchClick}
-                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface"
               >
                 <SearchIcon className="w-6 h-6 flex-shrink-0" />
                 <span className={labelCls}>Search</span>
@@ -143,7 +143,7 @@ export default function Sidebar({
               {/* Settings */}
               <button
                 onClick={onSettingsClick}
-                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface"
+                className="w-full flex items-center justify-start gap-4 pl-[10px] pr-3 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface"
               >
                 <CogIcon className="w-6 h-6 flex-shrink-0" />
                 <span className={labelCls}>Settings</span>

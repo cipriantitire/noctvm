@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/Sheet';
 
 interface LikedUser {
   id: string;
@@ -13,13 +19,13 @@ interface LikedUser {
   is_following: boolean;
 }
 
-interface LikesModalProps {
+interface LikesSheetProps {
   postId: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps) {
+export default function LikesSheet({ postId, isOpen, onClose }: LikesSheetProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [likes, setLikes] = useState<LikedUser[]>([]);
@@ -133,23 +139,14 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
     router.push(getProfileHref(username, displayName));
   }, [getProfileHref, onClose, router]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-viewer flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative w-full max-w-sm bg-noctvm-black border border-noctvm-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
-        <div className="p-4 border-b border-noctvm-border flex items-center justify-between">
-          <h3 className="font-heading font-bold text-white text-base">Likes</h3>
-          <button onClick={onClose} className="p-1 hover:bg-white/5 rounded-full transition-colors" title="Close likes modal" aria-label="Close likes modal">
-             <svg className="w-5 h-5 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-             </svg>
-          </button>
-        </div>
+    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <SheetContent side="bottom" className="h-[70vh] bg-noctvm-black border-noctvm-border p-0">
+        <SheetHeader className="p-4 border-b border-noctvm-border">
+          <SheetTitle className="font-heading font-bold text-base">Likes</SheetTitle>
+        </SheetHeader>
         
-        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+        <div className="overflow-y-auto custom-scrollbar flex-1">
           {loading ? (
             <div className="p-8 text-center">
               <div className="w-6 h-6 border-2 border-noctvm-violet border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -181,7 +178,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold leading-tight text-white hover:text-noctvm-violet transition-colors">{l.display_name}</p>
+                      <p className="truncate text-sm font-semibold leading-tight text-foreground hover:text-noctvm-violet transition-colors">{l.display_name}</p>
                       <p className="truncate text-xs text-noctvm-silver">@{l.username}</p>
                     </div>
                   </button>
@@ -193,8 +190,8 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
                       disabled={!!updatingIds[l.id]}
                       className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-60 ${
                         l.is_following 
-                          ? 'bg-noctvm-surface text-white border border-noctvm-border hover:bg-noctvm-surface/70' 
-                          : 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
+                          ? 'bg-noctvm-surface text-foreground border border-noctvm-border hover:bg-noctvm-surface/70' 
+                          : 'bg-noctvm-violet text-foreground hover:bg-noctvm-violet/90'
                       }`}
                     >
                       {updatingIds[l.id] ? '...' : (l.is_following ? 'Following' : 'Follow')}
@@ -205,7 +202,7 @@ export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps)
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

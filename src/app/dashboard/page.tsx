@@ -54,7 +54,7 @@ function DashboardPage() {
           {/* Quick Actions */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-sm font-bold text-white tracking-tight uppercase flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground tracking-tight uppercase flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-noctvm-violet"></span>
                 Quick Actions
               </h3>
@@ -109,7 +109,7 @@ function DashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 group-hover:bg-white/20">
-                    <HubIcon className="w-6 h-6 text-white" />
+                    <HubIcon className="w-6 h-6 text-foreground" />
                   </div>
                   <span className="text-noctvm-caption font-bold tracking-widest uppercase mb-1">Automate</span>
                   <span className="text-noctvm-xs text-noctvm-silver/40 uppercase">Run scrapers</span>
@@ -121,7 +121,7 @@ function DashboardPage() {
           {/* Recent Activity */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-sm font-bold text-white tracking-tight uppercase flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground tracking-tight uppercase flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald"></span>
                 Activity Feed
               </h3>
@@ -152,7 +152,7 @@ function DashboardPage() {
                   <div key={activity.id || i} className="flex items-center gap-5 p-5 hover:bg-white/5 transition-all duration-300 relative z-10 group/item">
                     <div className={`w-2 h-2 rounded-full ${color} ${i === 0 ? 'shadow-[0_0_8px_rgba(139,92,246,0.8)]' : ''}`}></div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate group-hover/item:text-noctvm-violet transition-colors">
+                      <p className="text-sm font-bold text-foreground truncate group-hover/item:text-noctvm-violet transition-colors">
                         {activity.message}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
@@ -168,7 +168,7 @@ function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right flex flex-col items-end gap-1">
-                      <span className="text-noctvm-caption text-white/40 font-mono">
+                      <span className="text-noctvm-caption text-foreground/40 font-mono">
                         {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <span className="text-noctvm-xs text-noctvm-silver/20 uppercase font-mono tracking-tighter">
@@ -188,7 +188,7 @@ function DashboardPage() {
 
         {/* Modals for creation */}
         {showVenueForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-noctvm-black/80 backdrop-blur-md animate-fade-in">
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <VenueForm 
                 onSuccess={() => { setShowVenueForm(false); fetchData(); }} 
@@ -199,7 +199,7 @@ function DashboardPage() {
         )}
 
         {showEventForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-noctvm-black/80 backdrop-blur-md animate-fade-in">
             <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <EventForm 
                 venues={ownedVenues}

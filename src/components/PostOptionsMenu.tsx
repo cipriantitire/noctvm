@@ -78,7 +78,7 @@ export default function PostOptionsMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="text-noctvm-silver hover:text-white p-1"
+          className="text-noctvm-silver hover:text-foreground p-1"
           title="Options"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

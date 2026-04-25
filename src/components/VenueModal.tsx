@@ -147,7 +147,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
       <button
         onClick={onBack}
         title="Go back"
-        className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-black/80 transition-all mb-6"
+        className="w-9 h-9 rounded-full bg-noctvm-black/60 backdrop-blur-sm border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-foreground hover:bg-noctvm-black/80 transition-all mb-6"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 18l-6-6 6-6" />
@@ -172,7 +172,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
         </div>
         <div className="flex-1 pt-1">
           <div className="flex items-center gap-2 lg:gap-3 flex-wrap">
-            <h1 className="text-2xl lg:text-4xl font-bold text-white leading-tight">{venueName}</h1>
+            <h1 className="text-2xl lg:text-4xl font-bold text-foreground leading-tight">{venueName}</h1>
             {venue?.badge && venue.badge !== 'none' && (
               <VerifiedBadge type={venue.badge} size="lg" className="translate-y-0.5" />
             )}
@@ -192,11 +192,11 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-10">
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
-          <p className="text-xl font-bold text-white">{venueEvents.length}</p>
+          <p className="text-xl font-bold text-foreground">{venueEvents.length}</p>
           <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Events</p>
         </div>
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
-          <p className="text-xl font-bold text-white">{info.capacity}</p>
+          <p className="text-xl font-bold text-foreground">{info.capacity}</p>
           <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Capacity</p>
         </div>
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
@@ -212,12 +212,12 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
       {/* Gallery */}
       <div className="mb-10 relative group/gallery">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-noctvm-caption font-bold text-white uppercase tracking-[0.3em] opacity-30">Gallery</h3>
+          <h3 className="text-noctvm-caption font-bold text-foreground uppercase tracking-[0.3em] opacity-30">Gallery</h3>
           <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
             <button
               onClick={() => scrollGallery('left')}
               title="Scroll left"
-              className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-[0.96]"
+              className="p-2 rounded-lg text-noctvm-silver hover:text-foreground hover:bg-noctvm-violet transition-all active:scale-[0.96]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
@@ -225,7 +225,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
             <button
               onClick={() => scrollGallery('right')}
               title="Scroll right"
-              className="p-2 rounded-lg text-noctvm-silver hover:text-white hover:bg-noctvm-violet transition-all active:scale-[0.96]"
+              className="p-2 rounded-lg text-noctvm-silver hover:text-foreground hover:bg-noctvm-violet transition-all active:scale-[0.96]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </button>
@@ -240,10 +240,10 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
           {GALLERY_THEMES.map((theme) => (
             <div key={theme.label} className="snap-start flex-shrink-0 w-[85vw] sm:w-[48%] lg:w-[32%]">
               <div className={`aspect-video rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.96] cursor-pointer shadow-xl relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-noctvm-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="text-center group-hover:transform group-hover:scale-110 transition-transform relative z-10">
-                  <span className="text-5xl font-bold text-white/10 group-hover:text-white/30 transition-colors uppercase tracking-tighter">{theme.icon}</span>
-                  <p className="text-noctvm-caption font-bold text-white/30 uppercase tracking-[0.2em] mt-3">{theme.label}</p>
+                  <span className="text-5xl font-bold text-foreground/10 group-hover:text-foreground/30 transition-colors uppercase tracking-tighter">{theme.icon}</span>
+                  <p className="text-noctvm-caption font-bold text-foreground/30 uppercase tracking-[0.2em] mt-3">{theme.label}</p>
                 </div>
               </div>
             </div>
@@ -268,19 +268,19 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
       {upcomingEvents.length > 0 && (
         <div className="mb-10">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-sm font-bold text-white uppercase tracking-widest">Upcoming Events</h3>
+            <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Upcoming Events</h3>
             <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
               <button
                 onClick={() => setViewMode('portrait')}
                 title="Portrait view"
-                className={`p-2 rounded-lg transition-all ${viewMode === 'portrait' ? 'bg-noctvm-violet text-white shadow-xl scale-110' : 'text-noctvm-silver hover:text-white'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'portrait' ? 'bg-noctvm-violet text-foreground shadow-xl scale-110' : 'text-noctvm-silver hover:text-foreground'}`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
               </button>
               <button
                 onClick={() => setViewMode('landscape')}
                 title="Landscape view"
-                className={`p-2 rounded-lg transition-all ${viewMode === 'landscape' ? 'bg-noctvm-violet text-white shadow-xl scale-110' : 'text-noctvm-silver hover:text-white'}`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'landscape' ? 'bg-noctvm-violet text-foreground shadow-xl scale-110' : 'text-noctvm-silver hover:text-foreground'}`}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
               </button>

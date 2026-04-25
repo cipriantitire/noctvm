@@ -86,7 +86,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                   className={`relative z-10 flex h-full w-full flex-col items-center justify-center gap-1 text-center transition-[color,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                     isActive
                       ? `${activeTintClass} drop-shadow-[0_0_4px_rgba(124,58,237,0.12)]`
-                      : 'text-noctvm-silver/70 hover:text-white'
+                      : 'text-noctvm-silver/70 hover:text-foreground'
                   }`}
                 >
                   <div
@@ -99,7 +99,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                       <div className="absolute -right-1.5 -top-1.5">
                         <Badge
                           variant="custom"
-                          className="flex h-4 min-w-[16px] items-center justify-center rounded-full border border-noctvm-black bg-noctvm-violet px-1 py-0 text-noctvm-caption text-white"
+                          className="flex h-4 min-w-[16px] items-center justify-center rounded-full border border-noctvm-black bg-noctvm-violet px-1 py-0 text-noctvm-caption text-foreground"
                         >
                           {item.badge}
                         </Badge>
@@ -108,7 +108,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                   </div>
                   <span
                     className={`relative z-10 max-w-full truncate text-noctvm-sm leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
-                      isActive ? activeTintClass : 'text-current group-hover:text-white'
+                      isActive ? activeTintClass : 'text-current group-hover:text-foreground'
                     }`}
                   >
                     {item.label}

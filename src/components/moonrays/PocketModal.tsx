@@ -22,7 +22,7 @@ export const PocketModal = ({ isOpen, onClose, title, children }: PocketModalPro
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md z-modal"
+            className="fixed inset-0 bg-noctvm-black/80 backdrop-blur-md z-modal"
           />
           
           {/* Modal Container */}
@@ -35,7 +35,7 @@ export const PocketModal = ({ isOpen, onClose, title, children }: PocketModalPro
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02]">
-              <h3 className="font-heading text-lg font-bold text-white uppercase tracking-wider">{title}</h3>
+              <h3 className="font-heading text-lg font-bold text-foreground uppercase tracking-wider">{title}</h3>
               <button 
                 onClick={onClose}
                 aria-label="Close modal"

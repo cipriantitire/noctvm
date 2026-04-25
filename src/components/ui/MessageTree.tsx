@@ -87,7 +87,7 @@ const TreeGridItem = ({
         </div>
         {/* Meta text goes into the 1fr column. WE ADD ml-3 HERE, to push the text away from the Avatar! */}
         <div className="min-w-0 ml-3 flex items-center h-[24px]">
-          <span className="font-bold text-xs text-white tracking-tight truncate group-hover/header:underline decoration-white/30">
+          <span className="font-bold text-xs text-foreground tracking-tight truncate group-hover/header:underline decoration-white/30">
             {node.authorHandle || node.authorName}
           </span>
           {node.authorBadge && (
@@ -129,7 +129,7 @@ const TreeGridItem = ({
                     type="text"
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full bg-noctvm-surface border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-noctvm-violet/40 transition-all shadow-inner"
+                    className="w-full bg-noctvm-surface border border-white/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:border-noctvm-violet/40 transition-all shadow-inner"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && onEdit) {
@@ -139,19 +139,19 @@ const TreeGridItem = ({
                     }}
                   />
                   <div className="flex justify-end gap-3 px-2">
-                    <button onClick={() => { setEditingId(null); setEditContent(''); }} className="text-noctvm-caption text-noctvm-silver hover:text-white uppercase font-black tracking-widest transition-colors">Cancel</button>
+                    <button onClick={() => { setEditingId(null); setEditContent(''); }} className="text-noctvm-caption text-noctvm-silver hover:text-foreground uppercase font-black tracking-widest transition-colors">Cancel</button>
                     <button onClick={() => { 
                         if (onEdit) onEdit(node.id, editContent); 
                         setEditingId(null); 
                       }} 
-                      className="text-noctvm-caption text-noctvm-violet hover:text-white uppercase font-black tracking-widest transition-colors">
+                      className="text-noctvm-caption text-noctvm-violet hover:text-foreground uppercase font-black tracking-widest transition-colors">
                       Save
                     </button>
                   </div>
                 </div>
               ) : (
                 <div 
-                  className="text-xs text-white/80 leading-relaxed pr-8 relative group/body"
+                  className="text-xs text-foreground/80 leading-relaxed pr-8 relative group/body"
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                 >
@@ -162,7 +162,7 @@ const TreeGridItem = ({
                     <div className={`absolute right-0 top-0 group/menu transition-all z-20 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                       <button 
                         onClick={() => setShowOptions(!showOptions)}
-                        className={`p-1 transition-colors ${showOptions ? 'text-white' : 'text-noctvm-silver/40 hover:text-white'}`}
+                        className={`p-1 transition-colors ${showOptions ? 'text-foreground' : 'text-noctvm-silver/40 hover:text-foreground'}`}
                         title="Options"
                       >
                         <svg className="w-5 h-5 font-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 12h.01M12 12h.01M19 12h.01" /></svg>
@@ -173,7 +173,7 @@ const TreeGridItem = ({
                           {onEdit && (
                             <button 
                               onClick={() => { setEditingId(node.id); setEditContent(node.content); setShowOptions(false); }} 
-                              className="px-4 py-3 text-xs text-left text-white hover:bg-white/5 font-black uppercase tracking-wider transition-colors border-b border-white/5"
+                              className="px-4 py-3 text-xs text-left text-foreground hover:bg-white/5 font-black uppercase tracking-wider transition-colors border-b border-white/5"
                             >
                               Edit
                             </button>
@@ -214,7 +214,7 @@ const TreeGridItem = ({
                   {onReply && (
                     <button 
                       onClick={() => setReplyingTo(replyingTo === node.id ? null : node.id)}
-                      className={`text-noctvm-label font-bold transition-all flex items-center gap-1.5 ${replyingTo === node.id ? 'text-noctvm-violet scale-105' : 'text-noctvm-silver/60 hover:text-white'}`}
+                      className={`text-noctvm-label font-bold transition-all flex items-center gap-1.5 ${replyingTo === node.id ? 'text-noctvm-violet scale-105' : 'text-noctvm-silver/60 hover:text-foreground'}`}
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                       Reply
@@ -232,7 +232,7 @@ const TreeGridItem = ({
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder={`Reply to ${node.authorHandle || node.authorName}...`}
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-2 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 pr-16 transition-all shadow-inner"
+                    className="w-full bg-noctvm-black/40 border border-white/5 rounded-2xl px-4 py-2 text-xs text-foreground focus:outline-none focus:border-noctvm-violet/40 pr-16 transition-all shadow-inner"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && onReply) {
                         onReply(node.id, replyText);
@@ -248,7 +248,7 @@ const TreeGridItem = ({
                       setReplyText('');
                     }}
                     disabled={!replyText.trim()}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-label font-bold text-noctvm-violet hover:text-white hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-label font-bold text-noctvm-violet hover:text-foreground hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
                   >
                     Post
                   </button>
@@ -338,7 +338,7 @@ export function MessageTree({
             value={rootText}
             onChange={(e) => setRootText(e.target.value)}
             placeholder="Write a message..."
-            className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-noctvm-violet/40 focus:border-noctvm-violet/40 transition-all pr-24"
+            className="w-full bg-noctvm-surface border border-noctvm-border rounded-xl px-5 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-noctvm-violet/40 focus:border-noctvm-violet/40 transition-all pr-24"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && onReply && rootText.trim()) {
                 onReply('root', rootText);

@@ -173,7 +173,7 @@ function MusicLinkRow({ link }: { link: { type: string; url: string; label?: str
       <div className="w-[30px] h-[30px] rounded-[9px] bg-[#7C3AED25] border border-[#7C3AED40] flex items-center justify-center shrink-0">
         <Music2 className="w-3.5 h-3.5 text-noctvm-violet" />
       </div>
-      <span className="font-mono text-noctvm-caption text-white">{label}</span>
+      <span className="font-mono text-noctvm-caption text-foreground">{label}</span>
     </a>
   );
 }
@@ -819,7 +819,7 @@ export default function UserProfilePage({
           <div className="flex-1 min-w-0 flex items-start justify-between gap-3 pt-1">
             <div className="min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-2xl sm:text-3xl font-heading font-semibold text-white tracking-tight leading-none">
+                <h2 className="text-2xl sm:text-3xl font-heading font-semibold text-foreground tracking-tight leading-none">
                   {profileName}
                 </h2>
                 {targetProfile.badge && targetProfile.badge !== 'none' && (
@@ -852,7 +852,7 @@ export default function UserProfilePage({
               <button
                 onClick={() => setIsSavedEventsOpen(true)}
                 type="button"
-                className="xl:hidden shrink-0 p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
+                className="xl:hidden shrink-0 p-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-foreground hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative group"
                 title="View Agenda"
               >
                 <CalendarIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -921,7 +921,7 @@ export default function UserProfilePage({
                   <div className="w-[30px] h-[30px] rounded-[9px] bg-[#111111] border border-[#1A1A1A] flex items-center justify-center shrink-0">
                     <Icon className="w-3.5 h-3.5 text-noctvm-silver" />
                   </div>
-                  <span className="font-mono text-noctvm-caption text-white">{label}</span>
+                  <span className="font-mono text-noctvm-caption text-foreground">{label}</span>
                 </a>
               );
             })}
@@ -951,7 +951,7 @@ export default function UserProfilePage({
             <button
               type="button"
               onClick={onEditProfileClick}
-              className="flex-1 py-3 rounded-2xl border border-white/10 bg-white/[0.05] text-noctvm-label font-black uppercase tracking-wider text-white transition-all hover:border-white/15 hover:bg-white/[0.08] active:scale-[0.96]"
+              className="flex-1 py-3 rounded-2xl border border-white/10 bg-white/[0.05] text-noctvm-label font-black uppercase tracking-wider text-foreground transition-all hover:border-white/15 hover:bg-white/[0.08] active:scale-[0.96]"
             >
               Edit Profile
             </button>
@@ -960,7 +960,7 @@ export default function UserProfilePage({
               type="button"
               onClick={() => void handleToggleFollow()}
               disabled={followLoading}
-              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-[0.96] disabled:opacity-60"
+              className="flex-1 py-3 rounded-2xl bg-noctvm-violet text-foreground text-noctvm-label font-black uppercase tracking-wider hover:bg-noctvm-violet/90 transition-all active:scale-[0.96] disabled:opacity-60"
             >
               {followLoading ? '...' : (isFollowingTarget ? 'Following' : 'Follow')}
             </button>
@@ -973,8 +973,8 @@ export default function UserProfilePage({
                 title={shareToast ? 'Profile shared' : 'Profile options'}
                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-[0.96] ${
                   shareToast
-                    ? 'border-noctvm-violet/30 bg-noctvm-violet/10 text-white'
-                    : 'border-noctvm-border bg-noctvm-surface text-white hover:bg-white/[0.06]'
+                    ? 'border-noctvm-violet/30 bg-noctvm-violet/10 text-foreground'
+                    : 'border-noctvm-border bg-noctvm-surface text-foreground hover:bg-white/[0.06]'
                 }`}
               >
                 <MoreHorizontal className="h-5 w-5" />
@@ -1034,7 +1034,7 @@ export default function UserProfilePage({
             
             <div className="space-y-3">
               {managedVenues.map((mv) => (
-                <div key={mv.venue_id} className="flex items-center justify-between p-3 rounded-lg bg-black/40 border border-noctvm-border/50 group hover:border-noctvm-violet/40 transition-colors">
+                <div key={mv.venue_id} className="flex items-center justify-between p-3 rounded-lg bg-noctvm-black/40 border border-noctvm-border/50 group hover:border-noctvm-violet/40 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-noctvm-surface overflow-hidden">
                       {mv.venues.image_url ? (
@@ -1044,14 +1044,14 @@ export default function UserProfilePage({
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white leading-tight">{mv.venues.name}</p>
+                      <p className="text-sm font-bold text-foreground leading-tight">{mv.venues.name}</p>
                       <p className="text-noctvm-caption text-noctvm-silver font-medium">{mv.role} • {mv.venues.city}</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => onManageVenue?.(mv.venue_id)}
-                    className="p-2 rounded-lg bg-noctvm-violet/10 border border-noctvm-violet/20 text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all"
+                    className="p-2 rounded-lg bg-noctvm-violet/10 border border-noctvm-violet/20 text-noctvm-violet hover:bg-noctvm-violet hover:text-foreground transition-all"
                     title="Manage Venue Settings"
                   >
                     <SettingsIcon className="w-4 h-4" />
@@ -1083,7 +1083,7 @@ export default function UserProfilePage({
                     {hl.cover_url ? (
                       <NextImage src={hl.cover_url} alt="" fill className="object-cover" unoptimized />
                     ) : (
-                      <span className="text-white text-lg font-bold">{hl.name[0].toUpperCase()}</span>
+                      <span className="text-foreground text-lg font-bold">{hl.name[0].toUpperCase()}</span>
                     )}
                   </div>
                 </div>
@@ -1092,7 +1092,7 @@ export default function UserProfilePage({
                  <button
                    type="button"
                    onClick={(e) => deleteHighlight(hl.id, e)}
-                   className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                   className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-noctvm-midnight border border-noctvm-border text-noctvm-silver opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-500 hover:text-foreground transition-all"
                    title="Delete Highlight"
                  >
                    <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 18L18 6M6 6l12 12" /></svg>
@@ -1114,7 +1114,7 @@ export default function UserProfilePage({
               aria-label={key}
               onClick={() => setActiveTab(key)}
               className={`flex-1 flex justify-center py-3 border-b-2 transition-all ${
-                activeTab === key ? 'border-white text-white' : 'border-transparent text-noctvm-silver'
+                activeTab === key ? 'border-white text-foreground' : 'border-transparent text-noctvm-silver'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -1171,7 +1171,7 @@ export default function UserProfilePage({
                   <div className="w-full h-full bg-noctvm-midnight flex items-center justify-center p-2"><span className="text-noctvm-caption text-noctvm-emerald/40 text-center line-clamp-3">{post.caption}</span></div>
                 )}
                 <div className="absolute top-2 right-2 p-1 rounded-full bg-noctvm-emerald/80 backdrop-blur-sm border border-noctvm-emerald/30">
-                  <RepostIcon className="w-3 h-3 text-white" />
+                  <RepostIcon className="w-3 h-3 text-foreground" />
                 </div>
               </button>
             ))}
@@ -1272,7 +1272,7 @@ export default function UserProfilePage({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[650] flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm"
+              className="fixed inset-0 z-[650] flex items-center justify-center bg-noctvm-black/85 p-6 backdrop-blur-sm"
               onClick={() => setShowProfilePictureLightbox(false)}
               role="dialog"
               aria-modal="true"
@@ -1281,7 +1281,7 @@ export default function UserProfilePage({
               <button
                 type="button"
                 onClick={() => setShowProfilePictureLightbox(false)}
-                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white transition-colors hover:bg-black/75"
+                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-noctvm-black/55 text-foreground transition-colors hover:bg-noctvm-black/75"
                 aria-label="Close profile picture"
               >
                 <X className="h-5 w-5" />
@@ -1305,7 +1305,7 @@ export default function UserProfilePage({
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
-                    <span className="text-7xl font-bold text-white/90">{initials}</span>
+                    <span className="text-7xl font-bold text-foreground/90">{initials}</span>
                   </div>
                 )}
               </motion.div>
@@ -1319,10 +1319,10 @@ export default function UserProfilePage({
         <button
           type="button"
           onClick={onOpenCreatePost}
-          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all duration-200"
+          className="fixed bottom-24 right-6 lg:hidden z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-foreground shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all duration-200"
           title="Create Post"
         >
-          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
         </button>
@@ -1362,14 +1362,14 @@ export default function UserProfilePage({
                 type="button"
                 onClick={() => setMobileFeedView(false)}
                 title="Close feed"
-                className="p-2 text-white bg-white/5 rounded-full hover:bg-white/10 active:scale-[0.96] transition-all"
+                className="p-2 text-foreground bg-white/5 rounded-full hover:bg-white/10 active:scale-[0.96] transition-all"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <div className="flex flex-col">
-                <span className="text-xs font-black text-white tracking-[0.2em] uppercase">
+                <span className="text-xs font-black text-foreground tracking-[0.2em] uppercase">
                   {activeTab === 'posts' ? 'Moments' :
                    activeTab === 'reposts' ? 'Reposts' :
                    activeTab === 'saved' ? 'Saved' : 'Tagged'}

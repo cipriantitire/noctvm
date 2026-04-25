@@ -2,8 +2,8 @@ import { cn } from "@/lib/cn";
 
 export const inputBaseClassName = cn(
   "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5",
-  "focus:border-noctvm-violet/50 outline-none transition-all text-white frosted-noise text-sm",
-  "placeholder:text-white/10"
+  "focus:border-noctvm-violet/50 outline-none transition-all text-foreground frosted-noise text-sm",
+  "placeholder:text-foreground/10"
 );
 
 export const labelBaseClassName =
@@ -59,7 +59,7 @@ export function TextArea({ className, ...rest }: TextAreaProps) {
     <textarea
       className={cn(
         inputBaseClassName,
-        "resize-none font-medium text-xs text-white/80 leading-relaxed rounded-2xl py-3",
+        "resize-none font-medium text-xs text-foreground/80 leading-relaxed rounded-2xl py-3",
         className
       )}
       {...rest}

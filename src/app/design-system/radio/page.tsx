@@ -5,7 +5,7 @@ export default function RadioPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Radio Group</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Radio Group</h1>
         <p className="text-noctvm-silver">Single selection from a set of options.</p>
       </div>
       <div className="space-y-6">

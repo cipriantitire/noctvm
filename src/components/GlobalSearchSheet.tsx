@@ -434,7 +434,7 @@ export default function GlobalSearchSheet({
             : 'sticky top-0 z-10 px-3 pb-3 pt-3'}
           >
             <div className={isDesktop ? 'space-y-1' : 'sr-only'}>
-              <SheetTitle className={isDesktop ? 'text-2xl font-black tracking-tight text-white' : ''}>Global Search</SheetTitle>
+              <SheetTitle className={isDesktop ? 'text-2xl font-black tracking-tight text-foreground' : ''}>Global Search</SheetTitle>
               <SheetDescription className={isDesktop ? 'text-noctvm-silver/60' : ''}>
                 Search events, venues, people, and settings from anywhere in the app.
               </SheetDescription>
@@ -483,7 +483,7 @@ export default function GlobalSearchSheet({
                       <SearchIcon className="h-4 w-4" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium text-white">Start typing to search the entire app.</p>
+                      <p className="text-sm font-medium text-foreground">Start typing to search the entire app.</p>
                       <p className="max-w-xl text-xs leading-5 text-noctvm-silver/60">
                         Search events, venues, people, and settings from one place. Results update as soon as you type.
                       </p>
@@ -510,13 +510,13 @@ export default function GlobalSearchSheet({
                               <Image src={event.image_url} alt={event.title} fill className="object-cover" unoptimized />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight">
-                                <CalendarIcon className="h-5 w-5 text-white/70" />
+                                <CalendarIcon className="h-5 w-5 text-foreground/70" />
                               </div>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="truncate font-semibold text-white">{event.title}</p>
+                              <p className="truncate font-semibold text-foreground">{event.title}</p>
                               {event.city && (
                                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-noctvm-micro font-mono font-bold uppercase tracking-[0.18em] text-noctvm-silver/60">
                                   {event.city}
@@ -544,13 +544,13 @@ export default function GlobalSearchSheet({
                               <Image src={getVenueLogo(venue.name, venue.logo_url || undefined)} alt={venue.name} fill className="object-cover" unoptimized />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight">
-                                <span className="text-sm font-black text-white">{venue.name[0]}</span>
+                                <span className="text-sm font-black text-foreground">{venue.name[0]}</span>
                               </div>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="truncate font-semibold text-white">{venue.name}</p>
+                              <p className="truncate font-semibold text-foreground">{venue.name}</p>
                               {venue.city && (
                                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-noctvm-micro font-mono font-bold uppercase tracking-[0.18em] text-noctvm-silver/60">
                                   {venue.city}
@@ -578,13 +578,13 @@ export default function GlobalSearchSheet({
                               <Image src={user.avatar_url} alt={user.display_name || user.username} fill className="object-cover" unoptimized />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-noctvm-violet/20 to-noctvm-midnight">
-                                <span className="text-sm font-black text-white">{(user.display_name || user.username || 'U')[0].toUpperCase()}</span>
+                                <span className="text-sm font-black text-foreground">{(user.display_name || user.username || 'U')[0].toUpperCase()}</span>
                               </div>
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="truncate font-semibold text-white">{user.display_name || user.username}</p>
+                              <p className="truncate font-semibold text-foreground">{user.display_name || user.username}</p>
                               {user.badge !== 'none' && <VerifiedBadge type={user.badge} size="sm" />}
                             </div>
                             <p className="mt-1 truncate text-xs text-noctvm-silver/55">@{user.username}</p>
@@ -605,7 +605,7 @@ export default function GlobalSearchSheet({
                             {action.icon}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate font-semibold text-white">{action.label}</p>
+                            <p className="truncate font-semibold text-foreground">{action.label}</p>
                             <p className="mt-1 truncate text-xs text-noctvm-silver/55">{action.desc}</p>
                           </div>
                         </ResultButton>
@@ -621,7 +621,7 @@ export default function GlobalSearchSheet({
                     <SearchIcon className="h-4 w-4" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-white">No matches found.</p>
+                    <p className="text-sm font-medium text-foreground">No matches found.</p>
                     <p className="max-w-xl text-xs leading-5 text-noctvm-silver/60">
                       Try a different keyword, or search for an event, venue, person, or settings page.
                     </p>

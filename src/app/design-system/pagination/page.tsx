@@ -10,7 +10,7 @@ export default function PaginationPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Pagination</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Pagination</h1>
         <p className="text-noctvm-silver">Page navigation for large datasets.</p>
       </div>
       <div className="space-y-8">

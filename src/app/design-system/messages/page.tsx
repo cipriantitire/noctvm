@@ -1,158 +1,149 @@
 'use client';
 
-import React, { useState } from 'react';
-import { GlassPanel } from '@/components/ui';
-import MessageTree, { MessageTreeNode } from '@/components/ui/MessageTree';
-import VerifiedBadge from '@/components/VerifiedBadge';
-import CodePreview from '../CodePreview';
+import React from 'react';
+import { MessageTree } from '@/components/ui';
 
-const initialMockData: MessageTreeNode[] = [
+const mockData = [
   {
     id: '1',
-    authorName: 'Alex Cipher',
-    authorHandle: '@alexcipher',
-    authorFallback: 'A',
-    authorBadge: <VerifiedBadge type="verified" size="xs" />,
-    content: 'This new UI component is looking phenomenal. The recursive threading feels very clean.',
+    authorName: 'Alexandra M.',
+    authorHandle: '@alexndr',
+    authorAvatar: '',
+    authorFallback: 'AM',
+    content: 'Control Club tonight was absolutely unreal. The new Boiler Room setup is next level. Who else was there?',
     timestampStr: '2h',
+    isOwner: false,
     replies: [
       {
         id: '1-1',
-        authorName: 'Sarah Node',
-        authorHandle: '@sarahnode',
-        authorFallback: 'S',
-        content: 'I agree! I specifically love the curved elbows and how the vertical lines connect.',
+        authorName: 'Vlad D.',
+        authorHandle: '@vladd',
+        authorFallback: 'VD',
+        content: 'I was at the bar during the transition. Missed the first 20 min but caught the peak. Incredible energy.',
         timestampStr: '1h',
-        replies: [
-          {
-            id: '1-1-1',
-            authorName: 'Alex Cipher',
-            authorHandle: '@alexcipher',
-            authorFallback: 'A',
-            authorBadge: <VerifiedBadge type="verified" size="xs" />,
-            content: 'Wait until you see how it handles editing and deleting inside the popover menu.',
-            timestampStr: '10m',
-          }
-        ]
+        isOwner: false,
       },
       {
         id: '1-2',
-        authorName: 'Marcus Volt',
-        authorHandle: '@marcus_v',
-        authorFallback: 'M',
-        content: 'Is this component strictly for comments or can we use it for an inbox UI too?',
-        timestampStr: '30m'
-      }
-    ]
+        authorName: 'Maria S.',
+        authorHandle: '@maria_s',
+        authorFallback: 'MS',
+        content: 'The sound system upgrade is noticeable. Bass felt cleaner, less muddy in the back.',
+        timestampStr: '45m',
+        isOwner: false,
+        replies: [
+          {
+            id: '1-2-1',
+            authorName: 'Alexandra M.',
+            authorHandle: '@alexndr',
+            authorFallback: 'AM',
+            content: 'Right? They installed the new Funktion-One rig last week. Makes a huge difference.',
+            timestampStr: '30m',
+            isOwner: false,
+          },
+        ],
+      },
+    ],
   },
   {
     id: '2',
-    authorName: 'Nexus Events',
-    authorHandle: '@nexusevents',
-    authorFallback: 'N',
-    authorBadge: <VerifiedBadge type="owner" size="xs" />,
-    content: 'Tickets for this Friday drop at midnight. Do not sleep on this one...',
-    timestampStr: '4h',
-  }
+    authorName: 'You',
+    authorHandle: '@you',
+    authorFallback: 'YO',
+    content: 'Next Saturday: Techno Showcase at Guesthouse. Lineup drops tomorrow.',
+    timestampStr: '5h',
+    isOwner: true,
+    replies: [
+      {
+        id: '2-1',
+        authorName: 'Ionut C.',
+        authorHandle: '@ionut',
+        authorFallback: 'IC',
+        content: 'Any idea who is headlining?',
+        timestampStr: '4h',
+        isOwner: false,
+      },
+    ],
+  },
 ];
 
-export default function MessageTreeShowcasePage() {
-  const [data, setData] = useState<MessageTreeNode[]>(initialMockData);
+const singleThread = [
+  {
+    id: '3',
+    authorName: 'Diana R.',
+    authorHandle: '@diana_r',
+    authorFallback: 'DR',
+    content: 'Has anyone been to the new venue in Expozitiei? Curious about the vibe before I commit to the event.',
+    timestampStr: '1d',
+    isOwner: false,
+  },
+];
 
-  // Deep clone helper for recursive updates
-  const updateTree = (nodes: MessageTreeNode[], targetId: string, updater: (node: MessageTreeNode) => MessageTreeNode | null): MessageTreeNode[] => {
-    return nodes.reduce((acc, node) => {
-      if (node.id === targetId) {
-        const updated = updater(node);
-        if (updated) acc.push(updated); // null means delete
-      } else {
-        const newNode = { ...node };
-        if (newNode.replies) {
-          newNode.replies = updateTree(newNode.replies, targetId, updater);
-        }
-        acc.push(newNode);
-      }
-      return acc;
-    }, [] as MessageTreeNode[]);
-  };
-
-  const handleReply = (parentId: string, text: string) => {
-    const newReply: MessageTreeNode = {
-      id: Math.random().toString(),
-      authorName: 'You',
-      authorHandle: '@guest',
-      authorFallback: 'U',
-      content: text,
-      timestampStr: 'Now',
-    };
-
-    if (parentId === 'root') {
-      setData([newReply, ...data]);
-      return;
-    }
-
-    setData(updateTree(data, parentId, (node) => {
-      return {
-        ...node,
-        replies: [...(node.replies || []), newReply]
-      };
-    }));
-  };
-
-  const handleEdit = (nodeId: string, newText: string) => {
-    setData(updateTree(data, nodeId, (node) => ({ ...node, content: newText })));
-  };
-
-  const handleDelete = (nodeId: string) => {
-    setData(updateTree(data, nodeId, () => null));
-  };
-
+export default function MessageTreePage() {
   return (
-    <div className="space-y-12 pb-24">
+    <div className="space-y-10">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-white mb-4">Message Trees</h1>
-        <p className="text-noctvm-silver text-lg max-w-2xl">
-          A generic, highly-recursive component for structuring comments, threaded messages, and conversational UI.
+        <h1 className="text-2xl font-bold text-foreground mb-2">MessageTree</h1>
+        <p className="text-noctvm-silver">
+          Nested comment thread with collapsible branches, inline editing, reply inputs,
+          and threaded connector lines.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          
-          <section className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold text-white">Interactive Thread Preview</h2>
-            <GlassPanel variant="subtle" className="p-6 md:p-8">
-              <MessageTree 
-                data={data} 
-                onReply={handleReply}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            </GlassPanel>
-            
-            <CodePreview code={`<MessageTree 
-  data={treeData} 
-  onReply={(nodeId, text) => handleReply(nodeId, text)}
-  onEdit={(nodeId, newText) => handleEdit(nodeId, newText)}
-  onDelete={(nodeId) => handleDelete(nodeId)}
-  hideRootInput={false} // optional
-/>`} />
-          </section>
-
+      {/* Full Thread */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-noctvm-silver uppercase tracking-widest">Nested Thread (3 levels)</h2>
+        <div className="max-w-xl bg-noctvm-surface/30 border border-white/5 rounded-2xl p-6">
+          <MessageTree
+            data={mockData}
+            onReply={(id, text) => console.log('Reply to', id, ':', text)}
+            onEdit={(id, text) => console.log('Edit', id, ':', text)}
+            onDelete={(id) => console.log('Delete', id)}
+          />
         </div>
+      </section>
 
-        <div className="space-y-6">
-          <GlassPanel className="p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Features</h3>
-            <ul className="space-y-4 text-sm text-noctvm-silver leading-relaxed list-disc list-inside">
-              <li>Supports infinite recursive depth.</li>
-              <li>Purely presentational (bring your own state/database).</li>
-              <li>Calculates visual &quot;elbows&quot; and &quot;stems&quot; using CSS absolute positioning to perfectly link replies to their parents.</li>
-              <li>Built-in inline Edit modes and floating Option popovers.</li>
-            </ul>
-          </GlassPanel>
+      {/* Single Comment */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-noctvm-silver uppercase tracking-widest">Single Comment (No Replies)</h2>
+        <div className="max-w-xl bg-noctvm-surface/30 border border-white/5 rounded-2xl p-6">
+          <MessageTree
+            data={singleThread}
+            onReply={(id, text) => console.log('Reply to', id, ':', text)}
+          />
         </div>
-      </div>
+      </section>
+
+      {/* Empty State */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-noctvm-silver uppercase tracking-widest">Empty State</h2>
+        <div className="max-w-xl bg-noctvm-surface/30 border border-white/5 rounded-2xl p-6">
+          <MessageTree
+            data={[]}
+            onReply={(id, text) => console.log('Reply to', id, ':', text)}
+          />
+        </div>
+      </section>
+
+      {/* Specs */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-noctvm-silver uppercase tracking-widest">Features</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-noctvm-sm">
+          {[
+            { label: 'Collapsible threads', desc: 'Click username or stem to collapse/expand' },
+            { label: 'Inline editing', desc: 'Edit button reveals input + Save/Cancel' },
+            { label: 'Reply input', desc: 'Animated slide-up with placeholder' },
+            { label: 'Thread connectors', desc: 'L-shaped elbows + vertical continuation lines' },
+            { label: 'Owner actions', desc: 'Edit/Delete popover on hover (if isOwner)' },
+            { label: 'Avatar rings', desc: 'story-unseen, story-seen, or none' },
+          ].map((f) => (
+            <div key={f.label} className="p-4 rounded-xl border border-white/5 bg-white/5">
+              <p className="text-foreground font-medium mb-1">{f.label}</p>
+              <p className="text-noctvm-silver/60">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

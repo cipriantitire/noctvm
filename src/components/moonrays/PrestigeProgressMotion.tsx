@@ -10,7 +10,7 @@ interface Props {
 
 export const PrestigeProgressMotion = ({ progress, color }: Props) => {
   return (
-    <div className="relative h-3 w-full overflow-hidden rounded-full bg-black/40 border border-white/10 backdrop-blur-md shadow-inner">
+    <div className="relative h-3 w-full overflow-hidden rounded-full bg-noctvm-black/40 border border-white/10 backdrop-blur-md shadow-inner">
       {/* ── Base Fill Grow ─────────────────────────────── */}
       <motion.div 
         initial={{ width: 0 }}

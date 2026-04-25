@@ -98,7 +98,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
         <button
           onClick={() => void loadPreview()}
           disabled={loading || !accessToken}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver hover:text-white hover:bg-white/10 transition-all disabled:opacity-40"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver hover:text-foreground hover:bg-white/10 transition-all disabled:opacity-40"
           title="Refresh venue cleanup preview"
         >
           <RefreshIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -112,7 +112,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
             <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">
               Duplicate Groups
             </p>
-            <p className="text-2xl font-black text-white">
+            <p className="text-2xl font-black text-foreground">
               {preview?.candidateCount ?? (loading ? '...' : '0')}
             </p>
           </div>
@@ -120,7 +120,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
             <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">
               Status
             </p>
-            <p className="text-sm font-bold text-white uppercase tracking-widest">
+            <p className="text-sm font-bold text-foreground uppercase tracking-widest">
               {loading ? 'Scanning' : preview?.candidateCount ? 'Needs cleanup' : 'Clean'}
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
             <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">
               Generated
             </p>
-            <p className="text-sm font-bold text-white uppercase tracking-widest">
+            <p className="text-sm font-bold text-foreground uppercase tracking-widest">
               {preview?.generatedAt ? new Date(preview.generatedAt).toLocaleString() : 'No data'}
             </p>
           </div>
@@ -150,7 +150,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
 
         {!loading && preview && preview.candidateCount === 0 && (
           <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-6 text-center">
-            <p className="text-sm font-bold text-white uppercase tracking-widest">
+            <p className="text-sm font-bold text-foreground uppercase tracking-widest">
               No duplicate venue groups found
             </p>
             <p className="text-noctvm-caption text-noctvm-silver/50 font-mono mt-2">
@@ -166,7 +166,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
                 <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">
                   {candidate.city}
                 </p>
-                <h4 className="text-sm font-black text-white uppercase tracking-wider">
+                <h4 className="text-sm font-black text-foreground uppercase tracking-wider">
                   Suggested Canonical: {candidate.canonical.name}
                 </h4>
                 <p className="text-noctvm-caption text-noctvm-silver/50 font-mono mt-1">
@@ -177,7 +177,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
               <button
                 onClick={() => void mergeCandidate(candidate)}
                 disabled={Boolean(mergingKey) || !accessToken}
-                className="px-4 py-2 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-40"
+                className="px-4 py-2 rounded-xl bg-noctvm-violet text-foreground text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all disabled:opacity-40"
               >
                 {mergingKey === candidate.key ? 'Merging...' : `Merge Into ${candidate.canonical.name}`}
               </button>
@@ -188,7 +188,7 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
                 <p className="text-noctvm-micro text-noctvm-emerald uppercase font-mono tracking-widest mb-2">
                   Keep
                 </p>
-                <p className="text-sm font-black text-white uppercase tracking-wider">
+                <p className="text-sm font-black text-foreground uppercase tracking-wider">
                   {candidate.canonical.name}
                 </p>
                 <p className="text-noctvm-caption text-noctvm-silver/60 font-mono mt-2">
@@ -198,11 +198,11 @@ export default function VenueCleanupPanel({ accessToken }: VenueCleanupPanelProp
 
               <div className="space-y-3">
                 {candidate.duplicates.map((duplicate) => (
-                  <div key={duplicate.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div key={duplicate.id} className="rounded-2xl border border-white/10 bg-noctvm-black/20 p-4">
                     <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-2">
                       Merge
                     </p>
-                    <p className="text-sm font-black text-white uppercase tracking-wider">
+                    <p className="text-sm font-black text-foreground uppercase tracking-wider">
                       {duplicate.name}
                     </p>
                     <p className="text-noctvm-caption text-noctvm-silver/60 font-mono mt-2">

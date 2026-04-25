@@ -254,7 +254,7 @@ export default function VenueManager() {
 
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-white transition-all h-[42px] flex items-center justify-center min-w-[42px]"
+            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-foreground transition-all h-[42px] flex items-center justify-center min-w-[42px]"
             title="Toggle Sort Order"
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
@@ -263,14 +263,14 @@ export default function VenueManager() {
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 h-[42px]">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="Grid View"
             >
               <GridIcon className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="List View"
             >
               <LayoutListIcon className="w-4 h-4" />
@@ -279,7 +279,7 @@ export default function VenueManager() {
 
           <button 
             onClick={() => { setEditingVenue(null); setShowForm(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] whitespace-nowrap"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-foreground hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] whitespace-nowrap"
             title="Add Venue"
           >
             <PlusIcon className="w-3.5 h-3.5" />
@@ -289,7 +289,7 @@ export default function VenueManager() {
       </div>
 
       {(showForm || editingVenue) && (
-        <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
+        <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-noctvm-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
           <div className="w-full max-w-4xl my-auto">
             <VenueForm 
               initialData={editingVenue || undefined}
@@ -338,7 +338,7 @@ export default function VenueManager() {
                     sizes={viewMode === 'grid' ? "400px" : "80px"}
                   />
                   {isOwned && (
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-noctvm-violet backdrop-blur-md text-white text-noctvm-xs font-black uppercase tracking-widest shadow-lg">
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-noctvm-violet backdrop-blur-md text-foreground text-noctvm-xs font-black uppercase tracking-widest shadow-lg">
                       My Venue
                     </div>
                   )}
@@ -348,7 +348,7 @@ export default function VenueManager() {
                   <div className="flex items-start justify-between mb-0.5">
                     <div className="min-w-0 pr-4">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <h3 className="font-bold text-white tracking-tight text-base group-hover:text-noctvm-violet transition-colors truncate">
+                        <h3 className="font-bold text-foreground tracking-tight text-base group-hover:text-noctvm-violet transition-colors truncate">
                           {venue.name}
                         </h3>
                         {venue.is_verified && <VerifiedBadge type={venue.badge} size="xs" />}
@@ -389,16 +389,16 @@ export default function VenueManager() {
 
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                          <span className="text-noctvm-micro font-black text-white">{followCounts[venue.name] || 0}</span>
+                          <span className="text-noctvm-micro font-black text-foreground">{followCounts[venue.name] || 0}</span>
                           <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50">Followers</span>
                        </div>
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
                           <UsersIcon className="w-2.5 h-2.5 text-noctvm-emerald" />
-                          <span className="text-noctvm-micro font-black text-white">{venue.capacity || 'N/A'}</span>
+                          <span className="text-noctvm-micro font-black text-foreground">{venue.capacity || 'N/A'}</span>
                           <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50">Capacity</span>
                        </div>
                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/5">
-                          <span className="text-noctvm-micro font-black text-white">{venue.upcoming_events}</span>
+                          <span className="text-noctvm-micro font-black text-foreground">{venue.upcoming_events}</span>
                           <span className="text-noctvm-xs uppercase font-mono tracking-widest text-noctvm-silver/50 ml-1">Upcoming</span>
                        </div>
                     </div>
@@ -425,7 +425,7 @@ export default function VenueManager() {
                     setExpandedVenue(next);
                     if (next) fetchReviews(next);
                   }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 border-t border-white/5 text-noctvm-caption text-noctvm-silver hover:text-white transition-colors uppercase font-mono tracking-widest mt-auto"
+                  className="w-full flex items-center justify-between px-4 py-2.5 border-t border-white/5 text-noctvm-caption text-noctvm-silver hover:text-foreground transition-colors uppercase font-mono tracking-widest mt-auto"
                 >
                   <div className="flex items-center gap-2">
                     <StarRating rating={venue.rating || 0} />
@@ -439,7 +439,7 @@ export default function VenueManager() {
                 </button>
 
               {expandedVenue === venue.name && (
-                <div className="border-t border-white/5 bg-black/20 animate-fade-in max-h-[300px] overflow-y-auto no-scrollbar">
+                <div className="border-t border-white/5 bg-noctvm-black/20 animate-fade-in max-h-[300px] overflow-y-auto no-scrollbar">
                   {loadingReviews.has(venue.name) ? (
                     <div className="flex items-center justify-center py-8">
                        <div className="w-5 h-5 border-2 border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
@@ -459,7 +459,7 @@ export default function VenueManager() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-noctvm-label font-bold text-white uppercase tracking-tight">
+                                  <span className="text-noctvm-label font-bold text-foreground uppercase tracking-tight">
                                     {review.profiles?.display_name || review.profiles?.username || 'Anonymous'}
                                   </span>
                                   <StarRating rating={review.rating} />
@@ -480,7 +480,7 @@ export default function VenueManager() {
                                 {!review.reply_text && (
                                   <button 
                                     onClick={() => setReplyInputs(prev => ({ ...prev, [review.id]: (prev[review.id] === undefined ? '' : undefined) as any }))}
-                                    className="text-noctvm-micro text-noctvm-silver/40 hover:text-white font-bold uppercase tracking-widest transition-colors"
+                                    className="text-noctvm-micro text-noctvm-silver/40 hover:text-foreground font-bold uppercase tracking-widest transition-colors"
                                   >
                                     Reply
                                   </button>
@@ -505,11 +505,11 @@ export default function VenueManager() {
                                     placeholder="Write a reply as owner..."
                                     value={replyInputs[review.id]}
                                     onChange={(e) => setReplyInputs(prev => ({ ...prev, [review.id]: e.target.value }))}
-                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-noctvm-violet/50"
+                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-foreground outline-none focus:border-noctvm-violet/50"
                                   />
                                   <button 
                                     onClick={() => handleReplyReview(venue.name, review.id)}
-                                    className="px-4 py-2 bg-noctvm-violet text-white rounded-xl text-noctvm-caption font-bold uppercase tracking-widest"
+                                    className="px-4 py-2 bg-noctvm-violet text-foreground rounded-xl text-noctvm-caption font-bold uppercase tracking-widest"
                                   >
                                     Send
                                   </button>

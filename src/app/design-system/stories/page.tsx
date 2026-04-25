@@ -29,7 +29,7 @@ export default function StoriesShowcasePage() {
   return (
     <div className="space-y-12 pb-24">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-white mb-4">Stories Elements</h1>
+        <h1 className="text-3xl font-heading font-bold text-foreground mb-4">Stories Elements</h1>
         <p className="text-noctvm-silver text-lg max-w-2xl">
           Core primitives for building rich Story experiences, including animated rings and multi-segment progress bars.
         </p>
@@ -39,7 +39,7 @@ export default function StoriesShowcasePage() {
         <div className="lg:col-span-2 space-y-8">
           
           <section className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold text-white">Interactive Progress Bar</h2>
+            <h2 className="text-xl font-heading font-semibold text-foreground">Interactive Progress Bar</h2>
             <GlassPanel variant="noise" className="p-8 aspect-video relative flex flex-col justify-between overflow-hidden">
                {/* Background abstract gradient for contrast */}
                <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/20 via-black to-blue-900/30 -z-10" />
@@ -62,8 +62,8 @@ export default function StoriesShowcasePage() {
                     ring="story-unseen"
                  />
                  <div>
-                   <p className="text-white font-semibold text-sm drop-shadow-md">alexa_nct</p>
-                   <p className="text-xs text-white/70 drop-shadow-md">2h ago</p>
+                   <p className="text-foreground font-semibold text-sm drop-shadow-md">alexa_nct</p>
+                   <p className="text-xs text-foreground/70 drop-shadow-md">2h ago</p>
                  </div>
                </div>
                
@@ -95,26 +95,26 @@ export default function StoriesShowcasePage() {
           </section>
 
           <section className="space-y-4">
-             <h2 className="text-xl font-heading font-semibold text-white">Story Avatar Rings</h2>
+             <h2 className="text-xl font-heading font-semibold text-foreground">Story Avatar Rings</h2>
              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                <GlassPanel className="p-6 flex flex-col items-center gap-3 justify-center text-center">
                   <Avatar fallback="U" size="lg" ring="story-unseen" />
                   <div>
-                    <p className="text-white font-semibold text-sm">New Story</p>
+                    <p className="text-foreground font-semibold text-sm">New Story</p>
                     <p className="text-xs text-noctvm-silver">Violet-cyan gradient</p>
                   </div>
                </GlassPanel>
                <GlassPanel className="p-6 flex flex-col items-center gap-3 justify-center text-center">
                   <Avatar fallback="U" size="lg" ring="highlight" />
                   <div>
-                    <p className="text-white font-semibold text-sm">Highlight</p>
+                    <p className="text-foreground font-semibold text-sm">Highlight</p>
                     <p className="text-xs text-noctvm-silver">Silver border</p>
                   </div>
                </GlassPanel>
                <GlassPanel className="p-6 flex flex-col items-center gap-3 justify-center text-center">
                   <Avatar fallback="U" size="lg" ring="story-seen" />
                   <div>
-                    <p className="text-white font-semibold text-sm">Viewed Story</p>
+                    <p className="text-foreground font-semibold text-sm">Viewed Story</p>
                     <p className="text-xs text-noctvm-silver">Muted grey ring</p>
                   </div>
                </GlassPanel>
@@ -125,7 +125,7 @@ export default function StoriesShowcasePage() {
 
         <div className="space-y-6">
           <GlassPanel className="p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Technical Notes</h3>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Technical Notes</h3>
             <ul className="space-y-4 text-sm text-noctvm-silver leading-relaxed list-disc list-inside">
               <li>The <code>StoryProgressBar</code> uses hardware-accelerated CSS transitions for the <code>width</code> property based on absolute numbers.</li>
               <li>Avatars handle their own ring borders via the newly configured <code>ringStyle</code> API inside the Avatar Atom primitive.</li>

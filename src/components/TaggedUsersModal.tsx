@@ -107,11 +107,11 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
 
   return (
     <div className="fixed inset-0 z-viewer flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-noctvm-black/60 backdrop-blur-sm" onClick={onClose} />
       
       <div className="relative w-full max-w-sm bg-noctvm-black border border-noctvm-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
         <div className="p-4 border-b border-noctvm-border flex items-center justify-between">
-          <h3 className="font-heading font-bold text-white text-base">Tagged People</h3>
+          <h3 className="font-heading font-bold text-foreground text-base">Tagged People</h3>
           <button onClick={onClose} className="p-1 hover:bg-white/5 rounded-full transition-colors" title="Close">
              <svg className="w-5 h-5 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -158,7 +158,7 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
                         aria-label={`Open ${u.display_name}'s profile`}
                         title={`Open ${u.display_name}'s profile`}
                       >
-                        <p className="truncate text-sm font-semibold leading-tight text-white">{u.display_name}</p>
+                        <p className="truncate text-sm font-semibold leading-tight text-foreground">{u.display_name}</p>
                         <p className="truncate text-xs text-noctvm-silver">@{normalizeHandle(u.username)}</p>
                       </button>
                     </div>
@@ -170,8 +170,8 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
                       onClick={() => void handleToggleFollow(u)}
                       className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       u.is_following 
-                        ? 'bg-noctvm-surface text-white border border-noctvm-border hover:bg-noctvm-surface/70' 
-                        : 'bg-noctvm-violet text-white hover:bg-noctvm-violet/90'
+                        ? 'bg-noctvm-surface text-foreground border border-noctvm-border hover:bg-noctvm-surface/70' 
+                        : 'bg-noctvm-violet text-foreground hover:bg-noctvm-violet/90'
                     }`}
                     >
                       {u.is_following ? 'Following' : 'Follow'}

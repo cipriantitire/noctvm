@@ -79,7 +79,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
         <section className="space-y-4">
           <div className="flex items-center gap-2 px-1">
             <SparklesIcon className="w-4 h-4 text-noctvm-gold" />
-            <h3 className="text-xs font-heading font-black text-white uppercase tracking-widest">Atmospheres</h3>
+            <h3 className="text-xs font-heading font-black text-foreground uppercase tracking-widest">Atmospheres</h3>
           </div>
 
           {loading ? (
@@ -108,11 +108,11 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
 
                     <div className="relative z-10 flex items-center justify-between gap-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform">
+                        <div className="w-14 h-14 rounded-2xl bg-noctvm-black/40 border border-white/5 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform">
                           {asset.type === 'profile_background' ? '🌌' : asset.type === 'story_frame' ? '🖼️' : '✨'}
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-sm font-bold text-white truncate">{asset.name}</h4>
+                          <h4 className="text-sm font-bold text-foreground truncate">{asset.name}</h4>
                           <p className="text-noctvm-caption text-noctvm-silver/50 font-mono mt-0.5 uppercase tracking-wide">
                             {asset.type.replace('_', ' ')}
                           </p>
@@ -126,7 +126,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                             className={`px-4 py-1.5 rounded-full text-noctvm-caption font-black uppercase tracking-widest transition-all ${
                               invItem.is_equipped 
                                 ? 'bg-noctvm-emerald/20 text-noctvm-emerald border border-noctvm-emerald/30' 
-                                : 'bg-white/10 text-white border border-white/10 hover:bg-noctvm-violet hover:border-noctvm-violet'
+                                : 'bg-white/10 text-foreground border border-white/10 hover:bg-noctvm-violet hover:border-noctvm-violet'
                             }`}
                           >
                             {invItem.is_equipped ? 'Equipped' : 'Equip'}
@@ -137,7 +137,7 @@ export const BoutiqueModal = ({ isOpen, onClose, pocketBalance }: { isOpen: bool
                             onClick={() => handlePurchase(asset)}
                             className={`px-5 py-2 rounded-full text-noctvm-caption font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
                               canAfford 
-                                ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-[0.96]' 
+                                ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-[0.96]' 
                                 : 'bg-white/5 text-noctvm-silver/40 border border-white/5 cursor-not-allowed'
                             }`}
                           >

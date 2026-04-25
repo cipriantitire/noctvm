@@ -11,7 +11,7 @@ export default function ListboxPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Listbox</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Listbox</h1>
         <p className="text-noctvm-silver">Selectable list with sections and icons.</p>
       </div>
       <div className="space-y-6 max-w-sm">

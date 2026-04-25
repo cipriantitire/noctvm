@@ -141,12 +141,12 @@ export default function RightPanel({
                       el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-noctvm-caption font-bold text-white`}>
+                  <span className={`fallback hidden text-noctvm-caption font-bold text-foreground`}>
                     {event.venue[0]}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-noctvm-label font-medium text-white truncate group-hover/event:text-noctvm-violet transition-colors">{event.title}</p>
+                  <p className="text-noctvm-label font-medium text-foreground truncate group-hover/event:text-noctvm-violet transition-colors">{event.title}</p>
                   <p className="text-noctvm-caption text-noctvm-silver truncate">{event.venue}{event.time ? ` · ${event.time}` : ''}</p>
                 </div>
               </button>
@@ -159,7 +159,7 @@ export default function RightPanel({
 
       {/* Trending venues */}
       <div>
-        <h3 className="font-heading text-sm font-semibold text-white mb-3">Trending Venues</h3>
+        <h3 className="font-heading text-sm font-semibold text-foreground mb-3">Trending Venues</h3>
         <div className="space-y-2">
           {trendingVenues.slice(0, 5).map(({ name, count }) => (
             <button
@@ -175,12 +175,12 @@ export default function RightPanel({
                     el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
                   }}
                 />
-                <span className={`fallback hidden text-xs font-heading font-bold text-white`}>
+                <span className={`fallback hidden text-xs font-heading font-bold text-foreground`}>
                   {name[0]}
                 </span>
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-xs font-medium text-white group-hover:text-noctvm-violet transition-colors truncate">{name}</p>
+                <p className="text-xs font-medium text-foreground group-hover:text-noctvm-violet transition-colors truncate">{name}</p>
                 <p className="text-noctvm-caption text-noctvm-silver">{count} Upcoming Events</p>
               </div>
             </button>

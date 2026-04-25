@@ -45,7 +45,7 @@ function MobileView() {
       <div className="flex items-center justify-between px-4 pt-12 pb-3">
         <div className="flex items-center gap-2">
           <EventsIcon className="w-5 h-5 text-noctvm-violet" />
-          <span className="text-white font-bold text-lg font-heading">Events</span>
+          <span className="text-foreground font-bold text-lg font-heading">Events</span>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="featured">București</Badge>
@@ -90,14 +90,14 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-heading">Platform</p>
+          <p className="text-foreground font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {['Events', 'Feed', 'Venues', 'Pocket', 'Profile'].map(t => (
             <div key={t} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               t === 'Events'
                 ? 'bg-noctvm-violet/15 text-noctvm-violet border border-noctvm-violet/20'
-                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-white'
+                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-foreground'
             }`}>
               <EventsIcon className="w-4 h-4" />
               {t}
@@ -109,7 +109,7 @@ function DesktopView() {
       {/* Main */}
       <main className="flex-1 flex flex-col">
         <div className="flex items-center justify-between px-8 pt-8 pb-4">
-          <h1 className="text-2xl font-black text-white font-heading">Events</h1>
+          <h1 className="text-2xl font-black text-foreground font-heading">Events</h1>
           <div className="flex items-center gap-3">
             <SearchBox placeholder="Search events..." className="w-64" />
             <Badge variant="featured">București</Badge>
@@ -135,7 +135,7 @@ function DesktopView() {
             <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
               <div className="w-2 h-2 rounded-full bg-noctvm-violet shrink-0" />
               <div className="min-w-0">
-                <p className="text-white text-xs font-medium truncate">{e.title}</p>
+                <p className="text-foreground text-xs font-medium truncate">{e.title}</p>
                 <p className="text-[#8A8A8A] text-[10px]">{e.venue}</p>
               </div>
             </div>

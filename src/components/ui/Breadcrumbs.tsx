@@ -41,7 +41,7 @@ const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
                   <span className="text-sm text-noctvm-silver px-1">…</span>
                 ) : isLast ? (
                   <span
-                    className="text-sm text-white font-medium"
+                    className="text-sm text-foreground font-medium"
                     aria-current="page"
                   >
                     {item.label}
@@ -49,14 +49,14 @@ const Breadcrumbs = React.forwardRef<HTMLElement, BreadcrumbsProps>(
                 ) : item.href ? (
                   <a
                     href={item.href}
-                    className="text-sm text-noctvm-silver hover:text-white transition-colors px-1 py-0.5 rounded hover:bg-white/5"
+                    className="text-sm text-noctvm-silver hover:text-foreground transition-colors px-1 py-0.5 rounded hover:bg-white/5"
                   >
                     {item.label}
                   </a>
                 ) : (
                   <button
                     onClick={item.onClick}
-                    className="text-sm text-noctvm-silver hover:text-white transition-colors px-1 py-0.5 rounded hover:bg-white/5"
+                    className="text-sm text-noctvm-silver hover:text-foreground transition-colors px-1 py-0.5 rounded hover:bg-white/5"
                   >
                     {item.label}
                   </button>

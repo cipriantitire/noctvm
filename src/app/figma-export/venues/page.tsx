@@ -85,7 +85,7 @@ function VenueCard({ venue, compact = false }: { venue: typeof MOCK_VENUES[0]; c
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-white text-sm font-semibold truncate">{venue.name}</span>
+            <span className="text-foreground text-sm font-semibold truncate">{venue.name}</span>
             {venue.openNow && <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald shrink-0" />}
           </div>
           <div className="flex items-center gap-1.5 text-[#8A8A8A] text-xs mb-1">
@@ -108,7 +108,7 @@ function VenueCard({ venue, compact = false }: { venue: typeof MOCK_VENUES[0]; c
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between mb-1">
-          <span className="text-white font-semibold">{venue.name}</span>
+          <span className="text-foreground font-semibold">{venue.name}</span>
           {venue.openNow && (
             <span className="text-noctvm-emerald text-[10px] font-mono uppercase tracking-wide flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald" />Open
@@ -143,7 +143,7 @@ function MobileView() {
     <div className="w-[390px] bg-[#050505] min-h-screen flex flex-col border border-white/5 rounded-3xl overflow-hidden">
       <div className="flex items-center gap-2 px-4 pt-12 pb-3">
         <VenuesIcon className="w-5 h-5 text-noctvm-violet" />
-        <span className="text-white font-bold text-lg font-heading">Venues</span>
+        <span className="text-foreground font-bold text-lg font-heading">Venues</span>
       </div>
       <div className="px-4 pb-2">
         <SearchBox placeholder="Search venues..." className="w-full" />
@@ -188,7 +188,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-heading">Platform</p>
+          <p className="text-foreground font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -201,7 +201,7 @@ function DesktopView() {
             <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               label === 'Venues'
                 ? 'bg-noctvm-violet/15 text-noctvm-violet border border-noctvm-violet/20'
-                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-white'
+                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-foreground'
             }`}>
               <Icon className="w-4 h-4" />
               {label}
@@ -214,7 +214,7 @@ function DesktopView() {
       <main className="flex-1 flex flex-col overflow-hidden">
         <div className="px-8 pt-8 pb-4 border-b border-white/5">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-black text-white font-heading">Venues</h1>
+            <h1 className="text-2xl font-black text-foreground font-heading">Venues</h1>
             <div className="flex items-center gap-3">
               <SearchBox placeholder="Search venues..." className="w-64" />
               <Badge variant="featured">București</Badge>
@@ -255,7 +255,7 @@ function DesktopView() {
           {MOCK_VENUES.filter(v => v.openNow).map(v => (
             <div key={v.id} className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/5">
               <span className="w-2 h-2 rounded-full bg-noctvm-emerald shrink-0" />
-              <span className="text-white text-sm flex-1">{v.name}</span>
+              <span className="text-foreground text-sm flex-1">{v.name}</span>
               <span className="text-[#8A8A8A] text-xs">{v.city}</span>
             </div>
           ))}

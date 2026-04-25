@@ -720,14 +720,14 @@ function AppShell() {
         </div>
 
         <p className="text-noctvm-caption uppercase tracking-[0.35em] text-noctvm-silver/50">{gate.title}</p>
-        <h2 className="mt-3 font-heading text-3xl font-black text-white sm:text-4xl">{gate.subtitle}</h2>
+        <h2 className="mt-3 font-heading text-3xl font-black text-foreground sm:text-4xl">{gate.subtitle}</h2>
         <p className="mt-4 max-w-lg text-sm leading-6 text-noctvm-silver">{gate.body}</p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
             onClick={() => setShowAuthModal(true)}
-            className="rounded-full bg-noctvm-violet px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-noctvm-violet/90"
+            className="rounded-full bg-noctvm-violet px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-noctvm-violet/90"
           >
             Sign In
           </button>
@@ -737,7 +737,7 @@ function AppShell() {
               setShowAuthModal(false);
               handleTabChange('events');
             }}
-            className="rounded-full border border-noctvm-border bg-noctvm-surface px-6 py-3 text-sm font-semibold text-noctvm-silver transition-colors hover:text-white hover:bg-white/5"
+            className="rounded-full border border-noctvm-border bg-noctvm-surface px-6 py-3 text-sm font-semibold text-noctvm-silver transition-colors hover:text-foreground hover:bg-white/5"
           >
             Browse Events
           </button>
@@ -806,10 +806,10 @@ function AppShell() {
       {activeTab === 'feed' && user && (
         <button
           onClick={() => setShowCreatePost(true)}
-          className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 xl:right-[22rem] z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-white shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all duration-200"
+          className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 xl:right-[22rem] z-40 w-14 h-14 rounded-full border border-noctvm-black/70 ring-1 ring-white/20 bg-[linear-gradient(155deg,rgba(104,44,206,0.96),rgba(58,22,146,0.90))] text-foreground shadow-[0_6px_12px_rgba(5,5,5,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] flex items-center justify-center hover:scale-105 hover:brightness-105 active:scale-[0.96] transition-all duration-200"
           title="Add Post"
         >
-          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
         </button>
@@ -820,7 +820,7 @@ function AppShell() {
         <div 
           className={`fixed inset-0 flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8 ${venueZIndex >= eventZIndex ? 'z-[210]' : 'z-[200]'}`}
         >
-          <div className={`absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
+          <div className={`absolute inset-0 bg-noctvm-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
           <div
             className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col min-h-0 ${
               venueClosing ? 'animate-scale-out' : 'animate-scale-in'
@@ -890,7 +890,7 @@ function AppShell() {
                 {(isAdmin || isOwner) && (
                   <Link
                     href="/dashboard"
-                    className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-foreground hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
                     title="Dashboard"
                   >
                     <GridIcon className="w-4 h-4" />
@@ -898,21 +898,21 @@ function AppShell() {
                 )}
                 <button
                   onClick={() => setIsGlobalSearchOpen(true)}
-                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-foreground hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
                   title="Search"
                 >
                   <SearchIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setIsNotificationsOpen(true)}
-                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative flex-shrink-0"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-foreground hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center relative flex-shrink-0"
                   title="Notifications"
                 >
                   <BellIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleSettingsClick}
-                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-foreground hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center flex-shrink-0"
                   title="Settings"
                 >
                   <CogIcon className="w-4 h-4" />
@@ -986,7 +986,7 @@ function AppShell() {
                         <button
                           type="button"
                           onClick={showMoreEvents}
-                          className="rounded-lg border border-white/10 bg-noctvm-surface/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-noctvm-silver transition-colors hover:border-white/20 hover:text-white"
+                          className="rounded-lg border border-white/10 bg-noctvm-surface/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-noctvm-silver transition-colors hover:border-white/20 hover:text-foreground"
                         >
                           Load more events
                         </button>

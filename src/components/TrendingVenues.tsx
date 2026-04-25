@@ -47,11 +47,11 @@ export default function TrendingVenues({
                   className="object-cover group-hover:scale-110 transition-transform duration-500"
                   unoptimized
                 />
-                <span className={`fallback text-xs font-bold text-white hidden relative z-10`}>
+                <span className={`fallback text-xs font-bold text-foreground hidden relative z-10`}>
                   {venue.name.charAt(0)}
                 </span>
               </div>
-              <span className="text-xs text-noctvm-silver/70 text-center line-clamp-1 w-full font-medium transition-colors group-hover:text-white">{venue.name}</span>
+              <span className="text-xs text-noctvm-silver/70 text-center line-clamp-1 w-full font-medium transition-colors group-hover:text-foreground">{venue.name}</span>
               <span className="text-noctvm-caption text-noctvm-silver/50 font-mono -mt-1 group-hover:text-noctvm-violet transition-colors">{venue.count} events</span>
             </button>
           );

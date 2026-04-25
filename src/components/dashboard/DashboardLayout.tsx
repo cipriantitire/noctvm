@@ -27,7 +27,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-noctvm-black overflow-hidden font-body text-white selection:bg-noctvm-violet/30 selection:text-white">
+    <div className="flex flex-col lg:flex-row h-screen bg-noctvm-black overflow-hidden font-body text-foreground selection:bg-noctvm-violet/30 selection:text-foreground">
       {/* Dynamic Background Noise/Gradient */}
       <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-noctvm-violet/20 blur-[120px] rounded-full animate-pulse-slow"></div>
@@ -51,7 +51,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           <div className="flex justify-center">
             <button
               onClick={() => router.push('/')}
-              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-white hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
+              className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-noctvm-silver/70 hover:text-foreground hover:bg-noctvm-violet/20 hover:border-noctvm-violet/30 transition-all flex items-center justify-center"
               title="Return to App"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,11 +92,11 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 title={item.label}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/10'
-                    : 'text-noctvm-silver/60 hover:text-white hover:bg-white/5'
+                    ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/10'
+                    : 'text-noctvm-silver/60 hover:text-foreground hover:bg-white/5'
                 }`}
               >
-                <span className={`${isActive ? 'text-white' : 'group-hover:text-noctvm-violet'} transition-colors duration-200`}>
+                <span className={`${isActive ? 'text-foreground' : 'group-hover:text-noctvm-violet'} transition-colors duration-200`}>
                   {item.icon}
                 </span>
                 <span className="font-bold text-xs uppercase tracking-wider">{item.label}</span>
@@ -122,14 +122,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-black truncate tracking-tight uppercase text-white">{profile?.display_name || 'Admin'}</p>
+              <p className="text-xs font-black truncate tracking-tight uppercase text-foreground">{profile?.display_name || 'Admin'}</p>
               <p className="text-noctvm-micro text-noctvm-silver font-mono uppercase tracking-widest">
                 {profile?.role || 'User'}
               </p>
             </div>
             <button
               onClick={() => router.push('/')}
-              className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/5 transition-all"
+              className="p-2 rounded-lg text-noctvm-silver/40 hover:text-foreground hover:bg-white/5 transition-all"
               title="Return to App"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,13 +151,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 title={item.label}
                 className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
-                  isActive ? 'text-white' : 'text-noctvm-silver hover:text-white'
+                  isActive ? 'text-foreground' : 'text-noctvm-silver hover:text-foreground'
                 }`}
               >
-                <div className={`transition-transform duration-200 ${isActive ? 'scale-110 text-white' : ''}`}>
+                <div className={`transition-transform duration-200 ${isActive ? 'scale-110 text-foreground' : ''}`}>
                   {React.cloneElement(item.icon as React.ReactElement, { className: "w-6 h-6" })}
                 </div>
-                <span className={`text-noctvm-caption font-medium ${isActive ? 'text-white' : ''}`}>{item.label}</span>
+                <span className={`text-noctvm-caption font-medium ${isActive ? 'text-foreground' : ''}`}>{item.label}</span>
               </Link>
             );
           })}

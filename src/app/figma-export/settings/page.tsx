@@ -47,7 +47,7 @@ function SettingRow({ label, description, chevron = true, danger = false }: {
   return (
     <div className={`flex items-center justify-between py-3 border-b border-white/5 last:border-0 cursor-pointer hover:bg-white/[0.02] transition-colors px-1 rounded-lg ${danger ? 'text-red-400' : ''}`}>
       <div>
-        <p className={`text-sm font-medium ${danger ? 'text-red-400' : 'text-white'}`}>{label}</p>
+        <p className={`text-sm font-medium ${danger ? 'text-red-400' : 'text-foreground'}`}>{label}</p>
         {description && <p className="text-[#8A8A8A] text-xs mt-0.5">{description}</p>}
       </div>
       {chevron && <ChevronRight className="w-4 h-4 text-[#8A8A8A] shrink-0" />}
@@ -62,7 +62,7 @@ function MobileView() {
       {/* Top */}
       <div className="flex items-center gap-2 px-4 pt-12 pb-3">
         <CogIcon className="w-5 h-5 text-noctvm-violet" />
-        <span className="text-white font-bold text-lg font-heading">Settings</span>
+        <span className="text-foreground font-bold text-lg font-heading">Settings</span>
       </div>
 
       {/* Profile preview */}
@@ -70,7 +70,7 @@ function MobileView() {
         <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
           <Avatar size="xl" src="https://i.pravatar.cc/150?u=djnoctvm" alt="Profile" />
           <div className="flex-1">
-            <p className="text-white font-semibold">NOCTVM DJ</p>
+            <p className="text-foreground font-semibold">NOCTVM DJ</p>
             <p className="text-[#8A8A8A] text-sm">@djnoctvm</p>
             <Badge variant="featured" className="mt-1">Silver</Badge>
           </div>
@@ -97,7 +97,7 @@ function MobileView() {
           {TOGGLE_SETTINGS.slice(0, 3).map(s => (
             <div key={s.label} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
               <div>
-                <p className="text-white text-sm">{s.label}</p>
+                <p className="text-foreground text-sm">{s.label}</p>
                 <p className="text-[#8A8A8A] text-xs mt-0.5">{s.description}</p>
               </div>
               <Switch checked={s.on} onCheckedChange={() => {}} />
@@ -143,7 +143,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-heading">Platform</p>
+          <p className="text-foreground font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -153,7 +153,7 @@ function DesktopView() {
             { label: 'Pocket', Icon: PocketIcon  },
             { label: 'Profile',Icon: UserIcon    },
           ].map(({ label, Icon }) => (
-            <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#8A8A8A] hover:bg-white/5 hover:text-white transition-all">
+            <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#8A8A8A] hover:bg-white/5 hover:text-foreground transition-all">
               <Icon className="w-4 h-4" />
               {label}
             </div>
@@ -164,14 +164,14 @@ function DesktopView() {
       {/* Settings nav */}
       <div className="w-[280px] border-r border-white/5 bg-[#070707] flex flex-col pt-8 shrink-0">
         <div className="px-6 mb-6">
-          <h1 className="text-xl font-black text-white font-heading">Settings</h1>
+          <h1 className="text-xl font-black text-foreground font-heading">Settings</h1>
         </div>
         {/* Profile preview */}
         <div className="px-4 mb-6">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
             <Avatar size="md" src="https://i.pravatar.cc/150?u=djnoctvm" alt="Profile" />
             <div>
-              <p className="text-white text-sm font-medium">NOCTVM DJ</p>
+              <p className="text-foreground text-sm font-medium">NOCTVM DJ</p>
               <p className="text-[#8A8A8A] text-xs">@djnoctvm · Silver</p>
             </div>
           </div>
@@ -184,7 +184,7 @@ function DesktopView() {
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${
                 activeSection === s.title
                   ? 'bg-noctvm-violet/15 text-noctvm-violet border border-noctvm-violet/20'
-                  : 'text-[#8A8A8A] hover:bg-white/5 hover:text-white'
+                  : 'text-[#8A8A8A] hover:bg-white/5 hover:text-foreground'
               }`}
             >
               {s.icon}
@@ -203,7 +203,7 @@ function DesktopView() {
       <main className="flex-1 p-10 overflow-y-auto">
         {activeSection === 'Account' && (
           <div className="max-w-xl space-y-6">
-            <h2 className="text-xl font-bold text-white font-heading">Account Settings</h2>
+            <h2 className="text-xl font-bold text-foreground font-heading">Account Settings</h2>
             <GlassPanel variant="subtle" className="rounded-2xl p-6 space-y-4">
               <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest">Profile</p>
               <Field label="Display Name">
@@ -235,12 +235,12 @@ function DesktopView() {
         )}
         {activeSection === 'Notifications' && (
           <div className="max-w-xl space-y-6">
-            <h2 className="text-xl font-bold text-white font-heading">Notifications</h2>
+            <h2 className="text-xl font-bold text-foreground font-heading">Notifications</h2>
             <GlassPanel variant="subtle" className="rounded-2xl p-6 space-y-0">
               {TOGGLE_SETTINGS.map(s => (
                 <div key={s.label} className="flex items-center justify-between py-4 border-b border-white/5 last:border-0">
                   <div>
-                    <p className="text-white text-sm font-medium">{s.label}</p>
+                    <p className="text-foreground text-sm font-medium">{s.label}</p>
                     <p className="text-[#8A8A8A] text-xs mt-0.5">{s.description}</p>
                   </div>
                   <Switch checked={s.on} onCheckedChange={() => {}} />
@@ -251,7 +251,7 @@ function DesktopView() {
         )}
         {(activeSection === 'Privacy' || activeSection === 'App') && (
           <div className="max-w-xl">
-            <h2 className="text-xl font-bold text-white font-heading mb-6">{activeSection}</h2>
+            <h2 className="text-xl font-bold text-foreground font-heading mb-6">{activeSection}</h2>
             <GlassPanel variant="subtle" className="rounded-2xl p-6">
               {SETTINGS_SECTIONS.find(s => s.title === activeSection)?.items.map(item => (
                 <SettingRow key={item} label={item} />

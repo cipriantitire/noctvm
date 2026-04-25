@@ -10,7 +10,7 @@ export default function DropdownPage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Dropdown Menu</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Dropdown Menu</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Context menus and action menus. Replaces PostOptionsMenu and similar patterns.</p>
       </div>
 

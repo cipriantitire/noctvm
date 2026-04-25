@@ -42,7 +42,7 @@ function ToastItem({ item, onRemove }: { item: ToastItem; onRemove: (id: string)
   return (
     <div
       className={cn(
-        'frosted-glass pointer-events-auto flex items-center gap-3 rounded-noctvm-md border px-4 py-3 pr-10 text-sm text-white shadow-lg',
+        'frosted-glass pointer-events-auto flex items-center gap-3 rounded-noctvm-md border px-4 py-3 pr-10 text-sm text-foreground shadow-lg',
         'animate-fade-in-up',
       )}
       style={{ borderLeftColor: variantBorderColor[item.variant ?? 'default'] }}
@@ -51,7 +51,7 @@ function ToastItem({ item, onRemove }: { item: ToastItem; onRemove: (id: string)
       <span className="flex-1">{item.message}</span>
       <button
         onClick={() => onRemove(item.id)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-white transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-foreground transition-colors"
         aria-label="Dismiss"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">

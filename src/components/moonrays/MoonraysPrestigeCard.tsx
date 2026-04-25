@@ -22,7 +22,7 @@ export const MoonraysPrestigeCard = () => {
           <LockIcon className="w-8 h-8 text-noctvm-silver/40" />
         </div>
         <div>
-          <h3 className="text-lg font-heading font-bold text-white">Your Nightly Status</h3>
+          <h3 className="text-lg font-heading font-bold text-foreground">Your Nightly Status</h3>
           <p className="text-xs text-noctvm-silver/60 mt-1 max-w-[200px]">Rank up, claim perks, and unlock premium cosmetics by logging in.</p>
         </div>
       </div>
@@ -52,11 +52,11 @@ export const MoonraysPrestigeCard = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${rank.color} flex items-center justify-center shadow-lg transform rotate-3 border border-white/20`}>
-              <MoonIcon className="w-6 h-6 text-white" />
+              <MoonIcon className="w-6 h-6 text-foreground" />
             </div>
             <div>
               <p className="text-noctvm-caption text-noctvm-silver/60 font-mono uppercase tracking-[0.2em]">Current Rank</p>
-              <h3 className="text-xl font-heading font-bold text-white tracking-tight">{rank.name}</h3>
+              <h3 className="text-xl font-heading font-bold text-foreground tracking-tight">{rank.name}</h3>
             </div>
           </div>
           <div className="text-right">

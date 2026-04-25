@@ -39,15 +39,15 @@ interface Summary {
 }
 
 const SOURCES: ScraperSource[] = [
-  { id: 'controlclub', name: 'Control Club', description: 'Direct venue calendar — authoritative dates & prices', status: 'idle' },
-  { id: 'clubguesthouse', name: 'Club Guesthouse', description: 'Direct venue program — server-rendered HTML', status: 'idle' },
-  { id: 'ra', name: 'Resident Advisor', description: 'Electronic music platform — rich metadata & tickets', status: 'idle' },
+  { id: 'controlclub', name: 'Control Club', description: 'Direct venue calendar: authoritative dates & prices', status: 'idle' },
+  { id: 'clubguesthouse', name: 'Club Guesthouse', description: 'Direct venue program: server-rendered HTML', status: 'idle' },
+  { id: 'ra', name: 'Resident Advisor', description: 'Electronic music platform: rich metadata & tickets', status: 'idle' },
   { id: 'livetickets', name: 'LiveTickets', description: 'Local club life data', status: 'idle' },
   { id: 'iabilet', name: 'Iabilet', description: 'Ticketed events tracking', status: 'idle' },
   { id: 'eventbook', name: 'Eventbook', description: 'Cultural and art events', status: 'idle' },
   { id: 'onevent', name: 'OnEvent', description: 'Regional gathering data', status: 'idle' },
   { id: 'ambilet', name: 'Ambilet', description: 'Music and theater ticketing', status: 'idle' },
-  { id: 'zilesinopti', name: 'Zile și Nopți', description: 'Music category — /muzica/ only', status: 'idle' },
+  { id: 'zilesinopti', name: 'Zile și Nopți', description: 'Music category: /muzica/ only', status: 'idle' },
 ];
 
 export default function ScraperManager() {
@@ -149,26 +149,43 @@ export default function ScraperManager() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { label: 'Status', value: loading || runningSource ? 'Active' : 'Ready', color: loading || runningSource ? 'noctvm-gold' : 'noctvm-emerald' },
-          { label: 'Last Run', value: lastRun || 'No data', color: 'noctvm-violet' },
-          { label: 'Sources', value: `${SOURCES.length} Sources`, color: 'noctvm-emerald' }
-        ].map((stat, i) => (
-          <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 frosted-noise shadow-md">
-            <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-1">{stat.label}</p>
-            <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full bg-${stat.color} ${loading || runningSource ? 'animate-pulse' : ''}`}></div>
-              <span className="text-lg font-bold text-white uppercase tracking-tight">{stat.value}</span>
-            </div>
+        {/* Status card: larger, with visual indicator */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 frosted-noise shadow-md relative overflow-hidden">
+          <div className={`absolute top-0 left-0 w-full h-1 ${loading || runningSource ? 'bg-noctvm-gold' : 'bg-noctvm-emerald'}`} />
+          <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-2">Status</p>
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${loading || runningSource ? 'bg-noctvm-gold animate-pulse' : 'bg-noctvm-emerald'} shadow-[0_0_8px_currentColor]`} />
+            <span className="text-xl font-bold text-foreground uppercase tracking-tight">{loading || runningSource ? 'Active' : 'Ready'}</span>
           </div>
-        ))}
+          {loading && <p className="text-noctvm-caption text-noctvm-silver/50 mt-2 font-mono">Processing scrapers...</p>}
+        </div>
+
+        {/* Last Run: compact data point */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 frosted-noise shadow-md">
+          <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-2">Last Run</p>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-noctvm-violet" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span className="text-lg font-bold text-foreground tracking-tight">{lastRun || 'No data'}</span>
+          </div>
+        </div>
+
+        {/* Sources: badge-style count */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 frosted-noise shadow-md flex items-center justify-between">
+          <div>
+            <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest mb-2">Sources</p>
+            <span className="text-3xl font-bold text-foreground font-heading tracking-tighter">{SOURCES.length}</span>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-noctvm-emerald/10 border border-noctvm-emerald/20 flex items-center justify-center">
+            <svg className="w-6 h-6 text-noctvm-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+          </div>
+        </div>
       </div>
 
       <div className="px-2">
         <button
           onClick={runAllScrapers}
           disabled={loading || !!runningSource}
-          className="flex items-center justify-center gap-2 px-6 py-4 bg-noctvm-violet text-white rounded-2xl text-noctvm-caption md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/10 active:scale-[0.96] disabled:opacity-50 w-full"
+          className="flex items-center justify-center gap-2 px-6 py-4 bg-noctvm-violet text-foreground rounded-2xl text-noctvm-caption md:text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/10 active:scale-[0.96] disabled:opacity-50 w-full"
         >
           <PlayIcon className="w-4 h-4" />
           {loading ? 'Processing...' : 'Full System Scrape'}
@@ -193,21 +210,21 @@ export default function ScraperManager() {
                     </span>
                   )}
                   <div>
-                    <h4 className="text-sm font-bold text-white mb-0.5">{source.name}</h4>
+                    <h4 className="text-sm font-bold text-foreground mb-0.5">{source.name}</h4>
                     <p className="text-noctvm-caption text-noctvm-silver/60 lowercase font-mono">{source.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={(e) => { e.stopPropagation(); setSelectedSource(source); }}
-                    className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-white transition-all bg-white/5 border border-white/10"
+                    className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-foreground transition-all bg-white/5 border border-white/10"
                     title="View Source"
                   >
                     <EyeIcon className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); setSettingSource(source); }}
-                    className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-white transition-all bg-white/5 border border-white/10"
+                    className="p-2 hover:bg-white/10 rounded-xl text-noctvm-silver/60 hover:text-foreground transition-all bg-white/5 border border-white/10"
                     title="Settings"
                   >
                     <HubIcon className="w-4 h-4" />
@@ -215,7 +232,7 @@ export default function ScraperManager() {
                   <button 
                     onClick={(e) => { e.stopPropagation(); runSingleScraper(source.id); }}
                     disabled={loading || !!runningSource}
-                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver hover:bg-noctvm-violet hover:text-white hover:border-noctvm-violet transition-all active:scale-[0.96] disabled:opacity-30"
+                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver hover:bg-noctvm-violet hover:text-foreground hover:border-noctvm-violet transition-all active:scale-[0.96] disabled:opacity-30"
                   >
                     {runningSource === source.id ? (
                       <div className="w-3 h-3 border-2 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
@@ -241,7 +258,7 @@ export default function ScraperManager() {
                   {summary.results.map((r, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center text-center">
                       <span className="text-noctvm-xs text-noctvm-silver/40 uppercase font-mono mb-1">{r.source}</span>
-                      <span className={`text-2xl font-black ${r.error ? 'text-noctvm-rose' : 'text-white'}`}>
+                      <span className={`text-2xl font-black ${r.error ? 'text-noctvm-rose' : 'text-foreground'}`}>
                         {r.error ? 'Error' : r.count}
                       </span>
                     </div>
@@ -276,7 +293,7 @@ export default function ScraperManager() {
       <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden frosted-noise shadow-xl">
         <div className="px-6 py-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
           <h3 className="text-noctvm-caption font-bold uppercase tracking-widest text-noctvm-silver font-mono">Run History Log</h3>
-          <button onClick={fetchLogs} className="p-2 hover:bg-white/10 rounded-lg text-noctvm-silver/40 hover:text-white transition-all" title="Refresh Logs">
+          <button onClick={fetchLogs} className="p-2 hover:bg-white/10 rounded-lg text-noctvm-silver/40 hover:text-foreground transition-all" title="Refresh Logs">
             <RefreshIcon className="w-4 h-4" />
           </button>
         </div>
@@ -295,7 +312,7 @@ export default function ScraperManager() {
                 logs.map((log) => (
                   <tr key={log.id} className="group hover:bg-white/[0.01] transition-all">
                     <td className="px-6 py-4">
-                      <p className="text-xs text-white font-medium">{new Date(log.run_date).toLocaleDateString()}</p>
+                      <p className="text-xs text-foreground font-medium">{new Date(log.run_date).toLocaleDateString()}</p>
                       <p className="text-noctvm-caption text-noctvm-silver/40 font-mono italic">{new Date(log.run_date).toLocaleTimeString()}</p>
                     </td>
                     <td className="px-6 py-4">
@@ -315,7 +332,7 @@ export default function ScraperManager() {
                           results: log.results, 
                           skipped_venues: log.skipped_venues || [] 
                         })}
-                        className="p-1.5 hover:bg-white/10 rounded-lg text-noctvm-silver/40 hover:text-white transition-all inline-flex items-center gap-1.5 text-noctvm-caption uppercase font-bold"
+                        className="p-1.5 hover:bg-white/10 rounded-lg text-noctvm-silver/40 hover:text-foreground transition-all inline-flex items-center gap-1.5 text-noctvm-caption uppercase font-bold"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />
                         Analysis
@@ -336,7 +353,7 @@ export default function ScraperManager() {
       </div>
 
       {selectedSource && (
-          <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
+          <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-noctvm-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
             <div className="w-full max-w-lg my-auto bg-noctvm-black/90 border border-white/10 rounded-3xl p-8 shadow-2xl frosted-noise relative">
               <button 
                 onClick={() => setSelectedSource(null)}
@@ -356,7 +373,7 @@ export default function ScraperManager() {
                     : '🎫'}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white uppercase tracking-tight">{selectedSource.name}</h3>
+                  <h3 className="text-xl font-bold text-foreground uppercase tracking-tight">{selectedSource.name}</h3>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald"></span>
                     <span className="text-noctvm-caption text-noctvm-emerald uppercase font-mono font-bold">Signal Ready</span>
@@ -373,7 +390,7 @@ export default function ScraperManager() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                     <p className="text-noctvm-micro text-noctvm-silver/30 uppercase font-mono mb-1">Success Rate</p>
-                    <p className="text-lg font-bold text-white font-mono">98.2%</p>
+                    <p className="text-lg font-bold text-foreground font-mono">98.2%</p>
                   </div>
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                     <p className="text-noctvm-micro text-noctvm-silver/30 uppercase font-mono mb-1">Latency</p>
@@ -384,14 +401,14 @@ export default function ScraperManager() {
                 <div className="flex gap-3 pt-4">
                    <button 
                     disabled={loading}
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-caption font-bold uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-noctvm-caption font-bold uppercase tracking-widest text-foreground hover:bg-white/10 transition-all"
                   >
                     View Logs
                   </button>
                   <button 
                     onClick={() => runSingleScraper(selectedSource.id)}
                     disabled={loading}
-                    className="flex-[2] px-4 py-3 bg-noctvm-violet text-white rounded-xl text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-[0.96] disabled:opacity-50"
+                    className="flex-[2] px-4 py-3 bg-noctvm-violet text-foreground rounded-xl text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg active:scale-[0.96] disabled:opacity-50"
                   >
                     Run Scraper
                   </button>

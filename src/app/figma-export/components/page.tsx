@@ -41,7 +41,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section className="mb-20">
       <div className="flex items-center gap-4 mb-8">
-        <h2 className="text-2xl font-bold text-white font-heading uppercase tracking-wider">
+        <h2 className="text-2xl font-bold text-foreground font-heading uppercase tracking-wider">
           {title}
         </h2>
         <div className="flex-1 h-px bg-white/5" />
@@ -115,7 +115,7 @@ export default function ComponentsExportPage() {
         {/* ── Header ── */}
         <div className="mb-16">
           <p className="text-[10px] uppercase tracking-widest text-[#8A8A8A] font-mono mb-2">NOCTVM</p>
-          <h1 className="text-5xl font-black text-white font-heading uppercase tracking-tight">Component Library</h1>
+          <h1 className="text-5xl font-black text-foreground font-heading uppercase tracking-tight">Component Library</h1>
           <p className="text-[#8A8A8A] mt-2 text-sm">42 components · Dark system · Violet brand · Glass effects</p>
         </div>
 
@@ -180,7 +180,7 @@ export default function ComponentsExportPage() {
           {(['default', 'modal', 'subtle', 'header', 'noise'] as const).map(v => (
             <GlassPanel key={v} variant={v} className="p-6 rounded-2xl w-48">
               <p className="text-[10px] uppercase tracking-widest text-[#8A8A8A] font-mono mb-1">{v}</p>
-              <p className="text-white text-sm">Glass Panel</p>
+              <p className="text-foreground text-sm">Glass Panel</p>
             </GlassPanel>
           ))}
         </Section>
@@ -444,7 +444,7 @@ export default function ComponentsExportPage() {
         {/* ─────────────────────────────────────────────── COLLAPSIBLE */}
         <Section title="Collapsible">
           <Collapsible className="w-72 border border-white/10 rounded-xl p-4">
-            <CollapsibleTrigger className="text-white text-sm font-medium w-full text-left">
+            <CollapsibleTrigger className="text-foreground text-sm font-medium w-full text-left">
               Advanced filters ↓
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3 text-[#8A8A8A] text-sm">
@@ -637,7 +637,7 @@ export default function ComponentsExportPage() {
                   { event: 'Vlad Flueraru', venue: 'Control Club', date: 'Mar 14', genre: 'Ambient' },
                 ].map(row => (
                   <TableRow key={row.event}>
-                    <TableCell className="font-medium text-white">{row.event}</TableCell>
+                    <TableCell className="font-medium text-foreground">{row.event}</TableCell>
                     <TableCell>{row.venue}</TableCell>
                     <TableCell>{row.date}</TableCell>
                     <TableCell><Badge variant="genre">{row.genre}</Badge></TableCell>

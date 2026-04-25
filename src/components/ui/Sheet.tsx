@@ -27,7 +27,7 @@ function SheetOverlay({ className, ...props }: React.ComponentProps<typeof Sheet
       data-slot="sheet-overlay"
       className={cn(
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-        'fixed inset-0 bg-black/60 backdrop-blur-sm',
+        'fixed inset-0 bg-noctvm-black/60 backdrop-blur-sm',
         className,
       )}
       style={{ zIndex: 400 }}
@@ -71,7 +71,7 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="absolute top-4 right-4 rounded-full p-1.5 text-noctvm-silver opacity-70 transition-opacity hover:opacity-100 hover:text-white focus:outline-none focus:ring-2 focus:ring-noctvm-violet disabled:pointer-events-none">
+          <SheetPrimitive.Close className="absolute top-4 right-4 rounded-full p-1.5 text-noctvm-silver opacity-70 transition-opacity hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-noctvm-violet disabled:pointer-events-none">
             <XIcon className="size-4" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
@@ -90,7 +90,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
-  return <SheetPrimitive.Title data-slot="sheet-title" className={cn('font-heading font-semibold text-white', className)} {...props} />;
+  return <SheetPrimitive.Title data-slot="sheet-title" className={cn('font-heading font-semibold text-foreground', className)} {...props} />;
 }
 
 function SheetDescription({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Description>) {

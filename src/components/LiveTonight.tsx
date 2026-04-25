@@ -40,7 +40,7 @@ export default function LiveTonight({
           <button
             key={event.id}
             onClick={() => onEventClick(event)}
-            className="flex-shrink-0 w-[140px] rounded-lg overflow-hidden border border-white/5 bg-black/20 hover:border-noctvm-violet/40 transition-all active:scale-[0.96] text-left group/card"
+            className="flex-shrink-0 w-[140px] rounded-lg overflow-hidden border border-white/5 bg-noctvm-black/20 hover:border-noctvm-violet/40 transition-all active:scale-[0.96] text-left group/card"
           >
             <div className="aspect-[3/2] bg-noctvm-midnight relative overflow-hidden">
               <Image 
@@ -53,7 +53,7 @@ export default function LiveTonight({
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
             <div className="p-1.5">
-              <p className="text-noctvm-base font-medium text-white line-clamp-1 group-hover/card:text-noctvm-violet transition-colors">{event.title}</p>
+              <p className="text-noctvm-base font-medium text-foreground line-clamp-1 group-hover/card:text-noctvm-violet transition-colors">{event.title}</p>
               <p className="text-xs text-noctvm-silver/70 truncate">{event.venue}</p>
             </div>
           </button>

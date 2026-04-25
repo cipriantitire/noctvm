@@ -373,7 +373,7 @@ export default function VenuesPage({
             >
               {/* Venue color header */}
               <div className={`h-[156px] bg-gradient-to-br ${getVenueColor(venue.name)} relative flex items-center justify-center flex-shrink-0 overflow-hidden`}>
-                <div className="w-[80px] h-[80px] rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-black/20 relative">
+                <div className="w-[80px] h-[80px] rounded-2xl overflow-hidden border-2 border-white/20 flex items-center justify-center bg-noctvm-black/20 relative">
                   <Image
                     src={getVenueLogo(venue.name, venue.logo_url)}
                     alt={venue.name}
@@ -385,14 +385,14 @@ export default function VenuesPage({
                       el.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-2xl font-bold text-white absolute inset-0 flex items-center justify-center`}>{venue.name[0]}</span>
+                  <span className={`fallback hidden text-2xl font-bold text-foreground absolute inset-0 flex items-center justify-center`}>{venue.name[0]}</span>
                 </div>
-                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full corner-smooth-none bg-noctvm-violet/80 text-white text-noctvm-micro font-semibold">Following</span>}
+                {isFollowed && <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full corner-smooth-none bg-noctvm-violet/80 text-foreground text-noctvm-micro font-semibold">Following</span>}
               </div>
               {/* Info */}
               <div className="p-3 flex flex-col flex-1">
                 <div className="flex items-center gap-1.5 mb-1 min-w-0">
-                  <h3 className="font-heading font-semibold text-white text-sm leading-tight group-hover:text-noctvm-violet transition-colors truncate">{venue.name}</h3>
+                  <h3 className="font-heading font-semibold text-foreground text-sm leading-tight group-hover:text-noctvm-violet transition-colors truncate">{venue.name}</h3>
                   {venue.badge !== 'none' && <VerifiedBadge type={venue.badge} size="xs" />}
                 </div>
                 <div className="flex items-center gap-1.5 mb-1.5">
@@ -409,7 +409,7 @@ export default function VenuesPage({
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFollow(venue.name); }}
                     disabled={isLoading || !user}
-                    className={`px-2 py-1 rounded-md text-noctvm-caption font-semibold transition-all ${isFollowed ? 'bg-noctvm-violet/10 text-noctvm-violet' : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-white'} disabled:opacity-40`}
+                    className={`px-2 py-1 rounded-md text-noctvm-caption font-semibold transition-all ${isFollowed ? 'bg-noctvm-violet/10 text-noctvm-violet' : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-foreground'} disabled:opacity-40`}
                   >
                     {isLoading ? '...' : isFollowed ? 'Following' : 'Follow'}
                   </button>
@@ -443,7 +443,7 @@ export default function VenuesPage({
                       el.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-lg font-bold text-white absolute inset-0 flex items-center justify-center`}>
+                  <span className={`fallback hidden text-lg font-bold text-foreground absolute inset-0 flex items-center justify-center`}>
                     {venue.name[0]}
                   </span>
                 </button>
@@ -452,7 +452,7 @@ export default function VenuesPage({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="font-heading font-semibold text-white text-sm truncate">{venue.name}</span>
+                    <span className="font-heading font-semibold text-foreground text-sm truncate">{venue.name}</span>
                     {venue.badge !== 'none' && <VerifiedBadge type={venue.badge} size="xs" />}
                   </div>
                     {isFollowed && (
@@ -472,7 +472,7 @@ export default function VenuesPage({
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex-shrink-0 ${
                     isFollowed
                       ? 'bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/30 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30'
-                      : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-white'
+                      : 'bg-noctvm-midnight text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/40 hover:text-foreground'
                   } disabled:opacity-40`}
                 >
                   {isLoading ? '...' : isFollowed ? 'Following' : 'Follow'}
@@ -508,7 +508,7 @@ export default function VenuesPage({
                   setExpandedVenue(next);
                   if (next) fetchReviews(next);
                 }}
-                className="relative w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors overflow-hidden"
+                className="relative w-full flex items-center justify-between px-4 py-2.5 border-t border-noctvm-border text-xs text-noctvm-silver hover:text-foreground transition-colors overflow-hidden"
               >
                 <div className="absolute inset-0 z-0 pointer-events-none mask-gradient" />
                 <div className="relative z-10 flex items-center gap-1.5">
@@ -547,13 +547,13 @@ export default function VenuesPage({
                               {review.profiles?.avatar_url ? (
                                 <Image src={review.profiles.avatar_url} alt="" fill className="object-cover" unoptimized />
                               ) : (
-                                <span className="text-noctvm-caption font-bold text-white">{initial}</span>
+                                <span className="text-noctvm-caption font-bold text-foreground">{initial}</span>
                               )}
                               <div className="absolute inset-0 pointer-events-none z-10 glass-fade-edge" />
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-noctvm-label font-semibold text-white">@{handle}</span>
+                                <span className="text-noctvm-label font-semibold text-foreground">@{handle}</span>
                                 <StarRating rating={review.rating} />
                                 <span className="text-noctvm-caption text-noctvm-silver/40 ml-auto">{timeAgoShort(review.created_at)}</span>
                               </div>
@@ -570,7 +570,7 @@ export default function VenuesPage({
                   {/* Write a review */}
                   {user ? (
                     <div className="p-4 border-t border-noctvm-border" onClick={e => e.stopPropagation()}>
-                      <p className="text-xs font-semibold text-white mb-2">Rate & Review</p>
+                      <p className="text-xs font-semibold text-foreground mb-2">Rate & Review</p>
                       <div className="flex items-center gap-1 mb-3">
                         {[1, 2, 3, 4, 5].map(s => (
                           <button
@@ -591,13 +591,13 @@ export default function VenuesPage({
                           onChange={e => setReviewInputs(prev => ({ ...prev, [venue.name]: e.target.value }))}
                           onClick={e => e.stopPropagation()}
                           onKeyDown={e => { if (e.key === 'Enter') submitReview(venue.name); }}
-                          className="flex-1 bg-noctvm-surface text-xs text-white placeholder:text-noctvm-silver/30 outline-none px-3 py-2 rounded-lg border border-noctvm-border focus:border-noctvm-violet/50 transition-colors"
+                          className="flex-1 bg-noctvm-surface text-xs text-foreground placeholder:text-noctvm-silver/30 outline-none px-3 py-2 rounded-lg border border-noctvm-border focus:border-noctvm-violet/50 transition-colors"
                         />
                         <button
                           onClick={(e) => { e.stopPropagation(); submitReview(venue.name); }}
                           disabled={!reviewInputs[venue.name]?.trim() || !reviewRatings[venue.name] || submittingReview}
                           title="Post review"
-                          className="px-3 py-2 rounded-lg bg-noctvm-violet text-white text-xs font-semibold disabled:opacity-40 hover:bg-noctvm-violet/80 transition-colors"
+                          className="px-3 py-2 rounded-lg bg-noctvm-violet text-foreground text-xs font-semibold disabled:opacity-40 hover:bg-noctvm-violet/80 transition-colors"
                         >
                           Post
                         </button>
@@ -614,7 +614,7 @@ export default function VenuesPage({
 
         {sortedVenues.length === 0 && (
           <div className="text-center py-16 animate-fade-in">
-            <p className="text-white font-semibold text-sm mb-1">No venues found</p>
+            <p className="text-foreground font-semibold text-sm mb-1">No venues found</p>
             <p className="text-xs text-noctvm-silver/60">Try a different search or filter</p>
           </div>
         )}

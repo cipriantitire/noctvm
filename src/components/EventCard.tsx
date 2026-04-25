@@ -151,7 +151,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
       className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-200 ${
         currentIsSaved 
           ? 'bg-noctvm-violet/20 text-noctvm-violet border border-noctvm-violet/30' 
-          : 'bg-white/5 text-noctvm-silver/50 hover:bg-white/10 hover:text-white border border-white/5'
+          : 'bg-white/5 text-noctvm-silver/50 hover:bg-white/10 hover:text-foreground border border-white/5'
       } active:scale-[0.96]`}
       title={currentIsSaved ? 'Remove from saved' : 'Save event'}
     >
@@ -243,7 +243,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
                 <span key={genre} className="px-2 py-0.5 rounded-full corner-smooth-none text-noctvm-caption uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{genre}</span>
               ))}
             </div>
-            <h3 className="font-heading font-semibold text-white text-sm lg:text-base leading-tight mb-1 line-clamp-2 group-hover:text-noctvm-violet transition-colors">
+            <h3 className="font-heading font-semibold text-foreground text-sm lg:text-base leading-tight mb-1 line-clamp-2 group-hover:text-noctvm-violet transition-colors">
               {event.title}
             </h3>
             <p className="text-noctvm-silver/70 text-xs truncate">{event.venue}</p>
@@ -299,7 +299,7 @@ function EventCard({ event, variant = 'portrait', onClick, onSaveRequireAuth, sa
             <span key={genre} className="px-1.5 py-0.5 rounded-full corner-smooth-none text-noctvm-micro lg:text-noctvm-caption uppercase font-bold bg-white/5 text-noctvm-silver/60 border border-white/5">{genre}</span>
           ))}
         </div>
-        <h3 className="font-heading font-semibold text-white text-sm leading-snug mb-1 line-clamp-2 group-hover:text-noctvm-violet transition-colors">
+        <h3 className="font-heading font-semibold text-foreground text-sm leading-snug mb-1 line-clamp-2 group-hover:text-noctvm-violet transition-colors">
           {event.title}
         </h3>
         <p className="text-noctvm-silver/70 text-xs truncate mb-3">{event.venue}</p>

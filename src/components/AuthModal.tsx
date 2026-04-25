@@ -81,7 +81,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   if (checkEmail) {
     return (
       <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${isClosing ? 'animate-fade-out' : ''}`}>
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={handleClose} />
+        <div className="absolute inset-0 bg-noctvm-black/70 backdrop-blur-md" onClick={handleClose} />
         <div
           className={`relative w-full max-w-md frosted-glass rounded-2xl p-8 shadow-2xl shadow-black/50 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
           onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
@@ -92,12 +92,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
             </div>
-            <h2 className="font-heading text-xl font-bold text-white mb-2">Check your email</h2>
+            <h2 className="font-heading text-xl font-bold text-foreground mb-2">Check your email</h2>
             <p className="text-sm text-noctvm-silver">
-              We sent a confirmation link to <span className="text-white font-medium">{email}</span>
+              We sent a confirmation link to <span className="text-foreground font-medium">{email}</span>
             </p>
             <p className="text-xs text-noctvm-silver/60 mt-2">Click the link to activate your account.</p>
-            <button onClick={onClose} className="mt-6 px-6 py-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border text-sm text-noctvm-silver hover:text-white transition-colors">
+            <button onClick={onClose} className="mt-6 px-6 py-2.5 rounded-lg bg-noctvm-surface border border-noctvm-border text-sm text-noctvm-silver hover:text-foreground transition-colors">
               Close
             </button>
           </div>
@@ -109,14 +109,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md backdrop-enter" onClick={onClose} />
+      <div className="absolute inset-0 bg-noctvm-black/70 backdrop-blur-md backdrop-enter" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative w-full max-w-md frosted-glass rounded-2xl p-8 shadow-2xl shadow-black/50 animate-scale-in">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-noctvm-surface/80 border border-noctvm-border flex items-center justify-center text-noctvm-silver hover:text-white transition-all"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-noctvm-surface/80 border border-noctvm-border flex items-center justify-center text-noctvm-silver hover:text-foreground transition-all"
           title="Close Modal"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
         {/* Header */}
         <div className="text-center mb-6">
-          <h2 className="font-heading text-2xl font-bold text-white">
+          <h2 className="font-heading text-2xl font-bold text-foreground">
             {mode === 'login' ? 'Welcome back' : 'Join NOCTVM'}
           </h2>
           <p className="text-sm text-noctvm-silver mt-1">
@@ -136,7 +136,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         <div className="space-y-2 mb-5">
           <button
             onClick={() => handleOAuth('google')}
-            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-sm font-medium text-white"
+            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-lg bg-noctvm-midnight border border-noctvm-border hover:border-noctvm-violet/30 transition-colors text-sm font-medium text-foreground"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -163,7 +163,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               placeholder="Display name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors"
+              className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors"
               required
             />
           )}
@@ -172,7 +172,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors"
+            className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors"
             required
           />
           <input
@@ -180,7 +180,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors"
+            className="w-full bg-noctvm-midnight border border-noctvm-border rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-noctvm-silver/40 focus:outline-none focus:border-noctvm-violet/50 transition-colors"
             required
             minLength={6}
           />
@@ -194,7 +194,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2.5 rounded-lg bg-noctvm-violet text-foreground text-sm font-medium hover:bg-noctvm-violet/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

@@ -7,7 +7,7 @@ export default function CardPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Card</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Card</h1>
         <p className="text-noctvm-silver">Composable card with Header, Body, and Footer slots.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
@@ -49,7 +49,7 @@ export default function CardPage() {
         </Card>
         <Card variant="flat" isPressable>
           <CardBody>
-            <p className="text-sm text-white font-medium">Flat + Pressable</p>
+            <p className="text-sm text-foreground font-medium">Flat + Pressable</p>
             <p className="text-noctvm-caption text-noctvm-silver mt-1">Click to see the press scale effect.</p>
           </CardBody>
         </Card>

@@ -17,7 +17,7 @@ import CommentSection from './CommentSection';
 import PostViewerModal from '../PostViewerModal';
 import EditPostModal from '../EditPostModal';
 import TaggedUsersModal from '../TaggedUsersModal';
-import LikesModal from '../LikesModal';
+import LikesSheet from '../LikesSheet';
 import { Avatar } from '@/components/ui';
 
 interface FeedItemProps {
@@ -174,7 +174,7 @@ export function FeedItem({
             <div className="flex items-center gap-1.5 min-w-0">
               <Link
                 href={authorLink}
-                className="text-sm font-medium text-white hover:text-noctvm-violet transition-colors truncate"
+                className="text-sm font-medium text-foreground hover:text-noctvm-violet transition-colors truncate"
                 title={post.user.name}
               >
                 {post.user.name}
@@ -184,7 +184,7 @@ export function FeedItem({
               {!isFollowing && !isOwnPost && user && (
                 <button
                   onClick={() => onFollow?.(post.userId!)}
-                  className="ml-2 px-2.5 py-0.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-micro font-bold text-noctvm-violet hover:bg-noctvm-violet hover:text-white transition-all animate-fade-in"
+                  className="ml-2 px-2.5 py-0.5 rounded-full bg-noctvm-violet/20 border border-noctvm-violet/30 text-noctvm-micro font-bold text-noctvm-violet hover:bg-noctvm-violet hover:text-foreground transition-all animate-fade-in"
                   title={`Follow ${post.user.handle}`}
                 >
                   Follow
@@ -225,18 +225,18 @@ export function FeedItem({
           {post.imageUrl ? (
             <Image src={post.imageUrl} alt="" fill className="object-cover" priority={idx < 2} unoptimized />
           ) : (
-            <div className="text-white/20 italic p-4 text-center">Scene visualization unavailable</div>
+            <div className="text-foreground/20 italic p-4 text-center">Scene visualization unavailable</div>
           )}
           {post.venue.tagged && post.venue.name && (
             <button
               onClick={(e) => { e.stopPropagation(); onVenueClick(post.venue.name); }}
-              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 z-10"
+              className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-noctvm-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 z-10"
               title={`View ${post.venue.name}`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
                 <Image src={getVenueLogo(post.venue.name, venueLogosMap[post.venue.name])} alt="" fill className="object-cover" />
               </div>
-              <span className="text-noctvm-caption font-bold text-white pr-1">{post.venue.name}</span>
+              <span className="text-noctvm-caption font-bold text-foreground pr-1">{post.venue.name}</span>
             </button>
           )}
 
@@ -244,7 +244,7 @@ export function FeedItem({
           {post.taggedUsers && post.taggedUsers.length > 0 && (
             <button
               onClick={(e) => { e.stopPropagation(); setShowTaggedUsers(true); }}
-              className="absolute bottom-3 left-3 flex items-center gap-2 px-2 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all z-10"
+              className="absolute bottom-3 left-3 flex items-center gap-2 px-2 py-1.5 rounded-full bg-noctvm-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all z-10"
               title={`${post.taggedUsers.length} people tagged`}
             >
               <div className="flex px-1">
@@ -256,12 +256,12 @@ export function FeedItem({
                       className={`w-6 h-6 rounded-full border border-black flex items-center justify-center bg-noctvm-surface/80 shadow-sm ${is5th && post.taggedUsers.length > 5 ? 'opacity-50' : ''}`}
                       style={{ marginLeft: i === 0 ? 0 : '-10px', zIndex: 10 - i }}
                     >
-                      <span className="text-noctvm-micro font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
+                      <span className="text-noctvm-micro font-bold text-foreground uppercase">{handle.replace('@', '')[0]}</span>
                     </div>
                   );
                 })}
               </div>
-              <span className="text-noctvm-caption font-bold text-white pr-1 tracking-wider">
+              <span className="text-noctvm-caption font-bold text-foreground pr-1 tracking-wider">
                 {post.taggedUsers.length > 9 ? '9+' : post.taggedUsers.length}
               </span>
             </button>
@@ -273,8 +273,8 @@ export function FeedItem({
               onClick={(e) => e.stopPropagation()}
               className="absolute bottom-14 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg shadow-noctvm-violet/20 animate-fade-in z-10"
             >
-              <CalendarIcon className="w-3 h-3 text-white" />
-              <span className="text-noctvm-micro font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+              <CalendarIcon className="w-3 h-3 text-foreground" />
+              <span className="text-noctvm-micro font-black text-foreground uppercase tracking-wider truncate max-w-[120px]">
                 {post.event.title}
               </span>
             </div>
@@ -326,7 +326,7 @@ export function FeedItem({
             <button 
               onClick={() => setShowLikesModal(true)}
               title="View likes"
-              className="text-xs font-black text-white hover:text-noctvm-violet transition-colors"
+              className="text-xs font-black text-foreground hover:text-noctvm-violet transition-colors"
             >
               {post.likes.toLocaleString()} likes
             </button>
@@ -334,7 +334,7 @@ export function FeedItem({
 
           {/* Caption (Inline with Nickname) */}
           <div className="text-xs leading-relaxed text-noctvm-silver/90 mb-1 break-words">
-            <Link href={authorLink} className="font-bold text-white mr-1.5 hover:text-noctvm-violet transition-colors">
+            <Link href={authorLink} className="font-bold text-foreground mr-1.5 hover:text-noctvm-violet transition-colors">
               {post.user.handle.replace('@', '')}
             </Link>
             {post.caption ? <PostBody text={post.caption} /> : null}
@@ -390,7 +390,7 @@ export function FeedItem({
         onClose={() => setShowTaggedUsers(false)}
       />
 
-      <LikesModal
+      <LikesSheet
         postId={post.id}
         isOpen={showLikesModal}
         onClose={() => setShowLikesModal(false)}

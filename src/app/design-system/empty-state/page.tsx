@@ -37,7 +37,7 @@ export default function EmptyStatePage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Empty State</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Empty State</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Contextual zero-state with icon, title, description, and optional CTA.</p>
       </div>
 
@@ -46,7 +46,7 @@ export default function EmptyStatePage() {
         <div className="flex gap-2 flex-wrap">
           {scenarios.map(s => (
             <button key={s.id} onClick={() => setActive(s.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${active === s.id ? 'bg-noctvm-violet/20 text-white border border-noctvm-violet/30' : 'text-noctvm-silver border border-white/10 hover:border-white/20'}`}>
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${active === s.id ? 'bg-noctvm-violet/20 text-foreground border border-noctvm-violet/30' : 'text-noctvm-silver border border-white/10 hover:border-white/20'}`}>
               {s.label}
             </button>
           ))}

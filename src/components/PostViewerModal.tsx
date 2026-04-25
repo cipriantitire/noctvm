@@ -8,7 +8,7 @@ import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
-import LikesModal from './LikesModal';
+import LikesSheet from './LikesSheet';
 import { Avatar } from '@/components/ui';
 
 import VerifiedBadge from './VerifiedBadge';
@@ -308,14 +308,14 @@ export default function PostViewerModal({
   return createPortal(
     <div className="fixed inset-0 z-viewer flex items-center justify-center overflow-hidden">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl transition-opacity animate-fade-in" onClick={onClose} />
+      <div className="absolute inset-0 bg-noctvm-black/90 backdrop-blur-xl transition-opacity animate-fade-in" onClick={onClose} />
 
       {/* Close button top right */}
       <button 
         onClick={onClose}
         title="Close modal"
         aria-label="Close modal"
-        className="absolute top-10 right-4 lg:top-6 lg:right-6 z-viewer-controls p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90"
+        className="absolute top-10 right-4 lg:top-6 lg:right-6 z-viewer-controls p-3 rounded-full bg-noctvm-black/60 backdrop-blur-md border border-white/10 text-foreground hover:bg-noctvm-black/80 transition-all active:scale-90"
       >
         <svg className="w-6 h-6 lg:w-8 lg:h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6L6 18M6 6l12 12" />
@@ -327,7 +327,7 @@ export default function PostViewerModal({
         onClick={onClose}
         title="Go back"
         aria-label="Go back"
-        className="absolute top-10 left-4 lg:hidden z-viewer-controls p-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-all active:scale-90 shadow-xl"
+        className="absolute top-10 left-4 lg:hidden z-viewer-controls p-3 rounded-full bg-noctvm-black/60 backdrop-blur-md border border-white/10 text-foreground hover:bg-noctvm-black/80 transition-all active:scale-90 shadow-xl"
       >
         <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 18l-6-6 6-6" />
@@ -340,7 +340,7 @@ export default function PostViewerModal({
           onClick={() => setIndex(i => i - 1)}
           disabled={!hasPrev}
           title="Previous post"
-          className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all pointer-events-auto ${!hasPrev ? 'opacity-0 scale-90' : 'opacity-100'}`}
+          className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-foreground transition-all pointer-events-auto ${!hasPrev ? 'opacity-0 scale-90' : 'opacity-100'}`}
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
@@ -348,7 +348,7 @@ export default function PostViewerModal({
           onClick={() => setIndex(i => i + 1)}
           disabled={!hasNext}
           title="Next post"
-          className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all pointer-events-auto ${!hasNext ? 'opacity-0 scale-90' : 'opacity-100'}`}
+          className={`w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-foreground transition-all pointer-events-auto ${!hasNext ? 'opacity-0 scale-90' : 'opacity-100'}`}
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
         </button>
@@ -358,7 +358,7 @@ export default function PostViewerModal({
       <div className="relative w-full max-w-[1200px] lg:max-w-5xl h-full lg:h-[calc(100vh-80px)] lg:max-h-[850px] bg-noctvm-midnight border border-white/10 lg:rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] z-modal flex flex-col lg:flex-row transition-transform animate-scale-in mx-auto">
         
         {/* Left: Image Side */}
-        <div className="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
+        <div className="flex-1 bg-noctvm-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
           {post.image_url ? (
             <div className="w-full h-full relative">
               <Image 
@@ -381,20 +381,20 @@ export default function PostViewerModal({
              {post.venue?.tagged && post.venue?.name && (
                <button
                  onClick={(e) => { e.stopPropagation(); /* onVenueClick handling? maybe link to it later */ }}
-                 className="absolute bottom-4 right-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 pointer-events-auto"
+                 className="absolute bottom-4 right-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-noctvm-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 pointer-events-auto"
                  title={`View ${post.venue.name}`}
                >
                  <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 bg-noctvm-midnight flex items-center justify-center relative">
                    <Image src={getVenueLogo(post.venue.name, venueLogosMap?.[post.venue.name])} alt="" fill className="object-cover" />
                  </div>
-                 <span className="text-noctvm-caption font-bold text-white pr-1">{post.venue.name}</span>
+                 <span className="text-noctvm-caption font-bold text-foreground pr-1">{post.venue.name}</span>
                </button>
              )}
 
              {post.event && (
                <div className="absolute bottom-16 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-noctvm-violet/80 backdrop-blur-md border border-noctvm-violet/30 shadow-lg animate-fade-in pointer-events-auto">
-                 <CalendarIcon className="w-3 h-3 text-white" />
-                 <span className="text-noctvm-micro font-black text-white uppercase tracking-wider truncate max-w-[120px]">
+                 <CalendarIcon className="w-3 h-3 text-foreground" />
+                 <span className="text-noctvm-micro font-black text-foreground uppercase tracking-wider truncate max-w-[120px]">
                    {post.event.title}
                  </span>
                </div>
@@ -403,7 +403,7 @@ export default function PostViewerModal({
              {post.tagged_users && post.tagged_users.length > 0 && (
                <button
                  onClick={(e) => { e.stopPropagation(); setShowTaggedUsers(true); }}
-                 className="absolute bottom-4 left-4 flex items-center gap-2 px-2 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all pointer-events-auto"
+                 className="absolute bottom-4 left-4 flex items-center gap-2 px-2 py-1.5 rounded-full bg-noctvm-black/60 backdrop-blur-sm border border-white/10 hover:border-noctvm-violet/50 transition-all pointer-events-auto"
                  title={`${post.tagged_users.length} people tagged`}
                >
                  <div className="flex px-1">
@@ -411,12 +411,12 @@ export default function PostViewerModal({
                      const is5th = i === 4;
                      return (
                        <div key={handle} className={`w-6 h-6 rounded-full border border-black flex items-center justify-center bg-noctvm-surface/80 shadow-sm ${is5th && (post.tagged_users?.length || 0) > 5 ? 'opacity-50' : ''}`} style={{ marginLeft: i === 0 ? 0 : '-10px', zIndex: 10 - i }}>
-                         <span className="text-noctvm-micro font-bold text-white uppercase">{handle.replace('@', '')[0]}</span>
+                         <span className="text-noctvm-micro font-bold text-foreground uppercase">{handle.replace('@', '')[0]}</span>
                        </div>
                      );
                    })}
                  </div>
-                 <span className="text-noctvm-caption font-bold text-white pr-1 tracking-wider">
+                 <span className="text-noctvm-caption font-bold text-foreground pr-1 tracking-wider">
                    {(post.tagged_users?.length || 0) > 9 ? '9+' : post.tagged_users?.length}
                  </span>
                </button>
@@ -439,7 +439,7 @@ export default function PostViewerModal({
              />
               <div className="flex-1 min-w-0">
                  <div className="flex items-center gap-1.5">
-                    <button className="text-sm font-semibold text-white leading-tight truncate hover:text-noctvm-violet transition-colors">
+                    <button className="text-sm font-semibold text-foreground leading-tight truncate hover:text-noctvm-violet transition-colors">
                       {profileName || 'User'}
                     </button>
                     {profileBadge !== 'none' && <VerifiedBadge type={profileBadge} size="sm" />}
@@ -463,7 +463,7 @@ export default function PostViewerModal({
           <div ref={ref} style={maskStyle} className="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar flex flex-col gap-2">
              {post.caption && (
                <div className="mb-2 mt-1">
-                  <p className="text-xs text-white/90 leading-relaxed break-words">
+                  <p className="text-xs text-foreground/90 leading-relaxed break-words">
                      {post.caption}
                   </p>
                   {/* Hashtag Buttons */}
@@ -534,7 +534,7 @@ export default function PostViewerModal({
                 <button 
                   onClick={() => setShowLikesModal(true)}
                   title="View likes"
-                  className="text-xs font-black text-white hover:text-noctvm-violet transition-colors"
+                  className="text-xs font-black text-foreground hover:text-noctvm-violet transition-colors"
                 >
                   {likeCount.toLocaleString()} likes
                 </button>
@@ -547,7 +547,7 @@ export default function PostViewerModal({
                   value={commentInput}
                   onChange={(e) => setCommentInput(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-transparent border-none p-0 text-sm text-white focus:outline-none focus:ring-0 placeholder-noctvm-silver/50"
+                  className="w-full bg-transparent border-none p-0 text-sm text-foreground focus:outline-none focus:ring-0 placeholder-noctvm-silver/50"
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
                 />
                 {commentInput.trim() && (
@@ -564,7 +564,7 @@ export default function PostViewerModal({
 
         </div>
       </div>
-      <LikesModal
+      <LikesSheet
         postId={post.id}
         isOpen={showLikesModal}
         onClose={() => setShowLikesModal(false)}

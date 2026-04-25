@@ -148,7 +148,7 @@ export default function EventManager() {
 
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-white transition-all h-[42px] flex items-center justify-center min-w-[42px]"
+            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-foreground transition-all h-[42px] flex items-center justify-center min-w-[42px]"
             title="Toggle Sort Order"
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
@@ -157,14 +157,14 @@ export default function EventManager() {
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 h-[42px]">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="Grid View"
             >
               <GridIcon className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="List View"
             >
               <div className="w-4 h-4 flex flex-col justify-between py-0.5 px-0.5">
@@ -177,7 +177,7 @@ export default function EventManager() {
 
           <button 
             onClick={() => { setEditingEvent(null); setShowForm(true); }}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-white hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] whitespace-nowrap"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 h-[42px] bg-noctvm-violet rounded-xl text-noctvm-caption font-bold uppercase tracking-wider text-foreground hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] whitespace-nowrap"
             title="Create Event"
           >
             <PlusIcon className="w-3.5 h-3.5" />
@@ -188,7 +188,7 @@ export default function EventManager() {
             <div className="h-[42px]">
               <button
                 onClick={() => setShowSettings(true)}
-                className={`p-2.5 bg-white/5 border border-white/10 rounded-xl transition-all h-[42px] flex items-center justify-center min-w-[42px] ${showSettings ? 'text-noctvm-violet bg-noctvm-violet/5 border-noctvm-violet/30' : 'text-noctvm-silver hover:text-white'}`}
+                className={`p-2.5 bg-white/5 border border-white/10 rounded-xl transition-all h-[42px] flex items-center justify-center min-w-[42px] ${showSettings ? 'text-noctvm-violet bg-noctvm-violet/5 border-noctvm-violet/30' : 'text-noctvm-silver hover:text-foreground'}`}
                 title="Event Settings"
               >
                 <CogIcon className="w-5 h-5" />
@@ -199,7 +199,7 @@ export default function EventManager() {
       </div>
 
       {(showForm || editingEvent) && (
-        <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
+        <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-noctvm-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto no-scrollbar">
           <div className="w-full max-w-4xl my-auto">
             <EventForm 
               venues={venues}
@@ -239,7 +239,7 @@ export default function EventManager() {
                 }}
               />
               {event.is_promoted && (
-                <div className={`absolute top-2 right-2 bg-noctvm-emerald/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-glow-sm ${
+                <div className={`absolute top-2 right-2 bg-noctvm-emerald/90 backdrop-blur-md text-foreground px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-glow-sm ${
                   viewMode === 'grid' ? 'text-noctvm-micro' : 'text-noctvm-micro'
                 }`}>
                   Promoted
@@ -250,7 +250,7 @@ export default function EventManager() {
             <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
               <div className={`flex ${viewMode === 'grid' ? 'flex-col h-full' : 'flex-row items-center justify-between gap-4'}`}>
                 <div className="min-w-0 flex-1">
-                  <h3 className={`font-bold text-white tracking-tight group-hover:text-noctvm-violet transition-colors truncate ${
+                  <h3 className={`font-bold text-foreground tracking-tight group-hover:text-noctvm-violet transition-colors truncate ${
                     viewMode === 'grid' ? 'text-base line-clamp-2 leading-tight mb-1' : 'text-sm mb-0.5'
                   }`}>
                     {event.title}
@@ -259,7 +259,7 @@ export default function EventManager() {
                   <div className={`flex flex-wrap gap-x-4 gap-y-1 ${viewMode === 'grid' ? 'mb-6' : ''}`}>
                     <div className="flex items-center gap-1.5">
                       <MapPinIcon className="w-3 h-3 text-noctvm-violet/60" />
-                      <span className="text-noctvm-caption font-bold text-white/70 truncate">@{event.venue}</span>
+                      <span className="text-noctvm-caption font-bold text-foreground/70 truncate">@{event.venue}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CalendarIcon className="w-3 h-3 text-noctvm-emerald/60" />
@@ -280,7 +280,7 @@ export default function EventManager() {
                       className={`p-2 rounded-lg transition-all ${
                         event.is_promoted 
                           ? 'text-noctvm-emerald bg-noctvm-emerald/10 border border-noctvm-emerald/20 shadow-glow-sm' 
-                          : 'text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5'
+                          : 'text-noctvm-silver/40 hover:text-foreground hover:bg-white/10 border border-white/5'
                       }`}
                       title={event.is_promoted ? "Stop Promoting" : "Promote Event"}
                     >
@@ -290,7 +290,7 @@ export default function EventManager() {
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setEditingEvent(event); }}
-                      className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
+                      className="p-2 rounded-lg text-noctvm-silver/40 hover:text-foreground hover:bg-white/10 border border-white/5 transition-all"
                       title="Edit Event"
                     >
                       <EditIcon className="w-3.5 h-3.5" />
@@ -332,7 +332,7 @@ export default function EventManager() {
       {isAdmin && showSettings && (
         <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+            className="absolute inset-0 bg-noctvm-black/60 backdrop-blur-sm animate-fade-in"
             onClick={() => setShowSettings(false)}
           />
           
@@ -340,13 +340,13 @@ export default function EventManager() {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Global Fallback</h3>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground">Global Fallback</h3>
                   <p className="text-noctvm-caption font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Asset Management</p>
                 </div>
                 <button 
                   title="Close Settings" 
                   onClick={() => setShowSettings(false)} 
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-white transition-all hover:rotate-90"
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-noctvm-silver hover:text-foreground transition-all hover:rotate-90"
                 >
                   <XIcon className="w-4 h-4" />
                 </button>
@@ -370,9 +370,9 @@ export default function EventManager() {
                   ) : (
                     <>
                       <div className="w-10 h-10 rounded-full bg-noctvm-violet flex items-center justify-center shadow-lg shadow-noctvm-violet/40">
-                        <UploadIcon className="w-5 h-5 text-white" />
+                        <UploadIcon className="w-5 h-5 text-foreground" />
                       </div>
-                      <span className="text-noctvm-micro font-black uppercase tracking-widest text-white">Update Image</span>
+                      <span className="text-noctvm-micro font-black uppercase tracking-widest text-foreground">Update Image</span>
                     </>
                   )}
                 </button>
@@ -386,7 +386,7 @@ export default function EventManager() {
                 <button 
                   onClick={() => fallbackFileRef.current?.click()}
                   disabled={uploadingFallback}
-                  className="w-full py-3.5 rounded-xl bg-noctvm-violet text-white text-noctvm-caption font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl bg-noctvm-violet text-foreground text-noctvm-caption font-black uppercase tracking-[0.1em] hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 active:scale-[0.96] disabled:opacity-50"
                 >
                   {uploadingFallback ? 'Uploading...' : 'Upload New Design'}
                 </button>

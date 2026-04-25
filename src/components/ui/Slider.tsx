@@ -73,7 +73,7 @@ const Slider = React.forwardRef<
         {(label || showValue) && (
           <div className="flex justify-between items-center">
             {label && (
-              <span className="text-sm text-white font-medium">{label}</span>
+              <span className="text-sm text-foreground font-medium">{label}</span>
             )}
             {showValue && formatted && (
               <span className="text-noctvm-caption text-noctvm-silver">

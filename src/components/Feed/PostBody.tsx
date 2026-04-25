@@ -45,7 +45,7 @@ export default function PostBody({ text }: PostBodyProps) {
         className={`font-bold transition-all hover:opacity-80 ${
           isPocketLink 
             ? 'text-noctvm-violet drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]' 
-            : 'text-white underline decoration-white/20'
+            : 'text-foreground underline decoration-white/20'
         }`}
       >
         {label}

@@ -103,7 +103,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
       
       <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
         <div>
-          <h3 className="text-lg font-bold tracking-tight text-white uppercase">
+          <h3 className="text-lg font-bold tracking-tight text-foreground uppercase">
             {initialData?.id ? 'Edit Event' : 'Create New Event'}
           </h3>
           <p className="text-noctvm-micro font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Event Management</p>
@@ -132,10 +132,10 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               title="Select Venue"
             >
               {venues.map((v) => (
-                <option key={v.id} value={v.name} className="bg-noctvm-black text-white">{v.name}</option>
+                <option key={v.id} value={v.name} className="bg-noctvm-black text-foreground">{v.name}</option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/20">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               title="Poster Image URL"
               className={cn(
                 inputBaseClassName,
-                "pl-4 pr-[35%] font-mono text-noctvm-micro text-white/60 uppercase tracking-widest"
+                "pl-4 pr-[35%] font-mono text-noctvm-micro text-foreground/60 uppercase tracking-widest"
               )}
               placeholder="https://..."
               value={formData.image_url}
@@ -208,15 +208,15 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               onChange={(e) => setFormData({ ...formData, ticket_provider: e.target.value as any })}
               title="Select Ticket Provider"
             >
-              <option value="none" className="bg-noctvm-black text-white">None (Information Only)</option>
-              <option value="livetickets" className="bg-noctvm-black text-white">LiveTickets</option>
-              <option value="iabilet" className="bg-noctvm-black text-white">Iabilet</option>
-              <option value="eventbook" className="bg-noctvm-black text-white">Eventbook</option>
-              <option value="ambilet" className="bg-noctvm-black text-white">Ambilet</option>
-              <option value="ra" className="bg-noctvm-black text-white">Resident Advisor</option>
-              <option value="fever" className="bg-noctvm-black text-white">Fever</option>
+              <option value="none" className="bg-noctvm-black text-foreground">None (Information Only)</option>
+              <option value="livetickets" className="bg-noctvm-black text-foreground">LiveTickets</option>
+              <option value="iabilet" className="bg-noctvm-black text-foreground">Iabilet</option>
+              <option value="eventbook" className="bg-noctvm-black text-foreground">Eventbook</option>
+              <option value="ambilet" className="bg-noctvm-black text-foreground">Ambilet</option>
+              <option value="ra" className="bg-noctvm-black text-foreground">Resident Advisor</option>
+              <option value="fever" className="bg-noctvm-black text-foreground">Fever</option>
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/20">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
@@ -230,7 +230,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
           }
         >
           <Input
-            className="font-mono text-noctvm-micro text-white/60 uppercase tracking-widest font-normal"
+            className="font-mono text-noctvm-micro text-foreground/60 uppercase tracking-widest font-normal"
             placeholder="https://iabilet.ro/..."
             value={formData.ticket_url || ''}
             onChange={(e) => setFormData({ ...formData, ticket_url: e.target.value })}
@@ -241,7 +241,7 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
         <Field label="Official Event URL">
           <Input
-            className="font-mono text-noctvm-micro text-white/60 uppercase tracking-widest font-normal"
+            className="font-mono text-noctvm-micro text-foreground/60 uppercase tracking-widest font-normal"
             placeholder="https://facebook.com/events/..."
             value={formData.event_url}
             onChange={(e) => setFormData({ ...formData, event_url: e.target.value })}
@@ -270,8 +270,8 @@ export default function EventForm({ venues, onSuccess, onCancel, initialData }: 
               onClick={() => handleGenreChange(genre)}
               className={`px-3 py-1.5 rounded-full corner-smooth-none text-noctvm-micro font-bold uppercase tracking-widest border transition-all duration-300 ${
                 formData.genres?.includes(genre)
-                  ? 'bg-noctvm-violet text-white border-noctvm-violet shadow-lg shadow-noctvm-violet/20'
-                  : 'bg-white/5 text-noctvm-silver border-white/10 hover:border-white/30 hover:text-white'
+                  ? 'bg-noctvm-violet text-foreground border-noctvm-violet shadow-lg shadow-noctvm-violet/20'
+                  : 'bg-white/5 text-noctvm-silver border-white/10 hover:border-white/30 hover:text-foreground'
               }`}
             >
               {genre}

@@ -63,7 +63,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="flex-shrink-0 p-0.5 rounded text-noctvm-silver hover:text-white transition-colors"
+            className="flex-shrink-0 p-0.5 rounded text-noctvm-silver hover:text-foreground transition-colors"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />

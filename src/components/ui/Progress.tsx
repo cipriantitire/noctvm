@@ -50,7 +50,7 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
       <div ref={ref} className={cn('w-full flex flex-col gap-1.5', className)} {...props}>
         {(label || showValue) && (
           <div className="flex justify-between items-center">
-            {label && <span className="text-sm text-white font-medium">{label}</span>}
+            {label && <span className="text-sm text-foreground font-medium">{label}</span>}
             {showValue && (
               <span className="text-noctvm-caption text-noctvm-silver">
                 {isIndeterminate ? '...' : `${Math.round(pct)}%`}
@@ -163,7 +163,7 @@ const CircularProgress = React.forwardRef<SVGSVGElement, CircularProgressProps>(
           </svg>
           {showValue && !isIndeterminate && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-noctvm-xs text-white font-semibold">
+              <span className="text-noctvm-xs text-foreground font-semibold">
                 {Math.round(pct)}%
               </span>
             </div>

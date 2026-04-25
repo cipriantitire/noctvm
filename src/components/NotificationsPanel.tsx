@@ -130,7 +130,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[400]"
+            className="fixed inset-0 bg-noctvm-black/60 backdrop-blur-sm z-[400]"
           />
 
           <motion.div
@@ -166,12 +166,12 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             >
               <div className="flex items-center gap-3">
                 <BellIcon className="w-5 h-5 text-noctvm-violet" />
-                <h2 className="font-heading font-semibold text-white">Notifications</h2>
+                <h2 className="font-heading font-semibold text-foreground">Notifications</h2>
               </div>
               <button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center text-noctvm-silver hover:text-white transition-colors"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center text-noctvm-silver hover:text-foreground transition-colors"
                 title="Close"
               >
                 <XIcon className="w-4 h-4" />
@@ -223,8 +223,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                       </div>
 
                       <div className="flex-1 text-left">
-                        <p className="text-sm text-white font-medium">
-                          <span className="font-bold text-noctvm-silver group-hover:text-white transition-colors">
+                        <p className="text-sm text-foreground font-medium">
+                          <span className="font-bold text-noctvm-silver group-hover:text-foreground transition-colors">
                             @{n.actor?.username || 'someone'}
                           </span>
                           {' '}{n.message}
@@ -242,7 +242,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                 <button
                   onClick={() => markAsRead()}
                   disabled={loading || !hasUnread}
-                  className="w-full h-10 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold tracking-[0.08em] text-noctvm-silver hover:bg-white/10 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full h-10 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold tracking-[0.08em] text-noctvm-silver hover:bg-white/10 hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Mark all as read
                 </button>

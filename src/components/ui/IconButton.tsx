@@ -26,8 +26,8 @@ export function IconButton({
       className={cn(
         "inline-flex items-center justify-center rounded-full border border-white/10 transition-all shrink-0",
         variant === "overlay" &&
-          "bg-black/60 backdrop-blur-sm text-noctvm-silver hover:text-white hover:bg-black/80",
-        variant === "plain" && "bg-transparent border-transparent hover:bg-white/10 text-white",
+          "bg-noctvm-black/60 backdrop-blur-sm text-noctvm-silver hover:text-foreground hover:bg-noctvm-black/80",
+        variant === "plain" && "bg-transparent border-transparent hover:bg-white/10 text-foreground",
         sizes[size],
         className
       )}

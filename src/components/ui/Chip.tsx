@@ -26,19 +26,19 @@ const sizeMap: Record<ChipSize, { height: string; text: string; px: string; dot:
 
 const colorMap: Record<ChipColor, Record<ChipVariant, string>> = {
   default: {
-    solid: 'bg-noctvm-surface-light text-white border-transparent',
-    bordered: 'bg-transparent text-white border-noctvm-border',
-    flat: 'bg-white/10 text-white border-transparent',
+    solid: 'bg-noctvm-surface-light text-foreground border-transparent',
+    bordered: 'bg-transparent text-foreground border-noctvm-border',
+    flat: 'bg-white/10 text-foreground border-transparent',
     ghost: 'bg-transparent text-noctvm-silver border-noctvm-border hover:bg-white/5',
   },
   violet: {
-    solid: 'bg-noctvm-violet text-white border-transparent',
+    solid: 'bg-noctvm-violet text-foreground border-transparent',
     bordered: 'bg-transparent text-noctvm-violet border-noctvm-violet',
     flat: 'bg-noctvm-violet/20 text-noctvm-violet border-transparent',
     ghost: 'bg-transparent text-noctvm-violet border-noctvm-violet/50 hover:bg-noctvm-violet/10',
   },
   emerald: {
-    solid: 'bg-noctvm-emerald text-white border-transparent',
+    solid: 'bg-noctvm-emerald text-foreground border-transparent',
     bordered: 'bg-transparent text-noctvm-emerald border-noctvm-emerald',
     flat: 'bg-noctvm-emerald/20 text-noctvm-emerald border-transparent',
     ghost: 'bg-transparent text-noctvm-emerald border-noctvm-emerald/50 hover:bg-noctvm-emerald/10',
@@ -50,7 +50,7 @@ const colorMap: Record<ChipColor, Record<ChipVariant, string>> = {
     ghost: 'bg-transparent text-noctvm-gold border-noctvm-gold/50 hover:bg-noctvm-gold/10',
   },
   red: {
-    solid: 'bg-red-500 text-white border-transparent',
+    solid: 'bg-red-500 text-foreground border-transparent',
     bordered: 'bg-transparent text-red-400 border-red-500',
     flat: 'bg-red-500/20 text-red-400 border-transparent',
     ghost: 'bg-transparent text-red-400 border-red-500/50 hover:bg-red-500/10',

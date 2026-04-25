@@ -75,7 +75,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
   );
 
   return (
-    <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-sheet flex items-center justify-center p-4 bg-noctvm-black/60 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-lg bg-noctvm-black/90 border border-white/10 rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden frosted-noise">
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
@@ -86,7 +86,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
                 ) : <span className="text-xl">👤</span>}
              </div>
              <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">{user.display_name || 'Edit User'}</h3>
+                <h3 className="text-lg font-bold text-foreground tracking-tight">{user.display_name || 'Edit User'}</h3>
                 <p className="text-noctvm-caption text-noctvm-silver/40 uppercase font-mono tracking-widest">{user.email}</p>
              </div>
           </div>
@@ -128,14 +128,14 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
               }`}
             >
               <div className="text-left">
-                <p className={`text-sm font-bold transition-colors ${assignedVenueIds.includes(venue.id) ? 'text-white' : 'text-noctvm-silver'}`}>
+                <p className={`text-sm font-bold transition-colors ${assignedVenueIds.includes(venue.id) ? 'text-foreground' : 'text-noctvm-silver'}`}>
                   {venue.name}
                 </p>
                 <p className="text-noctvm-micro font-mono text-noctvm-silver/30 uppercase tracking-widest">{venue.city}</p>
               </div>
               <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
                 assignedVenueIds.includes(venue.id)
-                  ? 'bg-noctvm-violet border-noctvm-violet text-white'
+                  ? 'bg-noctvm-violet border-noctvm-violet text-foreground'
                   : 'border-white/10 text-transparent'
               }`}>
                 <CheckIcon className="w-3.5 h-3.5" />
@@ -155,7 +155,7 @@ export default function UserEditModal({ user, onClose, onSuccess }: UserEditModa
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="flex-[2] px-4 py-2.5 rounded-xl bg-noctvm-violet text-white text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 disabled:opacity-50"
+            className="flex-[2] px-4 py-2.5 rounded-xl bg-noctvm-violet text-foreground text-xs font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-lg shadow-noctvm-violet/20 disabled:opacity-50"
           >
             {saving ? 'Syncing...' : 'Save Assignments'}
           </button>

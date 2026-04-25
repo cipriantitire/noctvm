@@ -122,7 +122,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
       className={cn(
         'h-10 px-3 text-left text-noctvm-caption font-semibold uppercase tracking-wider text-noctvm-silver',
         'whitespace-nowrap',
-        isSortable && 'cursor-pointer hover:text-white select-none',
+        isSortable && 'cursor-pointer hover:text-foreground select-none',
         className
       )}
       onClick={isSortable ? onSort : undefined}
@@ -154,7 +154,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn('py-2 px-3 text-sm text-white align-middle', className)}
+    className={cn('py-2 px-3 text-sm text-foreground align-middle', className)}
     {...props}
   />
 ));

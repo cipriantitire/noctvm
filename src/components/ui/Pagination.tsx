@@ -78,7 +78,7 @@ const Pagination = React.forwardRef<HTMLElement, PaginationProps>(
           <button
             onClick={() => onChange(Math.max(1, page - 1))}
             disabled={page === 1 || isDisabled}
-            className={cn(itemBase, 'text-noctvm-silver hover:bg-white/10 hover:text-white disabled:opacity-30')}
+            className={cn(itemBase, 'text-noctvm-silver hover:bg-white/10 hover:text-foreground disabled:opacity-30')}
             aria-label="Previous page"
           >
             <ChevronLeft className={icon} />
@@ -98,8 +98,8 @@ const Pagination = React.forwardRef<HTMLElement, PaginationProps>(
               className={cn(
                 itemBase,
                 p === page
-                  ? 'bg-noctvm-violet text-white shadow-glow'
-                  : 'text-noctvm-silver hover:bg-white/10 hover:text-white'
+                  ? 'bg-noctvm-violet text-foreground shadow-glow'
+                  : 'text-noctvm-silver hover:bg-white/10 hover:text-foreground'
               )}
             >
               {p}
@@ -110,7 +110,7 @@ const Pagination = React.forwardRef<HTMLElement, PaginationProps>(
           <button
             onClick={() => onChange(Math.min(total, page + 1))}
             disabled={page === total || isDisabled}
-            className={cn(itemBase, 'text-noctvm-silver hover:bg-white/10 hover:text-white disabled:opacity-30')}
+            className={cn(itemBase, 'text-noctvm-silver hover:bg-white/10 hover:text-foreground disabled:opacity-30')}
             aria-label="Next page"
           >
             <ChevronRight className={icon} />

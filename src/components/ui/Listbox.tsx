@@ -21,7 +21,7 @@ const colorHover: Record<string, string> = {
   red: 'hover:bg-red-500/20',
 };
 const colorSelected: Record<string, string> = {
-  default: 'bg-white/10 text-white',
+  default: 'bg-white/10 text-foreground',
   violet: 'bg-noctvm-violet/20 text-noctvm-violet',
   emerald: 'bg-noctvm-emerald/20 text-noctvm-emerald',
   gold: 'bg-noctvm-gold/20 text-noctvm-gold',
@@ -44,7 +44,7 @@ const ListboxItem = React.forwardRef<HTMLButtonElement, ListboxItemProps>(
         'w-full flex items-center gap-2 rounded-noctvm-sm px-2 py-1.5',
         'text-left transition-colors duration-100 outline-none',
         'focus-visible:ring-2 focus-visible:ring-noctvm-violet/50',
-        isSelected ? colorSelected[color] : cn('text-white', colorHover[color]),
+        isSelected ? colorSelected[color] : cn('text-foreground', colorHover[color]),
         isDisabled && 'opacity-50 pointer-events-none',
         className
       )}

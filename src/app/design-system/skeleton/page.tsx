@@ -25,7 +25,7 @@ export default function SkeletonPage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Skeleton</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Skeleton</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Loading placeholders with shimmer animation.</p>
       </div>
 
@@ -55,7 +55,7 @@ export default function SkeletonPage() {
               [1, 2, 3].map(i => (
                 <div key={i} className="p-4 bg-noctvm-surface rounded-xl border border-white/5">
                   <div className="w-full h-40 bg-noctvm-violet/20 rounded-lg mb-3 flex items-center justify-center text-noctvm-violet text-sm font-mono">Event {i}</div>
-                  <p className="text-white font-medium text-sm">Sample Event Name</p>
+                  <p className="text-foreground font-medium text-sm">Sample Event Name</p>
                   <p className="text-noctvm-silver text-xs mt-1">Control Club · Tonight</p>
                 </div>
               ))

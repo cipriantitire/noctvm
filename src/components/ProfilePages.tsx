@@ -134,10 +134,10 @@ function SettingsGroup({
               {item.icon}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-heading text-sm font-semibold text-white">{item.label}</p>
+              <p className="font-heading text-sm font-semibold text-foreground">{item.label}</p>
               <p className="mt-0.5 text-xs leading-snug text-noctvm-silver/70">{item.desc}</p>
             </div>
-            <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-noctvm-silver/40 transition-all group-hover:translate-x-1 group-hover:text-white" />
+            <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-noctvm-silver/40 transition-all group-hover:translate-x-1 group-hover:text-foreground" />
           </button>
         ))}
       </div>
@@ -151,7 +151,7 @@ function BackButton({ onBack, label }: { onBack: () => void, label: string }) {
   return (
     <button
       onClick={onBack}
-      className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-white/90 transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+      className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-foreground/90 transition-colors hover:border-white/20 hover:bg-white/[0.06]"
       aria-label={label}
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
@@ -172,7 +172,7 @@ function SettingsPageHeader({
   subtitle,
   onBack,
   backLabel,
-  titleClassName = 'text-xl sm:text-2xl font-semibold tracking-tight text-white leading-tight',
+  titleClassName = 'text-xl sm:text-2xl font-semibold tracking-tight text-foreground leading-tight',
   subtitleClassName = 'text-noctvm-caption font-mono text-[10px] uppercase tracking-[0.28em] text-noctvm-silver/45',
 }: {
   title: string;
@@ -210,7 +210,7 @@ function FormInput({ label, value, onChange, placeholder = '', type = 'text', ti
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         title={title || label}
-        className="w-full rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/30 focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
+        className="w-full rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-noctvm-silver/30 focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
       />
     </div>
   );
@@ -225,7 +225,7 @@ function FormTextarea({ label, value, onChange, rows = 3 }: { label: string, val
         value={value}
         onChange={(e) => onChange(e.target.value)}
         title={label}
-        className="w-full resize-none rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/30 focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
+        className="w-full resize-none rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-noctvm-silver/30 focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
       />
     </div>
   );
@@ -239,7 +239,7 @@ function FormSelect({ label, value, onChange, options, title }: { label: string,
         value={value}
         onChange={(e) => onChange(e.target.value)}
         title={title || label}
-        className="w-full cursor-pointer appearance-none rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-white outline-none transition-all focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
+        className="w-full cursor-pointer appearance-none rounded-[20px] border border-white/5 bg-noctvm-surface/25 px-4 py-3 text-sm text-foreground outline-none transition-all focus:border-noctvm-violet/30 focus:bg-white/[0.05]"
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -257,7 +257,7 @@ function ToggleSwitch({ enabled, onToggle, label, desc }: { enabled: boolean, on
       className="group flex w-full items-center justify-between rounded-[24px] border border-white/5 bg-noctvm-surface/25 px-4 py-4 text-left transition-all hover:border-white/10 hover:bg-white/[0.05]"
     >
       <div className="min-w-0 pr-4">
-        <p className="text-sm font-semibold text-white">{label}</p>
+        <p className="text-sm font-semibold text-foreground">{label}</p>
         {desc && <p className="mt-1 text-noctvm-label leading-snug text-noctvm-silver">{desc}</p>}
       </div>
       <div className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors ${enabled ? 'border-noctvm-violet/30 bg-noctvm-violet/20' : 'border-white/5 bg-white/[0.03]'}`}>
@@ -577,20 +577,20 @@ export function EditProfilePage({
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <span className="text-2xl font-bold text-white/90">{avatarInitial}</span>
+                      <span className="text-2xl font-bold text-foreground/90">{avatarInitial}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white">Profile picture</p>
+                  <p className="text-sm font-semibold text-foreground">Profile picture</p>
                   <p className="mt-1 text-xs text-noctvm-silver/60">Shown on your profile, stories, and comments.</p>
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-noctvm-silver transition-all hover:bg-white/10 hover:text-white"
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-noctvm-silver transition-all hover:bg-white/10 hover:text-foreground"
                     >
                       {avatarPreview || avatarUrl ? 'Edit profile picture' : 'Add profile picture'}
                     </button>
@@ -599,7 +599,7 @@ export function EditProfilePage({
                       <button
                         type="button"
                         onClick={handleRemoveAvatar}
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-noctvm-silver transition-all hover:bg-white/10 hover:text-white"
+                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-noctvm-silver transition-all hover:bg-white/10 hover:text-foreground"
                       >
                         Remove
                       </button>
@@ -652,7 +652,7 @@ export function EditProfilePage({
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-24 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-white outline-none transition-all focus:w-32 focus:border-noctvm-violet/40"
+                className="w-24 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-foreground outline-none transition-all focus:w-32 focus:border-noctvm-violet/40"
                 value={genreSearch}
                 onChange={(e) => setGenreSearch(e.target.value)}
               />
@@ -666,7 +666,7 @@ export function EditProfilePage({
                   onClick={() => setGenres((prev) => prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g])}
                   className={`rounded-full border px-3 py-1.5 text-noctvm-caption font-bold transition-all active:scale-[0.96] ${
                     genres.includes(g)
-                      ? 'border-noctvm-violet bg-noctvm-violet text-white shadow-glow'
+                      ? 'border-noctvm-violet bg-noctvm-violet text-foreground shadow-glow'
                       : 'border-white/10 bg-white/5 text-noctvm-silver hover:border-white/20'
                   }`}
                   title={`Toggle ${g} genre`}
@@ -691,7 +691,7 @@ export function EditProfilePage({
               placeholder="yoursite.com"
               value={usernameFromUrl('website', socialLinks.find(l => l.platform === 'website')?.url ?? '')}
               onChange={(e) => updateSocial('website', buildSocialUrl('website', e.target.value))}
-              className="w-full rounded-xl border border-white/5 bg-noctvm-midnight/50 py-3 pl-12 pr-4 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/20 focus:border-noctvm-violet/30"
+              className="w-full rounded-xl border border-white/5 bg-noctvm-midnight/50 py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-all placeholder:text-noctvm-silver/20 focus:border-noctvm-violet/30"
             />
           </div>
         </GlassPanel>
@@ -703,7 +703,7 @@ export function EditProfilePage({
               <div className="relative">
                 <button
                   onClick={() => setShowPlatformDropdown(!showPlatformDropdown)}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-noctvm-silver transition-all active:scale-[0.96] hover:bg-white/10 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-noctvm-caption text-noctvm-silver transition-all active:scale-[0.96] hover:bg-white/10 hover:text-foreground"
                   title="Add a social media link"
                 >
                   <span>Add Social</span>
@@ -718,7 +718,7 @@ export function EditProfilePage({
                           updateSocial(p, ' ');
                           setShowPlatformDropdown(false);
                         }}
-                        className="w-full px-3 py-2 text-left capitalize text-noctvm-caption text-noctvm-silver transition-all active:scale-[0.96] hover:bg-white/5 hover:text-white"
+                        className="w-full px-3 py-2 text-left capitalize text-noctvm-caption text-noctvm-silver transition-all active:scale-[0.96] hover:bg-white/5 hover:text-foreground"
                         title={`Add ${p} link`}
                       >
                         {p}
@@ -744,13 +744,13 @@ export function EditProfilePage({
                       placeholder={p === 'website' ? 'yoursite.com' : 'username'}
                       value={link.url === ' ' ? '' : usernameFromUrl(p, link.url)}
                       onChange={(e) => updateSocial(p, buildSocialUrl(p, e.target.value))}
-                      className="w-full rounded-xl border border-white/5 bg-noctvm-midnight/50 py-3 pl-12 pr-10 text-sm text-white outline-none transition-all placeholder:text-noctvm-silver/20 focus:border-noctvm-violet/30"
+                      className="w-full rounded-xl border border-white/5 bg-noctvm-midnight/50 py-3 pl-12 pr-10 text-sm text-foreground outline-none transition-all placeholder:text-noctvm-silver/20 focus:border-noctvm-violet/30"
                     />
                     <button
                       onClick={() => updateSocial(p, '')}
                       title={`Remove ${p} link`}
                       aria-label={`Remove ${p} link`}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/20 opacity-0 transition-all active:scale-[0.96] group-hover:opacity-100 hover:text-red-500"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-foreground/20 opacity-0 transition-all active:scale-[0.96] group-hover:opacity-100 hover:text-red-500"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -773,7 +773,7 @@ export function EditProfilePage({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full rounded-xl bg-noctvm-violet px-4 py-4 text-sm font-bold text-white shadow-lg shadow-noctvm-violet/20 transition-all hover:scale-[1.02] active:scale-[0.96] disabled:opacity-50"
+            className="w-full rounded-xl bg-noctvm-violet px-4 py-4 text-sm font-bold text-foreground shadow-lg shadow-noctvm-violet/20 transition-all hover:scale-[1.02] active:scale-[0.96] disabled:opacity-50"
           >
             {saving ? 'Saving...' : saved ? 'Saved!' : 'Save All Changes'}
           </button>
@@ -786,7 +786,7 @@ export function EditProfilePage({
               <StarIcon className="w-5 h-5 text-yellow-500" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white font-heading">Premium Profile Effects</h3>
+              <h3 className="text-lg font-bold text-foreground font-heading">Premium Profile Effects</h3>
               <p className="text-xs text-noctvm-silver/50">Purchase and select visual enhancers</p>
             </div>
           </div>
@@ -965,7 +965,7 @@ export function ActivityLogPage({ onBack }: { onBack: () => void }) {
                   {a.type === 'post' ? <GridIcon className="w-5 h-5" /> : <ShieldIcon className="w-5 h-5" />}
                 </div>
                 <div className="flex-1 pt-1 border-b border-white/[0.03] pb-6 last:border-0">
-                  <p className="text-xs text-white/90 leading-relaxed font-medium">{a.message}</p>
+                  <p className="text-xs text-foreground/90 leading-relaxed font-medium">{a.message}</p>
                   <p className="text-noctvm-caption text-noctvm-silver/40 mt-1.5 font-bold uppercase tracking-wider">{new Date(a.created_at).toLocaleDateString()} • {new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
@@ -1066,7 +1066,7 @@ export function InventoryPage({ onBack, hideHeader = false }: { onBack: () => vo
           {premiumEffects.map(effect => (
             <div key={effect.id} className="p-4 rounded-xl bg-noctvm-surface border border-white/5 opacity-50 flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-white">{effect.name}</p>
+                <p className="text-sm font-bold text-foreground">{effect.name}</p>
                 <p className="text-noctvm-caption text-noctvm-silver font-bold uppercase tracking-widest mt-0.5">{effect.price}</p>
               </div>
               {effect.locked && <ShieldIcon className="w-4 h-4 text-noctvm-silver/30" />}
@@ -1140,7 +1140,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
             <button
               onClick={handleUpdateEmail}
               disabled={loading || email === profile?.email}
-              className="inline-flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-white transition-all hover:border-noctvm-violet/30 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-noctvm-violet/30 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Update Email
             </button>
@@ -1154,7 +1154,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
             <button
               onClick={handleUpdatePassword}
               disabled={loading || !password}
-              className="inline-flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-white transition-all hover:border-noctvm-violet/30 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-noctvm-violet/30 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Update Password
             </button>
@@ -1162,7 +1162,7 @@ export function ManageAccountPage({ onBack }: { onBack: () => void }) {
         </GlassPanel>
 
         <div className="pt-8 border-t border-white/5 flex flex-col gap-3">
-          <button className="group flex w-full items-center justify-between rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-4 text-left text-noctvm-silver transition-all hover:border-white/10 hover:text-white">
+          <button className="group flex w-full items-center justify-between rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-4 text-left text-noctvm-silver transition-all hover:border-white/10 hover:text-foreground">
             <span>Request Data Export</span>
             <ChevronRightIcon className="h-4 w-4 opacity-50 transition-all group-hover:translate-x-1" />
           </button>
@@ -1215,12 +1215,12 @@ export function AppearanceSettingsPage({ onBack }: { onBack: () => void }) {
             >
               <div className={`h-12 w-12 rounded-2xl border border-white/5 ${t.color}`} />
               <div className="flex-1">
-                <p className={`text-sm font-bold ${settings?.theme === t.id ? 'text-white' : 'text-noctvm-silver'}`}>{t.label}</p>
+                <p className={`text-sm font-bold ${settings?.theme === t.id ? 'text-foreground' : 'text-noctvm-silver'}`}>{t.label}</p>
                 <p className="mt-0.5 text-noctvm-label text-noctvm-silver/50">{t.desc}</p>
               </div>
               {settings?.theme === t.id && (
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-noctvm-violet animate-in zoom-in duration-300">
-                  <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                  <svg className="h-4 w-4 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
               )}
             </button>
@@ -1289,13 +1289,13 @@ export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
       <div className="mb-6 flex rounded-2xl border border-white/5 bg-white/[0.03] p-1">
         <button
           onClick={() => setTab('blocked')}
-          className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${tab === 'blocked' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver'}`}
+          className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${tab === 'blocked' ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver'}`}
         >
           Blocked Users
         </button>
         <button
           onClick={() => setTab('muted')}
-          className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${tab === 'muted' ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver'}`}
+          className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${tab === 'muted' ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' : 'text-noctvm-silver'}`}
         >
           Muted Users
         </button>
@@ -1325,12 +1325,12 @@ export function BlockedMutedSettingsPage({ onBack }: { onBack: () => void }) {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold leading-tight text-white">{u.display_name}</p>
+                  <p className="truncate text-sm font-bold leading-tight text-foreground">{u.display_name}</p>
                   <p className="mt-0.5 text-xs text-noctvm-silver">@{u.username}</p>
                 </div>
                 <button
                   onClick={() => handleUnrestrict(u.id)}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-bold text-noctvm-silver transition-all hover:border-white/20 hover:text-white"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-bold text-noctvm-silver transition-all hover:border-white/20 hover:text-foreground"
                 >
                   Un{tab === 'blocked' ? 'block' : 'mute'}
                 </button>

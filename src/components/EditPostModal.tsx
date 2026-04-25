@@ -177,7 +177,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-editor flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}>
+    <div className={`fixed inset-0 z-editor flex items-center justify-center p-4 bg-noctvm-black/80 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}>
       <div
         className={`w-full max-w-lg frosted-glass-modal frosted-noise rounded-2xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col max-h-[90vh] ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
         onClick={e => e.stopPropagation()}
@@ -185,8 +185,8 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-noctvm-border flex-shrink-0">
-          <button onClick={handleClose} className="text-noctvm-silver hover:text-white text-sm transition-colors" title="Cancel edit">Cancel</button>
-          <span className="text-sm font-semibold text-white">Edit Post</span>
+          <button onClick={handleClose} className="text-noctvm-silver hover:text-foreground text-sm transition-colors" title="Cancel edit">Cancel</button>
+          <span className="text-sm font-semibold text-foreground">Edit Post</span>
           <button
             onClick={handleSubmit}
             disabled={submitting || loadingInitial}
@@ -205,12 +205,12 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
           ) : (
             <>
               {/* Display existing Image - NEVER editable, exactly as requested */}
-              <div className="relative mx-4 mt-4 rounded-xl border border-white/5 overflow-hidden flex items-center justify-center bg-black/50">
+              <div className="relative mx-4 mt-4 rounded-xl border border-white/5 overflow-hidden flex items-center justify-center bg-noctvm-black/50">
                 {post.imageUrl ? (
                   <Image src={post.imageUrl} alt="Post media" width={500} height={500} className="w-full h-auto max-h-[300px] object-contain" unoptimized />
                 ) : (
                    <div className={`w-full h-[200px] bg-gradient-to-br ${post.imageTheme?.gradient} flex items-center justify-center`}>
-                      <span className="text-white/50 text-xs tracking-widest uppercase font-black">Text Post</span>
+                      <span className="text-foreground/50 text-xs tracking-widest uppercase font-black">Text Post</span>
                    </div>
                 )}
               </div>
@@ -220,7 +220,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                 <div className="w-8 h-8 rounded-full bg-noctvm-surface border border-noctvm-border flex items-center justify-center flex-shrink-0 overflow-hidden relative">
                   {profile?.avatar_url
                     ? <Image src={profile.avatar_url} alt="My profile" fill className="object-cover" unoptimized />
-                    : <span className="text-xs font-bold text-white">{(profile?.display_name || 'N')[0].toUpperCase()}</span>
+                    : <span className="text-xs font-bold text-foreground">{(profile?.display_name || 'N')[0].toUpperCase()}</span>
                   }
                 </div>
                 <textarea
@@ -230,19 +230,19 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                   title="Post caption"
                   rows={3}
                   maxLength={2200}
-                  className="flex-1 bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none resize-none"
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none resize-none"
                 />
               </div>
 
               {/* Tag venue */}
               <div className="px-4 py-3 border-b border-noctvm-border relative">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white font-medium">Tag Venue</span>
+                  <span className="text-sm text-foreground font-medium">Tag Venue</span>
                   <div className="flex-1 ml-4">
                     {selectedVenue ? (
                       <div className="flex items-center justify-end gap-2">
                         <span className="text-sm text-noctvm-violet font-bold">{selectedVenue}</span>
-                        <button onClick={() => { setSelectedVenue(''); setVenueSearch(''); }} className="text-noctvm-silver hover:text-white transition-colors" title="Remove venue">
+                        <button onClick={() => { setSelectedVenue(''); setVenueSearch(''); }} className="text-noctvm-silver hover:text-foreground transition-colors" title="Remove venue">
                           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                       </div>
@@ -254,7 +254,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                         value={venueSearch}
                         onChange={e => { setVenueSearch(e.target.value); searchVenues(e.target.value); setShowVenueSuggestions(true); }}
                         onFocus={() => setShowVenueSuggestions(true)}
-                        className="w-full bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none text-right"
+                        className="w-full bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none text-right"
                       />
                     )}
                   </div>
@@ -265,10 +265,10 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                       <button
                         key={venue.name}
                         onMouseDown={() => { setSelectedVenue(venue.name); setVenueSearch(''); setShowVenueSuggestions(false); }}
-                        className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
+                        className="w-full px-3 py-2.5 text-sm text-foreground hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
                         title={`Select ${venue.name}`}
                       >
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 bg-black/20 flex-shrink-0 relative">
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 bg-noctvm-black/20 flex-shrink-0 relative">
                            <Image src={getVenueLogo(venue.name, venue.logo_url || undefined)} alt="" fill className="object-cover" />
                         </div>
                         {venue.name}
@@ -281,12 +281,12 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
               {/* Tag event */}
               <div className="px-4 py-3 border-b border-noctvm-border relative">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-white font-medium">Tag Event</span>
+                  <span className="text-sm text-foreground font-medium">Tag Event</span>
                   <div className="flex-1 ml-4">
                     {selectedEvent ? (
                       <div className="flex items-center justify-end gap-2">
                         <span className="text-sm text-noctvm-emerald font-bold">{selectedEvent.title}</span>
-                        <button onClick={() => { setSelectedEvent(null); setEventSearch(''); }} className="text-noctvm-silver hover:text-white transition-colors" title="Remove event">
+                        <button onClick={() => { setSelectedEvent(null); setEventSearch(''); }} className="text-noctvm-silver hover:text-foreground transition-colors" title="Remove event">
                           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                       </div>
@@ -298,7 +298,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                         value={eventSearch}
                         onChange={e => { setEventSearch(e.target.value); searchEvents(e.target.value); setShowEventSuggestions(true); }}
                         onFocus={() => setShowEventSuggestions(true)}
-                        className="w-full bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none text-right"
+                        className="w-full bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none text-right"
                       />
                     )}
                   </div>
@@ -309,7 +309,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                       <button
                         key={e.id}
                         onMouseDown={() => { setSelectedEvent(e); setEventSearch(''); setShowEventSuggestions(false); }}
-                        className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex flex-col"
+                        className="w-full px-3 py-2.5 text-sm text-foreground hover:bg-noctvm-surface text-left transition-colors flex flex-col"
                         title={`Select ${e.title}`}
                       >
                         <span className="font-medium">{e.title}</span>
@@ -323,11 +323,11 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
               {/* Tag people */}
               <div className="px-4 py-3 border-b border-noctvm-border relative">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-white flex-shrink-0 font-medium">Tag People</span>
+                  <span className="text-sm text-foreground flex-shrink-0 font-medium">Tag People</span>
                   {taggedUsers.map(handle => (
                     <span key={handle} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-xs border border-noctvm-violet/20">
                       {handle}
-                      <button onClick={() => setTaggedUsers(prev => prev.filter(h => h !== handle))} title={`Remove ${handle}`} className="hover:text-white">
+                      <button onClick={() => setTaggedUsers(prev => prev.filter(h => h !== handle))} title={`Remove ${handle}`} className="hover:text-foreground">
                         <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                       </button>
                     </span>
@@ -340,7 +340,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                     onChange={e => { setPeopleSearch(e.target.value); searchProfiles(e.target.value); setShowPeopleSuggestions(true); }}
                     onFocus={() => setShowPeopleSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowPeopleSuggestions(false), 150)}
-                    className="flex-1 min-w-[100px] bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none"
+                    className="flex-1 min-w-[100px] bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none"
                   />
                 </div>
                 {showPeopleSuggestions && profileResults.length > 0 && (
@@ -354,7 +354,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                           setProfileResults([]);
                           setShowPeopleSuggestions(false);
                         }}
-                        className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
+                        className="w-full px-3 py-2.5 text-sm text-foreground hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
                         title={`Tag ${u.name}`}
                       >
                         <span className="font-medium">{u.name}</span>
@@ -368,12 +368,12 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
               {/* Hashtags */}
               <div className="px-4 py-3 border-b border-noctvm-border">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-white flex-shrink-0 font-medium">Tags</span>
+                  <span className="text-sm text-foreground flex-shrink-0 font-medium">Tags</span>
                   <div className="flex-1 flex flex-wrap items-center gap-1.5">
                     {tags.map(tag => (
                       <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-xs">
                         {tag}
-                        <button onClick={() => removeTag(tag)} title={`Remove tag ${tag}`} className="hover:text-white">
+                        <button onClick={() => removeTag(tag)} title={`Remove tag ${tag}`} className="hover:text-foreground">
                           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                       </span>
@@ -385,7 +385,7 @@ export default function EditPostModal({ post, isOpen, onClose, activeCity = 'buc
                       value={tagInput}
                       onChange={e => setTagInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addTag(); } }}
-                      className="flex-1 min-w-[80px] bg-transparent text-xs text-white placeholder:text-noctvm-silver/30 outline-none"
+                      className="flex-1 min-w-[80px] bg-transparent text-xs text-foreground placeholder:text-noctvm-silver/30 outline-none"
                     />
                   </div>
                 </div>

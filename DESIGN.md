@@ -131,7 +131,7 @@ Uses `GlassPanel` with `card` variant. No side-stripe borders. No nesting cards 
 Uses `GlassPanel` with `input` variant. Labels use `text-noctvm-micro`.
 
 ### Modal
-Uses `GlassPanel` with `modal` variant. Backdrop uses `.modal-frost-overlay` (`blur(12px) saturate(1.8)`).
+Uses `GlassPanel` with `modal` variant. Backdrop uses `.modal-frost-overlay` (`blur(12px) saturate(2)`).
 
 ### Scrollbar
 Custom violet gradient scrollbar (4px default, 8px for `.custom-scrollbar`). Hidden on mobile.

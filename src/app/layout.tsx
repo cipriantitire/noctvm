@@ -102,7 +102,7 @@ export default function RootLayout({
     <html lang="en" className={`dark ${freshid.variable} ${satoshi.variable} ${jetbrainsMono.variable}`}>
       <head>
       </head>
-      <body className="font-body bg-noctvm-black text-white min-h-screen relative isolate overflow-x-hidden">
+      <body className="font-body bg-noctvm-black text-foreground min-h-screen relative isolate overflow-x-hidden">
         <div className="relative">
           <Providers>{children}</Providers>
         </div>

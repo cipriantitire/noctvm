@@ -40,7 +40,7 @@ function SavedEventItem({ event }: { event: NoctEvent }) {
           />
         ) : (
           <span className={cn(
-            "text-sm font-mono font-bold text-white"
+            "text-sm font-mono font-bold text-foreground"
           )}>
             {event.venue[0]}
           </span>
@@ -48,7 +48,7 @@ function SavedEventItem({ event }: { event: NoctEvent }) {
       </div>
 
       <div className="flex-1 min-w-0 relative z-10">
-        <p className="text-noctvm-caption font-bold text-noctvm-silver group-hover:text-white transition-colors leading-tight">
+        <p className="text-noctvm-caption font-bold text-noctvm-silver group-hover:text-foreground transition-colors leading-tight">
           {event.title}
         </p>
         <p className="text-noctvm-micro font-mono text-noctvm-silver/40 flex items-center gap-1 mt-1 uppercase tracking-wider">
@@ -140,7 +140,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
             <h3 className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-noctvm-silver/40 mb-1">
               Agenda
             </h3>
-            <h2 className="text-xl font-heading font-black text-white leading-none">
+            <h2 className="text-xl font-heading font-black text-foreground leading-none">
               Saved Events
             </h2>
           </div>

@@ -10,7 +10,7 @@ export interface SidebarItem {
   onClick?: () => void;
   href?: string;
   isActive?: boolean;
-  highlightColor?: string; // Optional custom active color class, default is text-white
+  highlightColor?: string; // Optional custom active color class, default is text-foreground
 }
 
 export interface SidebarProps {
@@ -62,8 +62,8 @@ export default function Sidebar({
           const baseClasses = `w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150`;
           
           const activeClasses = item.isActive
-            ? `bg-noctvm-violet/10 ${item.highlightColor || 'text-white'}`
-            : `text-noctvm-silver hover:text-white hover:bg-noctvm-surface`;
+            ? `bg-noctvm-violet/10 ${item.highlightColor || 'text-foreground'}`
+            : `text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface`;
 
           if (item.href) {
             return (

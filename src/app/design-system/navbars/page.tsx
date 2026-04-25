@@ -52,7 +52,7 @@ export default function NavbarsShowcasePage() {
   return (
     <div className="space-y-12 pb-24">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-white mb-4">Navbars</h1>
+        <h1 className="text-3xl font-heading font-bold text-foreground mb-4">Navbars</h1>
         <p className="text-noctvm-silver text-lg max-w-2xl">
           Mobile-first navigation bars. Includes generic support for active states, badges, and safe area inset paddings.
         </p>
@@ -61,13 +61,13 @@ export default function NavbarsShowcasePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <section className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold text-white">Interactive Playground</h2>
-            <div className="relative border border-noctvm-border rounded-3xl overflow-hidden bg-black flex flex-col justify-end h-[600px] shadow-2xl w-full max-w-[400px] mx-auto">
+            <h2 className="text-xl font-heading font-semibold text-foreground">Interactive Playground</h2>
+            <div className="relative border border-noctvm-border rounded-3xl overflow-hidden bg-noctvm-black flex flex-col justify-end h-[600px] shadow-2xl w-full max-w-[400px] mx-auto">
                
                {/* Mock Mobile Screen Content */}
                <div className="flex-1 p-6 relative flex flex-col items-center justify-center overflow-hidden">
                  <div className="w-full text-center space-y-4">
-                    <h3 className="text-2xl font-bold text-white mb-2 font-heading">Active: {activeTab}</h3>
+                    <h3 className="text-2xl font-bold text-foreground mb-2 font-heading">Active: {activeTab}</h3>
                     <p className="text-noctvm-silver">This mimics a true mobile screen layout.</p>
                  </div>
                  
@@ -106,7 +106,7 @@ export default function NavbarsShowcasePage() {
 
         <div className="space-y-6">
           <GlassPanel className="p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Technical Notes</h3>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Technical Notes</h3>
             <ul className="space-y-4 text-sm text-noctvm-silver leading-relaxed list-disc list-inside">
               <li>By default, BottomNav is <code>fixed</code> to the window bottom.</li>
               <li>Includes <code>pb-[env(safe-area-inset-bottom)]</code> specifically for iOS home button clearances.</li>

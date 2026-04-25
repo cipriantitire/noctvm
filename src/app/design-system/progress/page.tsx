@@ -12,11 +12,11 @@ export default function ProgressPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Progress</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Progress</h1>
         <p className="text-noctvm-silver">Linear bars and circular rings.</p>
       </div>
       <div className="space-y-6">
-        <h2 className="text-sm font-semibold text-noctvm-silver uppercase tracking-widest">Linear — Animated</h2>
+        <h2 className="text-sm font-semibold text-noctvm-silver uppercase tracking-widest">Linear: Animated</h2>
         <div className="space-y-4 max-w-md">
           <Progress value={value} label="Capacity" showValue color="violet" size="md" />
           <Progress value={75} color="emerald" size="sm" label="Check-ins" showValue />

@@ -11,7 +11,7 @@ export default function CardsShowcasePage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Cards & Containers</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Cards & Containers</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">
           The frosted glass base system for all modal windows, dropdowns, and content blocks.
         </p>
@@ -30,8 +30,8 @@ export default function CardsShowcasePage() {
                   onClick={() => setPanel(v)}
                   className={`px-4 py-2 rounded-lg text-xs font-mono tracking-wider border transition-colors ${
                     panel === v
-                      ? "border-noctvm-violet bg-noctvm-violet/20 text-white shadow-glow"
-                      : "border-white/10 text-noctvm-silver hover:border-white/30 bg-black/50"
+                      ? "border-noctvm-violet bg-noctvm-violet/20 text-foreground shadow-glow"
+                      : "border-white/10 text-noctvm-silver hover:border-white/30 bg-noctvm-black/50"
                   }`}
                 >
                   {v}
@@ -41,7 +41,7 @@ export default function CardsShowcasePage() {
 
             <GlassPanel variant={panel} className="p-8 max-w-md min-h-[160px] flex items-center justify-center">
               <p className="text-sm text-center text-noctvm-silver/90">
-                Interactive preview for <strong className="text-white capitalize">{panel}</strong> glass.<br/><br/>
+                Interactive preview for <strong className="text-foreground capitalize">{panel}</strong> glass.<br/><br/>
                 Radius maps to <span className="text-noctvm-violet font-mono text-xs">--radius-xl</span>.
               </p>
             </GlassPanel>

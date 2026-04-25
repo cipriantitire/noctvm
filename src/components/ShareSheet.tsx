@@ -91,7 +91,7 @@ const PLATFORMS = [
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
       </svg>
     ),
-    bg: 'bg-black border border-noctvm-border',
+    bg: 'bg-noctvm-black border border-noctvm-border',
     action: 'x',
   },
 ];
@@ -147,7 +147,7 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
               placeholder="Search"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none"
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none"
             />
           </div>
         </div>
@@ -162,7 +162,7 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
                 className="flex flex-col items-center gap-1.5 group"
               >
                 <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${friend.color} flex items-center justify-center ring-2 ring-transparent group-hover:ring-noctvm-violet/40 transition-all`}>
-                  <span className="text-base font-bold text-white">{friend.initial}</span>
+                  <span className="text-base font-bold text-foreground">{friend.initial}</span>
                 </div>
                 <span className="text-noctvm-caption text-noctvm-silver truncate w-full text-center">{friend.name}</span>
               </button>
@@ -182,7 +182,7 @@ export default function ShareSheet({ isOpen, onClose, postCaption = '', postUrl 
                 onClick={() => handlePlatform(platform.action)}
                 className="flex flex-col items-center gap-1.5 flex-shrink-0"
               >
-                <div className={`w-12 h-12 rounded-2xl ${platform.bg} flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-[0.96]`}>
+                <div className={`w-12 h-12 rounded-2xl ${platform.bg} flex items-center justify-center text-foreground transition-transform hover:scale-105 active:scale-[0.96]`}>
                   {platform.icon}
                 </div>
                 <span className="text-noctvm-caption text-noctvm-silver whitespace-nowrap">

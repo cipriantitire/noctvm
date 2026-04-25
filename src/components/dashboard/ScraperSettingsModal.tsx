@@ -80,14 +80,14 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-dropdown flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-dropdown flex items-center justify-center p-4 bg-noctvm-black/80 backdrop-blur-md">
         <div className="w-12 h-12 border-4 border-noctvm-violet/20 border-t-noctvm-violet rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-dropdown flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto no-scrollbar">
+    <div className="fixed inset-0 z-dropdown flex items-center justify-center p-4 bg-noctvm-black/80 backdrop-blur-md animate-fade-in overflow-y-auto no-scrollbar">
        <div className="w-full max-w-md my-auto bg-noctvm-black border border-white/10 rounded-3xl p-6 shadow-2xl frosted-noise relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-noctvm-violet/5 to-transparent pointer-events-none"></div>
 
@@ -97,7 +97,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                 <CogIcon className="w-4 h-4" />
              </div>
              <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-tight">{source.name} Settings</h3>
+                <h3 className="text-base font-bold text-foreground uppercase tracking-tight">{source.name} Settings</h3>
                 <p className="text-noctvm-micro font-mono text-noctvm-silver/40 uppercase tracking-widest mt-0.5">Hardware Abstraction Layer</p>
              </div>
           </div>
@@ -118,7 +118,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                 type="number"
                 value={settings.scanDepth}
                 onChange={(e) => setSettings({...settings, scanDepth: parseInt(e.target.value) || 1})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:border-noctvm-violet/50 outline-none transition-all shadow-inner"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:border-noctvm-violet/50 outline-none transition-all shadow-inner"
                 title="Scan Depth"
               />
             </div>
@@ -131,7 +131,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                 max="10"
                 value={settings.priority}
                 onChange={(e) => setSettings({...settings, priority: parseInt(e.target.value) || 5})}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-white focus:border-noctvm-violet/50 outline-none transition-all shadow-inner"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 font-mono text-sm text-foreground focus:border-noctvm-violet/50 outline-none transition-all shadow-inner"
                 title="Scraper Priority"
               />
             </div>
@@ -146,8 +146,8 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                   onClick={() => setSettings({...settings, concurrency: n})}
                   className={`flex-1 py-1.5 rounded-xl text-noctvm-caption font-bold transition-all ${
                     settings.concurrency === n 
-                      ? 'bg-noctvm-violet text-white shadow-lg shadow-noctvm-violet/20' 
-                      : 'text-noctvm-silver/40 hover:text-white hover:bg-white/5'
+                      ? 'bg-noctvm-violet text-foreground shadow-lg shadow-noctvm-violet/20' 
+                      : 'text-noctvm-silver/40 hover:text-foreground hover:bg-white/5'
                   }`}
                 >
                   {n}x
@@ -187,7 +187,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
             <div className="space-y-1.5">
               <label className="text-noctvm-caption text-noctvm-silver/60 font-mono uppercase tracking-widest ml-1">Include Keywords</label>
               <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-white focus:border-noctvm-violet/50 outline-none transition-all resize-none h-16"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-foreground focus:border-noctvm-violet/50 outline-none transition-all resize-none h-16"
                 placeholder="e.g. techno, house..."
                 value={settings.includeKeywords?.join(', ') || ''}
                 onChange={(e) => setSettings({...settings, includeKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)})}
@@ -210,7 +210,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                 Venue Mapping Words
               </label>
               <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-white focus:border-noctvm-violet/50 outline-none transition-all resize-none h-16"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-foreground focus:border-noctvm-violet/50 outline-none transition-all resize-none h-16"
                 placeholder="e.g. club, garden, space..."
                 value={(settings as any).venueMappingWords?.join(', ') || ''}
                 onChange={(e) => setSettings({...settings, venueMappingWords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)} as any)}
@@ -223,7 +223,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                 Price Detection Keywords
               </label>
               <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-white focus:border-noctvm-emerald/50 outline-none transition-all resize-none h-16"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-foreground focus:border-noctvm-emerald/50 outline-none transition-all resize-none h-16"
                 placeholder="e.g. ron, free, gratis..."
                 value={(settings as any).priceKeywords?.join(', ') || ''}
                 onChange={(e) => setSettings({...settings, priceKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)} as any)}
@@ -236,7 +236,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
                 Location Detection Words
               </label>
               <textarea 
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-white focus:border-noctvm-gold/50 outline-none transition-all resize-none h-16"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-noctvm-caption text-foreground focus:border-noctvm-gold/50 outline-none transition-all resize-none h-16"
                 placeholder="e.g. strada, nr, sector..."
                 value={(settings as any).locationKeywords?.join(', ') || ''}
                 onChange={(e) => setSettings({...settings, locationKeywords: e.target.value.split(',').map(s => s.trim()).filter(s => !!s)} as any)}
@@ -246,7 +246,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
 
           <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
              <div className="flex flex-col">
-                <span className="text-noctvm-label font-black text-white uppercase tracking-tight">Autonomous Sync</span>
+                <span className="text-noctvm-label font-black text-foreground uppercase tracking-tight">Autonomous Sync</span>
                 <span className="text-noctvm-xs text-noctvm-silver/40 font-mono uppercase tracking-tighter">Automatic background execution</span>
              </div>
              <button 
@@ -269,7 +269,7 @@ export default function ScraperSettingsModal({ source, onClose }: ScraperSetting
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="flex-[2] px-4 py-3 rounded-2xl bg-noctvm-violet text-white text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/20 flex items-center justify-center gap-2 active:scale-[0.96] disabled:opacity-50"
+            className="flex-[2] px-4 py-3 rounded-2xl bg-noctvm-violet text-foreground text-noctvm-caption font-bold uppercase tracking-widest hover:bg-noctvm-violet/80 transition-all shadow-xl shadow-noctvm-violet/20 flex items-center justify-center gap-2 active:scale-[0.96] disabled:opacity-50"
           >
             {saving ? (
                <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>

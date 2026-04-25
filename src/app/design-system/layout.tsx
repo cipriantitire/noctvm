@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ToastProvider } from '@/components/ui';
 
 export default function DesignSystemLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [productionContext, setProductionContext] = useState(false);
 
   const navGroups = [
     {
@@ -33,6 +34,7 @@ export default function DesignSystemLayout({ children }: { children: React.React
       title: 'Form Controls',
       categories: [
         { name: 'Inputs', href: '/design-system/inputs' },
+        { name: 'Calendar', href: '/design-system/calendar' },
         { name: 'Checkbox', href: '/design-system/checkbox' },
         { name: 'Radio Group', href: '/design-system/radio' },
         { name: 'Switch', href: '/design-system/switch' },
@@ -43,6 +45,7 @@ export default function DesignSystemLayout({ children }: { children: React.React
     {
       title: 'Molecules',
       categories: [
+        { name: 'Bottom Nav', href: '/design-system/bottom-nav' },
         { name: 'Search Box', href: '/design-system/search' },
         { name: 'Tabs', href: '/design-system/tabs' },
         { name: 'Button Group', href: '/design-system/button-group' },
@@ -51,9 +54,10 @@ export default function DesignSystemLayout({ children }: { children: React.React
         { name: 'Progress', href: '/design-system/progress' },
       ]
     },
-    {
+      {
       title: 'Organisms',
       categories: [
+        { name: 'GlassPanel', href: '/design-system/glass-panel' },
         { name: 'Cards & Panels', href: '/design-system/cards' },
         { name: 'Card (Structured)', href: '/design-system/card' },
         { name: 'Modals', href: '/design-system/modals' },
@@ -100,7 +104,7 @@ export default function DesignSystemLayout({ children }: { children: React.React
       {/* Sidebar Navigation */}
       <aside className="w-64 border-r border-white/5 bg-noctvm-surface/50 h-screen sticky top-0 overflow-y-auto flex flex-col hidden md:flex">
         <div className="p-6 border-b border-white/5">
-          <h1 className="text-xl font-bold text-white font-heading uppercase tracking-wider">
+          <h1 className="text-xl font-bold text-foreground font-heading uppercase tracking-wider">
             NOCTVM
           </h1>
           <p className="text-xs text-noctvm-silver/50 font-mono mt-1">Component Library System</p>
@@ -121,8 +125,8 @@ export default function DesignSystemLayout({ children }: { children: React.React
                         href={link.href}
                         className={`block px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                           isActive
-                            ? 'bg-noctvm-violet/20 text-white border border-noctvm-violet/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
-                            : 'text-noctvm-silver/70 hover:bg-white/5 hover:text-white'
+                            ? 'bg-noctvm-violet/20 text-foreground border border-noctvm-violet/30 shadow-[0_0_15px_rgba(124,58,237,0.1)]'
+                            : 'text-noctvm-silver/70 hover:bg-white/5 hover:text-foreground'
                         }`}
                       >
                         <span className="truncate">{link.name}</span>
@@ -137,8 +141,33 @@ export default function DesignSystemLayout({ children }: { children: React.React
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 h-screen overflow-y-auto w-full relative">
-        <div className="max-w-7xl mx-auto p-4 md:p-8 lg:p-12">
+      <main className={`flex-1 h-screen overflow-y-auto w-full relative ${
+        productionContext
+          ? "bg-[url('/images/noise.png')] bg-repeat bg-noctvm-black"
+          : "bg-[#050505]"
+      }`}>
+        {productionContext && (
+          <div className="fixed inset-0 pointer-events-none z-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-noctvm-midnight/30 via-transparent to-noctvm-violet/5" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(124,58,237,0.08)_0%,transparent_70%)]" />
+          </div>
+        )}
+        <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-8 lg:p-12">
+          {/* Production Context Toggle */}
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={() => setProductionContext(!productionContext)}
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-noctvm-label font-mono uppercase tracking-widest transition-all ${
+                productionContext
+                  ? 'bg-noctvm-violet/20 border-noctvm-violet/30 text-noctvm-violet'
+                  : 'bg-white/5 border-white/10 text-noctvm-silver/50 hover:text-foreground hover:bg-white/10'
+              }`}
+              title="Toggle app-like background context"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${productionContext ? 'bg-noctvm-violet animate-pulse' : 'bg-noctvm-silver/30'}`} />
+              {productionContext ? 'Production Context' : 'Flat Background'}
+            </button>
+          </div>
           {children}
         </div>
       </main>

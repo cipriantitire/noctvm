@@ -163,7 +163,7 @@ export default function UserTable() {
 
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-white transition-all"
+            className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-silver hover:text-foreground transition-all"
             title="Toggle Sort Order"
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
@@ -172,14 +172,14 @@ export default function UserTable() {
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-noctvm-violet text-foreground shadow-lg' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="Grid View"
             >
               <GridIcon className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-white shadow-lg' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-noctvm-violet text-foreground shadow-lg' : 'text-noctvm-silver/40 hover:text-noctvm-silver'}`}
               title="List View"
             >
               <LayoutListIcon className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function UserTable() {
           </div>
 
           <div className="hidden xl:flex px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-noctvm-caption font-mono text-noctvm-silver uppercase tracking-widest items-center justify-center gap-2">
-            Count: <span className="text-white font-bold">{users.length}</span>
+            Count: <span className="text-foreground font-bold">{users.length}</span>
           </div>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function UserTable() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-white tracking-tight text-base truncate group-hover:text-noctvm-violet transition-colors">
+                      <h3 className="font-bold text-foreground tracking-tight text-base truncate group-hover:text-noctvm-violet transition-colors">
                         {user.display_name || user.username || 'Anonymous'}
                       </h3>
                       <VerifiedBadge type={user.badge} size="xs" />
@@ -248,8 +248,8 @@ export default function UserTable() {
                     disabled={updatingId === user.id}
                     className={`w-full py-2.5 rounded-xl text-noctvm-caption font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
                       user.is_verified 
-                        ? 'bg-noctvm-emerald text-white shadow-lg shadow-noctvm-emerald/20' 
-                        : 'bg-white/5 text-noctvm-silver hover:text-white hover:bg-white/10 border border-white/10'
+                        ? 'bg-noctvm-emerald text-foreground shadow-lg shadow-noctvm-emerald/20' 
+                        : 'bg-white/5 text-noctvm-silver hover:text-foreground hover:bg-white/10 border border-white/10'
                     }`}
                   >
                     {user.is_verified ? 'VERIFIED' : 'UNVERIFIED'}
@@ -263,7 +263,7 @@ export default function UserTable() {
                       value={user.badge || 'none'}
                       onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
                       disabled={updatingId === user.id}
-                      className="flex-1 bg-noctvm-black/40 text-noctvm-caption font-bold py-2 px-3 rounded-xl border border-white/5 text-white outline-none cursor-pointer"
+                      className="flex-1 bg-noctvm-black/40 text-noctvm-caption font-bold py-2 px-3 rounded-xl border border-white/5 text-foreground outline-none cursor-pointer"
                       title="Set Access Level"
                     >
                       <option value="none">Regular</option>
@@ -283,7 +283,7 @@ export default function UserTable() {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setEditingUser(user)}
-                      className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
+                      className="p-2 rounded-lg text-noctvm-silver/40 hover:text-foreground hover:bg-white/10 border border-white/5 transition-all"
                       title="Manage User Venues"
                     >
                       <VenuesIcon className="w-3.5 h-3.5" />
@@ -325,7 +325,7 @@ export default function UserTable() {
                
                <div className="flex-1 min-w-0">
                  <div className="flex items-center gap-2">
-                   <h4 className="text-sm font-bold text-white truncate group-hover:text-noctvm-violet transition-colors">
+                   <h4 className="text-sm font-bold text-foreground truncate group-hover:text-noctvm-violet transition-colors">
                      {user.display_name || user.username || 'Anonymous'}
                    </h4>
                    <VerifiedBadge type={user.badge} size="xs" />
@@ -347,7 +347,7 @@ export default function UserTable() {
                  <select 
                     value={user.badge || 'none'}
                     onChange={(e) => handleUpdateBadge(user.id, e.target.value)}
-                    className="bg-noctvm-black/40 text-noctvm-micro font-bold py-1.5 px-3 rounded-lg border border-white/5 text-white outline-none cursor-pointer uppercase font-mono tracking-tighter"
+                    className="bg-noctvm-black/40 text-noctvm-micro font-bold py-1.5 px-3 rounded-lg border border-white/5 text-foreground outline-none cursor-pointer uppercase font-mono tracking-tighter"
                   >
                     <option value="none">Regular</option>
                     <option value="owner">Owner</option>
@@ -364,7 +364,7 @@ export default function UserTable() {
                </div>
 
                <div className="flex gap-1.5 ml-auto pl-4 border-l border-white/5">
-                 <button onClick={() => setEditingUser(user)} className="p-2 rounded-lg text-noctvm-silver/40 hover:text-white hover:bg-white/10 transition-all" title="Manage User Venues">
+                 <button onClick={() => setEditingUser(user)} className="p-2 rounded-lg text-noctvm-silver/40 hover:text-foreground hover:bg-white/10 transition-all" title="Manage User Venues">
                    <VenuesIcon className="w-3.5 h-3.5" />
                  </button>
                  <button 

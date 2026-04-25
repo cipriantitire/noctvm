@@ -13,7 +13,7 @@ export default function ButtonsShowcasePage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Buttons & Icons</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Buttons & Icons</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">
           Core interaction primitives.
         </p>
@@ -27,10 +27,10 @@ export default function ButtonsShowcasePage() {
           {/* Controls */}
           <div className="space-y-6">
             <div className="space-y-2">
-              <div className="text-noctvm-caption font-mono text-white/40 tracking-widest">VARIANT</div>
+              <div className="text-noctvm-caption font-mono text-foreground/40 tracking-widest">VARIANT</div>
               <div className="flex flex-col gap-1">
                 {(["primary", "secondary", "ghost", "submit"] as const).map(v => (
-                  <label key={v} className="flex items-center gap-2 text-sm cursor-pointer hover:text-white text-noctvm-silver transition-colors">
+                  <label key={v} className="flex items-center gap-2 text-sm cursor-pointer hover:text-foreground text-noctvm-silver transition-colors">
                     <input type="radio" checked={btnVariant === v} onChange={() => setBtnVariant(v)} className="accent-noctvm-violet" />
                     <span className="capitalize">{v}</span>
                   </label>
@@ -39,17 +39,17 @@ export default function ButtonsShowcasePage() {
             </div>
             
             <div className="space-y-2">
-              <div className="text-noctvm-caption font-mono text-white/40 tracking-widest">SIZE</div>
+              <div className="text-noctvm-caption font-mono text-foreground/40 tracking-widest">SIZE</div>
               <div className="flex gap-2">
                 {(["sm", "md", "lg"] as const).map(s => (
-                  <button key={s} onClick={() => setBtnSize(s)} className={`px-3 py-1 text-xs border rounded transition-colors ${btnSize === s ? "border-white/40 text-white" : "border-white/10 text-white/40 hover:border-white/20"}`}>
+                  <button key={s} onClick={() => setBtnSize(s)} className={`px-3 py-1 text-xs border rounded transition-colors ${btnSize === s ? "border-white/40 text-foreground" : "border-white/10 text-foreground/40 hover:border-white/20"}`}>
                     {s}
                   </button>
                 ))}
               </div>
             </div>
 
-            <label className="flex items-center gap-2 text-sm cursor-pointer text-noctvm-silver hover:text-white">
+            <label className="flex items-center gap-2 text-sm cursor-pointer text-noctvm-silver hover:text-foreground">
               <input type="checkbox" checked={btnDisabled} onChange={(e) => setBtnDisabled(e.target.checked)} className="accent-noctvm-violet rounded" />
               Disabled State
             </label>
@@ -57,7 +57,7 @@ export default function ButtonsShowcasePage() {
 
           {/* Preview */}
           <div className="flex flex-col justify-center gap-8 pl-0 md:pl-8 md:border-l border-white/10">
-            <div className="flex items-center justify-center p-12 bg-black/40 rounded-xl border border-white/5 min-h-[200px] bg-[url('/images/noise.png')] bg-repeat relative">
+            <div className="flex items-center justify-center p-12 bg-noctvm-black/40 rounded-xl border border-white/5 min-h-[200px] bg-[url('/images/noise.png')] bg-repeat relative">
               <div className="absolute inset-0 bg-gradient-to-br from-noctvm-midnight/50 to-noctvm-black/95 pointer-events-none rounded-xl" />
               <div className="relative z-10">
                 <Button variant={btnVariant} size={btnSize} disabled={btnDisabled}>

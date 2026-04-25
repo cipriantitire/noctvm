@@ -149,12 +149,12 @@ export default function StoriesViewerModal({
             loop
           />
         ) : (
-          <Image src={story.image_url} alt="" fill className="object-contain bg-black" priority unoptimized />
+          <Image src={story.image_url} alt="" fill className="object-contain bg-noctvm-black" priority unoptimized />
         )
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${currentUser.color}`} />
       )}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-noctvm-black/40" />
 
       {/* Progress bars */}
       <div className="absolute top-2 left-3 right-3 flex gap-1 z-20 pt-[env(safe-area-inset-top)]">
@@ -170,14 +170,14 @@ export default function StoriesViewerModal({
       {/* Header */}
       <div className="absolute top-7 left-0 right-0 flex items-center justify-between px-4 z-20">
         <div className="flex items-center gap-2.5">
-          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-white text-sm font-bold border-2 border-white/40 shadow-lg overflow-hidden relative`}>
+          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${currentUser.color} flex items-center justify-center text-foreground text-sm font-bold border-2 border-white/40 shadow-lg overflow-hidden relative`}>
             {currentUser.avatarUrl
               ? <Image src={currentUser.avatarUrl} alt="" fill className="object-cover" unoptimized />
               : currentUser.avatar}
           </div>
           <div>
-            <div className="text-white text-sm font-semibold leading-tight drop-shadow">{currentUser.name}</div>
-            <div className="text-white/60 text-noctvm-caption">{timeAgo(story.created_at)}</div>
+            <div className="text-foreground text-sm font-semibold leading-tight drop-shadow">{currentUser.name}</div>
+            <div className="text-foreground/60 text-noctvm-caption">{timeAgo(story.created_at)}</div>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -204,7 +204,7 @@ export default function StoriesViewerModal({
               navigator.clipboard.writeText(url);
             }}
           />
-          <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white transition-colors" aria-label="Close">
+          <button onClick={handleClose} className="w-9 h-9 flex items-center justify-center text-foreground/70 hover:text-foreground transition-colors" aria-label="Close">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -214,14 +214,14 @@ export default function StoriesViewerModal({
       {(story.caption || story.venue_name || story.event_title) && (
         <div className="absolute bottom-0 left-0 right-0 px-6 z-20 pointer-events-auto pb-[max(3rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-2">
           {story.caption && (
-            <p className="text-white text-sm text-center drop-shadow-lg max-w-xs">{story.caption}</p>
+            <p className="text-foreground text-sm text-center drop-shadow-lg max-w-xs">{story.caption}</p>
           )}
           
           <div className="flex flex-wrap justify-center gap-2">
             {story.venue_name && (
               <Link
                 href={`/venues/${encodeURIComponent(story.venue_name)}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-noctvm-midnight/60 backdrop-blur-md border border-white/10 text-white text-xs hover:bg-noctvm-surface transition-colors animate-fade-in"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-noctvm-midnight/60 backdrop-blur-md border border-white/10 text-foreground text-xs hover:bg-noctvm-surface transition-colors animate-fade-in"
                 onClick={e => e.stopPropagation()}
               >
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-white/10 relative">
@@ -256,13 +256,13 @@ export default function StoriesViewerModal({
       {/* User nav arrows */}
       {userIndex > 0 && (
         <button title="Previous Story" onClick={e => { e.stopPropagation(); setUserIndex(u => u - 1); setStoryIndex(0); resetProgress(); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all">
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-noctvm-black/30 backdrop-blur-sm flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-noctvm-black/50 transition-all">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
       )}
       {userIndex < users.length - 1 && (
         <button title="Next Story" onClick={e => { e.stopPropagation(); setUserIndex(u => u + 1); setStoryIndex(0); resetProgress(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-all">
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-noctvm-black/30 backdrop-blur-sm flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-noctvm-black/50 transition-all">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
         </button>
       )}

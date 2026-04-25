@@ -6,15 +6,15 @@ export type Size = "sm" | "md" | "lg";
 
 const variantClass: Record<Variant, string> = {
   primary:
-    "rounded-xl bg-gradient-to-r from-noctvm-violet to-purple-500 text-white font-semibold text-sm shadow-lg shadow-noctvm-violet/30 hover:opacity-90 active:scale-[0.98]",
+    "rounded-xl bg-gradient-to-r from-noctvm-violet to-purple-500 text-foreground font-semibold text-sm shadow-lg shadow-noctvm-violet/30 hover:opacity-90 active:scale-[0.98]",
   secondary:
-    "rounded-lg border border-white/10 bg-black/40 text-noctvm-silver text-xs font-medium hover:border-noctvm-violet/30 hover:text-noctvm-violet",
+    "rounded-lg border border-white/10 bg-noctvm-black/40 text-noctvm-silver text-xs font-medium hover:border-noctvm-violet/30 hover:text-noctvm-violet",
   ghost:
-    "text-noctvm-silver hover:text-white transition-all font-bold text-noctvm-micro uppercase tracking-widest",
+    "text-noctvm-silver hover:text-foreground transition-all font-bold text-noctvm-micro uppercase tracking-widest",
   submit:
-    "px-8 py-2.5 bg-noctvm-violet text-white rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 disabled:opacity-50 active:scale-[0.96] shadow-lg shadow-noctvm-violet/20",
+    "px-8 py-2.5 bg-noctvm-violet text-foreground rounded-xl font-bold text-noctvm-caption uppercase tracking-widest hover:bg-noctvm-violet/80 disabled:opacity-50 active:scale-[0.96] shadow-lg shadow-noctvm-violet/20",
   outline:
-    "border border-noctvm-border bg-transparent text-white hover:bg-white/5",
+    "border border-noctvm-border bg-transparent text-foreground hover:bg-white/5",
 };
 
 export const buttonVariants = ({ variant = "primary", size = "md", className }: { variant?: Variant, size?: Size, className?: string } = {}) => {

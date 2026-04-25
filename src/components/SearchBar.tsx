@@ -79,7 +79,7 @@ export default function SearchBar(props: SearchBarProps) {
               <DropdownMenuContent align="start" sideOffset={8} className="w-56">
                 <DropdownMenuItem
                   onClick={() => onCityChange('bucuresti')}
-                  className={activeCity === 'bucuresti' ? 'bg-white/10 text-white' : ''}
+                  className={activeCity === 'bucuresti' ? 'bg-white/10 text-foreground' : ''}
                 >
                   <span>București</span>
                   <span className="ml-auto flex w-4 items-center justify-center">
@@ -89,7 +89,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => onCityChange('constanta')}
-                  className={activeCity === 'constanta' ? 'bg-white/10 text-white' : ''}
+                  className={activeCity === 'constanta' ? 'bg-white/10 text-foreground' : ''}
                 >
                   <span>Constanța</span>
                   <span className="ml-auto flex w-4 items-center justify-center">
@@ -134,7 +134,7 @@ export default function SearchBar(props: SearchBarProps) {
                   <button
                     type="button"
                     onClick={() => props.onVenueSearchChange?.('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-noctvm-silver hover:text-foreground transition-colors"
                     aria-label="Clear venue search"
                     title="Clear venue search"
                   >
@@ -147,7 +147,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <button
                   type="button"
                   onClick={() => props.onVenueViewChange?.('grid')}
-                  className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${props.venueView === 'grid' ? 'bg-noctvm-violet/15 text-foreground border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-foreground'}`}
                   aria-label="Switch to grid view"
                   title="Switch to grid view"
                 >
@@ -157,7 +157,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <button
                   type="button"
                   onClick={() => props.onVenueViewChange?.('list')}
-                  className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-white'}`}
+                  className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${props.venueView === 'list' ? 'bg-noctvm-violet/15 text-foreground border border-noctvm-violet/20' : 'text-noctvm-silver hover:text-foreground'}`}
                   aria-label="Switch to list view"
                   title="Switch to list view"
                 >
@@ -195,7 +195,7 @@ export default function SearchBar(props: SearchBarProps) {
                     className={`w-full h-[34px] flex items-center justify-between gap-2 px-3 rounded-full corner-smooth-none text-noctvm-sm font-medium frosted-glass transition-colors ${
                       props.activeGenre === 'All'
                         ? 'text-noctvm-silver hover:border-noctvm-violet/30'
-                        : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
+                        : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-foreground'
                     }`}
                   >
                     <span>{props.activeGenre === 'All' ? 'All Genres' : props.activeGenre}</span>
@@ -240,7 +240,7 @@ export default function SearchBar(props: SearchBarProps) {
                           }}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                             props.activeGenre === genre
-                              ? 'bg-noctvm-violet/85 text-white'
+                              ? 'bg-noctvm-violet/85 text-foreground'
                               : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
                           }`}
                         >

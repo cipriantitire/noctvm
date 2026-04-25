@@ -71,7 +71,7 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-noctvm-violet/30">
-                <span className={cn(s.text, 'text-white font-semibold')}>
+                <span className={cn(s.text, 'text-foreground font-semibold')}>
                   {avatar.name ? getInitials(avatar.name) : '?'}
                 </span>
               </div>

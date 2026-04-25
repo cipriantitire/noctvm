@@ -41,7 +41,7 @@ const Checkbox = React.forwardRef<
         )}
         {...props}
       >
-        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-white">
+        <CheckboxPrimitive.Indicator className="flex items-center justify-center text-foreground">
           {props.checked === 'indeterminate' ? (
             <Minus className={s.icon} strokeWidth={3} />
           ) : (
@@ -52,7 +52,7 @@ const Checkbox = React.forwardRef<
       {(label || description) && (
         <div className="flex flex-col gap-0.5">
           {label && (
-            <span className={cn(s.text, 'text-white font-medium leading-tight group-has-[button:disabled]:opacity-50')}>
+            <span className={cn(s.text, 'text-foreground font-medium leading-tight group-has-[button:disabled]:opacity-50')}>
               {label}
             </span>
           )}

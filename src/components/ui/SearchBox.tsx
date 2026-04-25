@@ -31,7 +31,7 @@ export const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(
           type="text"
           value={value}
           onChange={onChange}
-          className={`w-full rounded-xl py-3 pl-11 pr-10 text-sm text-white placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all ${toneClassName} ${className}`}
+          className={`w-full rounded-xl py-3 pl-11 pr-10 text-sm text-foreground placeholder:text-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50 focus:shadow-glow transition-all ${toneClassName} ${className}`}
           style={{ ...toneStyle, ...style }}
           {...props}
         />
@@ -40,7 +40,7 @@ export const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(
           <button
             type="button"
             onClick={onClear}
-            className="absolute right-3 p-1 rounded-full text-noctvm-silver/50 hover:text-white hover:bg-white/10 transition-colors"
+            className="absolute right-3 p-1 rounded-full text-noctvm-silver/50 hover:text-foreground hover:bg-white/10 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6L6 18M6 6l12 12" />

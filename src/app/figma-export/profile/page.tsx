@@ -44,7 +44,7 @@ const profileTabs: TabItem[] = [
 function StatBlock({ value, label }: { value: string | number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <span className="text-white font-bold text-lg font-heading">{typeof value === 'number' ? value.toLocaleString() : value}</span>
+      <span className="text-foreground font-bold text-lg font-heading">{typeof value === 'number' ? value.toLocaleString() : value}</span>
       <span className="text-[#8A8A8A] text-xs">{label}</span>
     </div>
   );
@@ -58,8 +58,8 @@ function PostsGrid({ compact = false }: { compact?: boolean }) {
         <div key={p.id} className="aspect-square relative overflow-hidden group cursor-pointer">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={p.image} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="flex items-center gap-1 text-white text-sm font-bold">
+          <div className="absolute inset-0 bg-noctvm-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="flex items-center gap-1 text-foreground text-sm font-bold">
               <Heart className="w-4 h-4 fill-white" />{p.likes}
             </div>
           </div>
@@ -79,7 +79,7 @@ function SavedEvents() {
             <img src={e.image} alt="" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{e.title}</p>
+            <p className="text-foreground text-sm font-medium truncate">{e.title}</p>
             <p className="text-[#8A8A8A] text-xs">{e.venue} · {e.date}</p>
           </div>
           <Bookmark className="w-4 h-4 text-noctvm-violet shrink-0" />
@@ -95,7 +95,7 @@ function MobileView() {
     <div className="w-[390px] bg-[#050505] min-h-screen flex flex-col border border-white/5 rounded-3xl overflow-hidden">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-12 pb-3">
-        <span className="text-white font-bold text-lg font-heading">@{MOCK_USER.username}</span>
+        <span className="text-foreground font-bold text-lg font-heading">@{MOCK_USER.username}</span>
         <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
       </div>
 
@@ -105,7 +105,7 @@ function MobileView() {
           <Avatar size="2xl" src={MOCK_USER.avatar} alt={MOCK_USER.displayName} ring="highlight" />
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-white font-bold">{MOCK_USER.displayName}</span>
+              <span className="text-foreground font-bold">{MOCK_USER.displayName}</span>
               {MOCK_USER.verified && <Badge variant="featured">✓</Badge>}
             </div>
             <div className="flex gap-4 mt-2">
@@ -165,7 +165,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-heading">Platform</p>
+          <p className="text-foreground font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -178,7 +178,7 @@ function DesktopView() {
             <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               label === 'Profile'
                 ? 'bg-noctvm-violet/15 text-noctvm-violet border border-noctvm-violet/20'
-                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-white'
+                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-foreground'
             }`}>
               <Icon className="w-4 h-4" />
               {label}
@@ -190,7 +190,7 @@ function DesktopView() {
           <div className="flex items-center gap-2">
             <Avatar size="sm" src={MOCK_USER.avatar} />
             <div>
-              <p className="text-white text-xs font-medium">@{MOCK_USER.username}</p>
+              <p className="text-foreground text-xs font-medium">@{MOCK_USER.username}</p>
               <p className="text-[#8A8A8A] text-[10px]">🌙 {MOCK_USER.moonrays.toLocaleString()}</p>
             </div>
           </div>
@@ -207,7 +207,7 @@ function DesktopView() {
               <Avatar size="2xl" src={MOCK_USER.avatar} alt={MOCK_USER.displayName} ring="highlight" />
               <div className="flex-1 pb-2">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-white text-2xl font-black font-heading">{MOCK_USER.displayName}</h1>
+                  <h1 className="text-foreground text-2xl font-black font-heading">{MOCK_USER.displayName}</h1>
                   {MOCK_USER.verified && <Badge variant="featured">Verified</Badge>}
                 </div>
                 <p className="text-[#8A8A8A] text-sm">@{MOCK_USER.username}</p>
@@ -257,7 +257,7 @@ function DesktopView() {
           {['Control Club', 'OXYA Club', 'Expirat'].map(v => (
             <div key={v} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
               <span className="text-noctvm-violet text-xs">◆</span>
-              <span className="text-white text-sm">{v}</span>
+              <span className="text-foreground text-sm">{v}</span>
             </div>
           ))}
         </GlassPanel>

@@ -54,7 +54,7 @@ function NoctvmConsentBanner() {
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-noctvm-violet animate-pulse shadow-[0_0_12px_rgba(124,58,237,0.8)]" />
-                <h3 className="text-xl font-heading font-bold text-white tracking-tight uppercase">
+                <h3 className="text-xl font-heading font-bold text-foreground tracking-tight uppercase">
                   Memory of the Night
                 </h3>
               </div>
@@ -69,7 +69,7 @@ function NoctvmConsentBanner() {
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setIsPrivacyDialogOpen(true)}
-                className="text-noctvm-silver/60 hover:text-white transition-colors"
+                className="text-noctvm-silver/60 hover:text-foreground transition-colors"
               >
                 Preferences
               </Button>
@@ -136,7 +136,7 @@ function CustomPreferencesDialog() {
           {categories.map((category: any) => (
             <div key={category} className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-white capitalize">{category}</h4>
+                <h4 className="text-sm font-bold text-foreground capitalize">{category}</h4>
                 <p className="text-xs text-noctvm-silver/70 leading-relaxed uppercase tracking-widest">
                   {category === 'necessary' ? 'PLATFORM STABILITY' : 'EXPERIENCE ENHANCEMENT'}
                 </p>

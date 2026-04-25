@@ -4,7 +4,7 @@ import React from 'react';
 export default function DesignSystemIntroPage() {
   if (process.env.NODE_ENV !== 'development' && process.env.NEXT_PUBLIC_ENABLE_DESIGN_SYSTEM !== 'true') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050505] text-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#050505] text-foreground">
         <p>Design System is currently disabled.</p>
       </div>
     );
@@ -14,7 +14,7 @@ export default function DesignSystemIntroPage() {
     <div className="space-y-8 animate-fade-in max-w-4xl">
       <div className="p-8 rounded-xl bg-gradient-to-br from-noctvm-violet/20 to-black border border-noctvm-violet/20 shadow-[0_0_50px_rgba(124,58,237,0.1)] relative overflow-hidden">
         <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
-        <h1 className="text-5xl font-black text-white mb-4 font-heading tracking-widest uppercase relative z-10">
+        <h1 className="text-5xl font-black text-foreground mb-4 font-heading tracking-widest uppercase relative z-10">
           Component Library
         </h1>
         <p className="text-lg text-noctvm-silver leading-relaxed relative z-10 font-medium">
@@ -35,7 +35,7 @@ export default function DesignSystemIntroPage() {
             href={item.href}
             className="p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-noctvm-violet/40 transition-all hover:-translate-y-1 block group"
           >
-            <h3 className="text-lg font-bold text-white mb-2 group-hover:text-noctvm-violet transition-colors">{item.title}</h3>
+            <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-noctvm-violet transition-colors">{item.title}</h3>
             <p className="text-sm text-noctvm-silver/70">{item.desc}</p>
           </a>
         ))}

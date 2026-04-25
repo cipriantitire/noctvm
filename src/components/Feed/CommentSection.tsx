@@ -183,13 +183,13 @@ export default function CommentSection({
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full bg-noctvm-midnight/80 border border-white/10 rounded-2xl px-5 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-noctvm-violet/20 focus:border-noctvm-violet/40 transition-all pr-24"
+            className="w-full bg-noctvm-midnight/80 border border-white/10 rounded-2xl px-5 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-noctvm-violet/20 focus:border-noctvm-violet/40 transition-all pr-24"
             onKeyDown={(e) => e.key === 'Enter' && handleRootPost()}
           />
           <button
             onClick={handleRootPost}
             disabled={!newComment.trim()}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-noctvm-violet text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-noctvm-violet text-foreground px-4 py-1.5 rounded-xl text-xs font-bold shadow-lg shadow-noctvm-violet/20 hover:scale-105 active:scale-[0.96] disabled:opacity-30 disabled:scale-100 transition-all"
           >
             Post
           </button>
@@ -222,7 +222,7 @@ export default function CommentSection({
       {!isExpanded && comments.length > 2 && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="w-full py-2.5 flex items-center justify-center gap-2 text-noctvm-caption font-black uppercase tracking-wider text-noctvm-silver/40 hover:text-white transition-all bg-white/[0.02] hover:bg-white/[0.05] rounded-xl border border-white/5 group"
+          className="w-full py-2.5 flex items-center justify-center gap-2 text-noctvm-caption font-black uppercase tracking-wider text-noctvm-silver/40 hover:text-foreground transition-all bg-white/[0.02] hover:bg-white/[0.05] rounded-xl border border-white/5 group"
         >
           <span>View all {comments.length} comments</span>
           <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
@@ -239,13 +239,13 @@ export default function CommentSection({
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full bg-transparent border-b border-white/5 px-0 py-2.5 text-xs text-white focus:outline-none focus:border-noctvm-violet/40 transition-all pr-12"
+            className="w-full bg-transparent border-b border-white/5 px-0 py-2.5 text-xs text-foreground focus:outline-none focus:border-noctvm-violet/40 transition-all pr-12"
             onKeyDown={(e) => e.key === 'Enter' && handleRootPost()}
           />
           <button
             onClick={handleRootPost}
             disabled={!newComment.trim()}
-            className="absolute right-0 top-1/2 -translate-y-1/2 text-noctvm-caption font-bold text-noctvm-violet hover:text-white disabled:opacity-0 transition-all"
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-noctvm-caption font-bold text-noctvm-violet hover:text-foreground disabled:opacity-0 transition-all"
           >
             Post
           </button>

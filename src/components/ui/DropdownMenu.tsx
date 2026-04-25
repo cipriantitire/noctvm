@@ -31,7 +31,7 @@ function DropdownMenuContent({ className, sideOffset = 4, ...props }: React.Comp
           'frosted-glass',
           'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-          'z-[500] min-w-[8rem] overflow-y-auto max-h-[60vh] rounded-noctvm-md border-noctvm-border p-1 text-white shadow-md',
+          'z-[500] min-w-[8rem] overflow-y-auto max-h-[60vh] rounded-noctvm-md border-noctvm-border p-1 text-foreground shadow-md',
           className,
         )}
         {...props}
@@ -56,8 +56,8 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        'relative flex cursor-default items-center gap-2 rounded-noctvm-sm px-2 py-1.5 text-sm text-white outline-none select-none transition-colors',
-        'focus:bg-white/10 focus:text-white',
+        'relative flex cursor-default items-center gap-2 rounded-noctvm-sm px-2 py-1.5 text-sm text-foreground outline-none select-none transition-colors',
+        'focus:bg-white/10 focus:text-foreground',
         'data-[variant=destructive]:text-red-400 data-[variant=destructive]:focus:bg-red-500/10',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         'data-[inset]:pl-8',
@@ -74,7 +74,7 @@ function DropdownMenuCheckboxItem({ className, children, checked, ...props }: Re
     <DropdownMenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
-        'relative flex cursor-default items-center gap-2 rounded-noctvm-sm py-1.5 pr-2 pl-8 text-sm text-white outline-none select-none',
+        'relative flex cursor-default items-center gap-2 rounded-noctvm-sm py-1.5 pr-2 pl-8 text-sm text-foreground outline-none select-none',
         'focus:bg-white/10',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -101,7 +101,7 @@ function DropdownMenuRadioItem({ className, children, ...props }: React.Componen
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        'relative flex cursor-default items-center gap-2 rounded-noctvm-sm py-1.5 pr-2 pl-8 text-sm text-white outline-none select-none',
+        'relative flex cursor-default items-center gap-2 rounded-noctvm-sm py-1.5 pr-2 pl-8 text-sm text-foreground outline-none select-none',
         'focus:bg-white/10',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -159,7 +159,7 @@ function DropdownMenuSubTrigger({ className, inset, children, ...props }: React.
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        'flex cursor-default items-center rounded-noctvm-sm px-2 py-1.5 text-sm text-white outline-none select-none',
+        'flex cursor-default items-center rounded-noctvm-sm px-2 py-1.5 text-sm text-foreground outline-none select-none',
         'focus:bg-white/10 data-[state=open]:bg-white/10',
         'data-[inset]:pl-8',
         className,
@@ -180,7 +180,7 @@ function DropdownMenuSubContent({ className, ...props }: React.ComponentProps<ty
         'frosted-glass',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-        'z-[500] min-w-[8rem] overflow-hidden rounded-noctvm-md p-1 text-white shadow-lg',
+        'z-[500] min-w-[8rem] overflow-hidden rounded-noctvm-md p-1 text-foreground shadow-lg',
         className,
       )}
       {...props}

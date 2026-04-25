@@ -132,7 +132,7 @@ export default function PocketPage() {
         >
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/5 to-transparent overflow-hidden pointer-events-none" />
           <PocketIcon className="w-8 h-8 text-noctvm-violet mb-2 animate-float" />
-          <span className="text-4xl font-heading font-black text-white text-glow">
+          <span className="text-4xl font-heading font-black text-foreground text-glow">
             {pocket?.balance.toLocaleString() || (loading ? '...' : '0')}
           </span>
           <span className="text-noctvm-caption text-noctvm-silver/60 font-mono uppercase tracking-[0.3em] mt-1 italic">Pocket</span>
@@ -145,7 +145,7 @@ export default function PocketPage() {
       {/* ── 2. Prestige Journey ────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between px-2">
-          <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest">Nightly Prestige</h2>
+          <h2 className="text-sm font-heading font-bold text-foreground uppercase tracking-widest">Nightly Prestige</h2>
         </div>
         <MoonraysPrestigeCard />
       </section>
@@ -160,7 +160,7 @@ export default function PocketPage() {
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
             <PlusIcon className="w-12 h-12 text-noctvm-violet" />
           </div>
-          <h3 className="text-sm font-heading font-bold text-white uppercase tracking-wider mb-1">Earning Guide</h3>
+          <h3 className="text-sm font-heading font-bold text-foreground uppercase tracking-wider mb-1">Earning Guide</h3>
           <p className="text-noctvm-caption text-noctvm-silver/60">Earn Moonrays through social rites</p>
           <div className="mt-4 flex items-center gap-1.5 text-noctvm-caption font-mono text-noctvm-violet uppercase">
             Browse Methods <ChevronRightIcon className="w-3 h-3" />
@@ -172,7 +172,7 @@ export default function PocketPage() {
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <StarIcon className="w-12 h-12 text-noctvm-gold" />
           </div>
-          <h3 className="text-sm font-heading font-bold text-white uppercase tracking-wider mb-1">Invite Nexus</h3>
+          <h3 className="text-sm font-heading font-bold text-foreground uppercase tracking-wider mb-1">Invite Nexus</h3>
           <p className="text-noctvm-caption text-noctvm-silver/60">Share code: <span className="text-noctvm-violet font-mono">{profile?.referral_code || '...'}</span></p>
           <button 
             onClick={copyToClipboard}
@@ -186,7 +186,7 @@ export default function PocketPage() {
       {/* ── 4. The Vanity Emporium (Redeem Section) ────── */}
       <section className="space-y-6">
         <div className="flex items-center justify-between px-2">
-          <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest">Vanity Emporium</h2>
+          <h2 className="text-sm font-heading font-bold text-foreground uppercase tracking-widest">Vanity Emporium</h2>
           <button 
             onClick={() => setIsBoutiqueOpen(true)}
             className="text-noctvm-caption text-noctvm-violet font-mono uppercase flex items-center gap-1 hover:underline active:scale-[0.96] transition-all"
@@ -206,14 +206,14 @@ export default function PocketPage() {
               className="relative group p-5 rounded-3xl bg-white/5 border border-white/5 overflow-hidden cursor-pointer active:scale-[0.96] transition-all hover:bg-white/10"
             >
               <div className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl ${item.color} opacity-20`} />
-              <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-noctvm-black/40 border border-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 {item.icon}
               </div>
-              <h4 className="text-noctvm-caption font-heading font-bold text-white mb-1 uppercase tracking-wider">{item.name}</h4>
+              <h4 className="text-noctvm-caption font-heading font-bold text-foreground mb-1 uppercase tracking-wider">{item.name}</h4>
               <p className="text-noctvm-micro text-noctvm-silver/50 font-mono mb-4">{item.type}</p>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-noctvm-violet">{item.cost} <span className="text-noctvm-xs">MR</span></span>
-                <span className="text-noctvm-xs font-mono text-white/20 uppercase tracking-widest flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="text-noctvm-xs font-mono text-foreground/20 uppercase tracking-widest flex items-center gap-1 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
                    Preview <ExternalLinkIcon className="w-2 h-2" />
                 </span>
               </div>
@@ -239,11 +239,11 @@ export default function PocketPage() {
               transition={{ delay: i * 0.05 }}
               className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl"
             >
-              <div className="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center text-2xl border border-white/5 shadow-inner">
+              <div className="w-12 h-12 rounded-xl bg-noctvm-black/40 flex items-center justify-center text-2xl border border-white/5 shadow-inner">
                 {item.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-bold leading-tight">{item.action}</p>
+                <p className="text-sm text-foreground font-bold leading-tight">{item.action}</p>
                 <p className="text-noctvm-caption text-noctvm-silver/60 mt-0.5">{item.desc}</p>
               </div>
               <span className="text-xs font-bold text-noctvm-violet font-mono bg-noctvm-violet/10 px-3 py-1 rounded-lg border border-noctvm-violet/20">

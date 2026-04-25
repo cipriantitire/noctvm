@@ -9,7 +9,7 @@ export default function AlertPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Alert</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Alert</h1>
         <p className="text-noctvm-silver">Persistent informational banners.</p>
       </div>
       <div className="space-y-3 max-w-lg">

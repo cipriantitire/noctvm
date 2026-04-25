@@ -48,14 +48,14 @@ function SavedEventItem({ event, onEventClick }: { event: NoctEvent; onEventClic
           />
         ) : (
           <span className={cn(
-            "text-xs font-bold text-white"
+            "text-xs font-bold text-foreground"
           )}>
             {event.venue[0]}
           </span>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-white truncate">{event.title}</p>
+        <p className="text-xs font-semibold text-foreground truncate">{event.title}</p>
         <p className="text-[10px] text-noctvm-silver flex items-center gap-1 opacity-60">
           <MapPinIcon className="w-2.5 h-2.5" />
           {event.venue}
@@ -146,7 +146,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[400] xl:hidden"
+            className="fixed inset-0 bg-noctvm-black/60 backdrop-blur-sm z-[400] xl:hidden"
           />
 
           {/* Sheet Container */}
@@ -179,14 +179,14 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
               className="py-5 pl-6 pr-4 flex items-center justify-between"
               onPointerDown={(event) => dragControls.start(event)}
             >
-              <h3 className="text-sm font-bold capitalize tracking-wide text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold capitalize tracking-wide text-foreground flex items-center gap-2">
                 <TicketIcon className="w-4 h-4 text-noctvm-violet" />
                 Your Agenda
               </h3>
               <button 
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center text-noctvm-silver hover:text-white transition-colors"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center text-noctvm-silver hover:text-foreground transition-colors"
                 title="Close"
               >
                 <XIcon className="w-4 h-4" />

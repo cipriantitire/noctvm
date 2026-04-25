@@ -30,7 +30,7 @@ export default function TabsShowcasePage() {
     <div className="space-y-12 pb-24">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-heading font-bold text-white mb-4">Tabs</h1>
+        <h1 className="text-3xl font-heading font-bold text-foreground mb-4">Tabs</h1>
         <p className="text-noctvm-silver text-lg max-w-2xl">
           Navigation elements for switching between different views or categories. Uses Framer Motion for smooth active state transitions.
         </p>
@@ -40,7 +40,7 @@ export default function TabsShowcasePage() {
         <div className="lg:col-span-2 space-y-8">
           {/* Main Playground */}
           <section className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold text-white">Interactive Playground</h2>
+            <h2 className="text-xl font-heading font-semibold text-foreground">Interactive Playground</h2>
             <GlassPanel variant="noise" className="p-8 flex items-center justify-center min-h-[300px]">
               <Tabs 
                 tabs={MOCK_TABS_WITH_ICONS}
@@ -66,7 +66,7 @@ export default function TabsShowcasePage() {
 
           {/* Variants Showcase */}
           <section className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold text-white">Variants</h2>
+            <h2 className="text-xl font-heading font-semibold text-foreground">Variants</h2>
             <div className="space-y-6">
               <GlassPanel className="p-6 space-y-4">
                 <h3 className="text-sm font-medium text-noctvm-silver">Underline (Default)</h3>
@@ -104,7 +104,7 @@ export default function TabsShowcasePage() {
         {/* Controls Sidebar */}
         <div className="space-y-6">
           <GlassPanel className="p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Playground Controls</h3>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Playground Controls</h3>
             
             <div className="space-y-6">
               <div className="space-y-3">
@@ -115,7 +115,7 @@ export default function TabsShowcasePage() {
                        key={v}
                        onClick={() => setActiveVariant(v as any)}
                        className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                         activeVariant === v ? 'bg-noctvm-violet text-white' : 'text-noctvm-silver hover:text-white'
+                         activeVariant === v ? 'bg-noctvm-violet text-foreground' : 'text-noctvm-silver hover:text-foreground'
                        }`}
                      >
                        {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -133,7 +133,7 @@ export default function TabsShowcasePage() {
                      onChange={(e) => setFullWidth(e.target.checked)}
                      className="w-4 h-4 rounded bg-noctvm-black border-noctvm-border text-noctvm-violet focus:ring-noctvm-violet/30"
                    />
-                   <span className="text-sm text-white">Full Width</span>
+                   <span className="text-sm text-foreground">Full Width</span>
                  </label>
               </div>
             </div>

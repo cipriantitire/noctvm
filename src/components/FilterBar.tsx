@@ -84,8 +84,8 @@ export default function FilterBar({
             onClick={() => onViewModeChange('portrait')}
             className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${
               viewMode === 'portrait'
-                ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20'
-                : 'text-noctvm-silver hover:text-white'
+                ? 'bg-noctvm-violet/15 text-foreground border border-noctvm-violet/20'
+                : 'text-noctvm-silver hover:text-foreground'
             }`}
             title="Grid view"
           >
@@ -101,8 +101,8 @@ export default function FilterBar({
             onClick={() => onViewModeChange('landscape')}
             className={`p-2 rounded-full corner-smooth-none transition-all duration-200 flex items-center justify-center ${
               viewMode === 'landscape'
-                ? 'bg-noctvm-violet/15 text-white border border-noctvm-violet/20'
-                : 'text-noctvm-silver hover:text-white'
+                ? 'bg-noctvm-violet/15 text-foreground border border-noctvm-violet/20'
+                : 'text-noctvm-silver hover:text-foreground'
             }`}
             title="List view"
           >
@@ -121,7 +121,7 @@ export default function FilterBar({
               type="button"
               className={`flex h-[34px] w-fit min-w-[5.25rem] items-center justify-center gap-1.5 rounded-full corner-smooth-none border border-white/10 px-3 text-xs font-medium frosted-glass transition-colors ${
                 selectedDate
-                  ? '!border-noctvm-violet/20 !bg-noctvm-violet/10 !text-white'
+                  ? '!border-noctvm-violet/20 !bg-noctvm-violet/10 !text-foreground'
                   : '!text-noctvm-silver hover:!border-noctvm-violet/30'
               }`}
               title="Filter events by date"
@@ -158,7 +158,7 @@ export default function FilterBar({
                   onDateChange(null);
                   setDateDropdownOpen(false);
                 }}
-                className="rounded-noctvm-sm px-2 py-1 text-noctvm-label font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-white"
+                className="rounded-noctvm-sm px-2 py-1 text-noctvm-label font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-foreground"
               >
                 Clear
               </button>
@@ -168,7 +168,7 @@ export default function FilterBar({
                   onDateChange(format(todayDate, 'yyyy-MM-dd'));
                   setDateDropdownOpen(false);
                 }}
-                className="rounded-noctvm-sm px-2 py-1 text-noctvm-label font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-white"
+                className="rounded-noctvm-sm px-2 py-1 text-noctvm-label font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-foreground"
               >
                 Today
               </button>
@@ -184,7 +184,7 @@ export default function FilterBar({
               className={`w-full flex h-[34px] items-center justify-between gap-2 px-3 rounded-full corner-smooth-none text-xs font-medium frosted-glass transition-colors ${
                 activeGenres.includes('All')
                   ? 'text-noctvm-silver hover:border-noctvm-violet/30'
-                  : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'
+                  : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-foreground'
               }`}
             >
               <span>
@@ -231,7 +231,7 @@ export default function FilterBar({
                       onClick={() => handleGenreClick(genre)}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                         isActive
-                          ? 'bg-noctvm-violet/85 text-white'
+                          ? 'bg-noctvm-violet/85 text-foreground'
                           : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30'
                       }`}
                     >

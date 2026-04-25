@@ -10,7 +10,7 @@ export default function ButtonGroupPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Button Group</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Button Group</h1>
         <p className="text-noctvm-silver">Connected buttons sharing border radius.</p>
       </div>
       <div className="space-y-4">

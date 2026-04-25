@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
     <div className="flex min-h-screen items-center justify-center bg-noctvm-black px-4 text-center">
       <div className="max-w-sm space-y-3">
         <div className="mx-auto h-12 w-12 rounded-full border border-white/10 bg-noctvm-surface animate-pulse" />
-        <p className="font-heading text-xl font-semibold text-white">Signing you in</p>
+        <p className="font-heading text-xl font-semibold text-foreground">Signing you in</p>
         <p className="text-sm text-noctvm-silver">Redirecting you back to NOCTVM.</p>
       </div>
     </div>

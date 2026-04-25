@@ -9,7 +9,7 @@ export default function SliderPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Slider</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Slider</h1>
         <p className="text-noctvm-silver">Range input for numeric values.</p>
       </div>
 

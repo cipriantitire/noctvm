@@ -313,7 +313,7 @@ export default function EventModal({
     {/* Image lightbox */}
     {lightboxOpen && (
       <div
-        className="fixed inset-0 flex items-center justify-center bg-black/95 cursor-zoom-out"
+        className="fixed inset-0 flex items-center justify-center bg-noctvm-black/95 cursor-zoom-out"
         style={{ zIndex: (zIndex || 200) + 2 }}
         onClick={() => setLightboxOpen(false)}
       >
@@ -329,7 +329,7 @@ export default function EventModal({
           size="lg"
           aria-label="Close image preview"
           onClick={() => setLightboxOpen(false)}
-          className="absolute top-4 right-4 text-white"
+          className="absolute top-4 right-4 text-foreground"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
         </IconButton>
@@ -424,7 +424,7 @@ export default function EventModal({
 
         {/* Header metadata */}
         <div className="flex-shrink-0 space-y-4 p-5">
-          <h2 className="font-heading text-xl sm:text-2xl font-bold text-white leading-tight">
+          <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground leading-tight">
             {event.title}
           </h2>
 
@@ -454,7 +454,7 @@ export default function EventModal({
               <CalendarIcon className="w-4 h-4 text-noctvm-violet" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-white">{formatDate(event.date)}</p>
+              <p className="text-sm font-medium text-foreground">{formatDate(event.date)}</p>
               {event.time && <p className="text-xs text-noctvm-violet font-mono">{event.time}</p>}
             </div>
             <button
@@ -463,7 +463,7 @@ export default function EventModal({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                 isSaved
                   ? 'bg-noctvm-violet/20 text-noctvm-violet border-noctvm-violet/40'
-                  : 'bg-black/40 text-noctvm-silver border-white/10 hover:border-noctvm-violet/30 hover:text-noctvm-violet'
+                  : 'bg-noctvm-black/40 text-noctvm-silver border-white/10 hover:border-noctvm-violet/30 hover:text-noctvm-violet'
               } ${!isRealEvent(event?.id ?? '') ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

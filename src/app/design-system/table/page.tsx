@@ -65,7 +65,7 @@ export default function TablePage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Table</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Table</h1>
         <p className="text-noctvm-silver">Data table with sortable headers.</p>
       </div>
 

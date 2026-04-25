@@ -17,7 +17,7 @@ export default function AvatarsShowcasePage() {
   return (
     <div className="space-y-8 animate-fade-in pb-24">
       <div className="mb-6">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading tracking-wider uppercase">Avatars</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading tracking-wider uppercase">Avatars</h1>
         <p className="text-noctvm-silver/70">
           The core atomic component for representing users, venues, or brands. Supports story rings, live states, and text fallbacks.
         </p>
@@ -29,7 +29,7 @@ export default function AvatarsShowcasePage() {
         <div className="lg:col-span-4 space-y-6">
           <GlassPanel variant="subtle" className="p-6 space-y-8">
             <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Properties</h3>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Properties</h3>
               
               <div className="space-y-4">
                 <div>
@@ -39,7 +39,7 @@ export default function AvatarsShowcasePage() {
                       <button 
                         key={s} 
                         onClick={() => setSize(s)}
-                        className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${size === s ? 'bg-noctvm-violet/20 border-noctvm-violet/50 border text-white' : 'bg-white/5 text-noctvm-silver border border-transparent hover:bg-white/10'}`}
+                        className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${size === s ? 'bg-noctvm-violet/20 border-noctvm-violet/50 border text-foreground' : 'bg-white/5 text-noctvm-silver border border-transparent hover:bg-white/10'}`}
                       >
                         {s}
                       </button>
@@ -53,7 +53,7 @@ export default function AvatarsShowcasePage() {
                     {rings.map(r => (
                       <label key={r} className="flex items-center gap-2 cursor-pointer group">
                         <input type="radio" checked={ring === r} onChange={() => setRing(r)} className="text-noctvm-violet focus:ring-noctvm-violet bg-white/5 border-white/20" />
-                        <span className={`text-sm ${ring === r ? 'text-white font-medium' : 'text-noctvm-silver group-hover:text-white/80'}`}>{r}</span>
+                        <span className={`text-sm ${ring === r ? 'text-foreground font-medium' : 'text-noctvm-silver group-hover:text-foreground/80'}`}>{r}</span>
                       </label>
                     ))}
                   </div>
@@ -64,13 +64,13 @@ export default function AvatarsShowcasePage() {
                   <div className="flex items-center gap-3">
                     <button 
                       onClick={() => setUseImage(true)}
-                      className={`flex-1 py-1.5 rounded text-xs transition-colors ${useImage ? 'bg-white/20 text-white' : 'bg-white/5 text-noctvm-silver hover:bg-white/10'}`}
+                      className={`flex-1 py-1.5 rounded text-xs transition-colors ${useImage ? 'bg-white/20 text-foreground' : 'bg-white/5 text-noctvm-silver hover:bg-white/10'}`}
                     >
                       Image
                     </button>
                     <button 
                       onClick={() => setUseImage(false)}
-                      className={`flex-1 py-1.5 rounded text-xs transition-colors ${!useImage ? 'bg-white/20 text-white' : 'bg-white/5 text-noctvm-silver hover:bg-white/10'}`}
+                      className={`flex-1 py-1.5 rounded text-xs transition-colors ${!useImage ? 'bg-white/20 text-foreground' : 'bg-white/5 text-noctvm-silver hover:bg-white/10'}`}
                     >
                       Fallback Text
                     </button>
@@ -103,7 +103,7 @@ export default function AvatarsShowcasePage() {
 
           {/* Quick Grids */}
           <GlassPanel variant="subtle" className="p-6">
-            <h3 className="text-sm font-bold text-white mb-6">Size Scale</h3>
+            <h3 className="text-sm font-bold text-foreground mb-6">Size Scale</h3>
             <div className="flex items-end gap-6 flex-wrap">
               {sizes.map(s => (
                 <div key={s} className="flex flex-col items-center gap-3">

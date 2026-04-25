@@ -291,7 +291,7 @@ export default function FeedPage({ onVenueClick, onOpenCreatePost, onOpenCreateS
             key={sub}
             onClick={() => setSubTab(sub as any)}
             className={`pb-3 text-noctvm-caption font-bold uppercase tracking-[0.1em] transition-all ${
-              subTab === sub ? 'text-noctvm-violet border-b-2 border-noctvm-violet' : 'text-noctvm-silver/40 hover:text-white'
+              subTab === sub ? 'text-noctvm-violet border-b-2 border-noctvm-violet' : 'text-noctvm-silver/40 hover:text-foreground'
             }`}
           >
             {sub}

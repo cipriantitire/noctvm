@@ -16,7 +16,7 @@ export default function SwitchPage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Switch</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Switch</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Toggle control. Violet when on, surface when off.</p>
       </div>
 
@@ -26,7 +26,7 @@ export default function SwitchPage() {
           {items.map(item => (
             <div key={item.label} className="flex items-center justify-between px-6 py-4">
               <div>
-                <p className="text-sm font-medium text-white">{item.label}</p>
+                <p className="text-sm font-medium text-foreground">{item.label}</p>
                 <p className="text-xs text-noctvm-silver mt-0.5">{item.description}</p>
               </div>
               <Switch checked={item.checked} onCheckedChange={item.onChange} />
@@ -34,7 +34,7 @@ export default function SwitchPage() {
           ))}
           <div className="flex items-center justify-between px-6 py-4 opacity-50">
             <div>
-              <p className="text-sm font-medium text-white">Analytics (disabled)</p>
+              <p className="text-sm font-medium text-foreground">Analytics (disabled)</p>
               <p className="text-xs text-noctvm-silver mt-0.5">Unavailable in your region</p>
             </div>
             <Switch disabled checked={false} />

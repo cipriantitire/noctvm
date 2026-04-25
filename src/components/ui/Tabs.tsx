@@ -36,7 +36,7 @@ export default function Tabs({
               key={tab.id}
               onClick={() => onChange(tab.id)}
               className={`relative flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${fullWidth ? 'flex-1' : ''} ${
-                isActive ? 'text-white shadow-lg' : 'text-noctvm-silver hover:text-white'
+                isActive ? 'text-foreground shadow-lg' : 'text-noctvm-silver hover:text-foreground'
               }`}
             >
               {isActive && (
@@ -69,8 +69,8 @@ export default function Tabs({
               onClick={() => onChange(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-noctvm-violet text-white shadow-glow'
-                  : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30 hover:text-white'
+                  ? 'bg-noctvm-violet text-foreground shadow-glow'
+                  : 'bg-noctvm-surface text-noctvm-silver border border-noctvm-border hover:border-noctvm-violet/30 hover:text-foreground'
               }`}
             >
               {tab.icon}
@@ -97,7 +97,7 @@ export default function Tabs({
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={`relative flex items-center justify-center gap-2 py-4 px-1 font-medium text-sm transition-colors ${fullWidth ? 'flex-1' : 'mr-8'} ${
-              isActive ? 'text-white' : 'text-noctvm-silver hover:text-white'
+              isActive ? 'text-foreground' : 'text-noctvm-silver hover:text-foreground'
             }`}
           >
             {tab.icon}

@@ -7,7 +7,7 @@ export default function TooltipPage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Tooltip</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Tooltip</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Contextual hint on hover. Portal-rendered, zero delay by default.</p>
       </div>
 
@@ -31,7 +31,7 @@ export default function TooltipPage() {
           {['Bookmark', 'Share', 'Report'].map(label => (
             <Tooltip key={label}>
               <TooltipTrigger asChild>
-                <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-noctvm-silver hover:text-white hover:bg-white/10 transition-colors text-xs font-mono">
+                <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-noctvm-silver hover:text-foreground hover:bg-white/10 transition-colors text-xs font-mono">
                   {label[0]}
                 </button>
               </TooltipTrigger>

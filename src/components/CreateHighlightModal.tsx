@@ -143,7 +143,7 @@ export default function CreateHighlightModal({
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-noctvm-black/75 backdrop-blur-sm">
       <div className="relative w-full max-w-sm mx-4 bg-noctvm-midnight border border-noctvm-border rounded-2xl overflow-hidden">
 
         {/* Header */}
@@ -151,7 +151,7 @@ export default function CreateHighlightModal({
           {step === 2 ? (
             <button
               onClick={() => setStep(1)}
-              className="p-1 rounded-lg text-noctvm-silver hover:text-white transition-colors"
+              className="p-1 rounded-lg text-noctvm-silver hover:text-foreground transition-colors"
               aria-label="Back"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -161,7 +161,7 @@ export default function CreateHighlightModal({
           ) : (
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-noctvm-silver hover:text-white transition-colors"
+              className="p-1 rounded-lg text-noctvm-silver hover:text-foreground transition-colors"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -169,7 +169,7 @@ export default function CreateHighlightModal({
               </svg>
             </button>
           )}
-          <h2 className="flex-1 text-center text-sm font-semibold text-white">
+          <h2 className="flex-1 text-center text-sm font-semibold text-foreground">
             {step === 1 ? 'Select Stories' : 'New Highlight'}
           </h2>
           {/* Spacer to centre heading */}
@@ -209,7 +209,7 @@ export default function CreateHighlightModal({
                           />
                         ) : (
                           <div className="w-full h-full rounded-sm bg-gradient-to-br from-noctvm-violet to-purple-500 flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">
+                            <span className="text-foreground font-bold text-lg">
                               {story.caption?.[0]?.toUpperCase() ?? '?'}
                             </span>
                           </div>
@@ -219,7 +219,7 @@ export default function CreateHighlightModal({
                         {isSelected && (
                           <div className="absolute inset-0 rounded-sm bg-noctvm-violet/40 flex items-center justify-center">
                             <div className="w-6 h-6 rounded-full bg-noctvm-violet flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                              <svg className="w-4 h-4 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
                             </div>
@@ -240,7 +240,7 @@ export default function CreateHighlightModal({
               <button
                 onClick={() => setStep(2)}
                 disabled={selectedIds.size === 0}
-                className="px-5 py-2 rounded-lg bg-noctvm-violet text-white text-sm font-semibold hover:bg-noctvm-violet/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-5 py-2 rounded-lg bg-noctvm-violet text-foreground text-sm font-semibold hover:bg-noctvm-violet/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>
@@ -264,7 +264,7 @@ export default function CreateHighlightModal({
                 placeholder="e.g. Summer Nights"
                 maxLength={24}
                 autoFocus
-                className="w-full bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-2 text-sm text-white placeholder-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50"
+                className="w-full bg-noctvm-surface border border-noctvm-border rounded-lg px-3 py-2 text-sm text-foreground placeholder-noctvm-silver/50 focus:outline-none focus:border-noctvm-violet/50"
               />
               <p className="text-right text-noctvm-caption text-noctvm-silver/40 mt-1">
                 {name.length}/24
@@ -301,14 +301,14 @@ export default function CreateHighlightModal({
             <div className="flex gap-2 pt-1">
               <button
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-lg border border-noctvm-border text-xs text-noctvm-silver hover:text-white transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-noctvm-border text-xs text-noctvm-silver hover:text-foreground transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreate}
                 disabled={!name.trim() || creating}
-                className="flex-1 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-semibold hover:bg-noctvm-violet/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 py-2.5 rounded-lg bg-noctvm-violet text-foreground text-sm font-semibold hover:bg-noctvm-violet/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {creating ? 'Creating…' : 'Create'}
               </button>

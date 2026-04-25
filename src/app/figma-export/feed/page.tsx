@@ -89,7 +89,7 @@ function PostCard({ post, compact = false }: { post: typeof MOCK_POSTS[0]; compa
         <Avatar size="md" fallback={post.author[0].toUpperCase()} src={`https://i.pravatar.cc/150?u=${post.author}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-white text-sm font-semibold">{post.author}</span>
+            <span className="text-foreground text-sm font-semibold">{post.author}</span>
             <span className="text-[#8A8A8A] text-xs">{post.handle}</span>
             <span className="text-[#8A8A8A] text-xs">· {post.time}</span>
             {post.venue && (
@@ -119,7 +119,7 @@ function PostCard({ post, compact = false }: { post: typeof MOCK_POSTS[0]; compa
             <button className="flex items-center gap-1.5 text-xs hover:text-noctvm-emerald transition-colors">
               <Repeat2 className="w-4 h-4" />{post.reposts}
             </button>
-            <button className="ml-auto hover:text-white transition-colors">
+            <button className="ml-auto hover:text-foreground transition-colors">
               <Share2 className="w-4 h-4" />
             </button>
           </div>
@@ -137,7 +137,7 @@ function MobileView() {
       <div className="flex items-center justify-between px-4 pt-12 pb-3">
         <div className="flex items-center gap-2">
           <FeedIcon className="w-5 h-5 text-noctvm-violet" />
-          <span className="text-white font-bold text-lg font-heading">Feed</span>
+          <span className="text-foreground font-bold text-lg font-heading">Feed</span>
         </div>
         <Button variant="primary" size="sm">Post</Button>
       </div>
@@ -175,7 +175,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-heading">Platform</p>
+          <p className="text-foreground font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -188,7 +188,7 @@ function DesktopView() {
             <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               label === 'Feed'
                 ? 'bg-noctvm-violet/15 text-noctvm-violet border border-noctvm-violet/20'
-                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-white'
+                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-foreground'
             }`}>
               <Icon className="w-4 h-4" />
               {label}
@@ -204,7 +204,7 @@ function DesktopView() {
       <main className="flex-1 max-w-[680px] border-r border-white/5">
         <div className="sticky top-0 z-10 bg-[#050505]/90 backdrop-blur-md px-6 pt-6 pb-3 border-b border-white/5">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-black text-white font-heading">Feed</h1>
+            <h1 className="text-xl font-black text-foreground font-heading">Feed</h1>
           </div>
           <Tabs tabs={subTabs} activeTab={tab} onChange={setTab} />
         </div>
@@ -226,7 +226,7 @@ function DesktopView() {
           {['Control Club', 'OXYA Club', 'Expirat', 'Quantic'].map((v, i) => (
             <div key={v} className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
               <span className="text-[#8A8A8A] text-xs font-mono w-4">{i + 1}</span>
-              <span className="text-white text-sm flex-1">{v}</span>
+              <span className="text-foreground text-sm flex-1">{v}</span>
               <Badge variant="genre">Hot</Badge>
             </div>
           ))}
@@ -236,7 +236,7 @@ function DesktopView() {
           {['djnoctvm', 'control_club', 'vinyl_ro'].map(u => (
             <div key={u} className="flex items-center gap-3 py-2">
               <Avatar size="sm" fallback={u[0].toUpperCase()} src={`https://i.pravatar.cc/150?u=${u}`} />
-              <span className="text-white text-sm flex-1">@{u}</span>
+              <span className="text-foreground text-sm flex-1">@{u}</span>
               <Button variant="secondary" size="sm">Follow</Button>
             </div>
           ))}

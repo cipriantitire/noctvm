@@ -183,18 +183,18 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
 
   if (!user) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-noctvm-black/70 backdrop-blur-sm">
         <div className="bg-noctvm-midnight border border-noctvm-border rounded-2xl p-8 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
-          <p className="text-white font-semibold mb-2">Sign in to share a story</p>
+          <p className="text-foreground font-semibold mb-2">Sign in to share a story</p>
           <p className="text-sm text-noctvm-silver mb-4">Create an account to share your nightlife moments.</p>
           <div className="flex flex-col gap-2">
             <button
               onClick={() => { onClose(); onOpenAuth?.(); }}
-              className="px-6 py-2.5 rounded-lg bg-noctvm-violet text-white text-sm font-medium hover:bg-noctvm-violet/90 transition-colors"
+              className="px-6 py-2.5 rounded-lg bg-noctvm-violet text-foreground text-sm font-medium hover:bg-noctvm-violet/90 transition-colors"
             >
               Sign In
             </button>
-            <button onClick={onClose} className="text-xs text-noctvm-silver hover:text-white transition-colors py-1">
+            <button onClick={onClose} className="text-xs text-noctvm-silver hover:text-foreground transition-colors py-1">
               Cancel
             </button>
           </div>
@@ -205,7 +205,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-noctvm-black/60 backdrop-blur-sm ${isClosing ? 'animate-fade-out' : ''}`}
     >
       <div
         className={`w-full max-w-lg frosted-glass-modal frosted-noise rounded-2xl overflow-hidden shadow-2xl shadow-black/80 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
@@ -214,8 +214,8 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-noctvm-border">
-          <button onClick={handleClose} className="text-noctvm-silver hover:text-white text-sm transition-colors" title="Cancel story">Cancel</button>
-          <span className="text-sm font-semibold text-white">New Story</span>
+          <button onClick={handleClose} className="text-noctvm-silver hover:text-foreground text-sm transition-colors" title="Cancel story">Cancel</button>
+          <span className="text-sm font-semibold text-foreground">New Story</span>
           <button
             onClick={handleSubmit}
             disabled={submitting || !imagePreview}
@@ -246,7 +246,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                 )}
                 <button
                   onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); setMediaType('image'); }}
-                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center text-white hover:bg-black transition-colors"
+                  className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-noctvm-black/70 flex items-center justify-center text-foreground hover:bg-noctvm-black transition-colors"
                   title="Remove media"
                 >
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -262,7 +262,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white">Portrait recommended · Any photo or video</p>
+                  <p className="text-sm font-medium text-foreground">Portrait recommended · Any photo or video</p>
                   <p className="text-xs text-noctvm-silver mt-0.5">or <span className="text-noctvm-violet">browse files</span></p>
                   <p className="text-noctvm-caption text-noctvm-silver/40 mt-1">Disappears after 24 hours</p>
                 </div>
@@ -276,7 +276,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-noctvm-violet to-purple-400 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
               {profile?.avatar_url
                 ? <Image src={profile.avatar_url} alt="My profile" fill className="object-cover" unoptimized />
-                : <span className="text-xs font-bold text-white">{(profile?.display_name || 'N')[0].toUpperCase()}</span>
+                : <span className="text-xs font-bold text-foreground">{(profile?.display_name || 'N')[0].toUpperCase()}</span>
               }
             </div>
             <textarea
@@ -285,7 +285,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
               placeholder="Add a caption... (optional)"
               title="Story caption"
               rows={2}
-              className="flex-1 bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none resize-none"
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none resize-none"
             />
             <span className="text-noctvm-micro text-noctvm-silver/30 mt-2">{caption.length}/150</span>
           </div>
@@ -293,12 +293,12 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
           {/* Tag venue */}
           <div className="px-4 py-3 border-b border-noctvm-border relative">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white">Tag Venue</span>
+              <span className="text-sm text-foreground">Tag Venue</span>
               <div className="flex-1 ml-4">
                 {selectedVenue ? (
                   <div className="flex items-center justify-end gap-2">
                     <span className="text-sm text-noctvm-violet">{selectedVenue}</span>
-                    <button onClick={() => { setSelectedVenue(''); setVenueSearch(''); }} className="text-noctvm-silver hover:text-white" title="Remove venue">
+                    <button onClick={() => { setSelectedVenue(''); setVenueSearch(''); }} className="text-noctvm-silver hover:text-foreground" title="Remove venue">
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     </button>
                   </div>
@@ -310,7 +310,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                     value={venueSearch}
                     onChange={e => { setVenueSearch(e.target.value); searchVenues(e.target.value); setShowVenueSuggestions(true); }}
                     onFocus={() => setShowVenueSuggestions(true)}
-                    className="w-full bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none text-right"
+                    className="w-full bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none text-right"
                   />
                 )}
               </div>
@@ -321,10 +321,10 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   <button
                     key={venue.name}
                     onMouseDown={() => { setSelectedVenue(venue.name); setVenueSearch(''); setShowVenueSuggestions(false); }}
-                    className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
+                    className="w-full px-3 py-2.5 text-sm text-foreground hover:bg-noctvm-surface text-left transition-colors flex items-center gap-2"
                     title={`Select ${venue.name}`}
                   >
-                    <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 bg-black/20 flex-shrink-0 relative">
+                    <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 bg-noctvm-black/20 flex-shrink-0 relative">
                        <Image src={getVenueLogo(venue.name, venue.logo_url || undefined)} alt="" fill className="object-cover" />
                     </div>
                     {venue.name}
@@ -337,12 +337,12 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
           {/* Tag event */}
           <div className="px-4 py-3 border-b border-noctvm-border relative">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white">Tag Event</span>
+              <span className="text-sm text-foreground">Tag Event</span>
               <div className="flex-1 ml-4">
                 {selectedEvent ? (
                   <div className="flex items-center justify-end gap-2">
                     <span className="text-sm text-noctvm-emerald font-bold">{selectedEvent.title}</span>
-                    <button onClick={() => { setSelectedEvent(null); setEventSearch(''); }} className="text-noctvm-silver hover:text-white" title="Remove event">
+                    <button onClick={() => { setSelectedEvent(null); setEventSearch(''); }} className="text-noctvm-silver hover:text-foreground" title="Remove event">
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     </button>
                   </div>
@@ -354,7 +354,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                     value={eventSearch}
                     onChange={e => { setEventSearch(e.target.value); searchEvents(e.target.value); setShowEventSuggestions(true); }}
                     onFocus={() => setShowEventSuggestions(true)}
-                    className="w-full bg-transparent text-sm text-white placeholder:text-noctvm-silver/40 outline-none text-right"
+                    className="w-full bg-transparent text-sm text-foreground placeholder:text-noctvm-silver/40 outline-none text-right"
                   />
                 )}
               </div>
@@ -365,7 +365,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   <button
                     key={e.id}
                     onMouseDown={() => { setSelectedEvent(e); setEventSearch(''); setShowEventSuggestions(false); }}
-                    className="w-full px-3 py-2.5 text-sm text-white hover:bg-noctvm-surface text-left transition-colors flex flex-col"
+                    className="w-full px-3 py-2.5 text-sm text-foreground hover:bg-noctvm-surface text-left transition-colors flex flex-col"
                     title={`Select ${e.title}`}
                   >
                     <span className="font-medium text-xs">{e.title}</span>
@@ -379,7 +379,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
           {/* Hashtags */}
           <div className="px-4 py-3 border-b border-noctvm-border">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-white flex-shrink-0">Tags</span>
+              <span className="text-sm text-foreground flex-shrink-0">Tags</span>
               <div className="flex-1 flex flex-wrap items-center gap-1.5">
                 {tags.map(tag => (
                   <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-noctvm-violet/20 text-noctvm-violet text-xs">
@@ -396,7 +396,7 @@ export default function CreateStoryModal({ isOpen, onClose, onStoryCreated, onOp
                   value={tagInput}
                   onChange={e => setTagInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addTag(); } }}
-                  className="flex-1 min-w-[80px] bg-transparent text-xs text-white placeholder:text-noctvm-silver/30 outline-none"
+                  className="flex-1 min-w-[80px] bg-transparent text-xs text-foreground placeholder:text-noctvm-silver/30 outline-none"
                 />
               </div>
             </div>

@@ -17,7 +17,7 @@ export default function ToastPage() {
   return (
     <div className="space-y-12 animate-fade-in pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 font-heading uppercase tracking-wider">Toast</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2 font-heading uppercase tracking-wider">Toast</h1>
         <p className="text-noctvm-silver/70 max-w-2xl">Global notification system. Call <code className="text-noctvm-violet font-mono text-sm">useToast()</code> from anywhere. Requires <code className="text-noctvm-violet font-mono text-sm">ToastProvider</code> in the layout.</p>
       </div>
 

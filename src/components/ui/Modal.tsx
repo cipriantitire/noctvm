@@ -79,7 +79,7 @@ export function Modal({
     >
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop-displace" 
+        className="absolute inset-0 bg-noctvm-black/60 backdrop-blur-sm modal-backdrop-displace" 
         onClick={handleClose} 
       />
 
@@ -102,7 +102,7 @@ export function Modal({
           <div className="flex items-center justify-between px-6 py-4 border-b border-noctvm-border bg-noctvm-midnight/50 flex-shrink-0">
             <div className="flex-1">
               {typeof title === 'string' ? (
-                <h2 className="font-heading text-xl font-bold text-white">{title}</h2>
+                <h2 className="font-heading text-xl font-bold text-foreground">{title}</h2>
               ) : (
                 title
               )}

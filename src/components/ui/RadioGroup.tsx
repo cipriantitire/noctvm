@@ -60,7 +60,7 @@ const RadioItem = React.forwardRef<
       {(label || description) && (
         <div className="flex flex-col gap-0.5">
           {label && (
-            <span className={cn(s.text, 'text-white font-medium leading-tight')}>
+            <span className={cn(s.text, 'text-foreground font-medium leading-tight')}>
               {label}
             </span>
           )}

@@ -23,6 +23,7 @@
   "dependencies": {
     "@c15t/nextjs": "^1.8.5",
     "@c15t/react": "^1.8.5",
+    "@remotion/cli": "^4.0.451",
     "@sentry/nextjs": "^10.46.0",
     "@supabase/supabase-js": "^2.99.1",
     "@types/leaflet": "^1.9.21",

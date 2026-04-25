@@ -89,15 +89,15 @@ function PrestigeCard({ compact = false }: { compact?: boolean }) {
         {!compact && (
           <div className="flex gap-6 mt-4 pt-4 border-t border-white/5">
             <div>
-              <p className="text-white text-sm font-bold">{MOCK_POCKET.eventsAttended}</p>
+              <p className="text-foreground text-sm font-bold">{MOCK_POCKET.eventsAttended}</p>
               <p className="text-[#8A8A8A] text-[10px]">Events attended</p>
             </div>
             <div>
-              <p className="text-white text-sm font-bold">{MOCK_POCKET.referrals}</p>
+              <p className="text-foreground text-sm font-bold">{MOCK_POCKET.referrals}</p>
               <p className="text-[#8A8A8A] text-[10px]">Friends invited</p>
             </div>
             <div>
-              <p className="text-white text-sm font-bold">{MOCK_POCKET.totalEarned.toLocaleString()}</p>
+              <p className="text-foreground text-sm font-bold">{MOCK_POCKET.totalEarned.toLocaleString()}</p>
               <p className="text-[#8A8A8A] text-[10px]">Total earned</p>
             </div>
           </div>
@@ -114,7 +114,7 @@ function EarnRow({ action }: { action: typeof EARN_ACTIONS[0] }) {
         {action.icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-white text-sm font-medium">{action.label}</p>
+        <p className="text-foreground text-sm font-medium">{action.label}</p>
         <p className="text-[#8A8A8A] text-xs">{action.desc}</p>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
@@ -135,7 +135,7 @@ function BoutiqueCard({ item }: { item: typeof BOUTIQUE_ITEMS[0] }) {
         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
       </div>
       <div className="p-3">
-        <p className="text-white text-sm font-semibold">{item.name}</p>
+        <p className="text-foreground text-sm font-semibold">{item.name}</p>
         <p className="text-[#8A8A8A] text-xs mt-0.5 mb-2">{item.desc}</p>
         <div className="flex items-center justify-between">
           <span className={`text-sm font-bold ${canAfford ? 'text-noctvm-gold' : 'text-[#8A8A8A]'}`}>
@@ -157,7 +157,7 @@ function MobileView() {
       {/* Top */}
       <div className="flex items-center gap-2 px-4 pt-12 pb-3">
         <PocketIcon className="w-5 h-5 text-noctvm-violet" />
-        <span className="text-white font-bold text-lg font-heading">Pocket</span>
+        <span className="text-foreground font-bold text-lg font-heading">Pocket</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-4">
@@ -215,7 +215,7 @@ function DesktopView() {
       <aside className="w-[240px] border-r border-white/5 bg-[#0A0A0A] flex flex-col pt-8 pb-4 shrink-0">
         <div className="px-6 mb-8">
           <p className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">NOCTVM</p>
-          <p className="text-white font-bold text-lg font-heading">Platform</p>
+          <p className="text-foreground font-bold text-lg font-heading">Platform</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {[
@@ -228,7 +228,7 @@ function DesktopView() {
             <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               label === 'Pocket'
                 ? 'bg-noctvm-violet/15 text-noctvm-violet border border-noctvm-violet/20'
-                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-white'
+                : 'text-[#8A8A8A] hover:bg-white/5 hover:text-foreground'
             }`}>
               <Icon className="w-4 h-4" />
               {label}
@@ -240,7 +240,7 @@ function DesktopView() {
       {/* Main content */}
       <main className="flex-1 p-10 overflow-y-auto">
         <div className="max-w-2xl space-y-8">
-          <h1 className="text-2xl font-black text-white font-heading">Pocket</h1>
+          <h1 className="text-2xl font-black text-foreground font-heading">Pocket</h1>
 
           {/* Prestige card */}
           <PrestigeCard />
@@ -273,7 +273,7 @@ function DesktopView() {
             return (
               <div key={tier.name} className={`flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0 ${isCurrent ? 'opacity-100' : 'opacity-50'}`}>
                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: tier.color }} />
-                <span className="text-white text-sm flex-1">{tier.name}</span>
+                <span className="text-foreground text-sm flex-1">{tier.name}</span>
                 <span className="text-[#8A8A8A] text-xs">{tier.min.toLocaleString()}+ 🌙</span>
                 {isCurrent && <Badge variant="featured" className="text-[10px]">Current</Badge>}
               </div>
@@ -281,7 +281,7 @@ function DesktopView() {
           })}
           <div className="flex items-center gap-3 py-2.5">
             <div className="w-2.5 h-2.5 rounded-full shrink-0 bg-noctvm-violet" />
-            <span className="text-white text-sm flex-1">Onyx</span>
+            <span className="text-foreground text-sm flex-1">Onyx</span>
             <span className="text-[#8A8A8A] text-xs">15,000+ 🌙</span>
           </div>
         </GlassPanel>
@@ -298,7 +298,7 @@ function DesktopView() {
               <div key={stat.label} className="flex items-center gap-3">
                 <span className="text-noctvm-violet">{stat.icon}</span>
                 <span className="text-[#8A8A8A] text-sm flex-1">{stat.label}</span>
-                <span className="text-white text-sm font-bold">{stat.value}</span>
+                <span className="text-foreground text-sm font-bold">{stat.value}</span>
               </div>
             ))}
           </div>

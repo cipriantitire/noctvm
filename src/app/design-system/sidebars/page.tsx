@@ -36,7 +36,7 @@ export default function SidebarsShowcasePage() {
   return (
     <div className="space-y-12 pb-24">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-white mb-4">Sidebars</h1>
+        <h1 className="text-3xl font-heading font-bold text-foreground mb-4">Sidebars</h1>
         <p className="text-noctvm-silver text-lg max-w-2xl">
           Expandable standard navigation panels. Sidebars are heavily CSS-driven to ensure fast hover transitions with zero layout reflows on the main content.
         </p>
@@ -45,8 +45,8 @@ export default function SidebarsShowcasePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <section className="space-y-4">
-            <h2 className="text-xl font-heading font-semibold text-white">Interactive Playground</h2>
-            <div className="relative border border-noctvm-border rounded-2xl overflow-hidden bg-black flex h-[600px]">
+            <h2 className="text-xl font-heading font-semibold text-foreground">Interactive Playground</h2>
+            <div className="relative border border-noctvm-border rounded-2xl overflow-hidden bg-noctvm-black flex h-[600px]">
                {/* Left: The rendered Sidebar component */}
                <div className="flex-shrink-0 relative z-10 w-[72px] hover:w-56 transition-[width] duration-200">
                  <Sidebar
@@ -62,7 +62,7 @@ export default function SidebarsShowcasePage() {
                    items={mainItems}
                    bottomContent={
                      <div className="w-full">
-                       <button className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-white hover:bg-noctvm-surface">
+                       <button className="w-full flex items-center justify-center group-hover/sidebar:justify-start gap-0 group-hover/sidebar:gap-4 px-2 group-hover/sidebar:px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-150 text-noctvm-silver hover:text-foreground hover:bg-noctvm-surface">
                          <UserIcon className="w-6 h-6 flex-shrink-0" />
                          <span className="max-w-0 group-hover/sidebar:max-w-[160px] overflow-hidden opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75 whitespace-nowrap">Profile</span>
                        </button>
@@ -74,7 +74,7 @@ export default function SidebarsShowcasePage() {
                {/* Right: Mock Page Content Container */}
                <div className="flex-1 bg-noctvm-surface/20 p-8 relative flex items-center justify-center z-0 overflow-hidden">
                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-white mb-2 font-heading">Active Tab: {activeTab}</h3>
+                    <h3 className="text-2xl font-bold text-foreground mb-2 font-heading">Active Tab: {activeTab}</h3>
                     <p className="text-noctvm-silver">Hover over the sidebar on the left to see rapid CSS transitions.</p>
                  </div>
                  {/* Decorative mock items to show z-indexing overlaps */}
@@ -104,7 +104,7 @@ export default function SidebarsShowcasePage() {
 
         <div className="space-y-6">
           <GlassPanel className="p-6 sticky top-24">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">Technical Notes</h3>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-6">Technical Notes</h3>
             <ul className="space-y-4 text-sm text-noctvm-silver leading-relaxed list-disc list-inside">
               <li>Sidebar uses <code>w-[72px] hover:w-56 group/sidebar</code> classes to manage states entirely via CSS.</li>
               <li>Inner children labels use <code>max-w-0 group-hover/sidebar:max-w-[160px]</code> trick so they don&apos;t block flex-box space when collapsed.</li>
