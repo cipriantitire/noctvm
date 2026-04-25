@@ -23,7 +23,7 @@ export default function BreadcrumbsPage() {
         <Breadcrumbs
           items={[
             { label: 'Home', href: '/' },
-            { label: 'Discover', href: '/discover' },
+            { label: 'Explore', href: '/explore' },
             { label: 'Techno', href: '/discover/techno' },
             { label: 'Berlin', href: '/discover/techno/berlin' },
             { label: 'This Weekend' },

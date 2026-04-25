@@ -30,6 +30,31 @@ const LIST_URLS = [
       'techirghiol',
     ],
   },
+  // Sub-category pages surface events the generic /music/ listing misses
+  {
+    url: 'https://www.onevent.ro/orase/constanta/music-party/',
+    city: 'Constanta',
+    allowedCities: [
+      'constanta', 'constanța', 'mamaia',
+      'eforie', 'eforie nord', 'eforie sud',
+      'neptun', 'mangalia',
+      'navodari', 'năvodari',
+      'costinesti', 'costinești',
+      'vama veche', '2 mai',
+    ],
+  },
+  {
+    url: 'https://www.onevent.ro/orase/constanta/concerte-festivaluri/',
+    city: 'Constanta',
+    allowedCities: [
+      'constanta', 'constanța', 'mamaia',
+      'eforie', 'eforie nord', 'eforie sud',
+      'neptun', 'mangalia',
+      'navodari', 'năvodari',
+      'costinesti', 'costinești',
+      'vama veche', '2 mai',
+    ],
+  },
 ];
 const BASE_URL = 'https://www.onevent.ro';
 

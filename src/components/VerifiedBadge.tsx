@@ -30,13 +30,13 @@ export default function VerifiedBadge({ type, size = 'md', className = '' }: Ver
   const colors = {
     owner: { // Violet
       inner: '#7C3AED', // noctvm-violet
-      margin: '#FFFFFF',
+      margin: 'white',
       check: '#10B981', // noctvm-emerald
       border: '#6D28D9',
     },
     admin: { // Pink
-      inner: '#FF4DFF', 
-      margin: '#FFFFFF',
+      inner: '#FF4DFF',
+      margin: 'white',
       check: '#00FFFF', // Cyan checkmark
       border: '#D400D4',
     }

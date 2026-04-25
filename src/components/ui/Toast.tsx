@@ -42,7 +42,7 @@ function ToastItem({ item, onRemove }: { item: ToastItem; onRemove: (id: string)
   return (
     <div
       className={cn(
-        'frosted-glass pointer-events-auto flex items-center gap-3 rounded-noctvm-md border-l-4 px-4 py-3 pr-10 text-sm text-white shadow-lg',
+        'frosted-glass pointer-events-auto flex items-center gap-3 rounded-noctvm-md border px-4 py-3 pr-10 text-sm text-white shadow-lg',
         'animate-fade-in-up',
       )}
       style={{ borderLeftColor: variantBorderColor[item.variant ?? 'default'] }}

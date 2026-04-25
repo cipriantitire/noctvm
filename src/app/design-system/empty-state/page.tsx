@@ -10,7 +10,7 @@ const scenarios = [
     icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>,
     title: 'Nothing here yet',
     description: 'Follow people to see their posts and stories in your feed.',
-    action: <Button variant="primary" size="sm">Discover People</Button>,
+    action: <Button variant="primary" size="sm">Explore People</Button>,
   },
   {
     id: 'search',

@@ -130,6 +130,15 @@ export function extractTime(iso: string): string | null {
   return match ? match[1] : null;
 }
 
+function extractTimeFromText(text: string): string | null {
+  const match = clean(text).match(/(?:\bora\s+|\bat\s+)?(\d{1,2})[:.](\d{2})\b/i);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes) || hours > 23 || minutes > 59) return null;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
 // ── Text helpers ──────────────────────────────────────────────────────────────
 
 /**
@@ -157,22 +166,72 @@ export function splitTitleVenue(title: string): { title: string; venueHint: stri
   return { title, venueHint: null };
 }
 
-/** Collapse whitespace, strip HTML entities, and trim. */
+const HTML_ENTITY_MAP: Record<string, string> = {
+  amp: '&',
+  nbsp: ' ',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  '#039': "'",
+  '#39': "'",
+  bull: '•',
+  '#8226': '•',
+  ndash: '–',
+  mdash: '—',
+  rsquo: "'",
+  lsquo: "'",
+  rdquo: '"',
+  ldquo: '"',
+  icirc: 'î',
+  Icirc: 'Î',
+  acirc: 'â',
+  Acirc: 'Â',
+  aacute: 'á',
+  Aacute: 'Á',
+  tcedil: 'ţ',
+  Tcedil: 'Ţ',
+  scedil: 'ş',
+  Scedil: 'Ş',
+};
+
+function decodeHtmlEntity(entity: string): string {
+  const key = entity.slice(1, -1);
+  if (key.startsWith('#x') || key.startsWith('#X')) {
+    try { return String.fromCodePoint(parseInt(key.slice(2), 16)); } catch { return entity; }
+  }
+  if (key.startsWith('#')) {
+    try { return String.fromCodePoint(parseInt(key.slice(1), 10)); } catch { return entity; }
+  }
+  return HTML_ENTITY_MAP[key] ?? entity;
+}
+
+/** Collapse whitespace, strip HTML/code blocks, decode common entities, and trim. */
 export function clean(text: string | null | undefined): string {
   return (text ?? '')
-    .replace(/<[^>]+>/g, ' ')        // strip any residual HTML tags
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&#39;/g, "'")
-    .replace(/&bull;/g, '•')
-    .replace(/&#8226;/g, '•')
-    .replace(/&#\d+;/g, c => { try { return String.fromCodePoint(parseInt(c.slice(2, -1), 10)); } catch { return c; } })
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')        // strip properly closed HTML tags
+    .replace(/<(?:span|div|p|a|img|br|hr|input|button|table|tr|td|th|ul|ol|li|h[1-6]|strong|em|b|i|u|s)\b[^>]*$/gi, ' ') // strip truncated opening tags
+    .replace(/&(?:#x?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]+);/g, decodeHtmlEntity)
+    .replace(/&[a-zA-Z]{2,20}$/g, '') // strip truncated HTML entities at end of string
+    .replace(/(?:hover|entity|accent|underline|flex|grid|block|inline|font|text|bg|border|rounded|shadow|opacity|transition|transform|w-\d+|h-\d+|p-\d+|m-\d+)[\w-]*/g, ' ') // strip CSS utility classes
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+export function isArtifactRiddenText(text: string | null | undefined): boolean {
+  const cleaned = clean(text ?? '');
+  if (!cleaned) return false;
+
+  const questionRuns = cleaned.match(/\?{2,}/g) ?? [];
+  const questionCount = questionRuns.reduce((sum, run) => sum + run.length, 0);
+  if (cleaned.includes('�')) return true;
+  if (questionRuns.some(run => run.length >= 4)) return true;
+  if (questionRuns.length >= 2 && questionCount / cleaned.length > 0.02) return true;
+
+  return /<\/?script\b|__NEXT_DATA__|webpackJsonp|\bfunction\s*\(|\b(?:var|let|const)\s+[a-z_$][\w$]*\s*=|\{\s*["'][\w-]+["']\s*:/i.test(cleaned);
 }
 
 function normalizeSearchText(text: string | null | undefined): string {
@@ -398,7 +457,8 @@ export function parseEventsFromJsonLd(html: string, city: string): ScrapedEvent[
       ? venueName
       : resolvedVenueHint || 'Venue TBC';
 
-    const description = clean(String(b.description ?? '')) || null;
+    const rawDescription = clean(String(b.description ?? '')) || null;
+    const description = isArtifactRiddenText(rawDescription) ? null : rawDescription;
     const genres = guessGenres(title, description ?? '', venue);
     if (!genres) continue;
 
@@ -412,7 +472,7 @@ export function parseEventsFromJsonLd(html: string, city: string): ScrapedEvent[
       title,
       venue,
       date,
-      time: extractTime(startDate),
+      time: extractTime(startDate) || extractTimeFromText([startDate, b.description, b.name].map(value => String(value ?? '')).join(' ')),
       description,
       image_url,
       event_url: String(b.url ?? ''),
@@ -577,6 +637,63 @@ function extractVenueFromAddress(addrStr: string): string | null {
   return null;
 }
 
+function extractEmagicTitleAndVenue(rawTitle: string, description: string): { title: string; venue: string } {
+  const stripCitySuffix = (value: string): string => clean(value)
+    .replace(/\s*,?\s*(?:bucuresti|bucharest|constanta|constanța)\s*$/i, '')
+    .trim();
+
+  const sanitizeVenueCandidate = (value: string): string | null => {
+    const venue = stripCitySuffix(value);
+    if (!venue) return null;
+    if (/^(?:bucuresti|bucharest|constanta|constanța)$/i.test(venue)) return null;
+    if (/[–—-]/.test(venue)) return null;
+    if (isAddressString(venue)) return null;
+    if (!isValidVenueName(venue)) return null;
+    return venue;
+  };
+
+  const looksLikeVenueInTitle = (value: string): boolean =>
+    !/\b(?:concert|live|show|tour|special|promovare|album|festival|event|eveniment)\b/i.test(value);
+
+  const cleanedTitle = clean(rawTitle);
+  const atSplit = splitTitleVenue(cleanedTitle);
+  if (atSplit.venueHint) {
+    const venue = sanitizeVenueCandidate(atSplit.venueHint);
+    if (venue) {
+      return { title: clean(atSplit.title), venue };
+    }
+  }
+
+  const dashedSplit = cleanedTitle.match(/^(.*?)(?:\s+[-–—]\s+)([A-Z][^,.(\n]{2,80}?)(?=\s*(?:\(|,|\.|$))/);
+  if (dashedSplit) {
+    const title = clean(dashedSplit[1]).replace(/[-–—\s]+$/, '').trim();
+    const venue = sanitizeVenueCandidate(dashedSplit[2]);
+    if (title && venue && looksLikeVenueInTitle(venue)) {
+      return { title, venue };
+    }
+  }
+
+  const titleMatch = cleanedTitle.match(/^(.*?)(?:\s+\b(?:la|in|at)\b\s+)([A-Z][^,.(\n]{2,80}?)(?=\s*(?:\(|,|\.|$))/i);
+  if (titleMatch) {
+    const title = clean(titleMatch[1]).replace(/[-–—\s]+$/, '').trim();
+    const venue = sanitizeVenueCandidate(titleMatch[2]);
+    if (title && venue) {
+      return { title, venue };
+    }
+  }
+
+  const venuePattern = /\b(?:la|in|at)\s+([A-Z][^,.(\n]{2,80}?)(?=(?:\s+(?:la|in|at|pe|pentru|cu|din|și|si)\b|[.,;()]|$))/g;
+  const descMatches = Array.from(clean(description).matchAll(venuePattern)).map((match) => match[1]);
+  for (const candidate of descMatches.reverse()) {
+    const venue = sanitizeVenueCandidate(candidate);
+    if (venue) {
+      return { title: cleanedTitle, venue };
+    }
+  }
+
+  return { title: cleanedTitle, venue: 'Venue TBC' };
+}
+
 const VENUE_BLOCK_TERMS = [
   'copii', 'pentru copii', 'teatru pentru', 'teatrul pentru',
   'educativ', 'educational', 'pentru tineret', 'centrul multifunc',
@@ -668,6 +785,20 @@ export function extractDescriptionFromHtml(html: string): string | null {
     if (m) {
       const text = clean(m[1]);
       if (text.length > 40) return text.slice(0, 1500);
+    }
+  }
+
+  // emagic: the visible event description lives in the large body block below
+  // the ticket table, usually starting at a margin-top:50px wrapper.
+  const emagicPatterns: RegExp[] = [
+    /<div[^>]+style=["'][^"']*margin-top:50px;?[^"']*["'][^>]*>([\s\S]{120,12000}?)<\/div>\s*<\/div>\s*<div[^>]+class=["']footer["'][^>]*>/i,
+    /<div[^>]+style=["'][^"']*margin-top:50px;?[^"']*["'][^>]*>([\s\S]{120,12000}?)<\/div>/i,
+  ];
+  for (const re of emagicPatterns) {
+    const m = html.match(re);
+    if (m) {
+      const text = clean(m[1]);
+      if (text.length > 80) return text.slice(0, 1500);
     }
   }
 
@@ -865,6 +996,16 @@ const priceProviders: Record<string, PriceProvider> = {
     },
     priority: 10
   },
+
+  emagic: {
+    extract: (html: string): string | null => {
+      const priceMatch = html.match(/<span[^>]+class=["'][^"']*\bseatingcategoriesprice\b[^"']*["'][^>]*>([\s\S]*?)<\/span>/i);
+      if (!priceMatch) return null;
+      const price = clean(priceMatch[1]);
+      return price || null;
+    },
+    priority: 20
+  },
   
   // Generic fallback provider
   generic: {
@@ -958,7 +1099,7 @@ export function extractPriceFromHtml(html: string, url?: string): string | null 
 /** Extract registration/ticket links from HTML if JSON-LD is missing them. */
 export function extractTicketsFromHtml(html: string): string | null {
   // Search for buttons or links with ticket keywords
-  const re = /href=["']([^"']*(?:iabilet|livetickets|eventbook|ambilet|entertix|bilete\.ro|entree|tickets?|booking)[^"']*)["']/gi;
+  const re = /href=["']([^"']*(?:iabilet|livetickets|eventbook|ambilet|entertix|bilete\.ro|bilete\.emagic|entree|tickets?|booking)[^"']*)["']/gi;
   const matches = Array.from(html.matchAll(re));
   
   const ignoredExtensions = ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.pdf', '.php', '.xml', '.ico'];
@@ -990,7 +1131,7 @@ export function extractTicketsFromHtml(html: string): string | null {
       // If it's a UTM param or similar noise, ignore it
       if (searchPart.includes('utm_') || searchPart.includes('ref=')) {
         // Double check if it's a known provider though
-        const isKnownProvider = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix', 'bilete.ro'].some(p => mainPart.includes(p));
+        const isKnownProvider = ['iabilet', 'livetickets', 'eventbook', 'ambilet', 'entertix', 'bilete.ro', 'bilete.emagic'].some(p => mainPart.includes(p));
         if (!isKnownProvider) return false;
       }
     }
@@ -1001,7 +1142,7 @@ export function extractTicketsFromHtml(html: string): string | null {
   // Prioritize external ticketing providers over internal page links
   const providers = [
     'iabilet.ro/bilete-', 'iabilet.ro/go/', 'livetickets.ro/bilete/', 
-    'eventbook.ro/event/', 'ambilet.ro/eveniment/', 'entertix.ro/', 'bilete.ro/'
+    'eventbook.ro/event/', 'ambilet.ro/eveniment/', 'bilete.emagic.ro/', 'entertix.ro/', 'bilete.ro/'
   ];
   for (const p of providers) {
     const found = validMatches.find(link => link.toLowerCase().includes(p.toLowerCase()));
@@ -1090,10 +1231,11 @@ export async function parseDetailPage(
     const cleanedRawDesc = cleanJsonLdText(rawDesc);
     const htmlDesc = extractDescriptionFromHtml(html);
     // Prefer richer HTML body description when available, but never lose JSON-LD/OG text.
-    const description =
+    const rawDescription =
       htmlDesc && htmlDesc.length > cleanedRawDesc.length
         ? htmlDesc
         : cleanedRawDesc || htmlDesc || null;
+    const description = isArtifactRiddenText(rawDescription) ? null : rawDescription;
 
     // Venue: JSON-LD location.name > title "@Venue" hint > HTML itemprop/class > "Venue TBC"
     // Skip location.name if it looks like a street address (some sites set it to the street address)
@@ -1167,6 +1309,7 @@ export async function parseDetailPage(
       : url.includes('livetickets.ro') ? 'livetickets'
       : url.includes('eventbook.ro') ? 'eventbook'
       : url.includes('ambilet.ro') ? 'ambilet'
+      : url.includes('bilete.emagic.ro') ? 'emagic'
       : 'manual';
 
     const event_url = url; 
@@ -1180,7 +1323,7 @@ export async function parseDetailPage(
       title,
       venue,
       date,
-      time: extractTime(startDate) || null,
+      time: extractTime(startDate) || extractTimeFromText(`${rawDesc} ${og['og:description'] ?? ''} ${og['description'] ?? ''} ${html.slice(0, 80_000)}`),
       description,
       image_url,
       event_url,
@@ -1195,6 +1338,39 @@ export async function parseDetailPage(
   // Used for sites like ambilet.ro whose detail pages only have WebPage JSON-LD
   // but carry full event info in OG tags and visible HTML text.
   const rawOgTitle = clean(og['og:title']);
+
+  if (url.includes('bilete.emagic.ro')) {
+    const rawTitle = clean(html.match(/<div[^>]+class=["'][^"']*\beptitle\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? '');
+    if (!rawTitle) return null;
+
+    const description = extractDescriptionFromHtml(html);
+    const { title, venue } = extractEmagicTitleAndVenue(rawTitle, description ?? '');
+    const date = parseDate(`${description ?? ''} ${rawTitle} ${clean(html.slice(0, 50_000))}`);
+    if (!date || date < today) return null;
+
+    if (allowedCities && allowedCities.length > 0) {
+      const citySignal = [title, venue].join(' ');
+      if (containsUnexpectedCitySignal(citySignal, allowedCities)) return null;
+    }
+
+    const genres = guessGenres(title, description ?? '', venue);
+    if (!genres) return null;
+
+    return {
+      title,
+      venue,
+      date,
+      time: extractTimeFromText(`${description ?? ''} ${rawTitle} ${html.slice(0, 80_000)}`),
+      description: description && !isArtifactRiddenText(description) ? description : null,
+      image_url: html.match(/<img[^>]+class=["'][^"']*\beventbanner\b[^"']*["'][^>]+src=["']([^"']+)["']/i)?.[1] ?? '',
+      event_url: url,
+      ticket_url: url,
+      genres,
+      price: extractPriceFromHtml(html),
+      city,
+    };
+  }
+
   if (!rawOgTitle) return null;
 
   // Split "Event Name @ Venue" in the OG title
@@ -1217,10 +1393,11 @@ export async function parseDetailPage(
 
   const ogDesc = cleanJsonLdText(og['og:description'] ?? og['description'] ?? '');
   const htmlDescFallback = extractDescriptionFromHtml(html);
-  const finalDesc =
+  const rawFinalDesc =
     htmlDescFallback && htmlDescFallback.length > ogDesc.length
       ? htmlDescFallback
       : ogDesc || htmlDescFallback || null;
+  const finalDesc = isArtifactRiddenText(rawFinalDesc) ? null : rawFinalDesc;
 
   // Venue strategy: JSON-LD location fragment → title "@Venue" hint → " – Venue" → HTML
   let venue = 'Venue TBC';
@@ -1246,7 +1423,7 @@ export async function parseDetailPage(
     title: ogTitle,
     venue,
     date,
-    time: sdRaw ? extractTime(sdRaw) : null,
+    time: sdRaw ? extractTime(sdRaw) || extractTimeFromText(`${ogDesc} ${rawOgTitle} ${html.slice(0, 80_000)}`) : extractTimeFromText(`${ogDesc} ${rawOgTitle} ${html.slice(0, 80_000)}`),
     description: finalDesc,
     image_url: og['og:image'] ?? '',
     event_url: url,

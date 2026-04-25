@@ -240,7 +240,7 @@ export default function EventManager() {
               />
               {event.is_promoted && (
                 <div className={`absolute top-2 right-2 bg-noctvm-emerald/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-glow-sm ${
-                  viewMode === 'grid' ? 'text-noctvm-micro' : 'text-[7px]'
+                  viewMode === 'grid' ? 'text-noctvm-micro' : 'text-noctvm-micro'
                 }`}>
                   Promoted
                 </div>
@@ -271,7 +271,7 @@ export default function EventManager() {
                 <div className={`flex items-center gap-2 ${viewMode === 'grid' ? 'mt-auto pt-4 border-t border-white/5 justify-between' : ''}`}>
                   <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5 opacity-40 group-hover:opacity-100 transition-opacity">
                     <span className="w-1.5 h-1.5 rounded-full bg-noctvm-emerald animate-pulse"></span>
-                    <span className="text-[7px] font-mono text-noctvm-silver uppercase tracking-widest hidden sm:inline">Active</span>
+                    <span className="text-noctvm-micro font-mono text-noctvm-silver uppercase tracking-widest hidden sm:inline">Active</span>
                   </div>
 
                   <div className="flex gap-1.5">

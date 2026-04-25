@@ -69,10 +69,8 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
               style={getTabGeometry(activeIndex)}
               aria-hidden="true"
               transition={reducedMotion ? { duration: 0 } : {
-                type: 'spring',
-                stiffness: 520,
-                damping: 40,
-                mass: 0.9,
+                duration: 0.35,
+                ease: [0.23, 1, 0.32, 1],
               }}
             />
           )}
@@ -109,7 +107,7 @@ export default function BottomNav({ items, className = '' }: BottomNavProps) {
                     )}
                   </div>
                   <span
-                    className={`relative z-10 max-w-full truncate text-[12px] leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
+                    className={`relative z-10 max-w-full truncate text-noctvm-sm leading-none tracking-[0.02em] font-medium transition-colors duration-300 ${
                       isActive ? activeTintClass : 'text-current group-hover:text-white'
                     }`}
                   >

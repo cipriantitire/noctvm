@@ -31,6 +31,19 @@ const LIST_URLS = [
       'techirghiol',
     ],
   },
+  {
+    url: 'https://eventbook.ro/event/search?term=Mamaia',
+    city: 'Constanta',
+    allowedCities: [
+      'constanta', 'constanța', 'mamaia',
+      'navodari', 'năvodari', 'vama veche', '2 mai',
+    ],
+  },
+  {
+    url: 'https://eventbook.ro/event/search?term=Costinesti',
+    city: 'Constanta',
+    allowedCities: ['constanta', 'constanța', 'costinesti', 'costinești'],
+  },
 ];
 const BASE_URL = 'https://eventbook.ro';
 

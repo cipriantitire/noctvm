@@ -40,8 +40,7 @@ function SavedEventItem({ event }: { event: NoctEvent }) {
           />
         ) : (
           <span className={cn(
-            "text-sm font-mono font-bold bg-gradient-to-br bg-clip-text text-transparent",
-            getVenueColor(event.venue)
+            "text-sm font-mono font-bold text-white"
           )}>
             {event.venue[0]}
           </span>
@@ -49,10 +48,10 @@ function SavedEventItem({ event }: { event: NoctEvent }) {
       </div>
 
       <div className="flex-1 min-w-0 relative z-10">
-        <p className="text-[11px] font-bold text-noctvm-silver group-hover:text-white transition-colors leading-tight">
+        <p className="text-noctvm-caption font-bold text-noctvm-silver group-hover:text-white transition-colors leading-tight">
           {event.title}
         </p>
-        <p className="text-[9px] font-mono text-noctvm-silver/40 flex items-center gap-1 mt-1 uppercase tracking-wider">
+        <p className="text-noctvm-micro font-mono text-noctvm-silver/40 flex items-center gap-1 mt-1 uppercase tracking-wider">
           {event.venue}
         </p>
       </div>
@@ -145,7 +144,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
               Saved Events
             </h2>
           </div>
-          <span className="text-[22px] font-mono font-black text-noctvm-violet leading-none">
+          <span className="text-noctvm-2xl font-mono font-black text-noctvm-violet leading-none">
             {savedEvents.length.toString().padStart(2, '0')}
           </span>
         </div>
@@ -181,7 +180,7 @@ export default function ProfileSidebar({ userId, activeCity = 'bucuresti' }: Pro
 
       <div className="flex-1 overflow-hidden flex flex-col px-6">
         <div className="flex items-center gap-3 mb-6">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-noctvm-silver/60">
+          <span className="text-noctvm-caption font-mono font-bold uppercase tracking-[0.1em] text-noctvm-silver/60">
             {selectedDate ? format(selectedDate, 'MMM dd, yyyy') : 'All Events'}
           </span>
           <div className="h-px flex-1 bg-white/10" />

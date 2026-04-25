@@ -137,7 +137,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             drag="x"
             dragListener={false}
             dragControls={dragControls}

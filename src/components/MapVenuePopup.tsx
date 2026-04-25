@@ -60,20 +60,20 @@ export default function MapVenuePopup({
         </div>
 
         <div className="min-w-0 flex-1 flex flex-col justify-center gap-1">
-          <p className="m-0 truncate text-[13px] font-semibold leading-[14px] text-white">
+          <p className="m-0 truncate text-noctvm-base font-semibold leading-[14px] text-white">
             {venue.name}
           </p>
 
           <div className="flex min-w-0 items-center gap-1">
             <MapPin className="h-3 w-3 shrink-0 text-noctvm-silver/45" />
-            <p className="m-0 min-w-0 truncate text-[10px] leading-[12px] text-noctvm-silver/60">
+            <p className="m-0 min-w-0 truncate text-noctvm-caption leading-[12px] text-noctvm-silver/60">
               {venue.address}
             </p>
           </div>
 
           {summaryChip ? (
             <div className="mt-1 flex flex-wrap gap-1">
-              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-white/[0.78]">
+              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-noctvm-micro font-semibold uppercase tracking-[0.18em] text-white/[0.78]">
                 {summaryChip}
               </span>
             </div>
@@ -93,10 +93,10 @@ export default function MapVenuePopup({
                 onClick={() => onEventClick?.(event)}
                 className="flex w-full items-center gap-1.5 rounded-[11px] px-1.5 py-1 text-left transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-noctvm-violet/60"
               >
-                <span className="shrink-0 rounded-full border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-noctvm-silver/80">
+                <span className="shrink-0 rounded-full border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 text-noctvm-micro font-semibold uppercase tracking-[0.18em] text-noctvm-silver/80">
                   {event.time || 'Now'}
                 </span>
-                <p className="min-w-0 flex-1 truncate text-[11px] font-medium leading-none text-white">
+                <p className="min-w-0 flex-1 truncate text-noctvm-caption font-medium leading-none text-white">
                   {event.title}
                 </p>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0 text-noctvm-silver/50" />
@@ -105,7 +105,7 @@ export default function MapVenuePopup({
           </div>
 
           {remainingEvents > 0 ? (
-            <p className="mt-1 px-1 text-[8px] font-semibold uppercase tracking-[0.2em] text-noctvm-silver/40">
+            <p className="mt-1 px-1 text-noctvm-micro font-semibold uppercase tracking-[0.2em] text-noctvm-silver/40">
               +{remainingEvents} more
             </p>
           ) : null}

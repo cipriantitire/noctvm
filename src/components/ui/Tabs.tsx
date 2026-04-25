@@ -44,7 +44,7 @@ export default function Tabs({
                   layoutId="segmented-active"
                   className="absolute inset-0 bg-noctvm-violet rounded-lg"
                   initial={false}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                 />
               )}
               <span className="relative z-10 flex items-center gap-1.5">
@@ -112,7 +112,7 @@ export default function Tabs({
                 layoutId="underline-active"
                 className="absolute left-0 right-0 bottom-[-1px] h-[2px] bg-noctvm-violet"
                 initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               />
             )}
           </button>

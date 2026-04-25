@@ -13,27 +13,27 @@ interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const variantStyles: Record<AlertVariant, { border: string; icon: string; bg: string }> = {
   default: {
-    border: 'border-l-noctvm-violet',
+    border: 'border-noctvm-violet',
     icon: 'text-noctvm-violet',
     bg: 'bg-noctvm-violet/10',
   },
   success: {
-    border: 'border-l-noctvm-emerald',
+    border: 'border-noctvm-emerald',
     icon: 'text-noctvm-emerald',
     bg: 'bg-noctvm-emerald/10',
   },
   warning: {
-    border: 'border-l-noctvm-gold',
+    border: 'border-noctvm-gold',
     icon: 'text-noctvm-gold',
     bg: 'bg-noctvm-gold/10',
   },
   error: {
-    border: 'border-l-red-500',
+    border: 'border-red-500',
     icon: 'text-red-400',
     bg: 'bg-red-500/10',
   },
   info: {
-    border: 'border-l-blue-400',
+    border: 'border-blue-400',
     icon: 'text-blue-400',
     bg: 'bg-blue-400/10',
   },
@@ -47,7 +47,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         ref={ref}
         role="alert"
         className={cn(
-          'relative flex gap-3 rounded-noctvm-md border border-white/10 border-l-4 p-4',
+          'relative flex gap-3 rounded-noctvm-md border p-4',
           styles.border,
           styles.bg,
           className

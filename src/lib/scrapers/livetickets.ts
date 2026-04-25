@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { parseDate, extractTime, clean, guessGenres } from './utils';
+import { parseDate, extractTime, clean, guessGenres, isArtifactRiddenText } from './utils';
 
 // The API has no working city filter param; fetch all Romanian events and
 // filter client-side. Important: page 1 is not enough. Relevant events can sit
@@ -216,7 +216,8 @@ export async function scrapeLivetickets(): Promise<ScrapedEvent[]> {
       if (!title) continue;
 
       // Strip HTML from API description (livetickets sometimes returns HTML)
-      const description = clean(item.description?.replace(/<[^>]+>/g, ' ') ?? '') || null;
+      const rawDescription = clean(item.description ?? '') || null;
+      const description = isArtifactRiddenText(rawDescription) ? null : rawDescription;
 
       // CDN URL: https://livetickets-cdn.azureedge.net/itemimages/{slug}/Background_MEDIUM.jpg?{token}
       const image_url = item.url && item.image_token

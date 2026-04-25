@@ -76,3 +76,6 @@ export {
   Table, TableHeader, TableBody, TableFooter,
   TableRow, TableHead, TableCell, TableCaption,
 } from "./Table";
+export { Calendar } from "./Calendar";
+export { default as CurvedScrollBar } from "./CurvedScrollBar";
+export type { CurvedScrollBarProps } from "./CurvedScrollBar";

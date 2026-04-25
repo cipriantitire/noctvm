@@ -40,6 +40,7 @@ interface Summary {
 
 const SOURCES: ScraperSource[] = [
   { id: 'controlclub', name: 'Control Club', description: 'Direct venue calendar — authoritative dates & prices', status: 'idle' },
+  { id: 'clubguesthouse', name: 'Club Guesthouse', description: 'Direct venue program — server-rendered HTML', status: 'idle' },
   { id: 'ra', name: 'Resident Advisor', description: 'Electronic music platform — rich metadata & tickets', status: 'idle' },
   { id: 'livetickets', name: 'LiveTickets', description: 'Local club life data', status: 'idle' },
   { id: 'iabilet', name: 'Iabilet', description: 'Ticketed events tracking', status: 'idle' },
@@ -348,6 +349,7 @@ export default function ScraperManager() {
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-noctvm-violet/10 border border-noctvm-violet/20 flex items-center justify-center text-xl">
                   {selectedSource.id === 'controlclub' ? '🎛️'
+                    : selectedSource.id === 'clubguesthouse' ? '🏠'
                     : selectedSource.id === 'ra' ? '🎧'
                     : selectedSource.id === 'zilesinopti' ? '🌙'
                     : selectedSource.id === 'livetickets' ? '🎟️'

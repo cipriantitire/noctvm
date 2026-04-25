@@ -53,7 +53,7 @@ export default function LiveTonight({
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
             <div className="p-1.5">
-              <p className="text-[13px] font-medium text-white line-clamp-1 group-hover/card:text-noctvm-violet transition-colors">{event.title}</p>
+              <p className="text-noctvm-base font-medium text-white line-clamp-1 group-hover/card:text-noctvm-violet transition-colors">{event.title}</p>
               <p className="text-xs text-noctvm-silver/70 truncate">{event.venue}</p>
             </div>
           </button>

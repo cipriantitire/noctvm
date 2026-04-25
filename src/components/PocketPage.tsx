@@ -145,7 +145,7 @@ export default function PocketPage() {
       {/* ── 2. Prestige Journey ────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between px-2">
-          <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Nightly Prestige</h2>
+          <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest">Nightly Prestige</h2>
         </div>
         <MoonraysPrestigeCard />
       </section>
@@ -161,7 +161,7 @@ export default function PocketPage() {
             <PlusIcon className="w-12 h-12 text-noctvm-violet" />
           </div>
           <h3 className="text-sm font-heading font-bold text-white uppercase tracking-wider mb-1">Earning Guide</h3>
-          <p className="text-noctvm-caption text-noctvm-silver/60">Unlock MR through social rites</p>
+          <p className="text-noctvm-caption text-noctvm-silver/60">Earn Moonrays through social rites</p>
           <div className="mt-4 flex items-center gap-1.5 text-noctvm-caption font-mono text-noctvm-violet uppercase">
             Browse Methods <ChevronRightIcon className="w-3 h-3" />
           </div>
@@ -186,7 +186,7 @@ export default function PocketPage() {
       {/* ── 4. The Vanity Emporium (Redeem Section) ────── */}
       <section className="space-y-6">
         <div className="flex items-center justify-between px-2">
-          <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Vanity Emporium</h2>
+          <h2 className="text-sm font-heading font-bold text-white uppercase tracking-widest">Vanity Emporium</h2>
           <button 
             onClick={() => setIsBoutiqueOpen(true)}
             className="text-noctvm-caption text-noctvm-violet font-mono uppercase flex items-center gap-1 hover:underline active:scale-[0.96] transition-all"

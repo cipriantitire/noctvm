@@ -518,7 +518,7 @@ export default function GlobalSearchSheet({
                             <div className="flex items-center gap-2">
                               <p className="truncate font-semibold text-white">{event.title}</p>
                               {event.city && (
-                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-[0.18em] text-noctvm-silver/60">
+                                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-noctvm-micro font-mono font-bold uppercase tracking-[0.18em] text-noctvm-silver/60">
                                   {event.city}
                                 </span>
                               )}
@@ -552,7 +552,7 @@ export default function GlobalSearchSheet({
                             <div className="flex items-center gap-2">
                               <p className="truncate font-semibold text-white">{venue.name}</p>
                               {venue.city && (
-                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-[0.18em] text-noctvm-silver/60">
+                                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-noctvm-micro font-mono font-bold uppercase tracking-[0.18em] text-noctvm-silver/60">
                                   {venue.city}
                                 </span>
                               )}

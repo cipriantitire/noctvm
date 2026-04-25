@@ -117,7 +117,7 @@ function SettingsGroup({
   return (
     <GlassPanel variant="subtle" className="overflow-hidden rounded-[24px]">
       <div className="px-4 pt-4 pb-2.5">
-        <p className="text-noctvm-caption font-mono text-[9px] uppercase tracking-[0.28em] text-noctvm-silver/45">
+        <p className="text-noctvm-caption font-mono text-noctvm-micro uppercase tracking-[0.28em] text-noctvm-silver/45">
           {title}
         </p>
         <p className="mt-1 text-xs text-noctvm-silver/60">{description}</p>
@@ -158,7 +158,7 @@ function BackButton({ onBack, label }: { onBack: () => void, label: string }) {
         <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <span
-        className="whitespace-nowrap text-[11px] font-mono font-bold uppercase tracking-[0.16em] leading-none"
+        className="whitespace-nowrap text-noctvm-caption font-mono font-bold uppercase tracking-[0.16em] leading-none"
         style={{ color: 'rgb(229 231 235)', WebkitTextFillColor: 'rgb(229 231 235)', opacity: 1 }}
       >
         {label}
@@ -813,7 +813,7 @@ export function PrivacySettingsPage({ onBack }: { onBack: () => void }) {
       <div className="pt-2">
         <SettingsPageHeader
           title="Privacy & Safety"
-          subtitle="Discovery and interactions"
+          subtitle="Your nights, your connections"
           onBack={onBack}
           backLabel="Settings"
         />

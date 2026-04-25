@@ -162,7 +162,7 @@ function DashboardPage() {
                             {activity.user_name || 'System'}
                           </span>
                         </div>
-                        <span className="text-[7px] font-black text-noctvm-silver/40 uppercase tracking-tighter ml-1">
+                        <span className="text-noctvm-micro font-black text-noctvm-silver/40 uppercase tracking-tighter ml-1">
                           {typeLabel}
                         </span>
                       </div>

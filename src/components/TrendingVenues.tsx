@@ -47,7 +47,7 @@ export default function TrendingVenues({
                   className="object-cover group-hover:scale-110 transition-transform duration-500"
                   unoptimized
                 />
-                <span className={`fallback text-xs font-bold bg-gradient-to-br ${getVenueColor(venue.name)} bg-clip-text text-transparent hidden relative z-10`}>
+                <span className={`fallback text-xs font-bold text-white hidden relative z-10`}>
                   {venue.name.charAt(0)}
                 </span>
               </div>

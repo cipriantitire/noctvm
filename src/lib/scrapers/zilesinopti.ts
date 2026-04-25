@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { ScrapedEvent } from './types';
-import { fetchHtml, parseDetailPage, parseDate, clean, containsUnexpectedCitySignal, guessGenres } from './utils';
+import { fetchHtml, parseDetailPage, parseDate, clean, containsUnexpectedCitySignal, guessGenres, isArtifactRiddenText } from './utils';
 
 const BASE_URL = 'https://zilesinopti.ro';
 
@@ -178,7 +178,7 @@ function extractZileSiNoptiDetail(html: string): ZileSiNoptiDetail {
       .split(/Calendar Evenimente/i)[0]
       .trim();
 
-    description = visibleText.length >= 20 ? visibleText : null;
+    description = visibleText.length >= 20 && !isArtifactRiddenText(visibleText) ? visibleText : null;
   }
 
   const imageStart = html.indexOf('elementor-widget-theme-post-featured-image');
@@ -220,7 +220,7 @@ function buildFallbackEventFromStub(
     venue,
     date,
     time: stub.rawTime || null,
-    description: clean(stub.summary) || null,
+    description: isArtifactRiddenText(stub.summary) ? null : clean(stub.summary) || null,
     image_url: stub.image,
     event_url: stub.url,
     ticket_url: null,

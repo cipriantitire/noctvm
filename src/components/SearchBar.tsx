@@ -67,7 +67,7 @@ export default function SearchBar(props: SearchBarProps) {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="search-static-glass flex h-[34px] min-w-[7rem] items-center justify-between gap-1.5 rounded-[16px] px-3 text-[13px] font-medium text-noctvm-silver transition-colors"
+                   className="search-static-glass flex h-[34px] min-w-[7rem] items-center justify-between gap-1.5 rounded-[16px] px-3 text-noctvm-base font-medium text-noctvm-silver transition-colors"
                   title="Select city"
                 >
                   <span>{activeCity === 'bucuresti' ? 'București' : 'Constanța'}</span>
@@ -171,7 +171,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <Select value={props.venueSort} onValueChange={(value) => props.onVenueSortChange?.(value as NonNullable<SearchBarProps['venueSort']>)}>
                   <SelectTrigger
                     size="sm"
-                    className="h-[34px] w-auto whitespace-nowrap !justify-between !rounded-full corner-smooth-none !border-white/10 !bg-white/[0.04] !px-2.5 !py-1 !text-[12px] !font-medium !text-noctvm-silver !shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:!bg-white/[0.06] focus-visible:!border-noctvm-violet/50"
+                    className="h-[34px] w-auto whitespace-nowrap !justify-between !rounded-full corner-smooth-none !border-white/10 !bg-white/[0.04] !px-2.5 !py-1 !text-noctvm-sm !font-medium !text-noctvm-silver !shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:!bg-white/[0.06] focus-visible:!border-noctvm-violet/50"
                     title="Sort venues"
                   >
                     <SelectValue />
@@ -192,7 +192,7 @@ export default function SearchBar(props: SearchBarProps) {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className={`w-full h-[34px] flex items-center justify-between gap-2 px-3 rounded-full corner-smooth-none text-[12px] font-medium frosted-glass transition-colors ${
+                    className={`w-full h-[34px] flex items-center justify-between gap-2 px-3 rounded-full corner-smooth-none text-noctvm-sm font-medium frosted-glass transition-colors ${
                       props.activeGenre === 'All'
                         ? 'text-noctvm-silver hover:border-noctvm-violet/30'
                         : 'bg-noctvm-violet/10 border-noctvm-violet/20 text-white'

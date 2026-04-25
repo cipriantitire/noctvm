@@ -173,7 +173,7 @@ function MusicLinkRow({ link }: { link: { type: string; url: string; label?: str
       <div className="w-[30px] h-[30px] rounded-[9px] bg-[#7C3AED25] border border-[#7C3AED40] flex items-center justify-center shrink-0">
         <Music2 className="w-3.5 h-3.5 text-noctvm-violet" />
       </div>
-      <span className="font-mono text-[11px] text-white">{label}</span>
+      <span className="font-mono text-noctvm-caption text-white">{label}</span>
     </a>
   );
 }
@@ -834,7 +834,7 @@ export default function UserProfilePage({
               {targetProfile.city && (
                 <div className="flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
                   <MapPinIcon className="w-3 h-3 text-noctvm-silver/60" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-noctvm-silver/60">
+                  <span className="text-noctvm-caption font-black uppercase tracking-widest text-noctvm-silver/60">
                     {targetProfile.city}
                   </span>
                 </div>
@@ -867,33 +867,33 @@ export default function UserProfilePage({
           {/* Events card */}
           <div className="order-1 flex-1 basis-[calc(50%-4px)] lg:order-1 lg:flex-none lg:w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-emerald/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-emerald/5 group-hover:bg-noctvm-emerald/10 transition-colors" />
-            <span className="text-[20px] leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
-            <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body relative">Events</span>
+            <span className="text-noctvm-xl leading-none font-bold text-noctvm-emerald font-mono relative tabular-nums">{statsData.eventsAttended}</span>
+            <span className="text-noctvm-micro uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body relative">Events</span>
           </div>
 
           {/* Grouped card: Posts / Followers / Following */}
           <div className="order-3 basis-full lg:order-2 lg:flex-1 bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex items-center">
             <div className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
-              <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Posts</span>
+              <span className="text-noctvm-xl leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.posts}</span>
+              <span className="text-noctvm-micro uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Posts</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
             <div className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
-              <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Followers</span>
+              <span className="text-noctvm-xl leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.followers}</span>
+              <span className="text-noctvm-micro uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Followers</span>
             </div>
             <div className="w-px h-6 bg-[#FFFFFF15]" />
             <div className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[20px] leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
-              <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Following</span>
+              <span className="text-noctvm-xl leading-none font-bold text-[#E8E4DF] font-mono tabular-nums">{statsData.following}</span>
+              <span className="text-noctvm-micro uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body">Following</span>
             </div>
           </div>
 
           {/* Venues card */}
           <div className="order-2 flex-1 basis-[calc(50%-4px)] lg:order-3 lg:flex-none lg:w-[124px] bg-[#111111] border border-[#1A1A1A] rounded-[14px] p-2 flex flex-col items-center justify-center gap-1 relative overflow-hidden group hover:border-noctvm-violet/40 transition-all cursor-default">
             <div className="absolute inset-0 bg-noctvm-violet/5 group-hover:bg-noctvm-violet/10 transition-colors" />
-            <span className="text-[20px] leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
-            <span className="text-[8px] uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body relative">Venues</span>
+            <span className="text-noctvm-xl leading-none font-bold text-noctvm-violet font-mono relative tabular-nums">{statsData.venuesVisited}</span>
+            <span className="text-noctvm-micro uppercase tracking-widest text-noctvm-silver/60 font-semibold font-body relative">Venues</span>
           </div>
         </div>
 
@@ -921,7 +921,7 @@ export default function UserProfilePage({
                   <div className="w-[30px] h-[30px] rounded-[9px] bg-[#111111] border border-[#1A1A1A] flex items-center justify-center shrink-0">
                     <Icon className="w-3.5 h-3.5 text-noctvm-silver" />
                   </div>
-                  <span className="font-mono text-[11px] text-white">{label}</span>
+                  <span className="font-mono text-noctvm-caption text-white">{label}</span>
                 </a>
               );
             })}
@@ -937,7 +937,7 @@ export default function UserProfilePage({
             {targetProfile.genres.map(genre => (
               <span
                 key={genre}
-                className="px-3 py-1 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20 text-[10px] font-mono font-bold text-noctvm-violet/90 uppercase tracking-widest"
+                className="px-3 py-1 rounded-full bg-noctvm-violet/10 border border-noctvm-violet/20 text-noctvm-caption font-mono font-bold text-noctvm-violet/90 uppercase tracking-widest"
               >
                 #{genre}
               </span>
@@ -1291,7 +1291,7 @@ export default function UserProfilePage({
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 className="relative h-[min(82vw,560px)] w-[min(82vw,560px)] max-h-[560px] max-w-[560px] overflow-hidden rounded-full border border-white/10 bg-noctvm-surface shadow-[0_30px_80px_rgba(0,0,0,0.55)]"
                 onClick={(event) => event.stopPropagation()}
               >
@@ -1344,7 +1344,7 @@ export default function UserProfilePage({
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
           className="fixed inset-0 z-[300] bg-noctvm-midnight flex flex-col"
           onKeyDown={(e) => { if (e.key === 'Escape') setMobileFeedView(false); }}
           tabIndex={-1}
@@ -1374,7 +1374,7 @@ export default function UserProfilePage({
                    activeTab === 'reposts' ? 'Reposts' :
                    activeTab === 'saved' ? 'Saved' : 'Tagged'}
                 </span>
-                <span className="text-[10px] text-noctvm-silver/50 font-bold uppercase tracking-widest">
+                <span className="text-noctvm-caption text-noctvm-silver/50 font-bold uppercase tracking-widest">
                   {profileName}
                 </span>
               </div>

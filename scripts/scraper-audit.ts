@@ -480,7 +480,7 @@ function latestSnapshots(dirPath: string): string[] {
   if (!fs.existsSync(dirPath)) return [];
   return fs
     .readdirSync(dirPath)
-    .filter((name) => name.endsWith('.json') && !name.includes('-diff-'))
+    .filter((name) => name.endsWith('.json') && !name.includes('-diff-') && !name.includes('quality-report'))
     .map((name) => path.join(dirPath, name))
     .sort((a, b) => fs.statSync(a).mtimeMs - fs.statSync(b).mtimeMs);
 }

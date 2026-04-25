@@ -443,7 +443,7 @@ export default function VenuesPage({
                       el.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-lg font-bold bg-gradient-to-br ${getVenueColor(venue.name)} bg-clip-text text-transparent absolute inset-0 flex items-center justify-center`}>
+                  <span className={`fallback hidden text-lg font-bold text-white absolute inset-0 flex items-center justify-center`}>
                     {venue.name[0]}
                   </span>
                 </button>

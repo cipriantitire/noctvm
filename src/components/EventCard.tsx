@@ -16,7 +16,9 @@ function formatDate(dateStr: string): string {
 function getSourceBadge(source: string) {
   switch (source) {
     case 'controlclub': return { label: 'Control Club', color: `bg-zinc-950/85 text-zinc-100 border-zinc-300/30 ${imageBadgeChrome}` };
+    case 'clubguesthouse': return { label: 'GH', color: `bg-zinc-950/85 text-zinc-100 border-zinc-300/30 ${imageBadgeChrome}` };
     case 'fever':       return { label: 'Fever',         color: `bg-orange-950/85 text-orange-200 border-orange-300/30 ${imageBadgeChrome}` };
+    case 'emagic':      return { label: 'Emagic',        color: `bg-emerald-950/85 text-emerald-200 border-emerald-300/30 ${imageBadgeChrome}` };
     case 'ra':          return { label: 'RA',             color: `bg-red-950/85 text-[#FF8A8A] border-red-300/30 ${imageBadgeChrome}` };
     case 'eventbook':   return { label: 'Eventbook',      color: `bg-rose-950/85 text-[#FF7A8F] border-rose-300/30 ${imageBadgeChrome}` };
     case 'livetickets': return { label: 'LiveTickets',    color: `bg-pink-950/85 text-pink-200 border-pink-300/30 ${imageBadgeChrome}` };

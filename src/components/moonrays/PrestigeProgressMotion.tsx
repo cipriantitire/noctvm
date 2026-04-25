@@ -16,10 +16,8 @@ export const PrestigeProgressMotion = ({ progress, color }: Props) => {
         initial={{ width: 0 }}
         animate={{ width: `${progress}%` }}
         transition={{ 
-          type: "spring", 
-          stiffness: 45, 
-          damping: 15,
-          duration: 1.5
+          duration: 1.5,
+          ease: "easeOut"
         }}
         className={`absolute inset-y-0 left-0 bg-gradient-to-r ${color} shadow-[0_0_20px_rgba(139,92,246,0.3)]`}
       >

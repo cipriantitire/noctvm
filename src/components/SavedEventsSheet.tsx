@@ -48,8 +48,7 @@ function SavedEventItem({ event, onEventClick }: { event: NoctEvent; onEventClic
           />
         ) : (
           <span className={cn(
-            "text-xs font-bold bg-gradient-to-br bg-clip-text text-transparent",
-            getVenueColor(event.venue)
+            "text-xs font-bold text-white"
           )}>
             {event.venue[0]}
           </span>
@@ -155,7 +154,7 @@ export default function SavedEventsSheet({ userId, isOpen, onClose, activeCity =
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             drag="x"
             dragListener={false}
             dragControls={dragControls}

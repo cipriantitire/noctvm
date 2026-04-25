@@ -235,7 +235,7 @@ export default function UserTable() {
                 <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-noctvm-micro text-noctvm-silver/40 uppercase font-mono tracking-widest">Account Status {user.signup_method && `(${user.signup_method})`}</p>
-                    <span className={`text-[7px] px-1.5 py-0.5 rounded font-black tracking-widest uppercase ${
+                    <span className={`text-noctvm-micro px-1.5 py-0.5 rounded font-black tracking-widest uppercase ${
                       user.is_verified 
                         ? 'bg-noctvm-emerald/10 text-noctvm-emerald border border-noctvm-emerald/20' 
                         : 'bg-noctvm-gold/10 text-noctvm-gold border border-noctvm-gold/20'

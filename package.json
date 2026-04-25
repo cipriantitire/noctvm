@@ -13,6 +13,7 @@
     "scraper:audit:snapshot": "npx tsx scripts/scraper-audit.ts snapshot",
     "scraper:audit:diff": "npx tsx scripts/scraper-audit.ts diff",
     "scraper:audit:diff-latest": "npx tsx scripts/scraper-audit.ts diff-latest",
+    "scraper:quality-report": "npx tsx scripts/quality-report.ts",
     "venues:cleanup:preview": "npx tsx scripts/venue-cleanup.ts preview",
     "venues:geocode:preview": "ts-node --transpile-only scripts/venue-geocode.ts preview",
     "venues:geocode:preview:today": "ts-node --transpile-only scripts/venue-geocode.ts preview --today",

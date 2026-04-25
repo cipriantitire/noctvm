@@ -27,7 +27,7 @@ export interface Venue {
 
 export interface NoctEvent {
   id: string;
-  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere' | 'onevent' | 'ambilet' | 'eventbook' | 'manual' | 'controlclub';
+  source: 'fever' | 'ra' | 'zilesinopti' | 'livetickets' | 'iabilet' | 'beethere' | 'onevent' | 'ambilet' | 'eventbook' | 'manual' | 'controlclub' | 'clubguesthouse';
   title: string;
   venue: string;
   date: string;

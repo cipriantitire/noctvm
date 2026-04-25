@@ -31,7 +31,7 @@ function makeSvgLogo(name: string): string {
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
     <rect width="200" height="200" rx="40" fill="#1a1a2e"/>
-    <text x="100" y="130" text-anchor="middle" fill="#a78bfa" font-family="system-ui,sans-serif" font-weight="800" font-size="${fontSize}">${initial}</text>
+    <text x="100" y="130" text-anchor="middle" fill="#a78bfa" font-family="Satoshi, sans-serif" font-weight="800" font-size="${fontSize}">${initial}</text>
   </svg>`;
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;

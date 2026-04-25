@@ -141,7 +141,7 @@ export default function RightPanel({
                       el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
                     }}
                   />
-                  <span className={`fallback hidden text-noctvm-caption font-bold bg-gradient-to-br ${getVenueColor(event.venue)} bg-clip-text text-transparent`}>
+                  <span className={`fallback hidden text-noctvm-caption font-bold text-white`}>
                     {event.venue[0]}
                   </span>
                 </div>
@@ -175,7 +175,7 @@ export default function RightPanel({
                     el.parentElement!.querySelector('.fallback')?.classList.remove('hidden');
                   }}
                 />
-                <span className={`fallback hidden text-xs font-heading font-bold bg-gradient-to-br ${getVenueColor(name)} bg-clip-text text-transparent`}>
+                <span className={`fallback hidden text-xs font-heading font-bold text-white`}>
                   {name[0]}
                 </span>
               </div>

@@ -66,6 +66,10 @@ const config: Config = {
         "noctvm-micro": ["9px", { lineHeight: "1.2" }],
         "noctvm-caption": ["10px", { lineHeight: "1.3" }],
         "noctvm-label": ["11px", { lineHeight: "1.4" }],
+        "noctvm-sm": ["12px", { lineHeight: "1.4" }],
+        "noctvm-base": ["13px", { lineHeight: "1.5" }],
+        "noctvm-xl": ["20px", { lineHeight: "1.2" }],
+        "noctvm-2xl": ["22px", { lineHeight: "1.1" }],
       },
       borderRadius: {
         "noctvm-sm": "var(--radius-sm)",

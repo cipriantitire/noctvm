@@ -30,7 +30,7 @@ export const PocketModal = ({ isOpen, onClose, title, children }: PocketModalPro
             initial={{ y: '100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto z-modal bg-noctvm-midnight border-t border-white/10 rounded-t-[32px] overflow-hidden"
           >
             {/* Header */}

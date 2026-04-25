@@ -190,6 +190,8 @@ interface RAEvent {
   date: string;
   contentUrl: string;
   flyerFront?: string;
+  description?: string;
+  lineup?: Array<{ name: string } | string> | string;
   images?: { filename: string; type: string }[];
   venue: { name: string; contentUrl: string } | null;
   cost?: string;
@@ -440,8 +442,13 @@ export async function scrapeRA(settings?: { scan_depth?: number, limit?: number 
         .map((l: any) => {
           const e = l.event as RAEvent;
           const title = clean(e.title);
-          const description = ""; 
-          let genres = guessGenres(title, description);
+          const rawLineup = e.lineup ?? [];
+          const lineupArr = Array.isArray(rawLineup) ? rawLineup : (typeof rawLineup === 'string' ? [{ name: rawLineup }] : []);
+          const lineupNames = lineupArr
+            .map((a: any) => typeof a === 'string' ? clean(a) : clean(a?.name ?? ''))
+            .filter((n: string) => n && n.length > 1);
+          const description = lineupNames.length > 0 ? `Lineup: ${lineupNames.join(', ')}` : null;
+          let genres = guessGenres(title, description || '');
           
           if (!genres || genres.length === 0) {
             genres = ['Electronic'];

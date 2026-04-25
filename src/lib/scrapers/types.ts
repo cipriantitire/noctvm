@@ -1,3 +1,16 @@
+export type Source =
+  | 'fever'
+  | 'zilesinopti'
+  | 'iabilet'
+  | 'onevent'
+  | 'ambilet'
+  | 'livetickets'
+  | 'ra'
+  | 'eventbook'
+  | 'controlclub'
+  | 'clubguesthouse'
+  | 'emagic';
+
 export interface ScrapedEvent {
   title:       string;
   venue:       string;

@@ -158,7 +158,7 @@ export default function FilterBar({
                   onDateChange(null);
                   setDateDropdownOpen(false);
                 }}
-                className="rounded-noctvm-sm px-2 py-1 text-[11px] font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-white"
+                className="rounded-noctvm-sm px-2 py-1 text-noctvm-label font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-white"
               >
                 Clear
               </button>
@@ -168,7 +168,7 @@ export default function FilterBar({
                   onDateChange(format(todayDate, 'yyyy-MM-dd'));
                   setDateDropdownOpen(false);
                 }}
-                className="rounded-noctvm-sm px-2 py-1 text-[11px] font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-white"
+                className="rounded-noctvm-sm px-2 py-1 text-noctvm-label font-medium text-noctvm-silver/70 transition-colors hover:bg-white/5 hover:text-white"
               >
                 Today
               </button>
