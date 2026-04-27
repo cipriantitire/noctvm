@@ -8,13 +8,13 @@ import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import PostOptionsMenu from './PostOptionsMenu';
-import LikesSheet from './LikesSheet';
+import LikesOverlay from './LikesOverlay';
 import { Avatar } from '@/components/ui';
 
 import VerifiedBadge from './VerifiedBadge';
 import CommentSection from './Feed/CommentSection';
 import EditPostModal from './EditPostModal';
-import TaggedUsersModal from './TaggedUsersModal';
+import TaggedUsersOverlay from './TaggedUsersOverlay';
 import { getVenueLogo } from '@/lib/venue-logos';
 import { RepostIcon, CalendarIcon } from './icons';
 
@@ -355,7 +355,7 @@ export default function PostViewerModal({
       </div>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-[1200px] lg:max-w-5xl h-full lg:h-[calc(100vh-80px)] lg:max-h-[850px] bg-noctvm-midnight border border-white/10 lg:rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] z-modal flex flex-col lg:flex-row transition-transform animate-scale-in mx-auto">
+      <div className="relative w-full max-w-[1200px] lg:max-w-5xl h-full lg:h-[calc(100vh-80px)] lg:max-h-[850px] bg-noctvm-midnight border border-white/10 lg:rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] z-modal flex flex-col lg:flex-row transition-transform animate-scale-in mx-auto corner-smooth">
         
         {/* Left: Image Side */}
         <div className="flex-1 bg-noctvm-black flex items-center justify-center relative min-h-[40vh] md:min-h-0">
@@ -564,13 +564,13 @@ export default function PostViewerModal({
 
         </div>
       </div>
-      <LikesSheet
+      <LikesOverlay
         postId={post.id}
         isOpen={showLikesModal}
         onClose={() => setShowLikesModal(false)}
       />
 
-      <TaggedUsersModal
+      <TaggedUsersOverlay
         handles={post.tagged_users || []}
         isOpen={showTaggedUsers}
         onClose={() => setShowTaggedUsers(false)}

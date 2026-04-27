@@ -75,10 +75,12 @@ export default function VenuesPage({
   const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
   const [reviewRatings, setReviewRatings] = useState<Record<string, number>>({});
   const [venueView, setVenueView] = useState<'grid' | 'list'>('list');
-  const [venueSort, setVenueSort] = useState<'name' | 'popularity' | 'events'>('popularity');
+  const [venueSort, setVenueSort] = useState<'name' | 'popularity' | 'events'>('events');
   const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
-  const [trendingVenues, setTrendingVenues] = useState<{ name: string; count: number }[]>([]);
+  const [trendingVenues, setTrendingVenues] = useState<{ name: string; count: number; logo_url?: string | null }[]>([]);
   const [loadedReviews, setLoadedReviews] = useState<Record<string, VenueReview[]>>({});
+  const [loadedGoogleReviews, setLoadedGoogleReviews] = useState<Record<string, any[]>>({});
+  const [googlePlaceIds, setGooglePlaceIds] = useState<Record<string, string | undefined>>({});
   const [loadingReviews, setLoadingReviews] = useState<Set<string>>(new Set());
   const [submittingReview, setSubmittingReview] = useState(false);
   const [preloadedStats, setPreloadedStats] = useState<Record<string, { avg: number; count: number }>>({});
@@ -123,6 +125,18 @@ export default function VenuesPage({
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 10);
+
+          // Fetch logo_urls from venues table for trending venues
+          if (sorted.length > 0) {
+            const { data: venueData } = await supabase
+              .from('venues')
+              .select('name, logo_url')
+              .in('name', sorted.map(v => v.name));
+            if (venueData) {
+              const logoMap = new Map(venueData.map(v => [v.name, v.logo_url]));
+              sorted.forEach(v => { (v as any).logo_url = logoMap.get(v.name) || null; });
+            }
+          }
 
           setTrendingVenues(sorted);
         }
@@ -179,10 +193,23 @@ export default function VenuesPage({
           acc[r.venue_name].sum += r.rating;
           acc[r.venue_name].count++;
         });
-        const stats: Record<string, { avg: number; count: number }> = {};
+        const stats: Record<string, { avg: number; count: number; googleAvg?: number; googleCount?: number; googlePlaceId?: string }> = {};
         venues.forEach(v => {
           const r = acc[v.name];
-          stats[v.name] = r ? { avg: r.sum / r.count, count: r.count } : { avg: 0, count: 0 };
+          const userAvg = r ? r.sum / r.count : 0;
+          const userCount = r ? r.count : 0;
+          // Merge with Google rating if available
+          const googleRating = (v as any).rating as number | undefined;
+          const googleReviewCount = (v as any).review_count as number | undefined;
+          const googlePlaceId = (v as any).google_place_id as string | undefined;
+          if (googleRating && googleReviewCount && googleReviewCount > 0) {
+            // Weighted average: Google reviews carry more weight
+            const totalCount = userCount + googleReviewCount;
+            const weightedAvg = (userAvg * userCount + googleRating * googleReviewCount) / totalCount;
+            stats[v.name] = { avg: weightedAvg, count: totalCount, googleAvg: googleRating, googleCount: googleReviewCount, googlePlaceId };
+          } else {
+            stats[v.name] = { avg: userAvg, count: userCount, googlePlaceId };
+          }
         });
         setPreloadedStats(stats);
       });
@@ -253,21 +280,30 @@ export default function VenuesPage({
     
     if (venueSort === 'name') return a.name.localeCompare(b.name);
     // popularity is already handled by query order mostly, but for completeness:
-    if (venueSort === 'popularity') return (b.followers || 0) - (a.followers || 0);
+    if (venueSort === 'popularity') return (b.rating || 0) - (a.rating || 0);
 
-    return b.rating - a.rating; // fallback
+    return (b.rating || 0) - (a.rating || 0); // fallback
   });
 
   const fetchReviews = async (venueName: string) => {
     if (loadedReviews[venueName] !== undefined) return;
     setLoadingReviews(prev => new Set(prev).add(venueName));
+    
+    // Load user reviews
     const { data } = await supabase
       .from('venue_reviews')
-      .select('id, user_id, venue_name, rating, text, created_at, profiles(username, display_name, avatar_url)')
+      .select('*, profiles(username, display_name, avatar_url)')
       .eq('venue_name', venueName)
-      .order('created_at', { ascending: false })
-      .limit(20);
+      .order('created_at', { ascending: false });
+    
+    // Also load Google reviews from venue record
+    const venue = venues.find(v => v.name === venueName);
+    const googleReviews = (venue as any)?.google_reviews || [];
+    const googlePlaceId = (venue as any)?.google_place_id as string | undefined;
+    
     setLoadedReviews(prev => ({ ...prev, [venueName]: (data as VenueReview[] | null) || [] }));
+    setLoadedGoogleReviews(prev => ({ ...prev, [venueName]: googleReviews }));
+    setGooglePlaceIds(prev => ({ ...prev, [venueName]: googlePlaceId }));
     setLoadingReviews(prev => { const next = new Set(prev); next.delete(venueName); return next; });
   };
 
@@ -360,7 +396,7 @@ export default function VenuesPage({
           const isLoading = loadingFollows.has(venue.name);
           const isExpanded = expandedVenue === venue.name;
           const reviews = getReviews(venue.name);
-          const avgRating = getAvgRating(venue.name, venue.rating);
+          const avgRating = getAvgRating(venue.name, venue.rating || 0);
           const isLoadingReviews = loadingReviews.has(venue.name);
 
           return venueView === 'grid' ? (
@@ -396,8 +432,8 @@ export default function VenuesPage({
                   {venue.badge !== 'none' && <VerifiedBadge type={venue.badge} size="xs" />}
                 </div>
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <StarRating rating={venue.rating} />
-                  <span className="text-noctvm-micro text-noctvm-silver/60">{venue.rating}</span>
+                  <StarRating rating={venue.rating || 0} />
+                  <span className="text-noctvm-micro text-noctvm-silver/60">{venue.rating || 'N/A'}</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mb-auto">
                   {venue.genres.slice(0, 2).map(g => (
@@ -405,7 +441,7 @@ export default function VenuesPage({
                   ))}
                 </div>
                 <div className="flex items-center justify-between pt-2 mt-2 border-t border-noctvm-border">
-                  <span className="text-noctvm-micro text-noctvm-silver/40 font-mono">Cap. {venue.capacity}</span>
+                  <span className="text-noctvm-micro text-noctvm-silver/40 font-mono">Cap. {venue.capacity || 'N/A'}</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFollow(venue.name); }}
                     disabled={isLoading || !user}
@@ -486,8 +522,8 @@ export default function VenuesPage({
                     {g}
                   </span>
                 ))}
-                {venue.capacity > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-noctvm-micro font-semibold bg-noctvm-surface text-noctvm-silver/40 border border-noctvm-border">
+                {(venue.capacity || 0) > 0 && (
+                  <span className="px-3 py-1 rounded-full text-noctvm-caption font-mono bg-noctvm-surface border border-noctvm-border text-noctvm-silver/60">
                     Cap. {venue.capacity}
                   </span>
                 )}
@@ -513,9 +549,7 @@ export default function VenuesPage({
                 <div className="absolute inset-0 z-0 pointer-events-none mask-gradient" />
                 <div className="relative z-10 flex items-center gap-1.5">
                   {(() => {
-                    const stat = loadedReviews[venue.name] !== undefined
-                      ? { avg: reviews.length > 0 ? avgRating : 0, count: reviews.length }
-                      : (preloadedStats[venue.name] ?? { avg: 0, count: 0 });
+                    const stat = preloadedStats[venue.name] ?? { avg: 0, count: 0 };
                     return (
                       <>
                         <StarRating rating={stat.avg} />
@@ -536,11 +570,50 @@ export default function VenuesPage({
                     <div className="flex items-center justify-center py-6">
                       <div className="w-5 h-5 border-2 border-noctvm-violet/30 border-t-noctvm-violet rounded-full animate-spin" />
                     </div>
-                  ) : reviews.length > 0 ? (
-                    <div className="p-4 space-y-3">
-                      {reviews.map((review) => {
-                        const handle = review.profiles?.username || review.user_id.slice(0, 8);
-                        const initial = (review.profiles?.display_name || review.profiles?.username || '?')[0].toUpperCase();
+                  ) : (
+                    <>
+                      {/* Google Reviews */}
+                      {(loadedGoogleReviews[venue.name] || []).length > 0 && (
+                        <div className="p-4 pb-2">
+                          <div className="flex items-center gap-2 mb-2">
+                            <svg className="w-4 h-4 text-noctvm-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <span className="text-noctvm-caption font-bold text-noctvm-silver/60 uppercase tracking-widest">Google Reviews</span>
+                            {googlePlaceIds[venue.name] && (
+                              <a href={`https://search.google.com/local/writereview?placeid=${googlePlaceIds[venue.name]}`} target="_blank" rel="noopener noreferrer" className="ml-auto text-noctvm-caption text-noctvm-violet hover:underline">Write a Review on Google</a>
+                            )}
+                          </div>
+                          <div className="space-y-2.5">
+                            {(loadedGoogleReviews[venue.name] || []).slice(0, 3).map((r: any, i: number) => (
+                              <div key={`g-${i}`} className="flex gap-2.5">
+                                <div className="w-6 h-6 rounded-full bg-noctvm-surface flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                                  {r.profile_photo_url ? <Image src={r.profile_photo_url} alt="" fill className="object-cover" unoptimized /> : <span className="text-noctvm-caption font-bold text-noctvm-silver/50">G</span>}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-noctvm-label font-semibold text-foreground text-xs">{r.author_name}</span>
+                                    <StarRating rating={r.rating} />
+                                  </div>
+                                  <p className="text-xs text-noctvm-silver/80 leading-relaxed line-clamp-3">{r.text}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* User Reviews */}
+                      {loadedReviews[venue.name]?.length > 0 ? (
+                        <div className={`p-4 ${(loadedGoogleReviews[venue.name] || []).length > 0 ? 'pt-0' : ''} space-y-3`}>
+                          {(loadedGoogleReviews[venue.name] || []).length > 0 && loadedReviews[venue.name]?.length > 0 && (
+                            <div className="flex items-center gap-2 pt-2 pb-1">
+                              <div className="flex-1 h-px bg-noctvm-border/50" />
+                              <span className="text-noctvm-caption text-noctvm-silver/40">App Reviews</span>
+                              <div className="flex-1 h-px bg-noctvm-border/50" />
+                            </div>
+                          )}
+                          {loadedReviews[venue.name].map((review) => {
+                            const handle = review.profiles?.username || review.user_id.slice(0, 8);
+                            const initial = (review.profiles?.display_name || review.profiles?.username || '?')[0].toUpperCase();
                         return (
                           <div key={review.id} className="flex gap-3">
                             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-noctvm-violet/40 to-purple-500/40 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
@@ -563,9 +636,9 @@ export default function VenuesPage({
                         );
                       })}
                     </div>
-                  ) : (
+                  ) : (loadedGoogleReviews[venue.name] || []).length === 0 ? (
                     <p className="px-4 py-4 text-xs text-noctvm-silver/50">No reviews yet. Be the first!</p>
-                  )}
+                  ) : null}
 
                   {/* Write a review */}
                   {user ? (
@@ -606,6 +679,8 @@ export default function VenuesPage({
                   ) : (
                     <div className="px-4 pb-4 pt-2 text-xs text-noctvm-silver/50">Sign in to leave a review</div>
                   )}
+                  </>
+                )}
                 </div>
               )}
             </div>

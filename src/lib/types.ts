@@ -1,28 +1,29 @@
 export interface Venue {
   id: string;
   name: string;
-  address: string;
+  address: string | null;
   genres: string[];
-  capacity: number;
-  rating: number;
-  review_count: number;
-  description: string;
+  capacity: number | null;
+  rating: number | null;
+  review_count: number | null;
+  description: string | null;
   followers: number;
-  city: 'Bucharest' | 'Constanta';
-  country?: string;
-  image_url?: string;
+  city: string;
   lat: number | null;
   lng: number | null;
   owner_id?: string;
   badge: 'none' | 'owner' | 'admin' | 'gold' | 'verified';
-  logo_url?: string;
+  logo_url?: string | null;
   is_verified: boolean;
   featured: boolean;
   view_count: number;
   save_count: number;
-  website?: string;
+  website?: string | null;
   instagram?: string;
   facebook?: string;
+  google_place_id?: string;
+  google_reviews?: Array<{ author_name: string; rating: number; text: string; time: number; profile_photo_url: string }>;
+  photos?: string[];
 }
 
 export interface NoctEvent {

@@ -6,16 +6,19 @@ import { CalendarIcon, StarIcon, TicketIcon } from './icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import VerifiedBadge from './VerifiedBadge';
-import { Button, GlassPanel, IconButton } from '@/components/ui';
+import { Button, IconButton } from '@/components/ui';
 import CurvedScrollBar from './ui/CurvedScrollBar';
 import { imageBadgeChrome, imageGenreBadgeClass, imagePriceBadgeClass, imageRatingBadgeClass } from '@/lib/eventImageBadgeStyles';
+import {
+  Sheet,
+  SheetContent,
+} from '@/components/ui/Sheet';
 
-interface EventModalProps {
+interface EventSheetProps {
   event: NoctEvent | null;
   onClose: () => void;
   onVenueClick?: (venueName: string) => void;
   onOpenAuth: () => void;
-  zIndex?: number;
 }
 
 function formatDate(dateStr: string): string {
@@ -41,7 +44,7 @@ function getSourceBadge(source: string) {
     case 'livetickets': return { label: 'LiveTickets',    color: `bg-pink-950/85 text-pink-200 border-pink-300/30 ${imageBadgeChrome}` };
     case 'iabilet':     return { label: 'iaBilet',        color: `bg-cyan-950/85 text-cyan-200 border-cyan-300/30 ${imageBadgeChrome}` };
     case 'beethere':    return { label: 'BeeThere',       color: `bg-yellow-950/85 text-yellow-200 border-yellow-300/30 ${imageBadgeChrome}` };
-    case 'zilesinopti': return { label: 'Zile și Nopți',  color: `bg-amber-950/85 text-amber-200 border-amber-300/30 ${imageBadgeChrome}` };
+    case 'zilesinopti': return { label: 'Zile si Nopți',  color: `bg-amber-950/85 text-amber-200 border-amber-300/30 ${imageBadgeChrome}` };
     case 'onevent':     return { label: 'OnEvent',         color: `bg-violet-950/85 text-violet-200 border-violet-300/30 ${imageBadgeChrome}` };
     case 'ambilet':     return { label: 'Ambilet',         color: `bg-teal-950/85 text-teal-200 border-teal-300/30 ${imageBadgeChrome}` };
     default:            return { label: source,            color: `bg-zinc-950/85 text-noctvm-silver border-zinc-300/30 ${imageBadgeChrome}` };
@@ -163,17 +166,16 @@ function normalizeOutboundUrl(url?: string | null): string {
   }
 }
 
-export default function EventModal({ 
+export default function EventSheet({ 
   event, 
   onClose, 
   onVenueClick, 
   onOpenAuth,
-  zIndex = 200
-}: EventModalProps) {
+}: EventSheetProps) {
   const LIGHTBOX_OPEN_GUARD_MS = 350;
   const { user } = useAuth();
   const [descExpanded, setDescExpanded] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [saveCount, setSaveCount]     = useState(0);
   const [isSaved,   setIsSaved]       = useState(false);
@@ -182,10 +184,12 @@ export default function EventModal({
   const [isDescriptionOverflowing, setIsDescriptionOverflowing] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
   const blockLightboxUntilRef = useRef(0);
+
   const handleClose = useCallback(() => {
     setLightboxOpen(false);
-    setIsClosing(true);
-  }, []);
+    setIsOpen(false);
+    setTimeout(() => onClose(), 350);
+  }, [onClose]);
 
   useEffect(() => {
     if (!event) return;
@@ -198,7 +202,6 @@ export default function EventModal({
     if (!event || !isRealEvent(event.id)) { setSaveCount(0); setIsSaved(false); return; }
     const eventId = event.id;
 
-    // Initial fetch
     supabase
       .from('event_saves')
       .select('id, user_id', { count: 'exact' })
@@ -208,7 +211,6 @@ export default function EventModal({
         if (user) setIsSaved((data ?? []).some((r: any) => r.user_id === user.id));
       });
 
-    // Real-time subscription
     const channel = supabase
       .channel(`event_saves_${eventId}`)
       .on('postgres_changes', {
@@ -224,7 +226,6 @@ export default function EventModal({
       })
       .subscribe();
 
-    // Fetch venue badge
     supabase
       .from('venues')
       .select('badge')
@@ -309,51 +310,40 @@ export default function EventModal({
   const isFree = event.price?.toLowerCase() === 'free';
 
   return (
-    <div className="event-modal-root">
-    {/* Image lightbox */}
-    {lightboxOpen && (
-      <div
-        className="fixed inset-0 flex items-center justify-center bg-noctvm-black/95 cursor-zoom-out"
-        style={{ zIndex: (zIndex || 200) + 2 }}
-        onClick={() => setLightboxOpen(false)}
+    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+      <SheetContent
+        side="bottom"
+        overlayClassName="!bg-noctvm-black/70 backdrop-blur-md"
+        className="h-auto max-h-[85vh] bg-noctvm-black border-noctvm-border border-t p-0 rounded-t-3xl overflow-hidden flex flex-col min-h-0 corner-smooth"
+        showCloseButton={false}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={event.image_url || '/images/event-fallback.png'}
-          alt={event.title}
-          className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
-          onClick={e => e.stopPropagation()}
-          onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
-        />
-        <IconButton
-          size="lg"
-          aria-label="Close image preview"
-          onClick={() => setLightboxOpen(false)}
-          className="absolute top-4 right-4 text-foreground"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-        </IconButton>
-      </div>
-    )}
+        {/* Lightbox */}
+        {lightboxOpen && (
+          <div
+            className="fixed inset-0 flex items-center justify-center bg-noctvm-black/95 cursor-zoom-out"
+            style={{ zIndex: 500 }}
+            onClick={() => setLightboxOpen(false)}
+          >
+            <img
+              src={event.image_url || '/images/event-fallback.png'}
+              alt={event.title}
+              className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
+              onClick={e => e.stopPropagation()}
+              onError={(e) => { (e.target as HTMLImageElement).src = '/images/event-fallback.png'; }}
+            />
+            <IconButton
+              size="lg"
+              aria-label="Close image preview"
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-4 right-4 text-foreground"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </IconButton>
+          </div>
+        )}
 
-    <div
-      className={`fixed inset-0 flex items-center justify-center p-0 sm:p-4 lg:p-8 ${isClosing ? 'animate-fade-out' : ''}`}
-      style={{ zIndex }}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 modal-frost-overlay" onClick={handleClose} />
-
-      {/* Modal - Z-INDEX 200 to be above VenuePage (100) */}
-      <GlassPanel
-        variant="modal"
-        className={`relative w-full h-full sm:w-[560px] sm:h-auto sm:max-h-[90vh] sm:rounded-3xl overflow-hidden flex flex-col min-h-0 corner-smooth ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} shadow-2xl shadow-black/60`}
-        style={{ zIndex: (zIndex || 200) + 1 }}
-        onClick={e => e.stopPropagation()}
-        onAnimationEnd={() => { if (isClosing) { setIsClosing(false); onClose(); } }}
-      >
         {/* Hero image */}
-        <div className="relative flex-shrink-0 h-[260px] sm:h-[300px] bg-noctvm-black overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+        <div className="relative flex-shrink-0 h-[240px] bg-noctvm-black overflow-hidden">
           <img
             src={event.image_url || '/images/event-fallback.png'}
             alt={event.title}
@@ -363,30 +353,29 @@ export default function EventModal({
           />
           <IconButton
             onClick={handleClose}
-            title="Close modal"
-            aria-label="Close modal"
-            className="absolute top-4 right-4 z-10"
+            title="Close"
+            aria-label="Close"
+            className="absolute top-3 right-3 z-10"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </IconButton>
         </div>
 
-        {/* Absolute floating elements positioned relative to modal but outside hero container to avoid clipping shadows */}
-        <div className="absolute top-0 left-0 right-0 h-[260px] sm:h-[300px] pointer-events-none">
-          {/* Source badge (ticket platform) — clickable link */}
+        {/* Absolute floating elements */}
+        <div className="absolute top-0 left-0 right-0 h-[240px] pointer-events-none">
           <a
             href={badgeLink}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            className={`absolute top-4 left-4 pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border z-10 hover:scale-105 transition-transform`}
+            className={`absolute top-3 left-3 pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight ${sourceBadge.color} backdrop-blur-md border z-10 hover:scale-105 transition-transform`}
           >
             <TicketIcon className="w-3 h-3" />
             {sourceBadge.label === 'Control Club' ? 'CTRL' : sourceBadge.label}
           </a>
 
           {heroGenres.length > 0 && (
-            <div className="absolute bottom-4 left-4 z-10 max-w-[70%] flex flex-wrap gap-1.5">
+            <div className="absolute bottom-3 left-3 z-10 max-w-[70%] flex flex-wrap gap-1.5">
               {heroGenres.map((genre) => (
                 <span
                   key={genre}
@@ -399,7 +388,7 @@ export default function EventModal({
           )}
 
           {(event.rating || hasPrice || isFree) && (
-            <div className="absolute bottom-4 right-4 z-10 pointer-events-auto flex flex-col items-end gap-2">
+            <div className="absolute bottom-3 right-3 z-10 pointer-events-auto flex flex-col items-end gap-2">
               {event.rating && (
                 <div className={`flex items-center gap-1.5 backdrop-blur-sm rounded-lg px-2 py-1 border ${imageRatingBadgeClass}`}>
                   <StarIcon className="w-3 h-3 text-noctvm-gold" />
@@ -423,8 +412,8 @@ export default function EventModal({
         </div>
 
         {/* Header metadata */}
-        <div className="flex-shrink-0 space-y-4 p-5">
-          <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground leading-tight">
+        <div className="flex-shrink-0 space-y-3 p-4">
+          <h2 className="font-heading text-lg font-bold text-foreground leading-tight">
             {event.title}
           </h2>
 
@@ -474,14 +463,14 @@ export default function EventModal({
           </div>
         </div>
 
-        <div className="flex-shrink-0 px-5">
+        <div className="flex-shrink-0 px-4">
           <div className="w-full h-px bg-noctvm-border" />
         </div>
 
-        {/* Scrollable description content */}
+        {/* Scrollable description */}
         <CurvedScrollBar className="flex-1 min-h-0" viewportClassName="p-5 overscroll-contain" cornerRadius={24} edgePadding={4} verticalInset={4} fadeEdges>
           {descriptionParagraphs.length > 0 && (
-            <section id="event-modal-description" className="space-y-3">
+            <section id="event-sheet-description" className="space-y-3">
               <div
                 ref={descriptionRef}
                 className="space-y-3 overflow-hidden transition-[max-height] duration-300 ease-out"
@@ -511,7 +500,7 @@ export default function EventModal({
         </CurvedScrollBar>
 
         {/* CTA footer */}
-        <div className="px-5 pb-6 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0 space-y-3">
+        <div className="px-4 pb-5 pt-3 border-t border-noctvm-border bg-noctvm-midnight flex-shrink-0 space-y-3">
           {sourceEventLink && (
             <a
               href={sourceEventLink}
@@ -555,8 +544,7 @@ export default function EventModal({
             <p className="text-center text-sm text-noctvm-silver/50 py-3">No outbound link for this event.</p>
           )}
         </div>
-      </GlassPanel>
-    </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

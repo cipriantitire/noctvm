@@ -6,7 +6,7 @@ import { useScrollFade } from '@/hooks/useScrollFade';
 import Image from 'next/image';
 
 interface TrendingVenuesProps {
-  venues: { name: string, count: number }[];
+  venues: { name: string, count: number, logo_url?: string | null }[];
   onVenueClick: (venueName: string) => void;
   headerHidden?: boolean;
 }
@@ -32,7 +32,7 @@ export default function TrendingVenues({
       </div>
       <div ref={ref} style={maskStyle} className="flex gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 relative z-10">
         {venues.map(venue => {
-          const logoSrc = getVenueLogo(venue.name);
+          const logoSrc = getVenueLogo(venue.name, venue.logo_url);
           return (
             <button
               key={venue.name}

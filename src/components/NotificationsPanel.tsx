@@ -146,7 +146,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             onDragEnd={(_, info) => {
               if (info.offset.x > 80) onClose();
             }}
-            className="frosted-glass-modal fixed right-0 top-0 bottom-0 w-3/4 sm:max-w-sm z-[401] flex flex-col overflow-hidden border-l border-noctvm-border shadow-2xl"
+            className="frosted-glass-modal fixed right-0 top-0 bottom-0 w-3/4 sm:max-w-sm z-[401] flex flex-col overflow-hidden border-l border-noctvm-border shadow-2xl rounded-l-2xl corner-smooth"
             style={{
               zIndex: 401,
               position: 'fixed',

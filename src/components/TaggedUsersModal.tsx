@@ -16,7 +16,7 @@ interface TaggedUser {
 }
 
 interface TaggedUsersModalProps {
-  handles: string[]; // e.g., ["@cipri", "@user2"]
+  handles: string[];
   isOpen: boolean;
   onClose: () => void;
 }
@@ -109,7 +109,7 @@ export default function TaggedUsersModal({ handles, isOpen, onClose }: TaggedUse
     <div className="fixed inset-0 z-viewer flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-noctvm-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative w-full max-w-sm bg-noctvm-black border border-noctvm-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
+      <div className="relative w-full max-w-sm bg-noctvm-black border border-noctvm-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in corner-smooth">
         <div className="p-4 border-b border-noctvm-border flex items-center justify-between">
           <h3 className="font-heading font-bold text-foreground text-base">Tagged People</h3>
           <button onClick={onClose} className="p-1 hover:bg-white/5 rounded-full transition-colors" title="Close">

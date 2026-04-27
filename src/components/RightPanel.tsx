@@ -26,7 +26,7 @@ export default function RightPanel({
   const { ref: liveTonightRef, maskStyle: liveTonightMask } = useScrollFade('y');
   const [dbEvents, setDbEvents] = useState<NoctEvent[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
-  const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number}[]>([]);
+  const [trendingVenues, setTrendingVenues] = useState<{name: string, count: number, logo_url?: string | null}[]>([]);
   const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -73,7 +73,19 @@ export default function RightPanel({
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 8);
-          setTrendingVenues(sorted);
+          
+          // Fetch logo_urls from venues table
+          if (sorted.length > 0) {
+            supabase.from('venues').select('name, logo_url').in('name', sorted.map(v => v.name)).then(({ data: vd }) => {
+              if (vd) {
+                const logoMap = new Map(vd.map(v => [v.name, v.logo_url]));
+                sorted.forEach(v => { (v as any).logo_url = logoMap.get(v.name) || null; });
+              }
+              setTrendingVenues(sorted);
+            });
+          } else {
+            setTrendingVenues(sorted);
+          }
         }
       });
   }, [activeCity]);
@@ -161,14 +173,14 @@ export default function RightPanel({
       <div>
         <h3 className="font-heading text-sm font-semibold text-foreground mb-3">Trending Venues</h3>
         <div className="space-y-2">
-          {trendingVenues.slice(0, 5).map(({ name, count }) => (
+          {trendingVenues.slice(0, 5).map((v) => (
             <button
-              key={name}
-              onClick={() => onVenueClick?.(name)}
+              key={v.name}
+              onClick={() => onVenueClick?.(v.name)}
               className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.08] border border-white/5 hover:border-noctvm-violet/30 transition-all duration-300 cursor-pointer group shadow-sm hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
             >
               <div className="w-9 h-9 rounded-full border border-noctvm-border bg-noctvm-midnight flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-noctvm-violet/30 transition-colors">
-                <img src={getVenueLogo(name)} alt={name} className="w-full h-full object-cover"
+                <img src={getVenueLogo(v.name, v.logo_url)} alt={v.name} className="w-full h-full object-cover"
                   onError={(e) => {
                     const el = e.target as HTMLImageElement;
                     el.style.display = 'none';
@@ -176,12 +188,12 @@ export default function RightPanel({
                   }}
                 />
                 <span className={`fallback hidden text-xs font-heading font-bold text-foreground`}>
-                  {name[0]}
+                  {v.name[0]}
                 </span>
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-xs font-medium text-foreground group-hover:text-noctvm-violet transition-colors truncate">{name}</p>
-                <p className="text-noctvm-caption text-noctvm-silver">{count} Upcoming Events</p>
+                <p className="text-xs font-medium text-foreground group-hover:text-noctvm-violet transition-colors truncate">{v.name}</p>
+                <p className="text-noctvm-caption text-noctvm-silver">{v.count} Upcoming Events</p>
               </div>
             </button>
           ))}

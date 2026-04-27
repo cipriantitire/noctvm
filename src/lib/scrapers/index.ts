@@ -31,8 +31,7 @@ interface ScraperSettings {
 // Simple alias map: scraped name (lowercase) → canonical name stored in DB.
 // Use lowercase keys for case-insensitive matching.
 const VENUE_ALIASES: Record<string, string> = {
-  // iabilet/zilesinopti list some events with hall name instead of club name
-  'sala luceafarul': 'Control Club',   // default mapping; event-title override applied below
+  'sala luceafarul': 'Sala Luceafărul',
   // Control Club variants (RA uses lowercase, zilesinopti appends suffix)
   'control':        'Control Club',
   'club control':   'Control Club',
@@ -96,11 +95,37 @@ const VENUE_ALIASES: Record<string, string> = {
   'forge bucharest': 'Forge',
   'forge':            'Forge',
   'industrial warehouse': 'Secret Location',
+  'halo events center': 'Halo Events Center',
+  // Venue name aliases for orphan events after venue cleanup
+  'club quantic': 'Quantic',
+  'expirat': 'Expirat Halele Carol',
+  'palatul parlamentului': 'Palatul Parlamentului',
+  'the pub – universității': 'The Pub Universității',
+  'arcub': 'Sala Mare - ARCUB',
+  'njoy club': 'Njoy',
+  // zilesinopti uses full name for Exhibitions' Pavilion
+  'pavilionul expozitional': `Exhibitions' Pavilion`,
   // Apollo111 variants
   'apollo111 barul & terasa': 'Apollo111',
   // Hard Rock Cafe variants (sometimes with city suffix)
   'hard rock cafe bucuresti': 'Hard Rock Cafe',
   'hard rock cafe bucharest': 'Hard Rock Cafe',
+  // Missing aliases for existing venues (orphan event cleanup — user-requested)
+  'ruta 23':                       'Pub Ruta 23',
+  'goblin':                        'Goblin Constanta',
+  'grand hotel':                   'Grand Hotel Bucharest',
+  'grand hotel bucharest (fostul intercontinental)': 'Grand Hotel Bucharest',
+  'heavy yard':                    'HEAVY YARD & HEAVYSHOP',
+  'naive':                         'Naive',
+  'seawolves m.c. romania':        'Seawolves M.C',
+  // New venue aliases
+  'secret location (drops event day)': 'Secret Location',
+  'secret location':                   'Secret Location',
+  'tba - enjoy garden & club':         'TBA',
+  'venue tbc':                         'TBA',
+  'moki - modern kitchen':             'MOKI',
+  'district music culture — by până mâine': 'District Music Culture',
+  'district music culture':                 'District Music Culture',
 };
 
 // Event-title–aware overrides: if (title pattern) + wrong venue → correct venue.
@@ -640,6 +665,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     /centrul multifuncțional educativ/i,
     /jean constantin/i,
     /biseric/i,
+    /libr[ăa]ria/i,
+    /teatrul/i,
+    /teatru /i,
   ];
   const blockedTitleTerms = [
     'lacul lebedelor',
@@ -662,6 +690,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'comedie',
     'elrow',
     'concert de org',
+    'bookclub',
+    'lansare carte',
+    'lansare de carte',
   ];
   const blockedVenueCount = unique.length;
   let filteredCount = 0;
@@ -703,6 +734,8 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'comedy', 'comedie',
     'elrow',
     'concert de org',
+    'bookclub',
+    'lansare carte', 'lansare de carte',
     // Classical/ballet/opera that gets miscategorized
     'lacul lebedelor',
     'spargatorul de nuci',
@@ -743,6 +776,9 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
     'elrow',
     'biserica',
     'concert de org',
+    'bookclub',
+    'lansare carte',
+    'lansare de carte',
   ];
   for (const term of HARD_BLOCK_DESC_TERMS) {
     const { error: cleanErr } = await supabase
@@ -755,13 +791,16 @@ export async function fetchAndUpsertEvents(targetSource?: string): Promise<Fetch
   // Venue-level hard blocks for non-nightlife spaces that should never appear.
   const HARD_BLOCK_VENUE_TERMS = [
     'biserica',
-    // Theatres, municipal culture halls, and educational institutions
+    // Theatres, libraries, municipal culture halls, and educational institutions
     // are not nightlife venues and should be excluded.
     'casa de cultura a sindicatelor',
     'casa de cultură a sindicatelor',
     'colegiul național de arte',
     'centrul multifuncțional educativ',
     'jean constantin',
+    'teatrul',
+    'libraria',
+    'librăria',
   ];
   for (const term of HARD_BLOCK_VENUE_TERMS) {
     const { error: cleanErr } = await supabase

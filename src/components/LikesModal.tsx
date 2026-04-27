@@ -4,12 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/Sheet';
 
 interface LikedUser {
   id: string;
@@ -19,13 +13,13 @@ interface LikedUser {
   is_following: boolean;
 }
 
-interface LikesSheetProps {
+interface LikesModalProps {
   postId: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function LikesSheet({ postId, isOpen, onClose }: LikesSheetProps) {
+export default function LikesModal({ postId, isOpen, onClose }: LikesModalProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [likes, setLikes] = useState<LikedUser[]>([]);
@@ -139,14 +133,23 @@ export default function LikesSheet({ postId, isOpen, onClose }: LikesSheetProps)
     router.push(getProfileHref(username, displayName));
   }, [getProfileHref, onClose, router]);
 
+  if (!isOpen) return null;
+
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <SheetContent side="bottom" className="h-[70vh] bg-noctvm-black border-noctvm-border p-0 min-h-0 flex flex-col corner-smooth">
-        <SheetHeader className="p-4 border-b border-noctvm-border">
-          <SheetTitle className="font-heading font-bold text-base">Likes</SheetTitle>
-        </SheetHeader>
+    <div className="fixed inset-0 z-viewer flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-noctvm-black/60 backdrop-blur-sm" onClick={onClose} />
+      
+      <div className="relative w-full max-w-sm bg-noctvm-black border border-noctvm-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in corner-smooth">
+        <div className="p-4 border-b border-noctvm-border flex items-center justify-between">
+          <h3 className="font-heading font-bold text-foreground text-base">Likes</h3>
+          <button onClick={onClose} className="p-1 hover:bg-white/5 rounded-full transition-colors" title="Close likes modal" aria-label="Close likes modal">
+             <svg className="w-5 h-5 text-noctvm-silver" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+             </svg>
+          </button>
+        </div>
         
-        <div className="overflow-y-auto custom-scrollbar flex-1">
+        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
           {loading ? (
             <div className="p-8 text-center">
               <div className="w-6 h-6 border-2 border-noctvm-violet border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -202,7 +205,7 @@ export default function LikesSheet({ postId, isOpen, onClose }: LikesSheetProps)
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   );
 }

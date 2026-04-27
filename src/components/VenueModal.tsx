@@ -125,7 +125,25 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
   const upcomingEvents = venueEvents.filter(e => e.date > today);
   const pastEvents = venueEvents.filter(e => e.date < today);
 
-  const logoSrc = getVenueLogo(venueName);
+  // Default to portrait when >4 upcoming or past events
+  useEffect(() => {
+    if (upcomingEvents.length > 4 || pastEvents.length > 4) {
+      setViewMode('portrait');
+    }
+  }, [upcomingEvents.length, pastEvents.length]);
+
+  const logoSrc = getVenueLogo(venueName, venue?.logo_url);
+
+  // Venue data from DB
+  const venueAddress = venue?.address || info.address;
+  const venueWebsite = venue?.website;
+  const venueDescription = venue?.description || info.description;
+  const venueRating = venue?.rating;
+  const venueReviewCount = venue?.review_count;
+  const venuePhotos: string[] = Array.isArray(venue?.photos) 
+    ? (venue!.photos as string[]).map((ref: string) => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${ref}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyDFcufnUYpyjAi7vuA2vgwYhodb3K93UU0'}`)
+    : [];
+
   const { ref: galleryScrollRef, maskStyle: galleryMaskStyle } = useScrollFade('x');
   const venueScrollbarCornerRadius = isWindowedModal
     ? VENUE_SCROLLBAR_CORNER_RADIUS_WINDOW
@@ -177,20 +195,35 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
               <VerifiedBadge type={venue.badge} size="lg" className="translate-y-0.5" />
             )}
           </div>
-          <p className="text-noctvm-silver font-medium text-xs lg:text-sm mt-0.5">{info.address}</p>
-          <div className="flex flex-wrap gap-1.5 mt-2 mb-4">
+          <p className="text-noctvm-silver font-medium text-xs lg:text-sm mt-0.5">{venueAddress}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2 mb-2">
             {info.genres.map(g => (
               <span key={g} className="px-2.5 py-0.5 rounded-full text-noctvm-caption font-semibold bg-noctvm-violet/10 text-noctvm-violet border border-noctvm-violet/20">
                 {g}
               </span>
             ))}
+            {venueWebsite && (
+              <a href={venueWebsite} target="_blank" rel="noopener noreferrer" className="px-2.5 py-0.5 rounded-full text-noctvm-caption font-semibold bg-noctvm-emerald/10 text-noctvm-emerald border border-noctvm-emerald/20 hover:bg-noctvm-emerald/20 transition-all">
+                Website ↗
+              </a>
+            )}
+            {venue?.facebook && (
+              <a href={venue.facebook} target="_blank" rel="noopener noreferrer" className="px-2.5 py-0.5 rounded-full text-noctvm-caption font-semibold bg-blue-950/50 text-blue-300 border border-blue-300/20 hover:bg-blue-950/70 transition-all">
+                Facebook ↗
+              </a>
+            )}
+            {venue?.instagram && (
+              <a href={venue.instagram} target="_blank" rel="noopener noreferrer" className="px-2.5 py-0.5 rounded-full text-noctvm-caption font-semibold bg-pink-950/50 text-pink-300 border border-pink-300/20 hover:bg-pink-950/70 transition-all">
+                Instagram ↗
+              </a>
+            )}
           </div>
-          <p className="text-noctvm-silver/90 text-sm leading-relaxed max-w-4xl">{info.description}</p>
+          <p className="text-noctvm-silver/90 text-sm leading-relaxed max-w-4xl">{venueDescription}</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-10">
+      <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-foreground">{venueEvents.length}</p>
           <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Events</p>
@@ -201,55 +234,55 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
         </div>
         <div className="text-center p-4 rounded-2xl frosted-glass-subtle">
           <p className="text-xl font-bold text-noctvm-gold font-mono">
-            {venue?.rating ? venue.rating.toFixed(1) : '0.0'}
+            {venueRating ? venueRating.toFixed(1) : '—'}
           </p>
-          <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">Rating</p>
+          <p className="text-noctvm-caption text-noctvm-silver/60 uppercase tracking-widest mt-1">
+            Rating{venueReviewCount ? ` (${venueReviewCount})` : ''}
+          </p>
         </div>
       </div>
 
       <div className="h-4" /> {/* Spacer */}
 
       {/* Gallery */}
-      <div className="mb-10 relative group/gallery">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-noctvm-caption font-bold text-foreground uppercase tracking-[0.3em] opacity-30">Gallery</h3>
-          <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
-            <button
-              onClick={() => scrollGallery('left')}
-              title="Scroll left"
-              className="p-2 rounded-lg text-noctvm-silver hover:text-foreground hover:bg-noctvm-violet transition-all active:scale-[0.96]"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            </button>
-            <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
-            <button
-              onClick={() => scrollGallery('right')}
-              title="Scroll right"
-              className="p-2 rounded-lg text-noctvm-silver hover:text-foreground hover:bg-noctvm-violet transition-all active:scale-[0.96]"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </button>
+      {venuePhotos.length > 0 && (
+        <div className="mb-10 relative group/gallery">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-noctvm-caption font-bold text-foreground uppercase tracking-[0.3em] opacity-30">Gallery</h3>
+            <div className="flex p-1 rounded-xl bg-noctvm-surface border border-noctvm-border shadow-inner">
+              <button
+                onClick={() => scrollGallery('left')}
+                title="Scroll left"
+                className="p-2 rounded-lg text-noctvm-silver hover:text-foreground hover:bg-noctvm-violet transition-all active:scale-[0.96]"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+              </button>
+              <div className="w-px h-4 bg-noctvm-border self-center mx-1 opacity-50" />
+              <button
+                onClick={() => scrollGallery('right')}
+                title="Scroll right"
+                className="p-2 rounded-lg text-noctvm-silver hover:text-foreground hover:bg-noctvm-violet transition-all active:scale-[0.96]"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div
-          ref={galleryScrollRef}
-          style={galleryMaskStyle}
-          className="flex gap-5 overflow-x-auto py-4 pb-6 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory"
-        >
-          {GALLERY_THEMES.map((theme) => (
-            <div key={theme.label} className="snap-start flex-shrink-0 w-[85vw] sm:w-[48%] lg:w-[32%]">
-              <div className={`aspect-video rounded-3xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.96] cursor-pointer shadow-xl relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-noctvm-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="text-center group-hover:transform group-hover:scale-110 transition-transform relative z-10">
-                  <span className="text-5xl font-bold text-foreground/10 group-hover:text-foreground/30 transition-colors uppercase tracking-tighter">{theme.icon}</span>
-                  <p className="text-noctvm-caption font-bold text-foreground/30 uppercase tracking-[0.2em] mt-3">{theme.label}</p>
+          <div
+            ref={galleryScrollRef}
+            style={galleryMaskStyle}
+            className="flex gap-5 overflow-x-auto py-4 pb-6 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory"
+          >
+            {venuePhotos.map((url, i) => (
+              <div key={i} className="snap-start flex-shrink-0 w-[85vw] sm:w-[48%] lg:w-[32%]">
+                <div className="aspect-video rounded-3xl overflow-hidden border border-white/5 group hover:border-white/20 transition-all hover:scale-[1.02] active:scale-[0.96] cursor-pointer shadow-xl relative">
+                  <img src={url} alt={`${venueName} photo ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-noctvm-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Live Now */}
       {liveEvents.length > 0 && (
@@ -297,7 +330,7 @@ export default function VenueModal({ venueName, onBack, onClose, onEventClick }:
         <div className="pb-10">
           <h3 className="text-xs font-bold text-noctvm-silver/40 mb-4 uppercase tracking-[0.2em]">Past Events</h3>
           <div className="space-y-4 opacity-50 grayscale hover:grayscale-0 transition-all">
-            {pastEvents.map(event => <EventCard key={event.id} event={event} variant="landscape" onClick={onEventClick} />)}
+            {pastEvents.map(event => <EventCard key={event.id} event={event} variant={viewMode} onClick={onEventClick} />)}
           </div>
         </div>
       )}

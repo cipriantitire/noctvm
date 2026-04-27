@@ -18,6 +18,8 @@
     "venues:geocode:preview": "ts-node --transpile-only scripts/venue-geocode.ts preview",
     "venues:geocode:preview:today": "ts-node --transpile-only scripts/venue-geocode.ts preview --today",
     "venues:geocode:apply": "ts-node --transpile-only scripts/venue-geocode.ts apply",
+    "venues:enrich": "npx tsx scripts/venue-enrichment.ts",
+    "venues:enrich:dry-run": "npx tsx scripts/venue-enrichment.ts --dry-run",
     "venues:geocode:apply:today": "ts-node --transpile-only scripts/venue-geocode.ts apply --today"
   },
   "dependencies": {

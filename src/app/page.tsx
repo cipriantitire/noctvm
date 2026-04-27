@@ -11,7 +11,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import EventCard from '@/components/EventCard';
 import RightPanel from '@/components/RightPanel';
-import VenueModal from '@/components/VenueModal';
+import VenueOverlay from '@/components/VenueOverlay';
 import VenuesPage from '@/components/VenuesPage';
 import FeedPage from '@/components/FeedPage';
 import MobileTopSection from '@/components/MobileTopSection';
@@ -20,7 +20,7 @@ import SearchBar from '@/components/SearchBar';
 import { ActivityLogPage, SettingsPage } from '@/components/ProfilePages';
 import ProfileSidebar from '@/components/ProfileSidebar';
 import AuthModal from '@/components/AuthModal';
-import EventModal from '@/components/EventModal';
+import EventOverlay from '@/components/EventOverlay';
 import CreatePostModal from '@/components/CreatePostModal';
 import CreateStoryModal from '@/components/CreateStoryModal';
 import GlobalSearchSheet, { type GlobalSearchActionId } from '@/components/GlobalSearchSheet';
@@ -762,7 +762,7 @@ function AppShell() {
 
       {/* ── Event Detail Modal ──────────────────────────────────── */}
       {/* Note: Injected at root, uses z-[200] in component to sit above Venue Overlay z-[100] */}
-      <EventModal
+      <EventOverlay
         event={selectedEvent}
         onClose={() => {
           const shouldReopenSavedEvents = eventOpenSource === 'profile-saved-events';
@@ -816,33 +816,15 @@ function AppShell() {
       )}
 
       {/* ── Venue Overlay ───────────────────────────────────────── */}
-      {(selectedVenue || venueClosing) && (
-        <div 
-          className={`fixed inset-0 flex sm:items-center sm:justify-center p-0 sm:p-4 lg:p-8 ${venueZIndex >= eventZIndex ? 'z-[210]' : 'z-[200]'}`}
-        >
-          <div className={`absolute inset-0 bg-noctvm-black/70 backdrop-blur-md backdrop-enter ${venueClosing ? 'animate-fade-out' : ''}`} onClick={handleCloseVenue} />
-          <div
-            className={`relative w-full h-full sm:h-auto sm:max-h-[95vh] sm:w-[95%] lg:w-[90%] lg:h-[92%] sm:rounded-3xl overflow-hidden shadow-2xl shadow-black/80 flex flex-col min-h-0 ${
-              venueClosing ? 'animate-scale-out' : 'animate-scale-in'
-            } border-0 sm:border border-white/10 frosted-glass-modal frosted-noise`}
-            onAnimationEnd={() => {
-              if (!venueClosing) return;
-              setVenueClosing(false);
-              setSelectedVenue(null);
-              if (typeof window !== 'undefined' && window.location.search.includes('venue=')) {
-                window.history.back();
-              }
-            }}
-          >
-            <VenueModal
-              venueName={selectedVenue!}
-              onBack={handleCloseVenue}
-              onClose={handleCloseVenue}
-              onEventClick={(e) => openEvent(e)}
-              zIndex={venueZIndex}
-            />
-          </div>
-        </div>
+      {selectedVenue && (
+        <VenueOverlay
+          venueName={selectedVenue}
+          onBack={handleCloseVenue}
+          onClose={handleCloseVenue}
+          onEventClick={(e) => openEvent(e)}
+          zIndex={venueZIndex}
+          eventZIndex={eventZIndex}
+        />
       )}
 
       {/* ── Main Layout ─────────────────────────────────────────── */}

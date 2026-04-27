@@ -16,8 +16,8 @@ import CommentSheet from './CommentSheet';
 import CommentSection from './CommentSection';
 import PostViewerModal from '../PostViewerModal';
 import EditPostModal from '../EditPostModal';
-import TaggedUsersModal from '../TaggedUsersModal';
-import LikesSheet from '../LikesSheet';
+import TaggedUsersOverlay from '../TaggedUsersOverlay';
+import LikesOverlay from '../LikesOverlay';
 import { Avatar } from '@/components/ui';
 
 interface FeedItemProps {
@@ -384,13 +384,13 @@ export function FeedItem({
         </div>
       </article>
 
-      <TaggedUsersModal
+      <TaggedUsersOverlay
         handles={post.taggedUsers || []}
         isOpen={showTaggedUsers}
         onClose={() => setShowTaggedUsers(false)}
       />
 
-      <LikesSheet
+      <LikesOverlay
         postId={post.id}
         isOpen={showLikesModal}
         onClose={() => setShowLikesModal(false)}
